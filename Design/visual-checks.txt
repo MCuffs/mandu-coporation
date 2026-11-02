@@ -1,4 +1,22 @@
-Second Fist v5 - visual and audio asset validation
+Second Fist v7 - stage and visual asset validation
+PASS StreetRoster alpha transparency 1312x1199
+PASS StreetRoster frame 0 isolated sprite, pelvis root and ground contact registered
+PASS StreetRoster frame 1 isolated sprite, pelvis root and ground contact registered
+PASS StreetRoster frame 2 isolated sprite, pelvis root and ground contact registered
+PASS StreetRoster frame 3 isolated sprite, pelvis root and ground contact registered
+PASS StreetRoster frame 4 isolated sprite, pelvis root and ground contact registered
+PASS StreetRoster frame 5 isolated sprite, pelvis root and ground contact registered
+PASS StreetRoster frame 6 isolated sprite, pelvis root and ground contact registered
+PASS StreetRoster frame 7 isolated sprite, pelvis root and ground contact registered
+PASS StreetRoster frame 8 isolated sprite, pelvis root and ground contact registered
+PASS StreetRoster frame 9 isolated sprite, pelvis root and ground contact registered
+PASS StreetRoster frame 10 isolated sprite, pelvis root and ground contact registered
+PASS StreetRoster frame 11 isolated sprite, pelvis root and ground contact registered
+PASS StreetRoster frame 12 isolated sprite, pelvis root and ground contact registered
+PASS StreetRoster frame 13 isolated sprite, pelvis root and ground contact registered
+PASS StreetRoster frame 14 isolated sprite, pelvis root and ground contact registered
+PASS StreetRoster frame 15 isolated sprite, pelvis root and ground contact registered
+PASS four stage arenas imported at native resolution
 PASS HeroMotion alpha transparency 1254x1254
 PASS HeroMotion frame 0 isolated sprite, pelvis root and ground contact registered
 PASS HeroMotion frame 1 isolated sprite, pelvis root and ground contact registered

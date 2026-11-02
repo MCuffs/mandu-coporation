@@ -18,10 +18,10 @@ public static class AlleyVisualPipeline {
     public static void Prepare(){
         if(processing)return;processing=true;
         try{
-            string stamp="components-v6-arcade:"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/HeroMotion.png").Ticks+":"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/EnemyMotion.png").Ticks+":"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/AbilityIcons.png").Ticks;
+            string stamp="components-v7-streets:"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/HeroMotion.png").Ticks+":"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/EnemyMotion.png").Ticks+":"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/AbilityIcons.png").Ticks;
             if(SessionState.GetString("AlleyVisualStamp","")==stamp)return;
-            StringBuilder report=new StringBuilder("Second Fist v5 - visual and audio asset validation\n");
-            PrepareSheet("HeroMotion",true,report);PrepareSheet("EnemyMotion",true,report);PrepareSheet("FighterAtlas",true,report,2);PrepareSheet("AbilityIcons",false,report);
+            StringBuilder report=new StringBuilder("Second Fist v7 - stage and visual asset validation\n");
+            PrepareSheet("StreetRoster",true,report);PrepareArenas(report);PrepareSheet("HeroMotion",true,report);PrepareSheet("EnemyMotion",true,report);PrepareSheet("FighterAtlas",true,report,2);PrepareSheet("AbilityIcons",false,report);
             // Archived story assets are intentionally excluded from the arcade build.
             string[] fonts={"GothicA1-Regular","GothicA1-Bold","BlackHanSans-Regular"};
             foreach(string name in fonts){if(AssetDatabase.LoadAssetAtPath<Font>("Assets/Alley/Resources/Fonts/"+name+".ttf")==null)throw new Exception("Missing bundled font: "+name);report.AppendLine("PASS bundled font "+name);}
@@ -59,7 +59,7 @@ public static class AlleyVisualPipeline {
                 foreach(int pixelIndex in body.pixels){int y=pixelIndex/texture.width;if(y<body.y0+bodyHeight*.36f||y>body.y0+bodyHeight*.49f)continue;anchorSum+=pixelIndex%texture.width;anchorCount++;}
                 float anchor=anchorCount>0?(float)(anchorSum/anchorCount):(body.x0+body.x1)*.5f;
                 float width=right-left+1,height=top-bottom+1;
-                data.frames[frame]=new AlleyGame.FramePivot{x=(anchor-left)/width,y=(body.y0-bottom)/height,u=left/(float)texture.width,v=bottom/(float)texture.height,w=width/texture.width,h=height/texture.height,scale=name=="FighterAtlas"?ch/height:1};
+                data.frames[frame]=new AlleyGame.FramePivot{x=(anchor-left)/width,y=(body.y0-bottom)/height,u=left/(float)texture.width,v=bottom/(float)texture.height,w=width/texture.width,h=height/texture.height,scale=name=="FighterAtlas"||name=="StreetRoster"?ch/height:1};
                 report.AppendLine("PASS "+name+" frame "+frame+" isolated sprite, pelvis root and ground contact registered");
             }
             File.WriteAllText("Assets/Alley/Resources/"+name+"Pivots.json",JsonUtility.ToJson(data,true));
@@ -67,6 +67,11 @@ public static class AlleyVisualPipeline {
         importer.isReadable=false;importer.SaveAndReimport();
     }
 
+    static void PrepareArenas(StringBuilder report){
+        const string path="Assets/Alley/Resources/StageArenas.png";
+        var importer=(TextureImporter)AssetImporter.GetAtPath(path);importer.mipmapEnabled=false;importer.npotScale=TextureImporterNPOTScale.None;importer.wrapMode=TextureWrapMode.Clamp;importer.maxTextureSize=2048;importer.textureCompression=TextureImporterCompression.Uncompressed;importer.SaveAndReimport();
+        var texture=AssetDatabase.LoadAssetAtPath<Texture2D>(path);if(texture==null||texture.width!=1536||texture.height!=1024)throw new Exception("Stage arenas need 1536 x 1024 atlas");report.AppendLine("PASS four stage arenas imported at native resolution");
+    }
     static void PreparePrologue(StringBuilder report){
         const string path="Assets/Alley/Resources/PrologueInkScenes.png";
         TextureImporter importer=AssetImporter.GetAtPath(path) as TextureImporter;

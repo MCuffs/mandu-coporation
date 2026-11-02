@@ -5,7 +5,7 @@ using UnityEngine;
 namespace SecondFistGame {
     public enum RunState { Ready, Fighting, Choosing, Won, Lost }
     public sealed class Fighter {
-        public int id,kind,hp,maxHp,facing=1;
+        public int id,kind,hp,maxHp,appearance,facing=1;
         public Vector2 pos,velocity,aim,locomotion;
         public float attack,windup,stun,flash,contact,dash,wallCooldown,recovery,reaction;
         public float airElapsed,airDuration,airPeak;
@@ -23,7 +23,7 @@ namespace SecondFistGame {
         public Vector2 player=new Vector2(270,535),direction=Vector2.right,moveVelocity,playerImpulse;
         public float health=100,charge=100,elapsed,attackCooldown,invulnerable,punch,freeze,attackLead,attackAnimation,playerReaction;
         public int kills,hits,wallHits,chainHits,level=1,xp,nextXp=3,stage,bestChain,wallSkill,chainSkill,stunSkill;
-        public int targetKills { get { return 12+Mathf.Min(stage,6)*2; } }
+        public int targetKills { get { return StageCatalog.Get(stage).target; } }
         public bool bossSpawned,spawning=true;
         public float spawnClock=.25f,comboClock;
         public int chain;
@@ -44,7 +44,7 @@ namespace SecondFistGame {
         public void Start(){state=RunState.Fighting;}
         public Fighter AddEnemy(Vector2 pos,int kind=0){
             int hp=kind==2?18+stage*3:kind==1?5:3;
-            Fighter e=new Fighter{id=++nextId,kind=kind,hp=hp,maxHp=hp,pos=pos,attack=.6f+(nextId%4)*.12f};enemies.Add(e);return e;
+            Fighter e=new Fighter{id=++nextId,kind=kind,hp=hp,maxHp=hp,appearance=kind==2?(stage==0?1:stage==1?0:stage==2?2:3):kind==1?1:stage==0?2:stage==1?0:(nextId%2==0?0:2),pos=pos,attack=.6f+(nextId%4)*.12f};enemies.Add(e);return e;
         }
         public void Choose(int skill){
             if(state!=RunState.Choosing)return;
@@ -106,7 +106,7 @@ namespace SecondFistGame {
             float side=UnityEngine.Random.value<.5f?-1:1;
             float x=Mathf.Clamp(player.x+side*Mathf.Min(310,arena.width*.5f),arena.xMin+12,arena.xMax-12);
             float y=Mathf.Clamp(player.y+UnityEngine.Random.Range(-220f,220f),arena.yMin+35,arena.yMax-25);
-            AddEnemy(new Vector2(x,y),kills>5&&UnityEngine.Random.value<.28f?1:0);spawnClock=Mathf.Max(.65f,1.25f-kills*.025f);
+            AddEnemy(new Vector2(x,y),kills>3&&UnityEngine.Random.value<StageCatalog.Get(stage).heavyChance?1:0);spawnClock=Mathf.Max(.65f,1.25f-kills*.025f);
         }
         void MoveEnemy(Fighter e,float dt){
             e.flash=Mathf.Max(0,e.flash-dt);e.stun-=dt;e.contact-=dt;e.wallCooldown-=dt;e.attack-=dt;e.recovery=Mathf.Max(0,e.recovery-dt);e.reaction=Mathf.Max(0,e.reaction-dt);
@@ -134,15 +134,15 @@ namespace SecondFistGame {
             }
             if(e.windup>0){
                 e.locomotion=Vector2.MoveTowards(e.locomotion,Vector2.zero,900*dt);e.pos=ClampEnemy(e.pos+e.locomotion*dt);e.windup-=dt;
-                if(e.windup<=0){if(e.kind>=1){e.dash=.38f;e.attack=e.boss?2.8f:2.1f;}else{if(distance<83)Hurt(8,e.pos);e.attack=1.5f;e.recovery=.22f;}}
+                if(e.windup<=0){if(e.kind>=1){e.dash=.38f;e.attack=e.boss?2.8f:2.1f;}else{if(distance<(e.appearance==0?111:83))Hurt(e.appearance==0?10:8,e.pos);e.attack=e.appearance==0?1.8f:1.5f;e.recovery=.22f;}}
                 return;
             }
             if(e.recovery>0){e.locomotion=Vector2.MoveTowards(e.locomotion,Vector2.zero,750*dt);e.pos=ClampEnemy(e.pos+e.locomotion*dt);return;}
             if(e.kind>=1&&e.attack<=0&&(e.boss||distance<240)&&ChargeSlotAvailable(e)){e.windup=e.boss?.95f:.8f;e.aim=delta.normalized;e.facing=e.aim.x>=0?1:-1;return;}
-            if(e.kind==0&&distance<76&&e.attack<=0&&MeleeSlotsAvailable(e)){e.windup=.56f;e.aim=delta.normalized;return;}
+            if(e.kind==0&&distance<(e.appearance==0?104:76)&&e.attack<=0&&MeleeSlotsAvailable(e)){e.windup=.56f;e.aim=delta.normalized;return;}
             Vector2 desiredVelocity=Vector2.zero;
             if(distance>54){
-                float a=e.id*2.399963f;float laneRadius=e.boss?119:e.kind==1?94:70;Vector2 lane=new Vector2(Mathf.Cos(a),Mathf.Sin(a))*laneRadius;
+                float a=e.id*2.399963f;float laneRadius=e.boss?119:e.kind==1?94:e.appearance==0?98:70;Vector2 lane=new Vector2(Mathf.Cos(a),Mathf.Sin(a))*laneRadius;
                 Vector2 target=player+lane*Mathf.Clamp01((190-distance)/100f);
                 Vector2 steering=(target-e.pos).normalized;
                 foreach(Fighter other in enemies){if(other==e||other.hp<=0)continue;Vector2 away=e.pos-other.pos;float d=away.magnitude;float clearance=BodyRadius(e)+BodyRadius(other)+24;if(d>.01f&&d<clearance)steering+=away/d*(1-d/clearance)*1.15f;}

@@ -149,7 +149,10 @@ public partial class AlleyGame {
         Color tint=e.flash>0?new Color(1,.76f,.64f,spawn):new Color(1,1,1,spawn);
         float squash=e.windup>0?Mathf.Sin(Mathf.Clamp01(e.windup/.8f)*Mathf.PI)*.035f:0;
         float turn=cached?TurnWidth(m.turn):1;
-        if(reacting){
+        if(rosterAtlas!=null&&rosterPivots!=null){
+            int pose=reacting?3:(e.windup>0||e.dash>0)?2:cached&&m.speed>10?(Mathf.FloorToInt(phase/Mathf.PI)&1):0;
+            MotionSprite(rosterAtlas,rosterPivots,feet-new Vector2(0,lift+bob),e.appearance*4+pose,left,height,tint,tilt,new Vector2(turn,1-squash));
+        }else if(reacting){
             float landing=e.airDuration>0&&e.airElapsed>=e.airDuration?Mathf.Sin(Mathf.Clamp01(e.reaction/.14f)*Mathf.PI)*.045f:0;
             LegacyReaction(feet-new Vector2(0,lift),e.kind==0?5:7,left,height,tint,tilt,new Vector2((1+landing)*turn,1-landing));
         }else if(enemyMotionAtlas!=null){
@@ -168,7 +171,8 @@ public partial class AlleyGame {
             if(m.fighter.airDuration>0){float t=Mathf.Clamp01((m.fighter.airElapsed+m.death)/m.fighter.airDuration);air=m.fighter.airPeak*4*t*(1-t);}
             float alpha=progress<.58f?1:1-EaseOut((progress-.58f)/.42f);
             float rotation=(m.left?1:-1)*EaseOut(Mathf.Clamp01(m.death/.48f))*53;
-            LegacyReaction(m.rendered-new Vector2(0,air),m.fighter.kind==0?5:7,m.left,m.fighter.boss?181:m.fighter.kind==1?146:131,new Color(1,1,1,alpha),rotation,Vector2.one);
+            if(rosterAtlas!=null&&rosterPivots!=null)MotionSprite(rosterAtlas,rosterPivots,m.rendered-new Vector2(0,air),m.fighter.appearance*4+3,m.left,m.fighter.boss?181:m.fighter.kind==1?146:131,new Color(1,1,1,alpha),rotation,Vector2.one);
+            else LegacyReaction(m.rendered-new Vector2(0,air),m.fighter.kind==0?5:7,m.left,m.fighter.boss?181:m.fighter.kind==1?146:131,new Color(1,1,1,alpha),rotation,Vector2.one);
         }
     }
     void DrawAfterimagesAndDust(){

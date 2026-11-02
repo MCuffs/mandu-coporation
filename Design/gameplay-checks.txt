@@ -1,4 +1,4 @@
-Second Fist v6 - arcade, economy and motion checks
+Second Fist v7 - stages, arcade, economy and motion checks
 PASS  movement respects arena bounds
 PASS  attack anticipation precedes damage
 PASS  automatic attack deals damage and knockback
@@ -14,6 +14,12 @@ PASS  boss defeat ends the run
 PASS  bruiser telegraphs charge outside basic attack range
 PASS  standing still can be punished by a charge
 PASS  moving out of a telegraphed charge avoids damage
+PASS  four stages have increasing wave targets
+PASS  school and market use different enemy archetypes
+PASS  stage unlock survives profile persistence
+PASS  stage lookup safely bounds invalid indices
+PASS  each stage has a distinct boss silhouette
+PASS  wave completion spawns the stage boss
 PASS  20 FPS and 120 FPS produce the same travel distance
 PASS  retreat does not trigger an automatic backwards punch
 PASS  retreat input cancels attack anticipation

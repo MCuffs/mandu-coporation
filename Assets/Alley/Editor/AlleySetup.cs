@@ -36,7 +36,7 @@ public static class AlleySetup {
     static AlleyCombat Empty(){var c=new AlleyCombat();c.spawning=false;c.Start();return c;}
     [MenuItem("Second Fist/Run Gameplay Checks")]
     public static void RunChecks(){
-        StringBuilder report=new StringBuilder("Second Fist v6 - arcade, economy and motion checks\n");
+        StringBuilder report=new StringBuilder("Second Fist v7 - stages, arcade, economy and motion checks\n");
         var c=Empty();for(int i=0;i<200;i++)c.Tick(.02f,new Vector2(-1,-1),false);
         Expect(Mathf.Abs(c.player.x-(AlleyCombat.Left+12))<.1f&&Mathf.Abs(c.player.y-(AlleyCombat.Top+12))<.1f,"movement respects arena bounds",report);
         c=Empty();var target=c.AddEnemy(c.player+new Vector2(65,0));c.Tick(.02f,Vector2.zero,false);
@@ -65,6 +65,14 @@ public static class AlleySetup {
         c=Empty();c.attackCooldown=100;target=c.AddEnemy(c.player+new Vector2(180,0),1);target.attack=0;c.Tick(.02f,Vector2.zero,false);
         for(int i=0;i<75;i++)c.Tick(.02f,new Vector2(0,-1),false);
         Expect(c.health==100,"moving out of a telegraphed charge avoids damage",report);
+        Expect(StageCatalog.All.Length==4&&new AlleyCombat(3).targetKills==24,"four stages have increasing wave targets",report);
+        var school=new AlleyCombat(0);var market=new AlleyCombat(1);
+        Expect(school.AddEnemy(Vector2.zero).appearance!=market.AddEnemy(Vector2.zero).appearance,"school and market use different enemy archetypes",report);
+        var save=new ArcadeProfile();save.highestStage=3;save.Normalize();Expect(JsonUtility.FromJson<ArcadeProfile>(JsonUtility.ToJson(save)).highestStage==3,"stage unlock survives profile persistence",report);
+        Expect(StageCatalog.Get(99)==StageCatalog.Get(3),"stage lookup safely bounds invalid indices",report);
+        var bosses=new System.Collections.Generic.HashSet<int>();for(int index=0;index<4;index++)bosses.Add(new AlleyCombat(index).AddEnemy(Vector2.zero,2).appearance);
+        Expect(bosses.Count==4,"each stage has a distinct boss silhouette",report);
+        c=Empty();c.spawning=true;c.kills=c.targetKills;c.spawnClock=0;c.Tick(.02f,Vector2.zero,false);Expect(c.bossSpawned&&c.enemies.Exists(e=>e.boss),"wave completion spawns the stage boss",report);
         CheckNaturalMotion(report);
         CheckPrologue(report);
         var profile=new ArcadeProfile();
@@ -128,10 +136,10 @@ public static class AlleySetup {
     }
     [MenuItem("Second Fist/Build Windows")]
     public static void Build(){
-        AlleyVisualPipeline.Prepare();RunChecks();PlayerSettings.productName="Second Fist - Arcade";PlayerSettings.fullScreenMode=FullScreenMode.FullScreenWindow;PlayerSettings.defaultIsNativeResolution=true;Directory.CreateDirectory("Build/Windows-v6-arcade");
-        BuildReport result=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{ScenePath},locationPathName="Build/Windows-v6-arcade/SecondFist.exe",target=BuildTarget.StandaloneWindows64,options=BuildOptions.None});
+        AlleyVisualPipeline.Prepare();RunChecks();PlayerSettings.productName="Second Fist - Arcade";PlayerSettings.fullScreenMode=FullScreenMode.FullScreenWindow;PlayerSettings.defaultIsNativeResolution=true;Directory.CreateDirectory("Build/Windows-v7-streets");
+        BuildReport result=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{ScenePath},locationPathName="Build/Windows-v7-streets/SecondFist.exe",target=BuildTarget.StandaloneWindows64,options=BuildOptions.None});
         File.WriteAllText("Design/build-result.txt",result.summary.result+"\nErrors: "+result.summary.totalErrors+"\nBytes: "+result.summary.totalSize);
-        Directory.CreateDirectory("Build/Windows-v6-arcade/Licenses");foreach(string license in Directory.GetFiles("Design/Licenses","*.txt"))File.Copy(license,"Build/Windows-v6-arcade/Licenses/"+Path.GetFileName(license),true);
+        Directory.CreateDirectory("Build/Windows-v7-streets/Licenses");foreach(string license in Directory.GetFiles("Design/Licenses","*.txt"))File.Copy(license,"Build/Windows-v7-streets/Licenses/"+Path.GetFileName(license),true);
         if(result.summary.result!=BuildResult.Succeeded)throw new Exception("Build failed");Debug.Log("ALLEY_BUILD_SUCCEEDED");
     }
 }

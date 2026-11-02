@@ -59,7 +59,7 @@ public partial class AlleyGame {
         Outlined("정민수",23,16,235,37,24,Cream,TextAnchor.MiddleLeft,true);
         Meter(24,58,182,9,shownHealth/100,Coral,healthTrail/100);
         Meter(24,73,182,3,shownXp,Mint);
-        Outlined("LV. "+combat.level+"  ·  "+(stage==0?"학교 뒷골목":stage==1?"편의점 앞":"황제 당구장"),24,86,350,23,13,Cream,TextAnchor.MiddleLeft);
+        Outlined("LV. "+combat.level+"  ·  "+StageCatalog.Get(stage).name,24,86,350,23,13,Cream,TextAnchor.MiddleLeft);
         float cx=ViewWidth*.5f;int seconds=Mathf.FloorToInt(combat.elapsed);
         Outlined((seconds/60).ToString("00")+":"+(seconds%60).ToString("00"),cx-66,19,132,30,17,Cream,TextAnchor.MiddleCenter);
         CircleAt(new Vector2(ViewWidth-34,34),19,new Color(.04f,.06f,.08f,.37f));
@@ -120,6 +120,6 @@ public partial class AlleyGame {
         Text("다음 한 방을 준비하자.",25,434,490,35,20,new Color(.72f,.79f,.80f),TextAnchor.MiddleCenter);
         if(Button("계속 싸운다",36,550,468,70,Coral))paused=false;
         if(Button(source.mute?"효과음 꺼짐":"효과음 켜짐",36,647,468,53,Cream))source.mute=!source.mute;
-        if(Button("처음으로",36,727,468,53,Cream))NewRun();
+        if(Button("시작 화면으로",36,727,468,53,Cream))ReturnHome();
     }
 }

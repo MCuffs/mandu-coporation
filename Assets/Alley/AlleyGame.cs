@@ -28,7 +28,7 @@ public partial class AlleyGame : MonoBehaviour {
         atlas=Resources.Load<Texture2D>("FighterAtlas");background=Resources.Load<Texture2D>("AlleyBackground");
         white=Texture2D.whiteTexture;disc=Circle();round=Rounded();panelStyle=new GUIStyle{border=new RectOffset(8,8,8,8),normal={background=round}};
         source=gameObject.AddComponent<AudioSource>();hitSound=Sound(155,.055f);wallSound=Sound(80,.10f);specialSound=Sound(67,.20f);
-        LoadPresentation();LoadArcade();NewRun();
+        LoadPresentation();LoadArcade();LoadStages();NewRun();ReturnHome();
     }
     void NewRun() {
         combat=new AlleyCombat(stage);pops.Clear();map=false;ring=shake=0;dragging=false;paused=false;ResetMotion();
@@ -42,12 +42,12 @@ public partial class AlleyGame : MonoBehaviour {
     void Update() {
         float dt=Time.unscaledDeltaTime;pulse+=dt;walk+=dt;shake=Mathf.Max(0,shake-dt*22);ring=Mathf.Max(0,ring-dt*2);
         for(int i=pops.Count-1;i>=0;i--){pops[i].life-=dt;pops[i].pos.y-=dt*29;if(pops[i].life<=0)pops.RemoveAt(i);}
-        if(Input.GetKeyDown(KeyCode.Escape)&&combat.state==RunState.Fighting&&!map)paused=!paused;
+        if(Input.GetKeyDown(KeyCode.Escape)&&!home&&combat.state==RunState.Fighting&&!map)paused=!paused;
         if(Input.GetKeyDown(KeyCode.F11))ToggleFullscreen();
         UpdateArenaViewport(false);
         AdvancePresentation(dt);
         if(storyActive){UpdatePrologue(dt);UpdateMotion(dt,false);return;}
-        if(map||paused||combat.state!=RunState.Fighting){dragging=false;stick=Vector2.zero;UpdateMotion(dt,false);return;}
+        if(home||map||paused||combat.state!=RunState.Fighting){dragging=false;stick=Vector2.zero;UpdateMotion(dt,false);return;}
         Vector2 movement=new Vector2((Input.GetKey(KeyCode.D)||Input.GetKey(KeyCode.RightArrow)?1:0)-(Input.GetKey(KeyCode.A)||Input.GetKey(KeyCode.LeftArrow)?1:0),(Input.GetKey(KeyCode.S)||Input.GetKey(KeyCode.DownArrow)?1:0)-(Input.GetKey(KeyCode.W)||Input.GetKey(KeyCode.UpArrow)?1:0));
         bool special=requestSpecial||Input.GetKeyDown(KeyCode.Space);requestSpecial=false;
         // Mouse emulation is used only when there are no real touches: avoid duplicate input on phones.
@@ -113,7 +113,8 @@ public partial class AlleyGame : MonoBehaviour {
         GUI.color=color;GUI.DrawTextureWithTexCoords(target,atlas,new Rect((cell%4)*.25f,cell<4?.5f:0,uvWidth,.5f));GUI.color=Color.white;GUI.matrix=m;
     }
     void Floor(){
-        if(background!=null){GUI.color=Color.white;GUI.DrawTexture(new Rect(0,0,ViewWidth,ViewHeight),background,ScaleMode.ScaleAndCrop);}
+        if(stageBackgrounds!=null){GUI.color=Color.white;StageBackdrop(stage,new Rect(0,0,ViewWidth,ViewHeight));}
+        else if(background!=null){GUI.color=Color.white;GUI.DrawTexture(new Rect(0,0,ViewWidth,ViewHeight),background,ScaleMode.ScaleAndCrop);}
         else Box(0,0,ViewWidth,ViewHeight,new Color(.72f,.67f,.55f));
     }
     void World(){
@@ -123,7 +124,7 @@ public partial class AlleyGame : MonoBehaviour {
             if(e.windup>0) {
                 Color warning=new Color(1,.23f,.12f,.24f+Mathf.Sin(pulse*20)*.10f);
                 if(e.kind>=1){Line(e.pos,e.pos+e.aim*240,49,warning);Line(e.pos,e.pos+e.aim*240,2,Coral);}
-                else CircleAt(e.pos,77,warning);
+                else CircleAt(e.pos,e.appearance==0?111:83,warning);
             }
             if(e.stun>0&&e.velocity.sqrMagnitude<1000)Text("✦",e.pos.x-30,e.pos.y-125,60,30,25,new Color(1,.79f,.18f),TextAnchor.MiddleCenter);
             if(e.velocity.sqrMagnitude>20000)for(int j=1;j<4;j++)CircleAt(e.pos-e.velocity.normalized*j*15,24-j*5,new Color(1,.65f,.27f,.14f));
@@ -148,6 +149,7 @@ public partial class AlleyGame : MonoBehaviour {
     void Centered(System.Action draw){Matrix4x4 old=GUI.matrix;GUI.matrix=old*Matrix4x4.Translate(new Vector3((ViewWidth-540)*.5f,(ViewHeight-960)*.5f,0));draw();GUI.matrix=old;}
     void OnGUI(){
         float scale=Scale;GUI.matrix=Matrix4x4.Scale(new Vector3(scale,scale,1));
+        if(home){HomeScreen();GUI.color=Color.white;return;}
         if(storyActive){DrawPrologue();GUI.color=Color.white;return;}
         Floor();
         if(!map){
