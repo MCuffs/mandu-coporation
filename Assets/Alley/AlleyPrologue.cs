@@ -98,7 +98,7 @@ public partial class AlleyGame {
         // A short fade shares the same alley backdrop; combat is unlocked only after the dialogue ends.
         Box(0,0,ViewWidth,ViewHeight,new Color(.96f,.92f,.77f,Mathf.Clamp01((battleReveal-.55f)*1.8f)));
         float a=Mathf.Clamp01(battleReveal*2);
-        Outlined("내 가족에게서 손 떼.",(ViewWidth-Mathf.Min(600,ViewWidth))*.5f,ViewHeight*.30f,Mathf.Min(600,ViewWidth),68,31,new Color(1,.94f,.76f,a),TextAnchor.MiddleCenter,true);
+        Outlined("벽으로 날려! 연쇄로 끝내!",(ViewWidth-Mathf.Min(600,ViewWidth))*.5f,ViewHeight*.30f,Mathf.Min(600,ViewWidth),68,31,new Color(1,.94f,.76f,a),TextAnchor.MiddleCenter,true);
     }
     void DestroyPrologue(){if(heartbeatSource!=null)heartbeatSource.Stop();if(heartbeat!=null)Destroy(heartbeat);if(narrationSource!=null)narrationSource.Stop();}
 }

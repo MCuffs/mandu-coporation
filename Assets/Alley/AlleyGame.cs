@@ -28,7 +28,7 @@ public partial class AlleyGame : MonoBehaviour {
         atlas=Resources.Load<Texture2D>("FighterAtlas");background=Resources.Load<Texture2D>("AlleyBackground");
         white=Texture2D.whiteTexture;disc=Circle();round=Rounded();panelStyle=new GUIStyle{border=new RectOffset(8,8,8,8),normal={background=round}};
         source=gameObject.AddComponent<AudioSource>();hitSound=Sound(155,.055f);wallSound=Sound(80,.10f);specialSound=Sound(67,.20f);
-        LoadPresentation();LoadPrologue();NewRun();
+        LoadPresentation();LoadArcade();NewRun();
     }
     void NewRun() {
         combat=new AlleyCombat(stage);pops.Clear();map=false;ring=shake=0;dragging=false;paused=false;ResetMotion();
@@ -36,7 +36,7 @@ public partial class AlleyGame : MonoBehaviour {
         float cx=combat.arena.center.x,cy=combat.player.y;
         combat.AddEnemy(new Vector2(cx-94,cy-38));combat.AddEnemy(new Vector2(cx-158,cy-42));
         combat.AddEnemy(new Vector2(cx+151,cy-121));combat.AddEnemy(new Vector2(cx+137,cy+113),1);
-        BeginPrologue();
+        PrepareArcade();StartBattle();
     }
     void OnApplicationFocus(bool focused) { if(!focused){dragging=false;stick=Vector2.zero;} }
     void Update() {
@@ -81,7 +81,7 @@ public partial class AlleyGame : MonoBehaviour {
             else if(e.style==4){shake=3;source.PlayOneShot(hitSound,.7f);}
             else if(e.text=="−1")source.PlayOneShot(hitSound,.3f);
         }
-        combat.events.Clear();UpdateMotion(dt,true);
+        combat.events.Clear();SettleArcade();UpdateMotion(dt,true);
     }
     AudioClip Sound(float hz,float duration) {
         int n=(int)(22050*duration);float[] data=new float[n];
@@ -152,8 +152,8 @@ public partial class AlleyGame : MonoBehaviour {
         Floor();
         if(!map){
             World();Header();HUD();
-            if(paused)Centered(PausePanel);else if(combat.state==RunState.Choosing)Centered(Skills);else if(combat.state==RunState.Won||combat.state==RunState.Lost)Centered(Result);
-        }else Centered(Map);
+            if(paused)Centered(PausePanel);else if(combat.state==RunState.Choosing)Centered(Skills);else if(combat.state==RunState.Won||combat.state==RunState.Lost)Centered(ArcadeResult);
+        }else Centered(ArcadeResult);
         DrawBattleReveal();GUI.color=Color.white;DrawScreenTransition();
     }
     void OnDestroy(){Destroy(disc);Destroy(round);Destroy(hitSound);Destroy(wallSound);Destroy(specialSound);DestroyPrologue();}

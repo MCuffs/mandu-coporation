@@ -68,7 +68,7 @@ public partial class AlleyGame {
     }
 
     void HUD(){
-        Outlined(combat.bossSpawned?"골목 대장":("일진 "+Mathf.Min(18,combat.kills)+" / 18"),ViewWidth-221,76,195,29,16,combat.bossSpawned?Gold:Cream,TextAnchor.MiddleRight,true);
+        Outlined(combat.bossSpawned?"골목 대장":("일진 "+Mathf.Min(combat.targetKills,combat.kills)+" / "+combat.targetKills),ViewWidth-221,76,195,29,16,combat.bossSpawned?Gold:Cream,TextAnchor.MiddleRight,true);
         if(combat.chain>0&&combat.comboClock>0){float a=Mathf.Clamp01(combat.comboClock*1.8f);Outlined(combat.chain+" 연쇄!",ViewWidth*.5f-140,113,280,52,34,new Color(1,.83f,.36f,a),TextAnchor.MiddleCenter,true);}
         if(bossBanner>0){float w=Mathf.Min(580,ViewWidth-40);float a=Mathf.Clamp01(bossBanner*2);Outlined("골목 대장이 나타났다",(ViewWidth-w)*.5f,ViewHeight*.28f,w,62,30,new Color(1,.83f,.5f,a),TextAnchor.MiddleCenter,true);}
         if(dragging){
@@ -91,8 +91,8 @@ public partial class AlleyGame {
         Box(-(ViewWidth-540)*.5f,-(ViewHeight-960)*.5f,ViewWidth,ViewHeight,new Color(.025f,.04f,.065f,.89f));
         Matrix4x4 old=GUI.matrix;float lift=(1-EaseOut(modalAge/.28f))*38;GUI.matrix=old*Matrix4x4.Translate(new Vector3(0,lift,0));
         Text("LEVEL UP  /  "+combat.level,24,205,492,28,14,Gold,TextAnchor.MiddleCenter,true);
-        Title("전성기의 기억",24,248,492,60,39,Cream,TextAnchor.MiddleCenter);
-        Text("이번 싸움에서 되찾을 기술을 선택하세요",24,311,492,31,17,new Color(.72f,.79f,.80f),TextAnchor.MiddleCenter);
+        Title("한 방 강화",24,248,492,60,39,Cream,TextAnchor.MiddleCenter);
+        Text("이번 판에 사용할 기술을 선택하세요",24,311,492,31,17,new Color(.72f,.79f,.80f),TextAnchor.MiddleCenter);
         string[] names={"벽꿍","충돌 전파","연쇄 기절"};string[] tags={"강한 한 방","연쇄 공격","군중 제어"};
         string[] descriptions={"벽 충돌 피해가 1 증가합니다.","적끼리 충돌할 때 피해가 1 증가합니다.","충돌한 적의 기절 시간이 늘어납니다."};int[] ranks={combat.wallSkill,combat.chainSkill,combat.stunSkill};
         for(int i=0;i<3;i++){
@@ -113,34 +113,6 @@ public partial class AlleyGame {
         Text("기술을 조합해 나만의 싸움법을 완성하세요",24,876,492,30,15,new Color(.64f,.73f,.76f),TextAnchor.MiddleCenter);
         Text("선택하는 동안 전투가 멈춥니다",24,926,492,22,12,new Color(.44f,.55f,.60f),TextAnchor.MiddleCenter);
         GUI.matrix=old;
-    }
-    void Result(){
-        bool win=combat.state==RunState.Won;Box(-(ViewWidth-540)*.5f,-(ViewHeight-960)*.5f,ViewWidth,ViewHeight,new Color(.025f,.04f,.065f,.95f));
-        float lift=(1-EaseOut(modalAge/.4f))*25;Matrix4x4 old=GUI.matrix;GUI.matrix=old*Matrix4x4.Translate(new Vector3(0,lift,0));
-        Text(win?"STAGE CLEAR":"TRY AGAIN",24,216,492,27,14,win?Gold:Coral,TextAnchor.MiddleCenter,true);
-        Title(win?"골목을 되찾았다":"아직 끝나지 않았다",24,263,492,65,36,Cream,TextAnchor.MiddleCenter);
-        Box(237,337,66,3,win?Gold:Coral);
-        Text(win?"“그만해. 내 몸으로 뭐 하는 거야.”\n\n아이의 목소리가 들렸다.\n내 아들은 아직 여기에 있다.":"벽 가까이에서 적을 날려보세요.\n돌진 예고가 보이면 옆으로 피하고,\n포위되면 필살기로 길을 만드세요.",35,380,470,165,20,new Color(.78f,.82f,.82f),TextAnchor.MiddleCenter);
-        Surface(24,579,492,171,Slate,new Color(.32f,.40f,.44f));
-        string[] labels={"제압","벽 충돌","연쇄 충돌","최고 연쇄"};int[] values={combat.kills,combat.wallHits,combat.chainHits,combat.bestChain};
-        for(int i=0;i<4;i++){float x=35+i*123;Text(labels[i],x,603,113,27,13,new Color(.65f,.74f,.76f),TextAnchor.MiddleCenter,true);Title(Mathf.RoundToInt(values[i]*EaseOut(modalAge/.9f)).ToString(),x,646,113,54,34,i==3?Gold:Cream,TextAnchor.MiddleCenter);if(i<3)Box(x+116,616,1,69,new Color(.37f,.44f,.47f,.45f));}
-        if(Button(win?"골목 지도로":"다시 도전",24,810,492,69,Coral)){if(win)map=true;else{NewRun();StartBattle();}}
-        if(Button("처음으로",24,901,492,43,Cream))NewRun();GUI.matrix=old;
-    }
-    void Map(){
-        Box(-(ViewWidth-540)*.5f,-(ViewHeight-960)*.5f,ViewWidth,ViewHeight,Paper);Text("NEIGHBORHOOD",25,211,490,24,13,new Color(.48f,.46f,.38f),TextAnchor.UpperLeft,true);
-        Title("아들의 동네",24,249,492,57,38,Ink);Text("익숙한 골목, 낯선 아들의 삶.",26,313,488,31,18,new Color(.41f,.42f,.37f));
-        string[] names={"우리 학교","학교 뒷골목","편의점 앞","황제 당구장","지역 조직"};
-        for(int i=0;i<5;i++){
-            float y=391+i*78;bool done=i<=stage+1,current=i==stage+2;
-            if(i<4)for(int n=0;n<5;n++)Box(46,y+29+n*10,3,5,new Color(.66f,.66f,.57f));
-            CircleAt(new Vector2(48,y),23,done?Mint:current?Coral:new Color(.61f,.64f,.60f));
-            Text(done?"✓":(i+1).ToString(),25,y-23,46,46,20,Color.white,TextAnchor.MiddleCenter,true);
-            Surface(89,y-27,426,58,current?Ink:Color.Lerp(Paper,Color.white,.34f),current?Gold:new Color(.81f,.80f,.72f),false);
-            Text(names[i],107,y-17,277,34,20,current?Cream:Ink,TextAnchor.MiddleLeft,true);Text(done?"완료":current?"다음 도전":"잠김",376,y-14,121,30,13,current?Gold:Muted,TextAnchor.MiddleRight,true);
-        }
-        if(Button(stage<2?"다음 골목에 도전":"다시 도전",24,840,492,71,Coral)){stage=Mathf.Min(2,stage+1);NewRun();StartBattle();}
-        Text("한 골목씩, 진실에 가까워진다",24,931,492,22,13,new Color(.47f,.49f,.44f),TextAnchor.MiddleCenter);
     }
     void PausePanel(){
         Box(-(ViewWidth-540)*.5f,-(ViewHeight-960)*.5f,ViewWidth,ViewHeight,new Color(.025f,.04f,.065f,.92f));Text("TAKE A BREATH",25,292,490,28,13,Gold,TextAnchor.MiddleCenter,true);

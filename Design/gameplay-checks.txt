@@ -1,4 +1,4 @@
-Second Fist v5 - gameplay, motion and prologue checks
+Second Fist v6 - arcade, economy and motion checks
 PASS  movement respects arena bounds
 PASS  attack anticipation precedes damage
 PASS  automatic attack deals damage and knockback
@@ -33,3 +33,11 @@ PASS  prologue ends and hands over combat exactly once
 PASS  skip completes prologue only once
 PASS  key story dialogue preserved
 PASS  arena and movement adapt to a wide fullscreen viewport
+PASS  insufficient funds cannot unlock a style
+PASS  run settlement credits rewards exactly once
+PASS  unlock consumes coins and equips the style
+PASS  owned styles cannot be charged again and locked styles cannot equip
+PASS  invalid saved values are normalized
+PASS  profile survives JSON persistence
+PASS  opening round uses a shorter enemy wave and boss
+PASS  combat achievements determine score and coins

@@ -23,6 +23,7 @@ namespace SecondFistGame {
         public Vector2 player=new Vector2(270,535),direction=Vector2.right,moveVelocity,playerImpulse;
         public float health=100,charge=100,elapsed,attackCooldown,invulnerable,punch,freeze,attackLead,attackAnimation,playerReaction;
         public int kills,hits,wallHits,chainHits,level=1,xp,nextXp=3,stage,bestChain,wallSkill,chainSkill,stunSkill;
+        public int targetKills { get { return 12+Mathf.Min(stage,6)*2; } }
         public bool bossSpawned,spawning=true;
         public float spawnClock=.25f,comboClock;
         public int chain;
@@ -42,7 +43,7 @@ namespace SecondFistGame {
         static Vector2 Remap(Vector2 p,Rect from,Rect to){return new Vector2(to.xMin+(p.x-from.xMin)/from.width*to.width,to.yMin+(p.y-from.yMin)/from.height*to.height);}
         public void Start(){state=RunState.Fighting;}
         public Fighter AddEnemy(Vector2 pos,int kind=0){
-            int hp=kind==2?36+stage*8:kind==1?5:3;
+            int hp=kind==2?18+stage*3:kind==1?5:3;
             Fighter e=new Fighter{id=++nextId,kind=kind,hp=hp,maxHp=hp,pos=pos,attack=.6f+(nextId%4)*.12f};enemies.Add(e);return e;
         }
         public void Choose(int skill){
@@ -101,7 +102,7 @@ namespace SecondFistGame {
         }
         void Spawn(float dt){
             spawnClock-=dt;if(!spawning||spawnClock>0||bossSpawned||enemies.Count>=9)return;
-            if(kills>=18){AddEnemy(new Vector2(arena.center.x,arena.yMin+35),2);bossSpawned=true;events.Add(new CombatEvent("골목 대장 등장",new Vector2(arena.center.x,arena.yMin+105),3));return;}
+            if(kills>=targetKills){AddEnemy(new Vector2(arena.center.x,arena.yMin+35),2);bossSpawned=true;events.Add(new CombatEvent("골목 대장 등장",new Vector2(arena.center.x,arena.yMin+105),3));return;}
             float side=UnityEngine.Random.value<.5f?-1:1;
             float x=Mathf.Clamp(player.x+side*Mathf.Min(310,arena.width*.5f),arena.xMin+12,arena.xMax-12);
             float y=Mathf.Clamp(player.y+UnityEngine.Random.Range(-220f,220f),arena.yMin+35,arena.yMax-25);

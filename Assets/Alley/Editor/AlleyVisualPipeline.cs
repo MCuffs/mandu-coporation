@@ -11,18 +11,18 @@ public static class AlleyVisualPipeline {
     static AlleyVisualPipeline(){EditorApplication.delayCall+=Delayed;}
     static void Delayed(){
         if(EditorApplication.isCompiling||EditorApplication.isUpdating||EditorApplication.isPlayingOrWillChangePlaymode){EditorApplication.delayCall+=Delayed;return;}
-        if(!File.Exists("Assets/Alley/Resources/PrologueInkScenes.png")||!File.Exists("Assets/Alley/Resources/Voice/Prologue/13.mp3")||!File.Exists("Assets/Alley/Resources/HeroMotion.png")||!File.Exists("Assets/Alley/Resources/EnemyMotion.png")||!File.Exists("Assets/Alley/Resources/AbilityIcons.png"))return;
+        if(!File.Exists("Assets/Alley/Resources/HeroMotion.png")||!File.Exists("Assets/Alley/Resources/EnemyMotion.png")||!File.Exists("Assets/Alley/Resources/AbilityIcons.png"))return;
         Prepare();
     }
     [MenuItem("Second Fist/Prepare Visual Assets")]
     public static void Prepare(){
         if(processing)return;processing=true;
         try{
-            string stamp="components-v5-grounded-motion:"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/PrologueInkScenes.png").Ticks+":"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/HeroMotion.png").Ticks+":"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/EnemyMotion.png").Ticks+":"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/AbilityIcons.png").Ticks;
+            string stamp="components-v6-arcade:"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/HeroMotion.png").Ticks+":"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/EnemyMotion.png").Ticks+":"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/AbilityIcons.png").Ticks;
             if(SessionState.GetString("AlleyVisualStamp","")==stamp)return;
             StringBuilder report=new StringBuilder("Second Fist v5 - visual and audio asset validation\n");
             PrepareSheet("HeroMotion",true,report);PrepareSheet("EnemyMotion",true,report);PrepareSheet("FighterAtlas",true,report,2);PrepareSheet("AbilityIcons",false,report);
-            PreparePrologue(report);
+            // Archived story assets are intentionally excluded from the arcade build.
             string[] fonts={"GothicA1-Regular","GothicA1-Bold","BlackHanSans-Regular"};
             foreach(string name in fonts){if(AssetDatabase.LoadAssetAtPath<Font>("Assets/Alley/Resources/Fonts/"+name+".ttf")==null)throw new Exception("Missing bundled font: "+name);report.AppendLine("PASS bundled font "+name);}
             report.AppendLine("NOTE enemy cells 12 and 14 are excluded from playback because their designs vary.");

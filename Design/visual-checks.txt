@@ -43,15 +43,6 @@ PASS FighterAtlas frame 5 isolated sprite, pelvis root and ground contact regist
 PASS FighterAtlas frame 6 isolated sprite, pelvis root and ground contact registered
 PASS FighterAtlas frame 7 isolated sprite, pelvis root and ground contact registered
 PASS AbilityIcons alpha transparency 1254x1254
-PASS six-panel ink prologue atlas imported
-PASS narration 0 imported (4.82 seconds)
-PASS narration 2 imported (6.86 seconds)
-PASS narration 3 imported (2.90 seconds)
-PASS narration 5 imported (7.54 seconds)
-PASS narration 10 imported (7.97 seconds)
-PASS narration 11 imported (2.28 seconds)
-PASS narration 12 imported (2.28 seconds)
-PASS narration 13 imported (3.29 seconds)
 PASS bundled font GothicA1-Regular
 PASS bundled font GothicA1-Bold
 PASS bundled font BlackHanSans-Regular

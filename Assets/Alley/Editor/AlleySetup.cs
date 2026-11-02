@@ -36,7 +36,7 @@ public static class AlleySetup {
     static AlleyCombat Empty(){var c=new AlleyCombat();c.spawning=false;c.Start();return c;}
     [MenuItem("Second Fist/Run Gameplay Checks")]
     public static void RunChecks(){
-        StringBuilder report=new StringBuilder("Second Fist v5 - gameplay, motion and prologue checks\n");
+        StringBuilder report=new StringBuilder("Second Fist v6 - arcade, economy and motion checks\n");
         var c=Empty();for(int i=0;i<200;i++)c.Tick(.02f,new Vector2(-1,-1),false);
         Expect(Mathf.Abs(c.player.x-(AlleyCombat.Left+12))<.1f&&Mathf.Abs(c.player.y-(AlleyCombat.Top+12))<.1f,"movement respects arena bounds",report);
         c=Empty();var target=c.AddEnemy(c.player+new Vector2(65,0));c.Tick(.02f,Vector2.zero,false);
@@ -67,6 +67,15 @@ public static class AlleySetup {
         Expect(c.health==100,"moving out of a telegraphed charge avoids damage",report);
         CheckNaturalMotion(report);
         CheckPrologue(report);
+        var profile=new ArcadeProfile();
+        Expect(!profile.Unlock(1)&&profile.coins==0,"insufficient funds cannot unlock a style",report);
+        Expect(profile.Settle("a",1000,120)&&!profile.Settle("a",1000,120)&&profile.coins==120&&profile.runs==1,"run settlement credits rewards exactly once",report);
+        Expect(profile.Unlock(1)&&profile.coins==0&&profile.selectedStyle==1,"unlock consumes coins and equips the style",report);
+        Expect(!profile.Unlock(1)&&!profile.Equip(2),"owned styles cannot be charged again and locked styles cannot equip",report);
+        profile.coins=-5;profile.selectedStyle=99;profile.Normalize();Expect(profile.coins==0&&profile.selectedStyle==0,"invalid saved values are normalized",report);
+        var restored=JsonUtility.FromJson<ArcadeProfile>(JsonUtility.ToJson(profile));Expect(restored.Owns(1)&&restored.bestScore==1000,"profile survives JSON persistence",report);
+        c=Empty();Expect(c.targetKills==12&&c.AddEnemy(c.player,2).hp==18,"opening round uses a shorter enemy wave and boss",report);
+        c.kills=4;c.wallHits=3;c.chainHits=2;Expect(AlleyGame.ArcadeReward(c)==24&&AlleyGame.ArcadeScore(c)==665,"combat achievements determine score and coins",report);
         Directory.CreateDirectory("Design");File.WriteAllText("Design/gameplay-checks.txt",report.ToString());Debug.Log("ALLEY_CHECKS_PASSED\n"+report);
     }
 
@@ -119,10 +128,10 @@ public static class AlleySetup {
     }
     [MenuItem("Second Fist/Build Windows")]
     public static void Build(){
-        AlleyVisualPipeline.Prepare();RunChecks();PlayerSettings.productName="Second Fist - Combat Flow";PlayerSettings.fullScreenMode=FullScreenMode.FullScreenWindow;PlayerSettings.defaultIsNativeResolution=true;Directory.CreateDirectory("Build/Windows-v5-natural-motion");
-        BuildReport result=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{ScenePath},locationPathName="Build/Windows-v5-natural-motion/SecondFist.exe",target=BuildTarget.StandaloneWindows64,options=BuildOptions.None});
+        AlleyVisualPipeline.Prepare();RunChecks();PlayerSettings.productName="Second Fist - Arcade";PlayerSettings.fullScreenMode=FullScreenMode.FullScreenWindow;PlayerSettings.defaultIsNativeResolution=true;Directory.CreateDirectory("Build/Windows-v6-arcade");
+        BuildReport result=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{ScenePath},locationPathName="Build/Windows-v6-arcade/SecondFist.exe",target=BuildTarget.StandaloneWindows64,options=BuildOptions.None});
         File.WriteAllText("Design/build-result.txt",result.summary.result+"\nErrors: "+result.summary.totalErrors+"\nBytes: "+result.summary.totalSize);
-        Directory.CreateDirectory("Build/Windows-v5-natural-motion/Licenses");foreach(string license in Directory.GetFiles("Design/Licenses","*.txt"))File.Copy(license,"Build/Windows-v5-natural-motion/Licenses/"+Path.GetFileName(license),true);
+        Directory.CreateDirectory("Build/Windows-v6-arcade/Licenses");foreach(string license in Directory.GetFiles("Design/Licenses","*.txt"))File.Copy(license,"Build/Windows-v6-arcade/Licenses/"+Path.GetFileName(license),true);
         if(result.summary.result!=BuildResult.Succeeded)throw new Exception("Build failed");Debug.Log("ALLEY_BUILD_SUCCEEDED");
     }
 }
