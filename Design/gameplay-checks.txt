@@ -1,0 +1,16 @@
+Second Fist v3 - gameplay checks
+PASS  movement respects arena bounds
+PASS  attack anticipation precedes damage
+PASS  automatic attack deals damage and knockback
+PASS  wall impact damages and contains enemy
+PASS  moving enemy transfers impact to another enemy
+PASS  special requires full charge
+PASS  special damages and launches nearby targets
+PASS  skill selection pauses simulation
+PASS  skill choice changes build and resumes combat
+PASS  enemy telegraph resolves into defeat at zero health
+PASS  basic attack cannot permanently interrupt boss
+PASS  boss defeat ends the run
+PASS  bruiser telegraphs charge outside basic attack range
+PASS  standing still can be punished by a charge
+PASS  moving out of a telegraphed charge avoids damage

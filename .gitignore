@@ -1,0 +1,46 @@
+# Unity-generated state
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Bb]uild/
+/[Bb]uilds/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+/[Aa]ssets/AssetStoreTools*
+
+# IDE and local files
+.vs/
+.vscode/
+.idea/
+*.csproj
+*.sln
+*.slnx
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+.vsconfig
+.collabignore
+.DS_Store
+Thumbs.db
+
+# Temporary package backup and generated editor boot settings
+/Packages/manifest.original.json
+/ProjectSettings/boot.config
+
+# Credentials and machine-local environment
+.env
+.env.*
+!.env.example
+*.pfx
+*.p12
+*.keystore
+*.jks
