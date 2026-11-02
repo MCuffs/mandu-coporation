@@ -1,4 +1,4 @@
-Second Fist v4 - gameplay and prologue checks
+Second Fist v5 - gameplay, motion and prologue checks
 PASS  movement respects arena bounds
 PASS  attack anticipation precedes damage
 PASS  automatic attack deals damage and knockback
@@ -14,6 +14,18 @@ PASS  boss defeat ends the run
 PASS  bruiser telegraphs charge outside basic attack range
 PASS  standing still can be punished by a charge
 PASS  moving out of a telegraphed charge avoids damage
+PASS  20 FPS and 120 FPS produce the same travel distance
+PASS  retreat does not trigger an automatic backwards punch
+PASS  retreat input cancels attack anticipation
+PASS  ultimate is not immediately overwritten by an auto attack
+PASS  knockback starts on the ground without a vertical pop
+PASS  knockback rises along a timed airborne arc
+PASS  knockback returns to the ground before walking resumes
+PASS  player recoil applies an impulse instead of teleporting
+PASS  steering and soft separation keep approaching enemies apart
+PASS  charge has a braking and recovery phase
+PASS  bruisers take turns telegraphing a charge
+PASS  large enemies reserve space appropriate to their bodies
 PASS  first input reveals dialogue before advancing
 PASS  next input advances exactly one dialogue beat
 PASS  dialogue duration respects longer voice recording

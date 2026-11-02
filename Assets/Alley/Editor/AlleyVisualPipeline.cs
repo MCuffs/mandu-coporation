@@ -18,10 +18,10 @@ public static class AlleyVisualPipeline {
     public static void Prepare(){
         if(processing)return;processing=true;
         try{
-            string stamp="components-v4-prologue:"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/PrologueInkScenes.png").Ticks+":"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/HeroMotion.png").Ticks+":"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/EnemyMotion.png").Ticks+":"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/AbilityIcons.png").Ticks;
+            string stamp="components-v5-grounded-motion:"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/PrologueInkScenes.png").Ticks+":"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/HeroMotion.png").Ticks+":"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/EnemyMotion.png").Ticks+":"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/AbilityIcons.png").Ticks;
             if(SessionState.GetString("AlleyVisualStamp","")==stamp)return;
-            StringBuilder report=new StringBuilder("Second Fist v4 - visual and audio asset validation\n");
-            PrepareSheet("HeroMotion",true,report);PrepareSheet("EnemyMotion",true,report);PrepareSheet("AbilityIcons",false,report);
+            StringBuilder report=new StringBuilder("Second Fist v5 - visual and audio asset validation\n");
+            PrepareSheet("HeroMotion",true,report);PrepareSheet("EnemyMotion",true,report);PrepareSheet("FighterAtlas",true,report,2);PrepareSheet("AbilityIcons",false,report);
             PreparePrologue(report);
             string[] fonts={"GothicA1-Regular","GothicA1-Bold","BlackHanSans-Regular"};
             foreach(string name in fonts){if(AssetDatabase.LoadAssetAtPath<Font>("Assets/Alley/Resources/Fonts/"+name+".ttf")==null)throw new Exception("Missing bundled font: "+name);report.AppendLine("PASS bundled font "+name);}
@@ -29,7 +29,7 @@ public static class AlleyVisualPipeline {
             Directory.CreateDirectory("Design");File.WriteAllText("Design/visual-checks.txt",report.ToString());SessionState.SetString("AlleyVisualStamp",stamp);AssetDatabase.Refresh();Debug.Log("ALLEY_VISUAL_ASSETS_READY\n"+report);
         }finally{processing=false;}
     }
-    static void PrepareSheet(string name,bool pivots,StringBuilder report){
+    static void PrepareSheet(string name,bool pivots,StringBuilder report,int rows=4,int columns=4){
         string path="Assets/Alley/Resources/"+name+".png";
         TextureImporter importer=AssetImporter.GetAtPath(path) as TextureImporter;if(importer==null)throw new Exception("Texture importer missing: "+name);
         importer.textureType=TextureImporterType.Default;importer.alphaIsTransparency=true;importer.mipmapEnabled=false;importer.wrapMode=TextureWrapMode.Clamp;importer.filterMode=FilterMode.Bilinear;importer.maxTextureSize=2048;importer.npotScale=TextureImporterNPOTScale.None;importer.textureCompression=TextureImporterCompression.Uncompressed;importer.isReadable=true;importer.SaveAndReimport();
@@ -38,12 +38,12 @@ public static class AlleyVisualPipeline {
         if(transparent<100||opaque<100)throw new Exception("Atlas alpha/content invalid: "+name);
         report.AppendLine("PASS "+name+" alpha transparency "+texture.width+"x"+texture.height);
         if(pivots){
-            AlleyGame.PivotSheet data=new AlleyGame.PivotSheet{frames=new AlleyGame.FramePivot[16]};
-            float cw=texture.width/4f,ch=texture.height/4f;
+            AlleyGame.PivotSheet data=new AlleyGame.PivotSheet{rows=rows,columns=columns,frames=new AlleyGame.FramePivot[rows*columns]};
+            float cw=texture.width/(float)columns,ch=texture.height/(float)rows;
             List<Component> components=FindComponents(pixels,texture.width,texture.height);
             HashSet<int> used=new HashSet<int>();
-            for(int frame=0;frame<16;frame++){
-                Vector2 expected=new Vector2((frame%4+.5f)*cw,(3-frame/4+.5f)*ch);
+            for(int frame=0;frame<rows*columns;frame++){
+                Vector2 expected=new Vector2((frame%columns+.5f)*cw,(rows-1-frame/columns+.5f)*ch);
                 int best=-1;float bestScore=float.MaxValue;
                 for(int i=0;i<components.Count;i++){
                     if(used.Contains(i)||components[i].count<500)continue;Component c=components[i];
@@ -54,11 +54,13 @@ public static class AlleyVisualPipeline {
                 if(best<0||bestScore>cw*cw*.6f)throw new Exception("Cannot isolate sprite: "+name+" "+frame);
                 used.Add(best);Component body=components[best];
                 int left=Mathf.Max(0,body.x0-2),right=Mathf.Min(texture.width-1,body.x1+2),bottom=Mathf.Max(0,body.y0-2),top=Mathf.Min(texture.height-1,body.y1+2);
-                int footLeft=texture.width,footRight=0;
-                foreach(int pixelIndex in body.pixels){int y=pixelIndex/texture.width;if(y>body.y0+ch*.24f)continue;int x=pixelIndex%texture.width;footLeft=Mathf.Min(footLeft,x);footRight=Mathf.Max(footRight,x);}
+                // Register against the pelvis instead of swinging shoe extremes; all poses share the same root.
+                double anchorSum=0;int anchorCount=0;float bodyHeight=body.y1-body.y0+1;
+                foreach(int pixelIndex in body.pixels){int y=pixelIndex/texture.width;if(y<body.y0+bodyHeight*.36f||y>body.y0+bodyHeight*.49f)continue;anchorSum+=pixelIndex%texture.width;anchorCount++;}
+                float anchor=anchorCount>0?(float)(anchorSum/anchorCount):(body.x0+body.x1)*.5f;
                 float width=right-left+1,height=top-bottom+1;
-                data.frames[frame]=new AlleyGame.FramePivot{x=((footLeft+footRight)*.5f-left)/width,y=(body.y0-bottom)/height,u=left/(float)texture.width,v=bottom/(float)texture.height,w=width/texture.width,h=height/texture.height};
-                report.AppendLine("PASS "+name+" frame "+frame+" isolated sprite and foot contact registered");
+                data.frames[frame]=new AlleyGame.FramePivot{x=(anchor-left)/width,y=(body.y0-bottom)/height,u=left/(float)texture.width,v=bottom/(float)texture.height,w=width/texture.width,h=height/texture.height,scale=name=="FighterAtlas"?ch/height:1};
+                report.AppendLine("PASS "+name+" frame "+frame+" isolated sprite, pelvis root and ground contact registered");
             }
             File.WriteAllText("Assets/Alley/Resources/"+name+"Pivots.json",JsonUtility.ToJson(data,true));
         }

@@ -36,7 +36,7 @@ public static class AlleySetup {
     static AlleyCombat Empty(){var c=new AlleyCombat();c.spawning=false;c.Start();return c;}
     [MenuItem("Second Fist/Run Gameplay Checks")]
     public static void RunChecks(){
-        StringBuilder report=new StringBuilder("Second Fist v4 - gameplay and prologue checks\n");
+        StringBuilder report=new StringBuilder("Second Fist v5 - gameplay, motion and prologue checks\n");
         var c=Empty();for(int i=0;i<200;i++)c.Tick(.02f,new Vector2(-1,-1),false);
         Expect(Mathf.Abs(c.player.x-(AlleyCombat.Left+12))<.1f&&Mathf.Abs(c.player.y-(AlleyCombat.Top+12))<.1f,"movement respects arena bounds",report);
         c=Empty();var target=c.AddEnemy(c.player+new Vector2(65,0));c.Tick(.02f,Vector2.zero,false);
@@ -65,10 +65,44 @@ public static class AlleySetup {
         c=Empty();c.attackCooldown=100;target=c.AddEnemy(c.player+new Vector2(180,0),1);target.attack=0;c.Tick(.02f,Vector2.zero,false);
         for(int i=0;i<75;i++)c.Tick(.02f,new Vector2(0,-1),false);
         Expect(c.health==100,"moving out of a telegraphed charge avoids damage",report);
+        CheckNaturalMotion(report);
         CheckPrologue(report);
         Directory.CreateDirectory("Design");File.WriteAllText("Design/gameplay-checks.txt",report.ToString());Debug.Log("ALLEY_CHECKS_PASSED\n"+report);
     }
 
+
+    static void CheckNaturalMotion(StringBuilder report){
+        var slow=Empty();var fast=Empty();Rect wide=new Rect(0,0,2000,1200);slow.SetArena(wide);fast.SetArena(wide);
+        for(int i=0;i<40;i++)slow.Tick(.05f,Vector2.right,false);for(int i=0;i<240;i++)fast.Tick(1/120f,Vector2.right,false);
+        Expect((slow.player-fast.player).magnitude<.1f,"20 FPS and 120 FPS produce the same travel distance",report);
+        var c=Empty();c.AddEnemy(c.player-new Vector2(90,0));c.Tick(.02f,Vector2.right,false);
+        Expect(c.attackLead<=0&&c.hits==0&&c.moveVelocity.x>0,"retreat does not trigger an automatic backwards punch",report);
+        c=Empty();c.AddEnemy(c.player+new Vector2(70,0));c.Tick(.02f,Vector2.zero,false);c.Tick(.02f,Vector2.left,false);
+        Expect(c.attackLead<=0&&c.hits==0,"retreat input cancels attack anticipation",report);
+        c=Empty();c.AddEnemy(c.player+new Vector2(70,0));c.Tick(.02f,Vector2.zero,true);
+        Expect(c.attackLead<=0&&c.attackCooldown>.25f&&c.attackAnimation<=.32f,"ultimate is not immediately overwritten by an auto attack",report);
+        c=Empty();c.SetArena(wide);var target=c.AddEnemy(c.player+new Vector2(70,0));c.Attack(target);
+        Expect(target.lift==0,"knockback starts on the ground without a vertical pop",report);
+        c.Tick(.07f,Vector2.zero,false);Expect(target.lift>0,"knockback rises along a timed airborne arc",report);
+        for(int i=0;i<35;i++)c.Tick(.02f,Vector2.zero,false);
+        Expect(target.lift==0,"knockback returns to the ground before walking resumes",report);
+        c=Empty();c.attackCooldown=100;target=c.AddEnemy(c.player+new Vector2(60,0));target.windup=.001f;Vector2 before=c.player;c.Tick(.008f,Vector2.zero,false);
+        Expect((c.player-before).magnitude<.1f&&c.playerImpulse.sqrMagnitude>0,"player recoil applies an impulse instead of teleporting",report);
+        c=Empty();c.player=new Vector2(410,700);var a=c.AddEnemy(new Vector2(200,450));var b=c.AddEnemy(new Vector2(202,450));
+        for(int i=0;i<55;i++)c.Tick(.02f,Vector2.zero,false);
+        Expect((a.pos-b.pos).magnitude>32,"steering and soft separation keep approaching enemies apart",report);
+        c=Empty();c.attackCooldown=100;target=c.AddEnemy(c.player+new Vector2(180,0),1);target.attack=0;
+        bool recovered=false;for(int i=0;i<100;i++){c.Tick(.02f,Vector2.up,false);if(target.recovery>0)recovered=true;}
+        Expect(recovered,"charge has a braking and recovery phase",report);
+
+        c=Empty();c.attackCooldown=100;var first=c.AddEnemy(c.player+new Vector2(180,0),1);var second=c.AddEnemy(c.player-new Vector2(180,0),1);first.attack=second.attack=0;c.Tick(.02f,Vector2.zero,false);
+        int charges=(first.windup>0||first.dash>0?1:0)+(second.windup>0||second.dash>0?1:0);
+        Expect(charges==1,"bruisers take turns telegraphing a charge",report);
+        c=Empty();c.player=new Vector2(410,700);first=c.AddEnemy(new Vector2(200,450),1);second=c.AddEnemy(new Vector2(202,450),1);first.attack=second.attack=100;
+        for(int i=0;i<60;i++)c.Tick(.02f,Vector2.zero,false);
+        Expect((first.pos-second.pos).magnitude>49,"large enemies reserve space appropriate to their bodies",report);
+
+    }
     static void CheckPrologue(StringBuilder report){
         var timeline=new PrologueTimeline();for(int i=0;i<4;i++)timeline.Step(.1f);timeline.Step(0,true);
         Expect(timeline.index==0&&timeline.textComplete,"first input reveals dialogue before advancing",report);
@@ -85,10 +119,10 @@ public static class AlleySetup {
     }
     [MenuItem("Second Fist/Build Windows")]
     public static void Build(){
-        AlleyVisualPipeline.Prepare();RunChecks();PlayerSettings.productName="Second Fist - Prologue";PlayerSettings.fullScreenMode=FullScreenMode.FullScreenWindow;PlayerSettings.defaultIsNativeResolution=true;Directory.CreateDirectory("Build/Windows-v4-prologue");
-        BuildReport result=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{ScenePath},locationPathName="Build/Windows-v4-prologue/SecondFist.exe",target=BuildTarget.StandaloneWindows64,options=BuildOptions.None});
+        AlleyVisualPipeline.Prepare();RunChecks();PlayerSettings.productName="Second Fist - Combat Flow";PlayerSettings.fullScreenMode=FullScreenMode.FullScreenWindow;PlayerSettings.defaultIsNativeResolution=true;Directory.CreateDirectory("Build/Windows-v5-natural-motion");
+        BuildReport result=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{ScenePath},locationPathName="Build/Windows-v5-natural-motion/SecondFist.exe",target=BuildTarget.StandaloneWindows64,options=BuildOptions.None});
         File.WriteAllText("Design/build-result.txt",result.summary.result+"\nErrors: "+result.summary.totalErrors+"\nBytes: "+result.summary.totalSize);
-        Directory.CreateDirectory("Build/Windows-v4-prologue/Licenses");foreach(string license in Directory.GetFiles("Design/Licenses","*.txt"))File.Copy(license,"Build/Windows-v4-prologue/Licenses/"+Path.GetFileName(license),true);
+        Directory.CreateDirectory("Build/Windows-v5-natural-motion/Licenses");foreach(string license in Directory.GetFiles("Design/Licenses","*.txt"))File.Copy(license,"Build/Windows-v5-natural-motion/Licenses/"+Path.GetFileName(license),true);
         if(result.summary.result!=BuildResult.Succeeded)throw new Exception("Build failed");Debug.Log("ALLEY_BUILD_SUCCEEDED");
     }
 }

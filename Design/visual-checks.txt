@@ -1,38 +1,47 @@
-Second Fist v4 - visual and audio asset validation
+Second Fist v5 - visual and audio asset validation
 PASS HeroMotion alpha transparency 1254x1254
-PASS HeroMotion frame 0 isolated sprite and foot contact registered
-PASS HeroMotion frame 1 isolated sprite and foot contact registered
-PASS HeroMotion frame 2 isolated sprite and foot contact registered
-PASS HeroMotion frame 3 isolated sprite and foot contact registered
-PASS HeroMotion frame 4 isolated sprite and foot contact registered
-PASS HeroMotion frame 5 isolated sprite and foot contact registered
-PASS HeroMotion frame 6 isolated sprite and foot contact registered
-PASS HeroMotion frame 7 isolated sprite and foot contact registered
-PASS HeroMotion frame 8 isolated sprite and foot contact registered
-PASS HeroMotion frame 9 isolated sprite and foot contact registered
-PASS HeroMotion frame 10 isolated sprite and foot contact registered
-PASS HeroMotion frame 11 isolated sprite and foot contact registered
-PASS HeroMotion frame 12 isolated sprite and foot contact registered
-PASS HeroMotion frame 13 isolated sprite and foot contact registered
-PASS HeroMotion frame 14 isolated sprite and foot contact registered
-PASS HeroMotion frame 15 isolated sprite and foot contact registered
+PASS HeroMotion frame 0 isolated sprite, pelvis root and ground contact registered
+PASS HeroMotion frame 1 isolated sprite, pelvis root and ground contact registered
+PASS HeroMotion frame 2 isolated sprite, pelvis root and ground contact registered
+PASS HeroMotion frame 3 isolated sprite, pelvis root and ground contact registered
+PASS HeroMotion frame 4 isolated sprite, pelvis root and ground contact registered
+PASS HeroMotion frame 5 isolated sprite, pelvis root and ground contact registered
+PASS HeroMotion frame 6 isolated sprite, pelvis root and ground contact registered
+PASS HeroMotion frame 7 isolated sprite, pelvis root and ground contact registered
+PASS HeroMotion frame 8 isolated sprite, pelvis root and ground contact registered
+PASS HeroMotion frame 9 isolated sprite, pelvis root and ground contact registered
+PASS HeroMotion frame 10 isolated sprite, pelvis root and ground contact registered
+PASS HeroMotion frame 11 isolated sprite, pelvis root and ground contact registered
+PASS HeroMotion frame 12 isolated sprite, pelvis root and ground contact registered
+PASS HeroMotion frame 13 isolated sprite, pelvis root and ground contact registered
+PASS HeroMotion frame 14 isolated sprite, pelvis root and ground contact registered
+PASS HeroMotion frame 15 isolated sprite, pelvis root and ground contact registered
 PASS EnemyMotion alpha transparency 1254x1254
-PASS EnemyMotion frame 0 isolated sprite and foot contact registered
-PASS EnemyMotion frame 1 isolated sprite and foot contact registered
-PASS EnemyMotion frame 2 isolated sprite and foot contact registered
-PASS EnemyMotion frame 3 isolated sprite and foot contact registered
-PASS EnemyMotion frame 4 isolated sprite and foot contact registered
-PASS EnemyMotion frame 5 isolated sprite and foot contact registered
-PASS EnemyMotion frame 6 isolated sprite and foot contact registered
-PASS EnemyMotion frame 7 isolated sprite and foot contact registered
-PASS EnemyMotion frame 8 isolated sprite and foot contact registered
-PASS EnemyMotion frame 9 isolated sprite and foot contact registered
-PASS EnemyMotion frame 10 isolated sprite and foot contact registered
-PASS EnemyMotion frame 11 isolated sprite and foot contact registered
-PASS EnemyMotion frame 12 isolated sprite and foot contact registered
-PASS EnemyMotion frame 13 isolated sprite and foot contact registered
-PASS EnemyMotion frame 14 isolated sprite and foot contact registered
-PASS EnemyMotion frame 15 isolated sprite and foot contact registered
+PASS EnemyMotion frame 0 isolated sprite, pelvis root and ground contact registered
+PASS EnemyMotion frame 1 isolated sprite, pelvis root and ground contact registered
+PASS EnemyMotion frame 2 isolated sprite, pelvis root and ground contact registered
+PASS EnemyMotion frame 3 isolated sprite, pelvis root and ground contact registered
+PASS EnemyMotion frame 4 isolated sprite, pelvis root and ground contact registered
+PASS EnemyMotion frame 5 isolated sprite, pelvis root and ground contact registered
+PASS EnemyMotion frame 6 isolated sprite, pelvis root and ground contact registered
+PASS EnemyMotion frame 7 isolated sprite, pelvis root and ground contact registered
+PASS EnemyMotion frame 8 isolated sprite, pelvis root and ground contact registered
+PASS EnemyMotion frame 9 isolated sprite, pelvis root and ground contact registered
+PASS EnemyMotion frame 10 isolated sprite, pelvis root and ground contact registered
+PASS EnemyMotion frame 11 isolated sprite, pelvis root and ground contact registered
+PASS EnemyMotion frame 12 isolated sprite, pelvis root and ground contact registered
+PASS EnemyMotion frame 13 isolated sprite, pelvis root and ground contact registered
+PASS EnemyMotion frame 14 isolated sprite, pelvis root and ground contact registered
+PASS EnemyMotion frame 15 isolated sprite, pelvis root and ground contact registered
+PASS FighterAtlas alpha transparency 1536x1024
+PASS FighterAtlas frame 0 isolated sprite, pelvis root and ground contact registered
+PASS FighterAtlas frame 1 isolated sprite, pelvis root and ground contact registered
+PASS FighterAtlas frame 2 isolated sprite, pelvis root and ground contact registered
+PASS FighterAtlas frame 3 isolated sprite, pelvis root and ground contact registered
+PASS FighterAtlas frame 4 isolated sprite, pelvis root and ground contact registered
+PASS FighterAtlas frame 5 isolated sprite, pelvis root and ground contact registered
+PASS FighterAtlas frame 6 isolated sprite, pelvis root and ground contact registered
+PASS FighterAtlas frame 7 isolated sprite, pelvis root and ground contact registered
 PASS AbilityIcons alpha transparency 1254x1254
 PASS six-panel ink prologue atlas imported
 PASS narration 0 imported (4.82 seconds)

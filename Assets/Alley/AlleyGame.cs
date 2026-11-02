@@ -76,9 +76,9 @@ public partial class AlleyGame : MonoBehaviour {
         combat.Tick(Time.deltaTime,movement,special);
         foreach(CombatEvent e in combat.events) {
             pops.Add(new Pop{text=e.text,pos=e.pos,style=e.style});AddImpact(e);
-            if(e.style==3){shake=9;if(e.text=="전성기의 한 방")ring=1;source.PlayOneShot(specialSound,.6f);}
-            else if(e.style==1||e.style==2){shake=Mathf.Max(shake,4);source.PlayOneShot(wallSound,.45f);}
-            else if(e.style==4){shake=6;source.PlayOneShot(hitSound,.7f);}
+            if(e.style==3){shake=5;if(e.text=="전성기의 한 방")ring=1;source.PlayOneShot(specialSound,.6f);}
+            else if(e.style==1||e.style==2){shake=Mathf.Max(shake,e.text=="퍽!"?1.1f:2.6f);source.PlayOneShot(e.text=="퍽!"?hitSound:wallSound,e.text=="퍽!"?.24f:.38f);}
+            else if(e.style==4){shake=3;source.PlayOneShot(hitSound,.7f);}
             else if(e.text=="−1")source.PlayOneShot(hitSound,.3f);
         }
         combat.events.Clear();UpdateMotion(dt,true);
@@ -117,8 +117,8 @@ public partial class AlleyGame : MonoBehaviour {
         else Box(0,0,ViewWidth,ViewHeight,new Color(.72f,.67f,.55f));
     }
     void World(){
-        Matrix4x4 old=GUI.matrix;Vector2 jitter=shake>0?new Vector2(Mathf.Sin(pulse*177),Mathf.Cos(pulse*141))*shake:Vector2.zero;
-        GUI.matrix=old*Matrix4x4.Translate(jitter);Floor();
+        Matrix4x4 old=GUI.matrix;Vector2 jitter=shake>0?new Vector2(Mathf.PerlinNoise(pulse*34,0)-.5f,Mathf.PerlinNoise(0,pulse*34)-.5f)*shake:Vector2.zero;
+        GUI.matrix=old*Matrix4x4.Translate(jitter);Floor();DrawFallenActors();
         foreach(Fighter e in combat.enemies) {
             if(e.windup>0) {
                 Color warning=new Color(1,.23f,.12f,.24f+Mathf.Sin(pulse*20)*.10f);

@@ -37,11 +37,11 @@
 
 Unity 메뉴에서 다음 명령을 실행할 수 있습니다.
 
-- `Second Fist > Run Gameplay Checks`: 전투·프롤로그 검증 22개
+- `Second Fist > Run Gameplay Checks`: 전투·프롤로그·움직임 검증 34개
 - `Second Fist > Prepare Visual Assets`: 프레임 영역·발 피벗·알파·글꼴 검증
 - `Second Fist > Build Windows`: 검증 후 Windows 빌드 생성
 
-빌드 결과는 `Build/Windows-v4-prologue/SecondFist.exe`에 생성됩니다. 실행 파일뿐 아니라 같은 폴더의 데이터와 DLL도 함께 필요합니다.
+빌드 결과는 `Build/Windows-v5-natural-motion/SecondFist.exe`에 생성됩니다. 실행 파일뿐 아니라 같은 폴더의 데이터와 DLL도 함께 필요합니다.
 
 검증 기록: [전투](Design/gameplay-checks.txt), [시각 자산](Design/visual-checks.txt), [빌드](Design/build-result.txt).
 
@@ -72,3 +72,9 @@ Unity 캐시·로컬 설정·로그·실행 파일은 Git에 포함하지 않습
 - 정민수 독백과 핵심 선언 8줄은 임시 합성 음성입니다.
 
 [프롤로그 연출·음성 기록](Design/prologue-v4.md)
+
+## 자연스러운 전투 움직임 v5
+
+피격 크기 변화와 위치 튐을 보정하고, 가속·감속·공격 준비·넉백·착지·회복을 연결했습니다.
+뒤로 피할 때 자동 공격이 이동을 방해하지 않으며, 적의 체격별 간격과 공격 순서를 조정했습니다.
+[변경 내용과 검증](Design/natural-motion-v5.md)
