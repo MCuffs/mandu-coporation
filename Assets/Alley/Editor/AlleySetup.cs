@@ -36,7 +36,7 @@ public static class AlleySetup {
     static AlleyCombat Empty(){var c=new AlleyCombat();c.spawning=false;c.Start();return c;}
     [MenuItem("Second Fist/Run Gameplay Checks")]
     public static void RunChecks(){
-        StringBuilder report=new StringBuilder("Second Fist v7 - stages, arcade, economy and motion checks\n");
+        StringBuilder report=new StringBuilder("Second Fist v8 - stages, arcade, economy, fever, coins and motion checks\n");
         var c=Empty();for(int i=0;i<200;i++)c.Tick(.02f,new Vector2(-1,-1),false);
         Expect(Mathf.Abs(c.player.x-(AlleyCombat.Left+12))<.1f&&Mathf.Abs(c.player.y-(AlleyCombat.Top+12))<.1f,"movement respects arena bounds",report);
         c=Empty();var target=c.AddEnemy(c.player+new Vector2(65,0));c.Tick(.02f,Vector2.zero,false);
@@ -48,16 +48,19 @@ public static class AlleySetup {
         c=Empty();c.player=new Vector2(410,700);var source=c.AddEnemy(new Vector2(200,450));target=c.AddEnemy(new Vector2(236,450));source.velocity=new Vector2(520,0);c.Tick(.02f,Vector2.zero,false);
         Expect(c.chainHits==1&&target.hp==2&&target.velocity.x>0,"moving enemy transfers impact to another enemy",report);
         c=Empty();target=c.AddEnemy(c.player+new Vector2(70,0));c.charge=0;Expect(!c.Special()&&target.hp==3,"special requires full charge",report);c.charge=100;
-        Expect(c.Special()&&target.hp==1&&target.velocity.magnitude>800,"special damages and launches nearby targets",report);
+        Expect(c.Special()&&target.hp<=0&&c.isFever&&target.velocity.magnitude>800,"special damages, triggers fever and launches nearby targets",report);
         c=Empty();c.xp=3;c.Tick(.02f,Vector2.zero,false);float elapsed=c.elapsed;c.Tick(.03f,Vector2.one,true);
         Expect(c.state==RunState.Choosing&&c.elapsed==elapsed,"skill selection pauses simulation",report);c.Choose(1);
         Expect(c.state==RunState.Fighting&&c.chainSkill==1,"skill choice changes build and resumes combat",report);
+        c=Empty();c.xp=3;c.Tick(.02f,Vector2.zero,false);c.ChooseAll();
+        Expect(c.state==RunState.Fighting&&c.wallSkill==1&&c.chainSkill==1&&c.stunSkill==1,"jackpot skill choice grants all three skills",report);
         c=Empty();c.health=1;c.attackCooldown=10;target=c.AddEnemy(c.player+new Vector2(60,0));target.windup=.001f;c.Tick(.02f,Vector2.zero,false);
         Expect(c.state==RunState.Lost,"enemy telegraph resolves into defeat at zero health",report);
+        Expect(c.Revive()&&c.state==RunState.Fighting&&c.health==c.maxHealth&&c.isFever,"revive restores health, triggers fever and resumes combat",report);
         c=Empty();target=c.AddEnemy(c.player+new Vector2(70,0),2);target.windup=.8f;c.Attack(target);
         Expect(target.windup>.7f&&target.velocity==Vector2.zero,"basic attack cannot permanently interrupt boss",report);
         c=Empty();target=c.AddEnemy(c.player+new Vector2(70,0),2);target.hp=1;for(int i=0;i<9;i++)c.Tick(.02f,Vector2.zero,false);
-        Expect(c.state==RunState.Won,"boss defeat ends the run",report);
+        Expect(c.state==RunState.Won&&c.collectedCoins>=12,"boss defeat ends the run and vacuums dropped coins",report);
         c=Empty();c.attackCooldown=100;target=c.AddEnemy(c.player+new Vector2(180,0),1);target.attack=0;c.Tick(.02f,Vector2.zero,false);
         Expect(target.windup>0&&target.aim.x<-.9f,"bruiser telegraphs charge outside basic attack range",report);
         for(int i=0;i<75;i++)c.Tick(.02f,Vector2.zero,false);
@@ -80,13 +83,37 @@ public static class AlleySetup {
         Expect(profile.Settle("a",1000,120)&&!profile.Settle("a",1000,120)&&profile.coins==120&&profile.runs==1,"run settlement credits rewards exactly once",report);
         Expect(profile.Unlock(1)&&profile.coins==0&&profile.selectedStyle==1,"unlock consumes coins and equips the style",report);
         Expect(!profile.Unlock(1)&&!profile.Equip(2),"owned styles cannot be charged again and locked styles cannot equip",report);
+        profile.coins=100;Expect(profile.UpgradeStat(0)&&profile.fistLevel==1&&profile.coins==55,"stat upgrade consumes coins and increases permanent stat level",report);
         profile.coins=-5;profile.selectedStyle=99;profile.Normalize();Expect(profile.coins==0&&profile.selectedStyle==0,"invalid saved values are normalized",report);
-        var restored=JsonUtility.FromJson<ArcadeProfile>(JsonUtility.ToJson(profile));Expect(restored.Owns(1)&&restored.bestScore==1000,"profile survives JSON persistence",report);
+        var restored=JsonUtility.FromJson<ArcadeProfile>(JsonUtility.ToJson(profile));Expect(restored.Owns(1)&&restored.bestScore==1000&&restored.fistLevel==1,"profile survives JSON persistence",report);
         c=Empty();Expect(c.targetKills==12&&c.AddEnemy(c.player,2).hp==18,"opening round uses a shorter enemy wave and boss",report);
         c.kills=4;c.wallHits=3;c.chainHits=2;Expect(AlleyGame.ArcadeReward(c)==24&&AlleyGame.ArcadeScore(c)==665,"combat achievements determine score and coins",report);
+        CheckGymTycoon(report);
         Directory.CreateDirectory("Design");File.WriteAllText("Design/gameplay-checks.txt",report.ToString());Debug.Log("ALLEY_CHECKS_PASSED\n"+report);
     }
 
+    static void CheckGymTycoon(StringBuilder report){
+        var prof=new ArcadeProfile{coins=200,highestStage=2};
+        var gym=new GymWorld();gym.SyncFromProfile(prof);
+        Rect arena=new Rect(AlleyCombat.Left,AlleyCombat.Top,AlleyCombat.Right-AlleyCombat.Left,AlleyCombat.Bottom-AlleyCombat.Top);
+        var events=new System.Collections.Generic.List<CombatEvent>();
+        bool built;int cash;
+        Vector2 pad0=gym.StationPos(arena,gym.stations[0]);
+        for(int i=0;i<30;i++)gym.Tick(.05f,pad0,arena,prof,events,out built,out cash);
+        Expect(gym.stations[0].unlocked&&prof.coins==170&&gym.trainees.Count==1,"standing on punching bag pad drains coins, builds station and spawns trainee",report);
+        for(int i=0;i<60;i++)gym.Tick(.1f,Vector2.zero,arena,prof,events,out built,out cash);
+        Expect(gym.cashDeskPile>0,"trainees generate passive cash stack at the gym safe desk",report);
+        int beforeCoins=prof.coins;Vector2 desk=gym.CashDeskPos(arena);
+        for(int i=0;i<20;i++)gym.Tick(.05f,desk,arena,prof,events,out built,out cash);
+        Expect(prof.coins>beforeCoins&&gym.cashDeskPile==0,"walking over cash desk collects all stacked trainee fees",report);
+        Vector2 ringPad=gym.StationPos(arena,gym.stations[2]);
+        for(int i=0;i<40;i++)gym.Tick(.05f,ringPad,arena,prof,events,out built,out cash);
+        Expect(gym.HasPartner&&prof.IsStationUnlocked(2),"completing sparring ring unlocks partner fighter for combat",report);
+        var c=Empty();c.hasPartner=true;var enemy=c.AddEnemy(c.partnerPos+new Vector2(55,0));
+        for(int i=0;i<45;i++)c.Tick(.02f,Vector2.zero,false);
+        Expect(enemy.hp<3,"partner fighter automatically engages nearby enemies in combat",report);
+        Expect(!string.IsNullOrEmpty(prof.FameTitle)&&prof.BuiltStationCount>=2,"fame rank title updates based on gym and combat growth",report);
+    }
 
     static void CheckNaturalMotion(StringBuilder report){
         var slow=Empty();var fast=Empty();Rect wide=new Rect(0,0,2000,1200);slow.SetArena(wide);fast.SetArena(wide);
@@ -118,7 +145,6 @@ public static class AlleySetup {
         c=Empty();c.player=new Vector2(410,700);first=c.AddEnemy(new Vector2(200,450),1);second=c.AddEnemy(new Vector2(202,450),1);first.attack=second.attack=100;
         for(int i=0;i<60;i++)c.Tick(.02f,Vector2.zero,false);
         Expect((first.pos-second.pos).magnitude>49,"large enemies reserve space appropriate to their bodies",report);
-
     }
     static void CheckPrologue(StringBuilder report){
         var timeline=new PrologueTimeline();for(int i=0;i<4;i++)timeline.Step(.1f);timeline.Step(0,true);
@@ -136,10 +162,15 @@ public static class AlleySetup {
     }
     [MenuItem("Second Fist/Build Windows")]
     public static void Build(){
-        AlleyVisualPipeline.Prepare();RunChecks();PlayerSettings.productName="Second Fist - Arcade";PlayerSettings.fullScreenMode=FullScreenMode.FullScreenWindow;PlayerSettings.defaultIsNativeResolution=true;Directory.CreateDirectory("Build/Windows-v7-streets");
-        BuildReport result=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{ScenePath},locationPathName="Build/Windows-v7-streets/SecondFist.exe",target=BuildTarget.StandaloneWindows64,options=BuildOptions.None});
-        File.WriteAllText("Design/build-result.txt",result.summary.result+"\nErrors: "+result.summary.totalErrors+"\nBytes: "+result.summary.totalSize);
-        Directory.CreateDirectory("Build/Windows-v7-streets/Licenses");foreach(string license in Directory.GetFiles("Design/Licenses","*.txt"))File.Copy(license,"Build/Windows-v7-streets/Licenses/"+Path.GetFileName(license),true);
-        if(result.summary.result!=BuildResult.Succeeded)throw new Exception("Build failed");Debug.Log("ALLEY_BUILD_SUCCEEDED");
+        AlleyVisualPipeline.Prepare();RunChecks();PlayerSettings.productName="Second Fist - Arcade";PlayerSettings.fullScreenMode=FullScreenMode.FullScreenWindow;PlayerSettings.defaultIsNativeResolution=true;
+        string[] buildDirs={"Build/Windows-v7-streets","Build/Windows-v4-prologue"};
+        foreach(string dir in buildDirs){
+            Directory.CreateDirectory(dir);
+            BuildReport result=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{ScenePath},locationPathName=dir+"/SecondFist.exe",target=BuildTarget.StandaloneWindows64,options=BuildOptions.None});
+            File.WriteAllText("Design/build-result.txt",result.summary.result+"\nErrors: "+result.summary.totalErrors+"\nBytes: "+result.summary.totalSize);
+            Directory.CreateDirectory(dir+"/Licenses");foreach(string license in Directory.GetFiles("Design/Licenses","*.txt"))File.Copy(license,dir+"/Licenses/"+Path.GetFileName(license),true);
+            if(result.summary.result!=BuildResult.Succeeded)throw new Exception("Build failed for "+dir);
+        }
+        Debug.Log("ALLEY_BUILD_SUCCEEDED");
     }
 }

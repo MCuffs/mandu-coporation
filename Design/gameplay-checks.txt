@@ -1,16 +1,18 @@
-Second Fist v7 - stages, arcade, economy and motion checks
+Second Fist v8 - stages, arcade, economy, fever, coins and motion checks
 PASS  movement respects arena bounds
 PASS  attack anticipation precedes damage
 PASS  automatic attack deals damage and knockback
 PASS  wall impact damages and contains enemy
 PASS  moving enemy transfers impact to another enemy
 PASS  special requires full charge
-PASS  special damages and launches nearby targets
+PASS  special damages, triggers fever and launches nearby targets
 PASS  skill selection pauses simulation
 PASS  skill choice changes build and resumes combat
+PASS  jackpot skill choice grants all three skills
 PASS  enemy telegraph resolves into defeat at zero health
+PASS  revive restores health, triggers fever and resumes combat
 PASS  basic attack cannot permanently interrupt boss
-PASS  boss defeat ends the run
+PASS  boss defeat ends the run and vacuums dropped coins
 PASS  bruiser telegraphs charge outside basic attack range
 PASS  standing still can be punished by a charge
 PASS  moving out of a telegraphed charge avoids damage
@@ -43,7 +45,14 @@ PASS  insufficient funds cannot unlock a style
 PASS  run settlement credits rewards exactly once
 PASS  unlock consumes coins and equips the style
 PASS  owned styles cannot be charged again and locked styles cannot equip
+PASS  stat upgrade consumes coins and increases permanent stat level
 PASS  invalid saved values are normalized
 PASS  profile survives JSON persistence
 PASS  opening round uses a shorter enemy wave and boss
 PASS  combat achievements determine score and coins
+PASS  standing on punching bag pad drains coins, builds station and spawns trainee
+PASS  trainees generate passive cash stack at the gym safe desk
+PASS  walking over cash desk collects all stacked trainee fees
+PASS  completing sparring ring unlocks partner fighter for combat
+PASS  partner fighter automatically engages nearby enemies in combat
+PASS  fame rank title updates based on gym and combat growth

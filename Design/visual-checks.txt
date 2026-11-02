@@ -1,4 +1,4 @@
-Second Fist v7 - stage and visual asset validation
+Second Fist v9 - stage, gym tycoon and visual asset validation
 PASS StreetRoster alpha transparency 1312x1199
 PASS StreetRoster frame 0 isolated sprite, pelvis root and ground contact registered
 PASS StreetRoster frame 1 isolated sprite, pelvis root and ground contact registered
@@ -17,6 +17,8 @@ PASS StreetRoster frame 13 isolated sprite, pelvis root and ground contact regis
 PASS StreetRoster frame 14 isolated sprite, pelvis root and ground contact registered
 PASS StreetRoster frame 15 isolated sprite, pelvis root and ground contact registered
 PASS four stage arenas imported at native resolution
+PASS GymEquipment 2x2 alpha sprite sheet imported
+PASS GymBackdrop environment imported
 PASS HeroMotion alpha transparency 1254x1254
 PASS HeroMotion frame 0 isolated sprite, pelvis root and ground contact registered
 PASS HeroMotion frame 1 isolated sprite, pelvis root and ground contact registered

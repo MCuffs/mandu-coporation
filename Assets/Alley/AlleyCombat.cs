@@ -4,12 +4,24 @@ using UnityEngine;
 
 namespace SecondFistGame {
     public enum RunState { Ready, Fighting, Choosing, Won, Lost }
+    public sealed class CoinDrop {
+        public Vector2 pos,velocity;
+        public int value=1;
+        public float age,height,verticalVelocity;
+        public bool magnetized;
+    }
+    public sealed class Shockwave {
+        public Vector2 pos;
+        public float radius,maxRadius,life,maxLife;
+        public Color color;
+    }
     public sealed class Fighter {
-        public int id,kind,hp,maxHp,appearance,facing=1;
+        public int id,kind,hp,maxHp,appearance,facing=1,burstQueue;
         public Vector2 pos,velocity,aim,locomotion;
         public float attack,windup,stun,flash,contact,dash,wallCooldown,recovery,reaction;
         public float airElapsed,airDuration,airPeak;
         public bool boss { get { return kind==2; } }
+        public bool enraged;
         public float lift { get { if(airDuration<=0)return 0;float t=Mathf.Clamp01(airElapsed/airDuration);return airPeak*4*t*(1-t); } }
     }
     public struct CombatEvent {
@@ -19,10 +31,20 @@ namespace SecondFistGame {
     public sealed class AlleyCombat {
         public RunState state=RunState.Ready;
         public readonly List<Fighter> enemies=new List<Fighter>();
+        public readonly List<CoinDrop> coins=new List<CoinDrop>();
+        public readonly List<Shockwave> shockwaves=new List<Shockwave>();
         public readonly List<CombatEvent> events=new List<CombatEvent>();
         public Vector2 player=new Vector2(270,535),direction=Vector2.right,moveVelocity,playerImpulse;
-        public float health=100,charge=100,elapsed,attackCooldown,invulnerable,punch,freeze,attackLead,attackAnimation,playerReaction;
-        public int kills,hits,wallHits,chainHits,level=1,xp,nextXp=3,stage,bestChain,wallSkill,chainSkill,stunSkill;
+        public bool hasPartner;
+        public Vector2 partnerPos=new Vector2(225,555),partnerVelocity,partnerDirection=Vector2.right;
+        public float partnerCooldown,partnerPunch;
+        public float health=100,maxHealth=100,charge=100,elapsed,attackCooldown,invulnerable,punch,freeze,attackLead,attackAnimation,playerReaction;
+        public float feverClock,feverDuration=5.5f;
+        public bool isFever { get { return feverClock>0; } }
+        public int baseDamage=1,collectedCoins,comboStep,revivesUsed;
+        public int kills,hits,wallHits,chainHits,level=1,xp,nextXp=3,stage,bestChain;
+        public int wallSkill,chainSkill,stunSkill,fistSkill,vampSkill,magnetSkill;
+        public readonly int[] currentChoices={0,1,2};
         public int targetKills { get { return StageCatalog.Get(stage).target; } }
         public bool bossSpawned,spawning=true;
         public float spawnClock=.25f,comboClock;
@@ -32,25 +54,89 @@ namespace SecondFistGame {
         int nextId,pendingChoices;
         public const float Left=65,Right=475,Top=295,Bottom=745;
         public Rect arena=new Rect(Left,Top,Right-Left,Bottom-Top);
-        public AlleyCombat(int stage=0){this.stage=stage;}
+        public AlleyCombat(int stage=0){this.stage=stage;RollChoices();}
         public void SetArena(Rect next){
             if(next.width<160||next.height<200)throw new ArgumentException("Arena is too small");
             Rect previous=arena;
             player=Remap(player,previous,next);
+            partnerPos=Remap(partnerPos,previous,next);
             foreach(Fighter e in enemies)e.pos=Remap(e.pos,previous,next);
+            foreach(CoinDrop c in coins)c.pos=Remap(c.pos,previous,next);
             arena=next;ConstrainPlayer();
         }
         static Vector2 Remap(Vector2 p,Rect from,Rect to){return new Vector2(to.xMin+(p.x-from.xMin)/from.width*to.width,to.yMin+(p.y-from.yMin)/from.height*to.height);}
-        public void Start(){state=RunState.Fighting;}
+        public void Start(){state=RunState.Fighting;partnerPos=player+new Vector2(-42,18);}
         public Fighter AddEnemy(Vector2 pos,int kind=0){
-            int hp=kind==2?18+stage*3:kind==1?5:3;
+            int hp=kind==2?18+stage*4:kind==1?5+stage/2:3;
             Fighter e=new Fighter{id=++nextId,kind=kind,hp=hp,maxHp=hp,appearance=kind==2?(stage==0?1:stage==1?0:stage==2?2:3):kind==1?1:stage==0?2:stage==1?0:(nextId%2==0?0:2),pos=pos,attack=.6f+(nextId%4)*.12f};enemies.Add(e);return e;
         }
-        public void Choose(int skill){
+        public int GetSkillRank(int skillId){
+            switch(skillId){
+                case 0: return wallSkill;
+                case 1: return chainSkill;
+                case 2: return stunSkill;
+                case 3: return fistSkill;
+                case 4: return vampSkill;
+                default: return magnetSkill;
+            }
+        }
+        void RollChoices(){
+            if(level<=2){currentChoices[0]=0;currentChoices[1]=1;currentChoices[2]=2;return;}
+            List<int> pool=new List<int>{0,1,2,3,4,5};
+            for(int i=0;i<3;i++){
+                int pick=UnityEngine.Random.Range(0,pool.Count);
+                currentChoices[i]=pool[pick];
+                pool.RemoveAt(pick);
+            }
+        }
+        public void Choose(int choiceOrSkill){
             if(state!=RunState.Choosing)return;
-            if(skill==0)wallSkill++;else if(skill==1)chainSkill++;else stunSkill++;
-            pendingChoices=Mathf.Max(0,pendingChoices-1);state=pendingChoices>0?RunState.Choosing:RunState.Fighting;
-            events.Add(new CombatEvent(skill==0?"벽꿍 강화!":skill==1?"충돌 전파!":"연쇄 기절!",player,2));
+            int skill=choiceOrSkill;
+            if(choiceOrSkill>=0&&choiceOrSkill<3&&level>2)skill=currentChoices[choiceOrSkill];
+            ApplySkill(skill);
+            pendingChoices=Mathf.Max(0,pendingChoices-1);
+            if(pendingChoices>0){RollChoices();state=RunState.Choosing;}
+            else state=RunState.Fighting;
+        }
+        public void ChooseAll(){
+            if(state!=RunState.Choosing)return;
+            for(int i=0;i<3;i++)ApplySkill(level<=2?i:currentChoices[i]);
+            pendingChoices=Mathf.Max(0,pendingChoices-1);
+            if(pendingChoices>0){RollChoices();state=RunState.Choosing;}
+            else state=RunState.Fighting;
+            events.Add(new CombatEvent("전부 각성!!",player,3));
+        }
+        void ApplySkill(int skill){
+            if(skill==0){wallSkill++;events.Add(new CombatEvent("벽꿍 강화!",player,2));}
+            else if(skill==1){chainSkill++;events.Add(new CombatEvent("충돌 전파!",player,2));}
+            else if(skill==2){stunSkill++;events.Add(new CombatEvent("연쇄 기절!",player,2));}
+            else if(skill==3){fistSkill++;events.Add(new CombatEvent("폭풍 권법!",player,2));}
+            else if(skill==4){vampSkill++;health=Mathf.Min(maxHealth,health+15);events.Add(new CombatEvent("혈기 흡수!",player,2));}
+            else{magnetSkill++;events.Add(new CombatEvent("황금 손!",player,2));}
+        }
+        public bool Revive(){
+            if(state!=RunState.Lost)return false;
+            revivesUsed++;
+            health=maxHealth;charge=100;invulnerable=2.5f;feverClock=4.5f;state=RunState.Fighting;
+            AddShockwave(player,220,new Color(1,.78f,.22f));
+            foreach(Fighter e in enemies){
+                if(e.hp<=0)continue;
+                Vector2 delta=e.pos-player;Vector2 aim=delta.sqrMagnitude>.01f?delta.normalized:Vector2.up;
+                Damage(e,2+baseDamage,"",0);
+                Launch(e,aim*750,.38f,20);
+            }
+            events.Add(new CombatEvent("부활! 폭주 개시!",player,3));
+            return true;
+        }
+        public void AddShockwave(Vector2 pos,float maxRadius,Color color,float duration=.32f){
+            shockwaves.Add(new Shockwave{pos=pos,radius=14,maxRadius=maxRadius,life=duration,maxLife=duration,color=color});
+        }
+        void SpawnCoins(Vector2 pos,int count,int valueEach=1){
+            for(int i=0;i<count;i++){
+                float a=UnityEngine.Random.Range(0f,Mathf.PI*2f);
+                float speed=UnityEngine.Random.Range(65f,175f);
+                coins.Add(new CoinDrop{pos=pos,velocity=new Vector2(Mathf.Cos(a),Mathf.Sin(a))*speed,value=valueEach,height=8,verticalVelocity=UnityEngine.Random.Range(110f,180f)});
+            }
         }
         public void Tick(float dt,Vector2 movement,bool special){
             if(state!=RunState.Fighting||dt<=0)return;
@@ -63,13 +149,21 @@ namespace SecondFistGame {
         }
         void Simulate(float dt,Vector2 movement,bool special){
             elapsed+=dt;attackCooldown-=dt;invulnerable-=dt;playerReaction=Mathf.Max(0,playerReaction-dt);
-            punch=Mathf.Max(0,punch-dt);attackAnimation=Mathf.Max(0,attackAnimation-dt);comboClock-=dt;if(comboClock<=0)chain=0;
+            if(feverClock>0){feverClock=Mathf.Max(0,feverClock-dt);invulnerable=Mathf.Max(invulnerable,.1f);}
+            punch=Mathf.Max(0,punch-dt);attackAnimation=Mathf.Max(0,attackAnimation-dt);comboClock-=dt;if(comboClock<=0){chain=0;comboStep=0;}
+            for(int i=shockwaves.Count-1;i>=0;i--){
+                Shockwave s=shockwaves[i];s.life-=dt;
+                s.radius=Mathf.Lerp(s.maxRadius,14,Mathf.Clamp01(s.life/s.maxLife));
+                if(s.life<=0)shockwaves.RemoveAt(i);
+            }
+            UpdateCoins(dt);
             movement=Vector2.ClampMagnitude(movement,1);if(movement.magnitude<.10f)movement=Vector2.zero;
             // Retreat cancels preparation instead of forcing a backwards turn and a skating punch.
             if(attackLead>0&&movement.sqrMagnitude>.16f&&Vector2.Dot(movement.normalized,strikeDirection)<-.35f){attackLead=0;pendingTarget=null;attackAnimation=Mathf.Min(attackAnimation,.12f);attackCooldown=.14f;}
             float brace=attackLead>0?.62f:attackAnimation>.22f?.28f:1;
+            float speedMul=isFever?1.25f:1f;
             float acceleration=movement.sqrMagnitude>0?1250:1900;
-            moveVelocity=Vector2.MoveTowards(moveVelocity,movement*(172*brace),acceleration*dt);
+            moveVelocity=Vector2.MoveTowards(moveVelocity,movement*(172*brace*speedMul),acceleration*dt);
             player+=(moveVelocity+playerImpulse)*dt;playerImpulse*=Mathf.Exp(-12*dt);ConstrainPlayer();
             if(movement.sqrMagnitude>.03f&&attackAnimation<=0)direction=movement.normalized;
             if(special&&charge>=100)Special();
@@ -79,22 +173,82 @@ namespace SecondFistGame {
             }
             if(attackCooldown<=0&&attackLead<=0&&attackAnimation<=.08f&&playerReaction<=0){
                 Fighter target=AcquireTarget(movement);
-                if(target!=null){trackedTarget=pendingTarget=target;attackLead=.10f;attackAnimation=.44f;attackCooldown=.52f;strikeDirection=(target.pos-player).normalized;if(strikeDirection.sqrMagnitude<.01f)strikeDirection=direction;direction=strikeDirection;}
+                if(target!=null){
+                    trackedTarget=pendingTarget=target;
+                    float haste=1f/(1f+fistSkill*.16f+(isFever?.38f:0));
+                    attackLead=.10f*haste;attackAnimation=.44f*haste;attackCooldown=.52f*haste;
+                    strikeDirection=(target.pos-player).normalized;if(strikeDirection.sqrMagnitude<.01f)strikeDirection=direction;direction=strikeDirection;
+                }
             }
+            if(hasPartner)SimulatePartner(dt);
             Spawn(dt);
             foreach(Fighter e in enemies)if(e.hp>0)MoveEnemy(e,dt);
             ResolveContacts(dt);
             for(int i=enemies.Count-1;i>=0;i--)if(enemies[i].hp<=0){
-                Fighter e=enemies[i];enemies.RemoveAt(i);kills++;xp++;events.Add(new CombatEvent("제압",e.pos,0));
-                if(e.boss){state=RunState.Won;events.Add(new CombatEvent("BOSS DOWN",e.pos,3));}
+                Fighter e=enemies[i];enemies.RemoveAt(i);kills++;xp+=1+(magnetSkill>0&&kills%3==0?1:0);
+                if(vampSkill>0)health=Mathf.Min(maxHealth,health+vampSkill*2.5f);
+                SpawnCoins(e.pos,e.boss?12:e.kind==1?3:1,1+magnetSkill);
+                events.Add(new CombatEvent("제압",e.pos,0));
+                if(e.boss){
+                    foreach(CoinDrop c in coins){collectedCoins+=c.value;}coins.Clear();
+                    state=RunState.Won;events.Add(new CombatEvent("BOSS DOWN",e.pos,3));
+                }
             }
-            if(state==RunState.Fighting&&xp>=nextXp&&level<5){xp-=nextXp;level++;nextXp=level+2;pendingChoices++;state=RunState.Choosing;}
+            if(state==RunState.Fighting&&xp>=nextXp&&level<7){xp-=nextXp;level++;nextXp=level+2;pendingChoices++;RollChoices();state=RunState.Choosing;}
             if(health<=0)state=RunState.Lost;
         }
-        Fighter AcquireTarget(Vector2 movement){
-            Fighter best=null;float score=112;
+        void SimulatePartner(float dt){
+            partnerCooldown-=dt;partnerPunch=Mathf.Max(0,partnerPunch-dt);
+            Fighter nearest=null;float bestDist=240f;
             foreach(Fighter e in enemies){
-                if(e.hp<=0)continue;Vector2 delta=e.pos-player;float distance=delta.magnitude;if(distance>104)continue;
+                if(e.hp<=0)continue;
+                float d=(e.pos-partnerPos).magnitude;
+                if(d<bestDist){bestDist=d;nearest=e;}
+            }
+            Vector2 goal=nearest!=null?nearest.pos-(nearest.pos-partnerPos).normalized*56f:player+new Vector2(-46,20);
+            Vector2 delta=goal-partnerPos;
+            Vector2 desired=delta.magnitude>12f?delta.normalized*155f:Vector2.zero;
+            partnerVelocity=Vector2.MoveTowards(partnerVelocity,desired,950f*dt);
+            partnerPos=ClampEnemy(partnerPos+partnerVelocity*dt);
+            if(partnerVelocity.sqrMagnitude>20f)partnerDirection=partnerVelocity.normalized;
+            if(nearest!=null&&(nearest.pos-partnerPos).magnitude<92f&&partnerCooldown<=0){
+                partnerCooldown=.78f;partnerPunch=.18f;
+                Vector2 aim=(nearest.pos-partnerPos).normalized;if(aim.sqrMagnitude<.01f)aim=Vector2.right;
+                partnerDirection=aim;
+                Damage(nearest,1,"동료 지원!",1);
+                if(!nearest.boss)Launch(nearest,aim*540f,.26f,10f);
+            }
+        }
+        void UpdateCoins(float dt){
+            float magnetRange=115+magnetSkill*65+(isFever?180:0);
+            for(int i=coins.Count-1;i>=0;i--){
+                CoinDrop c=coins[i];c.age+=dt;
+                if(c.height>0||c.verticalVelocity>0){
+                    c.height+=c.verticalVelocity*dt;c.verticalVelocity-=520*dt;
+                    if(c.height<=0){c.height=0;c.verticalVelocity=0;}
+                }
+                Vector2 toPlayer=player-c.pos;float dist=toPlayer.magnitude;
+                if(c.age>.18f&&dist<magnetRange)c.magnetized=true;
+                if(c.magnetized){
+                    Vector2 dir=dist>.01f?toPlayer/dist:Vector2.zero;
+                    c.velocity=Vector2.MoveTowards(c.velocity,dir*580,2200*dt);
+                    c.pos+=c.velocity*dt;
+                    if(dist<28){
+                        collectedCoins+=c.value;
+                        charge=Mathf.Min(100,charge+1.5f+magnetSkill*.8f);
+                        events.Add(new CombatEvent("+"+c.value,player+new Vector2(0,-22),0));
+                        coins.RemoveAt(i);continue;
+                    }
+                }else{
+                    c.pos=ClampEnemy(c.pos+c.velocity*dt);
+                    c.velocity*=Mathf.Exp(-7*dt);
+                }
+            }
+        }
+        Fighter AcquireTarget(Vector2 movement){
+            Fighter best=null;float score=112+(isFever?28:0);
+            foreach(Fighter e in enemies){
+                if(e.hp<=0)continue;Vector2 delta=e.pos-player;float distance=delta.magnitude;if(distance>104+(isFever?24:0))continue;
                 if(movement.sqrMagnitude>.09f&&distance>52&&Vector2.Dot(movement.normalized,delta.normalized)<-.1f)continue;
                 float candidate=distance*(e==trackedTarget?.80f:1);if(candidate<score){best=e;score=candidate;}
             }
@@ -110,6 +264,11 @@ namespace SecondFistGame {
         }
         void MoveEnemy(Fighter e,float dt){
             e.flash=Mathf.Max(0,e.flash-dt);e.stun-=dt;e.contact-=dt;e.wallCooldown-=dt;e.attack-=dt;e.recovery=Mathf.Max(0,e.recovery-dt);e.reaction=Mathf.Max(0,e.reaction-dt);
+            if(e.boss&&!e.enraged&&e.hp<=e.maxHp/2){
+                e.enraged=true;e.flash=.3f;
+                AddShockwave(e.pos,180,new Color(1,.25f,.15f));
+                events.Add(new CombatEvent("대장 광폭화!!",e.pos,3));
+            }
             if(e.airDuration>0)e.airElapsed=Mathf.Min(e.airDuration,e.airElapsed+dt);
             if(e.windup<=0&&e.dash<=0){if(player.x-e.pos.x>18)e.facing=1;else if(player.x-e.pos.x<-18)e.facing=-1;}
             if(e.velocity.sqrMagnitude>28*28){
@@ -118,6 +277,8 @@ namespace SecondFistGame {
                 e.pos=ClampEnemy(desired);
                 if((hitX||hitY)&&e.wallCooldown<=0){
                     e.wallCooldown=.30f;wallHits++;CountChain();Damage(e,1+wallSkill,"벽꿍!",1);
+                    AddShockwave(e.pos,75+wallSkill*15,new Color(1,.65f,.22f),.22f);
+                    if(wallSkill>0)SpawnCoins(e.pos,1,1);
                     if(hitX)e.velocity.x*=-.16f;if(hitY)e.velocity.y*=-.16f;
                     e.stun=Mathf.Max(e.stun,.26f+stunSkill*.25f);e.reaction=Mathf.Max(e.reaction,.22f);freeze=Mathf.Max(freeze,.014f);
                 }
@@ -128,17 +289,35 @@ namespace SecondFistGame {
             Vector2 delta=player-e.pos;float distance=delta.magnitude;
             if(e.dash>0){
                 float started=.38f-e.dash;float ramp=Mathf.Min(Mathf.Clamp01(started/.055f),Mathf.Clamp01(e.dash/.10f));
-                e.locomotion=e.aim*(480*ramp);e.pos=ClampEnemy(e.pos+e.locomotion*dt);e.dash-=dt;
+                e.locomotion=e.aim*(480*(e.enraged?1.22f:1f)*ramp);e.pos=ClampEnemy(e.pos+e.locomotion*dt);e.dash-=dt;
                 if((player-e.pos).magnitude<52)Hurt(e.boss?18:12,e.pos);
-                if(e.dash<=0){e.recovery=.32f;e.locomotion=e.aim*90;}return;
+                if(e.dash<=0){
+                    if(e.boss&&e.burstQueue>0){
+                        e.burstQueue--;e.windup=.32f;e.aim=(player-e.pos).normalized;if(e.aim.sqrMagnitude<.01f)e.aim=Vector2.right;e.facing=e.aim.x>=0?1:-1;
+                        return;
+                    }
+                    if(e.boss&&stage>=2){
+                        AddShockwave(e.pos,115,new Color(1,.3f,.18f),.28f);
+                        if((player-e.pos).magnitude<105)Hurt(12,e.pos);
+                    }
+                    e.recovery=.32f;e.locomotion=e.aim*90;
+                }
+                return;
             }
             if(e.windup>0){
                 e.locomotion=Vector2.MoveTowards(e.locomotion,Vector2.zero,900*dt);e.pos=ClampEnemy(e.pos+e.locomotion*dt);e.windup-=dt;
-                if(e.windup<=0){if(e.kind>=1){e.dash=.38f;e.attack=e.boss?2.8f:2.1f;}else{if(distance<(e.appearance==0?111:83))Hurt(e.appearance==0?10:8,e.pos);e.attack=e.appearance==0?1.8f:1.5f;e.recovery=.22f;}}
+                if(e.windup<=0){
+                    if(e.kind>=1){e.dash=.38f;e.attack=e.boss?(e.enraged?1.8f:2.5f):2.1f;}
+                    else{if(distance<(e.appearance==0?111:83))Hurt(e.appearance==0?10:8,e.pos);e.attack=e.appearance==0?1.8f:1.5f;e.recovery=.22f;}
+                }
                 return;
             }
             if(e.recovery>0){e.locomotion=Vector2.MoveTowards(e.locomotion,Vector2.zero,750*dt);e.pos=ClampEnemy(e.pos+e.locomotion*dt);return;}
-            if(e.kind>=1&&e.attack<=0&&(e.boss||distance<240)&&ChargeSlotAvailable(e)){e.windup=e.boss?.95f:.8f;e.aim=delta.normalized;e.facing=e.aim.x>=0?1:-1;return;}
+            if(e.kind>=1&&e.attack<=0&&(e.boss||distance<240)&&ChargeSlotAvailable(e)){
+                e.windup=e.boss?(e.enraged?.68f:.92f):.8f;
+                e.burstQueue=e.boss&&(stage>=1||e.enraged)?1:0;
+                e.aim=delta.normalized;e.facing=e.aim.x>=0?1:-1;return;
+            }
             if(e.kind==0&&distance<(e.appearance==0?104:76)&&e.attack<=0&&MeleeSlotsAvailable(e)){e.windup=.56f;e.aim=delta.normalized;return;}
             Vector2 desiredVelocity=Vector2.zero;
             if(distance>54){
@@ -146,7 +325,7 @@ namespace SecondFistGame {
                 Vector2 target=player+lane*Mathf.Clamp01((190-distance)/100f);
                 Vector2 steering=(target-e.pos).normalized;
                 foreach(Fighter other in enemies){if(other==e||other.hp<=0)continue;Vector2 away=e.pos-other.pos;float d=away.magnitude;float clearance=BodyRadius(e)+BodyRadius(other)+24;if(d>.01f&&d<clearance)steering+=away/d*(1-d/clearance)*1.15f;}
-                float speed=e.boss?45:e.kind==1?55:72+stage*4;
+                float speed=e.boss?(e.enraged?62:45):e.kind==1?55:72+stage*4;
                 desiredVelocity=Vector2.ClampMagnitude(steering,1)*speed;
             }
             e.locomotion=Vector2.MoveTowards(e.locomotion,desiredVelocity,360*dt);e.pos=ClampEnemy(e.pos+e.locomotion*dt);
@@ -164,6 +343,7 @@ namespace SecondFistGame {
                     source.contact=.14f;target.contact=.30f;chainHits++;CountChain();
                     Vector2 impulse=source.velocity.normalized*(420+chainSkill*100);Launch(target,impulse,.27f,9);target.contact=.30f;target.stun=.34f+stunSkill*.45f;source.velocity*=.64f;
                     Damage(target,1+chainSkill,"연쇄!",2);
+                    AddShockwave(target.pos,65+chainSkill*14,new Color(.32f,.85f,.66f),.20f);
                 }else{
                     float settle=(required-distance)*.5f*(1-Mathf.Exp(-20*dt));
                     if(a.velocity.sqrMagnitude<900&&a.dash<=0)a.pos=ClampEnemy(a.pos-normal*settle);
@@ -171,27 +351,40 @@ namespace SecondFistGame {
                 }
             }
         }
-        void CountChain(){chain++;bestChain=Mathf.Max(bestChain,chain);comboClock=2;}
+        void CountChain(){chain++;bestChain=Mathf.Max(bestChain,chain);comboClock=2.3f;}
         Vector2 ClampEnemy(Vector2 p){return new Vector2(Mathf.Clamp(p.x,arena.xMin,arena.xMax),Mathf.Clamp(p.y,arena.yMin,arena.yMax));}
         void ConstrainPlayer(){player=new Vector2(Mathf.Clamp(player.x,arena.xMin+12,arena.xMax-12),Mathf.Clamp(player.y,arena.yMin+12,arena.yMax-12));if(player.x<=arena.xMin+12||player.x>=arena.xMax-12)moveVelocity.x=0;if(player.y<=arena.yMin+12||player.y>=arena.yMax-12)moveVelocity.y=0;}
-        static void Launch(Fighter e,Vector2 impulse,float duration,float peak){e.velocity=impulse;e.locomotion=Vector2.zero;e.airElapsed=0;e.airDuration=duration;e.airPeak=peak;e.reaction=duration+.14f;e.stun=duration+.10f;e.windup=0;e.dash=0;e.recovery=0;}
+        static void Launch(Fighter e,Vector2 impulse,float duration,float peak){e.velocity=impulse;e.locomotion=Vector2.zero;e.airElapsed=0;e.airDuration=duration;e.airPeak=peak;e.reaction=duration+.14f;e.stun=duration+.10f;e.windup=0;e.dash=0;e.recovery=0;e.burstQueue=0;}
         public void Attack(Fighter target){Vector2 aim=(target.pos-player).normalized;ResolvePunch(aim.sqrMagnitude>.01f?aim:direction);}
         void ResolvePunch(Vector2 aim){
-            direction=aim;punch=.19f;attackCooldown=.43f;hits++;if(attackAnimation<=0)attackAnimation=.34f;
-            foreach(Fighter e in enemies){Vector2 delta=e.pos-player;if(e.hp<=0||delta.magnitude>=110||Vector2.Dot(aim,delta.normalized)<=.25f)continue;
-                Damage(e,1,"",0);if(e.kind==0||(e.kind==1&&e.windup<=0&&e.dash<=0))Launch(e,aim*650,.30f,12);
+            direction=aim;punch=.19f;
+            float haste=1f/(1f+fistSkill*.16f+(isFever?.38f:0));
+            attackCooldown=.43f*haste;hits++;comboStep=(comboStep+1)%3;
+            bool finisher=comboStep==0||(isFever&&hits%2==0);
+            if(attackAnimation<=0)attackAnimation=.34f*haste;
+            float reach=110+fistSkill*12+(finisher?24:0)+(isFever?20:0);
+            int dmg=baseDamage+(finisher&&fistSkill>0?1:0)+(isFever?1:0);
+            float knockback=650+fistSkill*55+(finisher?190:0)+(isFever?160:0);
+            if(finisher)AddShockwave(player+aim*52,88+fistSkill*16,isFever?new Color(1,.76f,.22f):new Color(1,.42f,.18f),.22f);
+            foreach(Fighter e in enemies){
+                Vector2 delta=e.pos-player;if(e.hp<=0||delta.magnitude>=reach||Vector2.Dot(aim,delta.normalized)<=(finisher?.05f:.25f))continue;
+                Damage(e,dmg,finisher?"강타!":"",finisher?1:0);
+                if(e.kind==0||(e.kind==1&&(e.windup<=0&&e.dash<=0||finisher))||(e.boss&&(finisher&&isFever)))Launch(e,aim*knockback,finisher?.36f:.30f,finisher?18:12);
             }
-            charge=Mathf.Min(100,charge+9);freeze=Mathf.Max(freeze,.009f);events.Add(new CombatEvent("퍽!",player+aim*60,1));
+            charge=Mathf.Min(100,charge+9+vampSkill*2);freeze=Mathf.Max(freeze,finisher?.018f:.009f);
+            events.Add(new CombatEvent(finisher?"크리티컬!":"퍽!",player+aim*60,1));
         }
         public bool Special(){
             if(state!=RunState.Fighting||charge<100)return false;
-            charge=0;attackLead=0;pendingTarget=null;attackCooldown=Mathf.Max(attackCooldown,.36f);punch=.25f;attackAnimation=.32f;invulnerable=.55f;
-            foreach(Fighter e in enemies){Vector2 delta=e.pos-player;if(e.hp<=0||delta.magnitude>185)continue;Vector2 aim=delta.sqrMagnitude>.01f?delta.normalized:Vector2.up;Damage(e,2,"",0);Launch(e,aim*(e.boss?280:860),e.boss?.24f:.42f,e.boss?5:25);}
+            charge=0;attackLead=0;pendingTarget=null;attackCooldown=Mathf.Max(attackCooldown,.36f);punch=.25f;attackAnimation=.32f;invulnerable=1.2f;
+            feverClock=feverDuration+vampSkill*.8f;
+            AddShockwave(player,210,new Color(1,.78f,.24f),.38f);
+            foreach(Fighter e in enemies){Vector2 delta=e.pos-player;if(e.hp<=0||delta.magnitude>195)continue;Vector2 aim=delta.sqrMagnitude>.01f?delta.normalized:Vector2.up;Damage(e,2+baseDamage,"",0);Launch(e,aim*(e.boss?320:880),e.boss?.26f:.44f,e.boss?8:26);}
             freeze=Mathf.Max(freeze,.065f);events.Add(new CombatEvent("전성기의 한 방",player,3));return true;
         }
-        void Damage(Fighter e,int amount,string label,int style){if(e.hp<=0)return;e.hp-=amount;e.flash=.10f;charge=Mathf.Min(100,charge+3);events.Add(new CombatEvent(label.Length>0?label:"−"+amount,e.pos,style));}
+        void Damage(Fighter e,int amount,string label,int style){if(e.hp<=0)return;e.hp-=amount;e.flash=.10f;charge=Mathf.Min(100,charge+3+vampSkill);events.Add(new CombatEvent(label.Length>0?label:"−"+amount,e.pos,style));}
         void Hurt(int amount,Vector2 origin){
-            if(invulnerable>0)return;health=Mathf.Max(0,health-amount);invulnerable=.7f;playerReaction=.18f;
+            if(invulnerable>0||isFever)return;health=Mathf.Max(0,health-amount);invulnerable=.7f;playerReaction=.18f;
             playerImpulse=(player-origin).normalized*185;attackLead=0;pendingTarget=null;attackAnimation=Mathf.Min(attackAnimation,.12f);attackCooldown=Mathf.Max(attackCooldown,.20f);
             events.Add(new CombatEvent("−"+amount,player,4));
         }

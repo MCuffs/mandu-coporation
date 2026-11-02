@@ -29,7 +29,7 @@ public partial class AlleyGame {
     }
     void ResetMotion(){
         actorMotion.Clear();sparks.Clear();heroRendered=heroLast=new Vector2(270,535);heroSpeed=heroPhase=heroTilt=heroTurn=motionClock=lastModelElapsed=0;heroLeft=heroTargetLeft=false;
-        shownHealth=healthTrail=100;shownCharge=100;shownXp=0;menuAge=modalAge=0;shownState=RunState.Ready;readyPresentation=true;
+        shownHealth=healthTrail=combat!=null?combat.maxHealth:100;shownCharge=100;shownXp=0;menuAge=modalAge=0;shownState=RunState.Ready;readyPresentation=true;
     }
     void AdvancePresentation(float dt){
         dt=Mathf.Min(dt,.06f);menuAge+=dt;battleReveal=Mathf.Max(0,battleReveal-dt);
@@ -84,13 +84,13 @@ public partial class AlleyGame {
     float TurnWidth(float remaining){return remaining<=0?1:1-Mathf.Sin((1-remaining/.09f)*Mathf.PI)*.10f;}
 
     void AddImpact(CombatEvent e){
-        if(e.style==3&&e.text=="전성기의 한 방")specialFlash=.18f;
-        if(e.text=="골목 대장 등장")bossBanner=2.3f;
+        if(e.style==3&&(e.text=="전성기의 한 방"||e.text=="부활! 폭주 개시!"))specialFlash=.22f;
+        if(e.text=="골목 대장 등장"||e.text=="대장 광폭화!!")bossBanner=2.3f;
         if(e.style==0&&e.text=="제압")return;
-        if(e.text.StartsWith("벽꿍")||e.text.StartsWith("연쇄")||e.text=="퍽!"||e.style==4){
-            Color c=e.style==2?Mint:e.style==4?Coral:new Color(1,.76f,.33f);
-            int count=e.text=="퍽!"?6:10;
-            for(int i=0;i<count;i++){float a=UnityEngine.Random.value*Mathf.PI*2;float speed=UnityEngine.Random.Range(45,150);sparks.Add(new Spark{pos=e.pos-new Vector2(0,45),velocity=new Vector2(Mathf.Cos(a),Mathf.Sin(a))*speed,life=.30f,total=.30f,color=c,size=UnityEngine.Random.Range(2,5)});}
+        if(e.text.StartsWith("벽꿍")||e.text.StartsWith("연쇄")||e.text=="퍽!"||e.text=="크리티컬!"||e.text=="강타!"||e.style==4){
+            Color c=e.style==2?Mint:e.style==4?Coral:e.text=="크리티컬!"||e.text=="강타!"?new Color(1,.45f,.15f):new Color(1,.76f,.33f);
+            int count=e.text=="퍽!"?6:e.text=="크리티컬!"?14:10;
+            for(int i=0;i<count;i++){float a=UnityEngine.Random.value*Mathf.PI*2;float speed=UnityEngine.Random.Range(45,165);sparks.Add(new Spark{pos=e.pos-new Vector2(0,45),velocity=new Vector2(Mathf.Cos(a),Mathf.Sin(a))*speed,life=.32f,total=.32f,color=c,size=UnityEngine.Random.Range(2,5.5f)});}
         }
     }
     float EaseOut(float t){t=Mathf.Clamp01(t);return 1-Mathf.Pow(1-t,3);}
@@ -120,22 +120,32 @@ public partial class AlleyGame {
         Vector2 feet=heroRendered;bool moving=heroSpeed>14;
         float bob=moving?Mathf.Sin(heroPhase*2)*1.05f:Mathf.Sin(motionClock*2.8f)*.4f;
         Ellipse(feet+new Vector2(0,2),moving?49:51,13,new Color(0,0,0,.22f));
-        Ellipse(feet+new Vector2(0,1),48,12,new Color(.57f,.84f,.70f,.07f));
+        if(combat.isFever){
+            float aura=58+Mathf.Sin(pulse*18)*6;
+            Ellipse(feet+new Vector2(0,1),aura,18,new Color(1,.76f,.18f,.34f));
+            CircleAt(feet-new Vector2(0,55),46+Mathf.Sin(pulse*22)*4,new Color(1,.58f,.12f,.16f));
+        }else{
+            Ellipse(feet+new Vector2(0,1),48,12,new Color(.57f,.84f,.70f,.07f));
+        }
         int frame=combat.attackAnimation>0?AttackFrame():moving?(Mathf.FloorToInt(heroPhase/(Mathf.PI*2)*8)%8):8;
-        float attackT=.44f-combat.attackAnimation;float thrust=combat.attackAnimation>0?Mathf.Sin(Mathf.Clamp01((attackT-.06f)/.22f)*Mathf.PI)*4:0;
+        float attackT=.44f-combat.attackAnimation;float thrust=combat.attackAnimation>0?Mathf.Sin(Mathf.Clamp01((attackT-.06f)/.22f)*Mathf.PI)*(combat.comboStep==0?7:4):0;
         feet+=combat.direction*thrust-new Vector2(0,bob);
-        Color tint=combat.playerReaction>0?new Color(1,.72f,.62f):new Color(1,1,1,combat.invulnerable>0?.82f+.18f*Mathf.Cos(motionClock*18):1);
+        Color tint=combat.playerReaction>0?new Color(1,.72f,.62f):combat.isFever?new Color(1,.96f,.78f):new Color(1,1,1,combat.invulnerable>0?.82f+.18f*Mathf.Cos(motionClock*18):1);
         Vector2 stretch=moving?new Vector2(1+Mathf.Sin(heroPhase*2)*.012f,1-Mathf.Sin(heroPhase*2)*.018f):new Vector2(1,1+Mathf.Sin(motionClock*2.8f)*.004f);
         if(combat.attackLead>0)stretch=new Vector2(1.03f,.97f);
-        stretch.x*=TurnWidth(heroTurn);MotionSprite(heroMotionAtlas,heroPivots,feet,frame,heroLeft,138,tint,heroTilt,stretch);
+        stretch.x*=TurnWidth(heroTurn);
+        float height=combat.isFever?144:138;
+        MotionSprite(heroMotionAtlas,heroPivots,feet,frame,heroLeft,height,tint,heroTilt,stretch);
         if(combat.punch>0){
+            bool heavy=combat.comboStep==0||combat.isFever;
             float progress=Mathf.Clamp01(1-combat.punch/.19f);float a=Mathf.Atan2(combat.direction.y,combat.direction.x);
-            float radius=60+progress*23;Vector2 center=heroRendered-new Vector2(0,43);
+            float radius=(heavy?74:60)+progress*(heavy?32:23);Vector2 center=heroRendered-new Vector2(0,43);
+            Color arcColor=heavy?new Color(1,.74f,.18f,(1-progress)*.95f):new Color(1,.36f,.12f,(1-progress)*.9f);
             for(int i=0;i<17;i++){float p=i/16f;float angle=a-1.05f+p*2.1f;float next=angle+.13f;
                 Vector2 p1=center+new Vector2(Mathf.Cos(angle),Mathf.Sin(angle))*radius;
                 Vector2 p2=center+new Vector2(Mathf.Cos(next),Mathf.Sin(next))*radius;
                 float taper=Mathf.Sin(p*Mathf.PI)*(1-progress);
-                Line(p1,p2,11*taper+1,new Color(1,.36f,.12f,(1-progress)*.9f));Line(p1-new Vector2(0,2),p2-new Vector2(0,2),3*taper,new Color(1,.96f,.74f,1-progress));
+                Line(p1,p2,(heavy?15:11)*taper+1,arcColor);Line(p1-new Vector2(0,2),p2-new Vector2(0,2),3.5f*taper,new Color(1,.96f,.74f,1-progress));
             }
         }
     }
@@ -146,7 +156,8 @@ public partial class AlleyGame {
         float height=e.boss?181:e.kind==1?146:131,lift=e.lift;
         float bob=reacting||e.windup>0||e.dash>0?0:Mathf.Sin(phase*2)*.9f;
         Ellipse(feet+new Vector2(0,2),(e.boss?69:48)-lift*.25f,12-lift*.10f,new Color(0,0,0,(.20f-lift*.002f)*spawn));
-        Color tint=e.flash>0?new Color(1,.76f,.64f,spawn):new Color(1,1,1,spawn);
+        if(e.enraged)Ellipse(feet+new Vector2(0,1),76,16,new Color(1,.22f,.12f,.28f));
+        Color tint=e.flash>0?new Color(1,.76f,.64f,spawn):e.enraged?new Color(1,.82f,.76f,spawn):new Color(1,1,1,spawn);
         float squash=e.windup>0?Mathf.Sin(Mathf.Clamp01(e.windup/.8f)*Mathf.PI)*.035f:0;
         float turn=cached?TurnWidth(m.turn):1;
         if(rosterAtlas!=null&&rosterPivots!=null){
@@ -160,7 +171,7 @@ public partial class AlleyGame {
             int frame=e.kind==0?cycle:BruiserFrames[cycle];
             MotionSprite(enemyMotionAtlas,enemyPivots,feet-new Vector2(0,bob),frame,left,height,tint,tilt,new Vector2((1+squash)*turn,1-squash));
         }else DrawSprite(feet-new Vector2(0,bob),e.kind==0?4:6,left,height,tint,tilt);
-        if(e.hp<e.maxHp||e.boss){float w=e.boss?84:42;float y=feet.y-height*.86f;Panel(feet.x-w*.5f-1,y-1,w+2,8,Ink);Panel(feet.x-w*.5f,y,w*Mathf.Clamp01(e.hp/(float)e.maxHp),6,e.boss?Coral:Mint);}
+        if(e.hp<e.maxHp||e.boss){float w=e.boss?88:42;float y=feet.y-height*.86f;Panel(feet.x-w*.5f-1,y-1,w+2,8,Ink);Panel(feet.x-w*.5f,y,w*Mathf.Clamp01(e.hp/(float)e.maxHp),6,e.boss?Coral:Mint);}
         if(e.windup>0){CircleAt(feet-new Vector2(0,height+5),13,Coral);Text("!",feet.x-16,feet.y-height-20,32,32,20,Cream,TextAnchor.MiddleCenter,true);}
     }
 
@@ -176,16 +187,35 @@ public partial class AlleyGame {
         }
     }
     void DrawAfterimagesAndDust(){
-        foreach(Spark spark in sparks){float alpha=spark.life/spark.total;Line(spark.pos,spark.pos-spark.velocity.normalized*spark.size*2,spark.size*alpha,new Color(spark.color.r,spark.color.g,spark.color.b,alpha));}
+        foreach(Shockwave sw in combat.shockwaves){
+            float a=Mathf.Clamp01(sw.life/sw.maxLife);
+            Vector2 center=ProjectPoint(sw.pos,0.15f);
+            Ring(center,sw.radius,4.5f*a+.8f,new Color(sw.color.r,sw.color.g,sw.color.b,a*.75f));
+        }
+        if(world3D==null){
+            foreach(CoinDrop c in combat.coins){
+                Vector2 p=c.pos-new Vector2(0,c.height);
+                Ellipse(c.pos+new Vector2(0,2),13,5,new Color(0,0,0,.22f));
+                CircleAt(p,8.5f,new Color(.95f,.58f,.08f));
+                CircleAt(p-new Vector2(.8f,1f),6.2f,Gold);
+                Box(p.x-1.5f,p.y-4f,2.5f,6f,Cream);
+            }
+        }
+        foreach(Spark spark in sparks){
+            float alpha=spark.life/spark.total;
+            Vector2 sp=ProjectPoint(spark.pos,0.8f);
+            Line(sp,sp-spark.velocity.normalized*spark.size*2,spark.size*alpha,new Color(spark.color.r,spark.color.g,spark.color.b,alpha));
+        }
     }
 
     void DrawCombatText(){
         int index=0;
         foreach(Pop p in pops){
             if(p.text=="제압"||p.text=="골목 대장 등장"||p.text=="전성기의 한 방"||p.text.Length==0)continue;
-            float t=1-p.life;float a=Mathf.Clamp01(p.life*4);int size=p.style==4?22:p.style==0?17:25;
-            Color c=p.style==4?Coral:p.style==2?Mint:p.style==0?Cream:new Color(1,.83f,.36f);c.a=a;
-            Vector2 pos=p.pos+new Vector2((index++%3-1)*9,-78);
+            float t=1-p.life;float a=Mathf.Clamp01(p.life*4);int size=p.style==4?22:p.style==0?17:p.text=="크리티컬!"?29:25;
+            Color c=p.style==4?Coral:p.style==2?Mint:p.style==0?Cream:p.text=="크리티컬!"?new Color(1,.55f,.15f):new Color(1,.83f,.36f);c.a=a;
+            Vector2 baseGui=ProjectPoint(p.pos,1.5f);
+            Vector2 pos=baseGui+new Vector2((index++%3-1)*9,-28-(1-p.life)*28);
             float scale=1+Mathf.Sin(Mathf.Clamp01(t*4)*Mathf.PI)*.14f;
             Matrix4x4 old=GUI.matrix;GUI.matrix=old*Matrix4x4.TRS(new Vector3(pos.x,pos.y,0),Quaternion.Euler(0,0,p.style==0?0:-6),new Vector3(scale,scale,1));
             Outlined(p.text,-110,-24,220,48,size,c,TextAnchor.MiddleCenter,p.style!=0);GUI.matrix=old;

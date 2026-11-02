@@ -7,6 +7,7 @@ public partial class AlleyGame : MonoBehaviour {
     readonly List<Pop> pops=new List<Pop>();
     readonly List<Fighter> drawOrder=new List<Fighter>();
     public AlleyCombat combat;
+    public Alley3DWorld world3D;
     Texture2D atlas,background,white,disc,round;
     Font font,fontBold,fontDisplay;GUIStyle panelStyle;AudioSource source;AudioClip hitSound,wallSound,specialSound;
     Vector2 stickOrigin,stick; bool dragging,requestSpecial;int dragFinger=-1;
@@ -16,6 +17,10 @@ public partial class AlleyGame : MonoBehaviour {
     float ViewHeight { get { return Screen.height/Scale; } }
     Vector2 SpecialPosition { get { return new Vector2(ViewWidth-76,ViewHeight-82); } }
     Vector2 Pointer(Vector2 screen) { return new Vector2(screen.x/Scale,(Screen.height-screen.y)/Scale); }
+    public bool IsStoryActive() { return storyActive; }
+    public bool IsInGym() { return inGym; }
+    public bool IsHome() { return home; }
+
     void Awake() {
         Application.targetFrameRate=60;
 #if !UNITY_EDITOR
@@ -28,26 +33,32 @@ public partial class AlleyGame : MonoBehaviour {
         atlas=Resources.Load<Texture2D>("FighterAtlas");background=Resources.Load<Texture2D>("AlleyBackground");
         white=Texture2D.whiteTexture;disc=Circle();round=Rounded();panelStyle=new GUIStyle{border=new RectOffset(8,8,8,8),normal={background=round}};
         source=gameObject.AddComponent<AudioSource>();hitSound=Sound(155,.055f);wallSound=Sound(80,.10f);specialSound=Sound(67,.20f);
-        LoadPresentation();LoadArcade();LoadStages();NewRun();ReturnHome();
+        LoadPresentation();LoadArcade();LoadStages();LoadPrologue();
+        world3D=gameObject.AddComponent<Alley3DWorld>();
+        world3D.Initialize(Camera.main);
+        NewRun();EnterGymHub();
     }
     void NewRun() {
-        combat=new AlleyCombat(stage);pops.Clear();map=false;ring=shake=0;dragging=false;paused=false;ResetMotion();
+        combat=new AlleyCombat(stage);pops.Clear();map=false;ring=shake=0;dragging=false;paused=false;
+        PrepareArcade();ResetMotion();
         UpdateArenaViewport(true);
         float cx=combat.arena.center.x,cy=combat.player.y;
         combat.AddEnemy(new Vector2(cx-94,cy-38));combat.AddEnemy(new Vector2(cx-158,cy-42));
         combat.AddEnemy(new Vector2(cx+151,cy-121));combat.AddEnemy(new Vector2(cx+137,cy+113),1);
-        PrepareArcade();StartBattle();
+        StartBattle();
     }
     void OnApplicationFocus(bool focused) { if(!focused){dragging=false;stick=Vector2.zero;} }
     void Update() {
         float dt=Time.unscaledDeltaTime;pulse+=dt;walk+=dt;shake=Mathf.Max(0,shake-dt*22);ring=Mathf.Max(0,ring-dt*2);
         for(int i=pops.Count-1;i>=0;i--){pops[i].life-=dt;pops[i].pos.y-=dt*29;if(pops[i].life<=0)pops.RemoveAt(i);}
-        if(Input.GetKeyDown(KeyCode.Escape)&&!home&&combat.state==RunState.Fighting&&!map)paused=!paused;
+        if(Input.GetKeyDown(KeyCode.Escape)&&!home&&(inGym||combat.state==RunState.Fighting)&&!map)paused=!paused;
         if(Input.GetKeyDown(KeyCode.F11))ToggleFullscreen();
         UpdateArenaViewport(false);
         AdvancePresentation(dt);
-        if(storyActive){UpdatePrologue(dt);UpdateMotion(dt,false);return;}
-        if(home||map||paused||combat.state!=RunState.Fighting){dragging=false;stick=Vector2.zero;UpdateMotion(dt,false);return;}
+        if(storyActive){UpdatePrologue(dt);UpdateMotion(dt,false);if(world3D!=null)world3D.SyncWorld(this,dt);return;}
+        if(home||stageSelect||styleMenu||map||paused){dragging=false;stick=Vector2.zero;UpdateMotion(dt,false);if(world3D!=null)world3D.SyncWorld(this,dt);return;}
+        if(inGym){UpdateGymHub(dt);if(world3D!=null)world3D.SyncWorld(this,dt);return;}
+        if(combat.state!=RunState.Fighting){dragging=false;stick=Vector2.zero;UpdateMotion(dt,false);if(world3D!=null)world3D.SyncWorld(this,dt);return;}
         Vector2 movement=new Vector2((Input.GetKey(KeyCode.D)||Input.GetKey(KeyCode.RightArrow)?1:0)-(Input.GetKey(KeyCode.A)||Input.GetKey(KeyCode.LeftArrow)?1:0),(Input.GetKey(KeyCode.S)||Input.GetKey(KeyCode.DownArrow)?1:0)-(Input.GetKey(KeyCode.W)||Input.GetKey(KeyCode.UpArrow)?1:0));
         bool special=requestSpecial||Input.GetKeyDown(KeyCode.Space);requestSpecial=false;
         // Mouse emulation is used only when there are no real touches: avoid duplicate input on phones.
@@ -76,12 +87,14 @@ public partial class AlleyGame : MonoBehaviour {
         combat.Tick(Time.deltaTime,movement,special);
         foreach(CombatEvent e in combat.events) {
             pops.Add(new Pop{text=e.text,pos=e.pos,style=e.style});AddImpact(e);
-            if(e.style==3){shake=5;if(e.text=="전성기의 한 방")ring=1;source.PlayOneShot(specialSound,.6f);}
-            else if(e.style==1||e.style==2){shake=Mathf.Max(shake,e.text=="퍽!"?1.1f:2.6f);source.PlayOneShot(e.text=="퍽!"?hitSound:wallSound,e.text=="퍽!"?.24f:.38f);}
+            if(e.style==3){shake=5;if(e.text=="전성기의 한 방"||e.text=="부활! 폭주 개시!")ring=1;source.PlayOneShot(specialSound,.6f);}
+            else if(e.style==1||e.style==2){shake=Mathf.Max(shake,e.text=="퍽!"?1.1f:e.text=="크리티컬!"?3.2f:2.6f);source.PlayOneShot(e.text=="퍽!"?hitSound:wallSound,e.text=="퍽!"?.24f:.42f);}
             else if(e.style==4){shake=3;source.PlayOneShot(hitSound,.7f);}
+            else if(e.text.StartsWith("+"))source.PlayOneShot(hitSound,.12f);
             else if(e.text=="−1")source.PlayOneShot(hitSound,.3f);
         }
         combat.events.Clear();SettleArcade();UpdateMotion(dt,true);
+        if(world3D!=null)world3D.SyncWorld(this,dt);
     }
     AudioClip Sound(float hz,float duration) {
         int n=(int)(22050*duration);float[] data=new float[n];
@@ -113,44 +126,61 @@ public partial class AlleyGame : MonoBehaviour {
         GUI.color=color;GUI.DrawTextureWithTexCoords(target,atlas,new Rect((cell%4)*.25f,cell<4?.5f:0,uvWidth,.5f));GUI.color=Color.white;GUI.matrix=m;
     }
     void Floor(){
+        if(world3D!=null)return;
         if(stageBackgrounds!=null){GUI.color=Color.white;StageBackdrop(stage,new Rect(0,0,ViewWidth,ViewHeight));}
         else if(background!=null){GUI.color=Color.white;GUI.DrawTexture(new Rect(0,0,ViewWidth,ViewHeight),background,ScaleMode.ScaleAndCrop);}
         else Box(0,0,ViewWidth,ViewHeight,new Color(.72f,.67f,.55f));
     }
     void World(){
         Matrix4x4 old=GUI.matrix;Vector2 jitter=shake>0?new Vector2(Mathf.PerlinNoise(pulse*34,0)-.5f,Mathf.PerlinNoise(0,pulse*34)-.5f)*shake:Vector2.zero;
-        GUI.matrix=old*Matrix4x4.Translate(jitter);Floor();DrawFallenActors();
+        GUI.matrix=old*Matrix4x4.Translate(jitter);
+        if(world3D==null){
+            Floor();DrawFallenActors();
+        }
         foreach(Fighter e in combat.enemies) {
+            Vector2 ePos=ProjectPoint(e.pos,0.1f);
+            Vector2 headPos=ProjectPoint(e.pos,e.boss?2.3f:1.75f);
             if(e.windup>0) {
                 Color warning=new Color(1,.23f,.12f,.24f+Mathf.Sin(pulse*20)*.10f);
-                if(e.kind>=1){Line(e.pos,e.pos+e.aim*240,49,warning);Line(e.pos,e.pos+e.aim*240,2,Coral);}
-                else CircleAt(e.pos,e.appearance==0?111:83,warning);
+                if(e.kind>=1){
+                    Vector2 aimEnd=ProjectPoint(e.pos+e.aim*220,0.1f);
+                    Line(ePos,aimEnd,38,warning);Line(ePos,aimEnd,2.5f,Coral);
+                }else CircleAt(ePos,e.appearance==0?68:54,warning);
+                CircleAt(headPos+new Vector2(0,-14),12,Coral);
+                Text("!",headPos.x-16,headPos.y-30,32,32,19,Cream,TextAnchor.MiddleCenter,true);
             }
-            if(e.stun>0&&e.velocity.sqrMagnitude<1000)Text("✦",e.pos.x-30,e.pos.y-125,60,30,25,new Color(1,.79f,.18f),TextAnchor.MiddleCenter);
-            if(e.velocity.sqrMagnitude>20000)for(int j=1;j<4;j++)CircleAt(e.pos-e.velocity.normalized*j*15,24-j*5,new Color(1,.65f,.27f,.14f));
+            if(e.hp<e.maxHp||e.boss){
+                float w=e.boss?86:42;
+                Panel(headPos.x-w*.5f-1,headPos.y-1,w+2,8,Ink);
+                Panel(headPos.x-w*.5f,headPos.y,w*Mathf.Clamp01(e.hp/(float)e.maxHp),6,e.boss?Coral:Mint);
+            }
+            if(e.stun>0&&e.velocity.sqrMagnitude<1000)Text("✦",headPos.x-30,headPos.y-24,60,30,24,new Color(1,.79f,.18f),TextAnchor.MiddleCenter);
         }
-        if(ring>0){Ring(combat.player,185*(1-ring)+15,9*ring,new Color(1,.53f,.18f,ring));Ring(combat.player,125*(1-ring)+30,3,new Color(1,.95f,.76f,ring));}
-        drawOrder.Clear();drawOrder.AddRange(combat.enemies);drawOrder.Sort((a,b)=>a.pos.y.CompareTo(b.pos.y));
-        bool heroDrawn=false;
-        foreach(Fighter e in drawOrder){if(!heroDrawn&&e.pos.y>combat.player.y){Hero();heroDrawn=true;}Enemy(e);}
-        if(!heroDrawn)Hero();
+        Vector2 pGui=ProjectPoint(combat.player,0.6f);
+        if(ring>0){Ring(pGui,185*(1-ring)+15,9*ring,new Color(1,.53f,.18f,ring));Ring(pGui,125*(1-ring)+30,3,new Color(1,.95f,.76f,ring));}
+        if(world3D==null){
+            drawOrder.Clear();drawOrder.AddRange(combat.enemies);drawOrder.Sort((a,b)=>a.pos.y.CompareTo(b.pos.y));
+            bool heroDrawn=false;
+            foreach(Fighter e in drawOrder){if(!heroDrawn&&e.pos.y>combat.player.y){Hero();heroDrawn=true;}Enemy(e);}
+            if(!heroDrawn)Hero();
+        }
         DrawAfterimagesAndDust();
         DrawCombatText();
         GUI.matrix=old;
     }
-
-
-
-
-
-
-
 
     void Centered(System.Action draw){Matrix4x4 old=GUI.matrix;GUI.matrix=old*Matrix4x4.Translate(new Vector3((ViewWidth-540)*.5f,(ViewHeight-960)*.5f,0));draw();GUI.matrix=old;}
     void OnGUI(){
         float scale=Scale;GUI.matrix=Matrix4x4.Scale(new Vector3(scale,scale,1));
         if(home){HomeScreen();GUI.color=Color.white;return;}
         if(storyActive){DrawPrologue();GUI.color=Color.white;return;}
+        if(inGym){
+            DrawGymWorld();
+            if(stageSelect){Box(0,0,ViewWidth,ViewHeight,new Color(.02f,.03f,.05f,.92f));Centered(DrawStageSelect);}
+            else if(styleMenu){Box(0,0,ViewWidth,ViewHeight,new Color(.02f,.03f,.05f,.92f));Centered(StylePanel);}
+            else if(paused)Centered(PausePanel);
+            GUI.color=Color.white;DrawScreenTransition();return;
+        }
         Floor();
         if(!map){
             World();Header();HUD();

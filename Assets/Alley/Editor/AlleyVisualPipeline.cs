@@ -18,16 +18,33 @@ public static class AlleyVisualPipeline {
     public static void Prepare(){
         if(processing)return;processing=true;
         try{
-            string stamp="components-v7-streets:"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/HeroMotion.png").Ticks+":"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/EnemyMotion.png").Ticks+":"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/AbilityIcons.png").Ticks;
+            string stamp="components-v9-gym:"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/HeroMotion.png").Ticks+":"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/EnemyMotion.png").Ticks+":"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/AbilityIcons.png").Ticks;
             if(SessionState.GetString("AlleyVisualStamp","")==stamp)return;
-            StringBuilder report=new StringBuilder("Second Fist v7 - stage and visual asset validation\n");
-            PrepareSheet("StreetRoster",true,report);PrepareArenas(report);PrepareSheet("HeroMotion",true,report);PrepareSheet("EnemyMotion",true,report);PrepareSheet("FighterAtlas",true,report,2);PrepareSheet("AbilityIcons",false,report);
-            // Archived story assets are intentionally excluded from the arcade build.
+            StringBuilder report=new StringBuilder("Second Fist v9 - stage, gym tycoon and visual asset validation\n");
+            PrepareSheet("StreetRoster",true,report);PrepareArenas(report);PrepareGymAssets(report);PrepareSheet("HeroMotion",true,report);PrepareSheet("EnemyMotion",true,report);PrepareSheet("FighterAtlas",true,report,2);PrepareSheet("AbilityIcons",false,report);
             string[] fonts={"GothicA1-Regular","GothicA1-Bold","BlackHanSans-Regular"};
             foreach(string name in fonts){if(AssetDatabase.LoadAssetAtPath<Font>("Assets/Alley/Resources/Fonts/"+name+".ttf")==null)throw new Exception("Missing bundled font: "+name);report.AppendLine("PASS bundled font "+name);}
             report.AppendLine("NOTE enemy cells 12 and 14 are excluded from playback because their designs vary.");
             Directory.CreateDirectory("Design");File.WriteAllText("Design/visual-checks.txt",report.ToString());SessionState.SetString("AlleyVisualStamp",stamp);AssetDatabase.Refresh();Debug.Log("ALLEY_VISUAL_ASSETS_READY\n"+report);
         }finally{processing=false;}
+    }
+    static void PrepareGymAssets(StringBuilder report){
+        const string equipPath="Assets/Alley/Resources/GymEquipment.png";
+        if(File.Exists(equipPath)){
+            var eqImporter=(TextureImporter)AssetImporter.GetAtPath(equipPath);
+            if(eqImporter!=null){
+                eqImporter.textureType=TextureImporterType.Default;eqImporter.alphaIsTransparency=true;eqImporter.mipmapEnabled=false;eqImporter.wrapMode=TextureWrapMode.Clamp;eqImporter.filterMode=FilterMode.Bilinear;eqImporter.maxTextureSize=2048;eqImporter.npotScale=TextureImporterNPOTScale.None;eqImporter.textureCompression=TextureImporterCompression.Uncompressed;eqImporter.SaveAndReimport();
+                report.AppendLine("PASS GymEquipment 2x2 alpha sprite sheet imported");
+            }
+        }
+        const string bgPath="Assets/Alley/Resources/GymBackdrop.png";
+        if(File.Exists(bgPath)){
+            var bgImporter=(TextureImporter)AssetImporter.GetAtPath(bgPath);
+            if(bgImporter!=null){
+                bgImporter.textureType=TextureImporterType.Default;bgImporter.alphaIsTransparency=false;bgImporter.mipmapEnabled=false;bgImporter.wrapMode=TextureWrapMode.Clamp;bgImporter.filterMode=FilterMode.Bilinear;bgImporter.maxTextureSize=2048;bgImporter.npotScale=TextureImporterNPOTScale.None;bgImporter.textureCompression=TextureImporterCompression.Uncompressed;bgImporter.SaveAndReimport();
+                report.AppendLine("PASS GymBackdrop environment imported");
+            }
+        }
     }
     static void PrepareSheet(string name,bool pivots,StringBuilder report,int rows=4,int columns=4){
         string path="Assets/Alley/Resources/"+name+".png";
