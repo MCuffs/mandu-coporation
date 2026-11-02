@@ -12,9 +12,15 @@ public partial class AlleyGame : MonoBehaviour {
     Vector2 stickOrigin,stick; bool dragging,requestSpecial;int dragFinger=-1;
     float shake,pulse,ring,walk; int stage;bool map;
     float Scale { get { return Mathf.Min(Screen.width/540f,Screen.height/960f); } }
-    Vector2 Pointer(Vector2 screen) { float s=Scale;return new Vector2((screen.x-(Screen.width-540*s)*.5f)/s,(Screen.height-screen.y-(Screen.height-960*s)*.5f)/s); }
+    float ViewWidth { get { return Screen.width/Scale; } }
+    float ViewHeight { get { return Screen.height/Scale; } }
+    Vector2 SpecialPosition { get { return new Vector2(ViewWidth-76,ViewHeight-82); } }
+    Vector2 Pointer(Vector2 screen) { return new Vector2(screen.x/Scale,(Screen.height-screen.y)/Scale); }
     void Awake() {
         Application.targetFrameRate=60;
+#if !UNITY_EDITOR
+        Screen.SetResolution(Display.main.systemWidth,Display.main.systemHeight,FullScreenMode.FullScreenWindow);
+#endif
         font=Resources.Load<Font>("Fonts/GothicA1-Regular");
         fontBold=Resources.Load<Font>("Fonts/GothicA1-Bold");fontDisplay=Resources.Load<Font>("Fonts/BlackHanSans-Regular");
         if(font==null)font=Font.CreateDynamicFontFromOSFont(new[]{"Malgun Gothic","Arial"},24);
@@ -22,18 +28,25 @@ public partial class AlleyGame : MonoBehaviour {
         atlas=Resources.Load<Texture2D>("FighterAtlas");background=Resources.Load<Texture2D>("AlleyBackground");
         white=Texture2D.whiteTexture;disc=Circle();round=Rounded();panelStyle=new GUIStyle{border=new RectOffset(8,8,8,8),normal={background=round}};
         source=gameObject.AddComponent<AudioSource>();hitSound=Sound(155,.055f);wallSound=Sound(80,.10f);specialSound=Sound(67,.20f);
-        LoadPresentation();NewRun();
+        LoadPresentation();LoadPrologue();NewRun();
     }
     void NewRun() {
         combat=new AlleyCombat(stage);pops.Clear();map=false;ring=shake=0;dragging=false;paused=false;ResetMotion();
-        combat.AddEnemy(new Vector2(176,475));combat.AddEnemy(new Vector2(110,465));combat.AddEnemy(new Vector2(400,380));combat.AddEnemy(new Vector2(405,665),1);
+        UpdateArenaViewport(true);
+        float cx=combat.arena.center.x,cy=combat.player.y;
+        combat.AddEnemy(new Vector2(cx-94,cy-38));combat.AddEnemy(new Vector2(cx-158,cy-42));
+        combat.AddEnemy(new Vector2(cx+151,cy-121));combat.AddEnemy(new Vector2(cx+137,cy+113),1);
+        BeginPrologue();
     }
     void OnApplicationFocus(bool focused) { if(!focused){dragging=false;stick=Vector2.zero;} }
     void Update() {
         float dt=Time.unscaledDeltaTime;pulse+=dt;walk+=dt;shake=Mathf.Max(0,shake-dt*22);ring=Mathf.Max(0,ring-dt*2);
         for(int i=pops.Count-1;i>=0;i--){pops[i].life-=dt;pops[i].pos.y-=dt*29;if(pops[i].life<=0)pops.RemoveAt(i);}
         if(Input.GetKeyDown(KeyCode.Escape)&&combat.state==RunState.Fighting&&!map)paused=!paused;
+        if(Input.GetKeyDown(KeyCode.F11))ToggleFullscreen();
+        UpdateArenaViewport(false);
         AdvancePresentation(dt);
+        if(storyActive){UpdatePrologue(dt);UpdateMotion(dt,false);return;}
         if(map||paused||combat.state!=RunState.Fighting){dragging=false;stick=Vector2.zero;UpdateMotion(dt,false);return;}
         Vector2 movement=new Vector2((Input.GetKey(KeyCode.D)||Input.GetKey(KeyCode.RightArrow)?1:0)-(Input.GetKey(KeyCode.A)||Input.GetKey(KeyCode.LeftArrow)?1:0),(Input.GetKey(KeyCode.S)||Input.GetKey(KeyCode.DownArrow)?1:0)-(Input.GetKey(KeyCode.W)||Input.GetKey(KeyCode.UpArrow)?1:0));
         bool special=requestSpecial||Input.GetKeyDown(KeyCode.Space);requestSpecial=false;
@@ -42,8 +55,8 @@ public partial class AlleyGame : MonoBehaviour {
             for(int i=0;i<Input.touchCount;i++) {
                 Touch t=Input.GetTouch(i);Vector2 p=Pointer(t.position);
                 if(t.phase==TouchPhase.Began) {
-                    if((p-new Vector2(452,864)).magnitude<62)special=true;
-                    else if(!dragging&&p.y>220&&p.x>=0&&p.x<=540){dragging=true;dragFinger=t.fingerId;stickOrigin=p;}
+                    if((p-SpecialPosition).magnitude<62)special=true;
+                    else if(!dragging&&p.y>105&&p.x>=0&&p.x<=ViewWidth){dragging=true;dragFinger=t.fingerId;stickOrigin=p;}
                 }
                 if(dragging&&t.fingerId==dragFinger) {
                     if(t.phase==TouchPhase.Ended||t.phase==TouchPhase.Canceled){dragging=false;stick=Vector2.zero;}
@@ -53,8 +66,8 @@ public partial class AlleyGame : MonoBehaviour {
         } else {
             Vector2 p=Pointer(Input.mousePosition);
             if(Input.GetMouseButtonDown(0)) {
-                if((p-new Vector2(452,864)).magnitude<62)special=true;
-                else if(p.y>220&&p.y<940&&p.x>=0&&p.x<=540){dragging=true;stickOrigin=p;}
+                if((p-SpecialPosition).magnitude<62)special=true;
+                else if(p.y>105&&p.y<ViewHeight-10&&p.x>=0&&p.x<=ViewWidth){dragging=true;stickOrigin=p;}
             }
             if(dragging&&Input.GetMouseButton(0))stick=Vector2.ClampMagnitude((p-stickOrigin)/48,1);
             if(Input.GetMouseButtonUp(0)){dragging=false;stick=Vector2.zero;}
@@ -100,15 +113,8 @@ public partial class AlleyGame : MonoBehaviour {
         GUI.color=color;GUI.DrawTextureWithTexCoords(target,atlas,new Rect((cell%4)*.25f,cell<4?.5f:0,uvWidth,.5f));GUI.color=Color.white;GUI.matrix=m;
     }
     void Floor(){
-        if(background!=null){GUI.color=Color.white;GUI.DrawTexture(new Rect(0,170,540,650),background,ScaleMode.StretchToFill);}
-        else {
-            Box(0,170,540,650,new Color(.72f,.67f,.55f));
-            for(int y=200;y<820;y+=32)for(int x=-25;x<540;x+=66){Box(x+((y/32)%2)*33,y,64,30,new Color(.76f,.72f,.62f));}
-            Box(0,220,45,560,new Color(.37f,.33f,.29f));Box(495,220,45,560,new Color(.43f,.30f,.25f));
-        }
-        // Collision bounds read clearly as alley edges; dark curb lines also frame the playable floor.
-        Line(new Vector2(47,280),new Vector2(47,760),4,new Color(.17f,.22f,.22f,.65f));
-        Line(new Vector2(493,280),new Vector2(493,760),4,new Color(.17f,.22f,.22f,.65f));
+        if(background!=null){GUI.color=Color.white;GUI.DrawTexture(new Rect(0,0,ViewWidth,ViewHeight),background,ScaleMode.ScaleAndCrop);}
+        else Box(0,0,ViewWidth,ViewHeight,new Color(.72f,.67f,.55f));
     }
     void World(){
         Matrix4x4 old=GUI.matrix;Vector2 jitter=shake>0?new Vector2(Mathf.Sin(pulse*177),Mathf.Cos(pulse*141))*shake:Vector2.zero;
@@ -139,12 +145,16 @@ public partial class AlleyGame : MonoBehaviour {
 
 
 
+    void Centered(System.Action draw){Matrix4x4 old=GUI.matrix;GUI.matrix=old*Matrix4x4.Translate(new Vector3((ViewWidth-540)*.5f,(ViewHeight-960)*.5f,0));draw();GUI.matrix=old;}
     void OnGUI(){
-        float scale=Scale;GUI.matrix=Matrix4x4.TRS(new Vector3((Screen.width-540*scale)*.5f,(Screen.height-960*scale)*.5f,0),Quaternion.identity,new Vector3(scale,scale,1));
-        Box(0,0,540,960,Ink);
-        if(!map){if(combat.state==RunState.Ready)Floor();else World();Header();if(combat.state==RunState.Ready)Intro();else {HUD();if(paused)PausePanel();else if(combat.state==RunState.Choosing)Skills();else if(combat.state==RunState.Won||combat.state==RunState.Lost)Result();}}
-        else{Header();Map();}
-        GUI.color=Color.white;DrawScreenTransition();
+        float scale=Scale;GUI.matrix=Matrix4x4.Scale(new Vector3(scale,scale,1));
+        if(storyActive){DrawPrologue();GUI.color=Color.white;return;}
+        Floor();
+        if(!map){
+            World();Header();HUD();
+            if(paused)Centered(PausePanel);else if(combat.state==RunState.Choosing)Centered(Skills);else if(combat.state==RunState.Won||combat.state==RunState.Lost)Centered(Result);
+        }else Centered(Map);
+        DrawBattleReveal();GUI.color=Color.white;DrawScreenTransition();
     }
-    void OnDestroy(){Destroy(disc);Destroy(round);Destroy(hitSound);Destroy(wallSound);Destroy(specialSound);}
+    void OnDestroy(){Destroy(disc);Destroy(round);Destroy(hitSound);Destroy(wallSound);Destroy(specialSound);DestroyPrologue();}
 }

@@ -8,7 +8,7 @@
 2. Unity Hub에서 저장소 루트 폴더를 추가합니다.
 3. **Unity 2021.3.2f1**로 엽니다.
 4. `Assets/Alley/AlleyFight.unity`를 열고 Play를 누릅니다.
-5. **싸움 시작** 버튼을 누릅니다.
+5. 프롤로그가 자동으로 재생되며 마지막 대사 뒤 첫 전투가 시작됩니다.
 
 ## 조작
 
@@ -37,11 +37,11 @@
 
 Unity 메뉴에서 다음 명령을 실행할 수 있습니다.
 
-- `Second Fist > Run Gameplay Checks`: 전투 모델 검증 15개
+- `Second Fist > Run Gameplay Checks`: 전투·프롤로그 검증 22개
 - `Second Fist > Prepare Visual Assets`: 프레임 영역·발 피벗·알파·글꼴 검증
 - `Second Fist > Build Windows`: 검증 후 Windows 빌드 생성
 
-빌드 결과는 `Build/Windows-v3-polished/SecondFist.exe`에 생성됩니다. 실행 파일뿐 아니라 같은 폴더의 데이터와 DLL도 함께 필요합니다.
+빌드 결과는 `Build/Windows-v4-prologue/SecondFist.exe`에 생성됩니다. 실행 파일뿐 아니라 같은 폴더의 데이터와 DLL도 함께 필요합니다.
 
 검증 기록: [전투](Design/gameplay-checks.txt), [시각 자산](Design/visual-checks.txt), [빌드](Design/build-result.txt).
 
@@ -60,3 +60,15 @@ Unity 캐시·로컬 설정·로그·실행 파일은 Git에 포함하지 않습
 ## 이전 시제품
 
 `Assets/Scenes/FirstFight.unity`는 최초 좌우 타이밍 전투입니다. 현재 장면과 분리해 보관합니다.
+
+## 프롤로그와 전체 화면 v4
+
+팔룡회 보스 정민수의 배신과 죽음, 아들의 몸에서 눈뜨는 순간, 엄마의 절규와 분노, 정체 선언에서 첫 전투로 이어집니다.
+
+- 기본 실행은 전체 화면입니다. F11로 창 모드와 전체 화면을 전환합니다.
+- 프롤로그: 클릭/Space/Enter로 대사를 표시하거나 다음 컷으로 진행합니다. 자동 재생 및 건너뛰기도 지원합니다.
+- 전투: 상하 HUD 패널과 회색 경계선 없이 배경이 전체 화면을 채웁니다.
+- 원화 6컷에 시선 연결, 정지, 암전, 섬광, 절제된 카메라 이동을 적용한 모션 코믹입니다.
+- 정민수 독백과 핵심 선언 8줄은 임시 합성 음성입니다.
+
+[프롤로그 연출·음성 기록](Design/prologue-v4.md)

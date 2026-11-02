@@ -28,7 +28,7 @@ public partial class AlleyGame {
         shownHealth=healthTrail=100;shownCharge=100;shownXp=0;menuAge=modalAge=0;shownState=RunState.Ready;readyPresentation=true;
     }
     void AdvancePresentation(float dt){
-        dt=Mathf.Min(dt,.06f);menuAge+=dt;
+        dt=Mathf.Min(dt,.06f);menuAge+=dt;battleReveal=Mathf.Max(0,battleReveal-dt);
         if(shownState!=combat.state){shownState=combat.state;modalAge=0;if(shownState==RunState.Choosing)choiceFlash=.20f;}
         modalAge+=dt;specialFlash=Mathf.Max(0,specialFlash-dt);choiceFlash=Mathf.Max(0,choiceFlash-dt);bossBanner=Mathf.Max(0,bossBanner-dt);
         shownHealth=Mathf.Lerp(shownHealth,combat.health,1-Mathf.Exp(-dt*16));
@@ -152,8 +152,8 @@ public partial class AlleyGame {
         }
     }
     void DrawScreenTransition(){
-        if(specialFlash>0)Box(0,173,540,629,new Color(1,.90f,.65f,specialFlash*.9f));
-        if(choiceFlash>0)Box(0,173,540,787,new Color(1,.92f,.70f,choiceFlash*.65f));
-        if(menuAge<.35f)Box(0,0,540,960,new Color(Ink.r,Ink.g,Ink.b,1-EaseOut(menuAge/.35f)));
+        if(specialFlash>0)Box(0,0,ViewWidth,ViewHeight,new Color(1,.90f,.65f,specialFlash*.9f));
+        if(choiceFlash>0)Box(0,0,ViewWidth,ViewHeight,new Color(1,.92f,.70f,choiceFlash*.65f));
+        if(menuAge<.35f)Box(0,0,ViewWidth,ViewHeight,new Color(Ink.r,Ink.g,Ink.b,1-EaseOut(menuAge/.35f)));
     }
 }

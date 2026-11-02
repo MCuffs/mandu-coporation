@@ -11,17 +11,18 @@ public static class AlleyVisualPipeline {
     static AlleyVisualPipeline(){EditorApplication.delayCall+=Delayed;}
     static void Delayed(){
         if(EditorApplication.isCompiling||EditorApplication.isUpdating||EditorApplication.isPlayingOrWillChangePlaymode){EditorApplication.delayCall+=Delayed;return;}
-        if(!File.Exists("Assets/Alley/Resources/HeroMotion.png")||!File.Exists("Assets/Alley/Resources/EnemyMotion.png")||!File.Exists("Assets/Alley/Resources/AbilityIcons.png"))return;
+        if(!File.Exists("Assets/Alley/Resources/PrologueInkScenes.png")||!File.Exists("Assets/Alley/Resources/Voice/Prologue/13.mp3")||!File.Exists("Assets/Alley/Resources/HeroMotion.png")||!File.Exists("Assets/Alley/Resources/EnemyMotion.png")||!File.Exists("Assets/Alley/Resources/AbilityIcons.png"))return;
         Prepare();
     }
     [MenuItem("Second Fist/Prepare Visual Assets")]
     public static void Prepare(){
         if(processing)return;processing=true;
         try{
-            string stamp="components-v3:"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/HeroMotion.png").Ticks+":"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/EnemyMotion.png").Ticks+":"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/AbilityIcons.png").Ticks;
+            string stamp="components-v4-prologue:"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/PrologueInkScenes.png").Ticks+":"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/HeroMotion.png").Ticks+":"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/EnemyMotion.png").Ticks+":"+File.GetLastWriteTimeUtc("Assets/Alley/Resources/AbilityIcons.png").Ticks;
             if(SessionState.GetString("AlleyVisualStamp","")==stamp)return;
-            StringBuilder report=new StringBuilder("Second Fist v3 - visual asset validation\n");
+            StringBuilder report=new StringBuilder("Second Fist v4 - visual and audio asset validation\n");
             PrepareSheet("HeroMotion",true,report);PrepareSheet("EnemyMotion",true,report);PrepareSheet("AbilityIcons",false,report);
+            PreparePrologue(report);
             string[] fonts={"GothicA1-Regular","GothicA1-Bold","BlackHanSans-Regular"};
             foreach(string name in fonts){if(AssetDatabase.LoadAssetAtPath<Font>("Assets/Alley/Resources/Fonts/"+name+".ttf")==null)throw new Exception("Missing bundled font: "+name);report.AppendLine("PASS bundled font "+name);}
             report.AppendLine("NOTE enemy cells 12 and 14 are excluded from playback because their designs vary.");
@@ -62,6 +63,17 @@ public static class AlleyVisualPipeline {
             File.WriteAllText("Assets/Alley/Resources/"+name+"Pivots.json",JsonUtility.ToJson(data,true));
         }
         importer.isReadable=false;importer.SaveAndReimport();
+    }
+
+    static void PreparePrologue(StringBuilder report){
+        const string path="Assets/Alley/Resources/PrologueInkScenes.png";
+        TextureImporter importer=AssetImporter.GetAtPath(path) as TextureImporter;
+        if(importer==null)throw new Exception("Missing ink prologue artwork");
+        importer.textureType=TextureImporterType.Default;importer.alphaIsTransparency=false;importer.mipmapEnabled=false;importer.wrapMode=TextureWrapMode.Clamp;importer.filterMode=FilterMode.Bilinear;importer.maxTextureSize=2048;importer.npotScale=TextureImporterNPOTScale.None;importer.textureCompression=TextureImporterCompression.Uncompressed;importer.SaveAndReimport();
+        var texture=AssetDatabase.LoadAssetAtPath<Texture2D>(path);if(texture.width<1000||texture.height<700)throw new Exception("Prologue artwork resolution invalid");
+        report.AppendLine("PASS six-panel ink prologue atlas imported");
+        int[] indices={0,2,3,5,10,11,12,13};
+        foreach(int i in indices){string voicePath="Assets/Alley/Resources/Voice/Prologue/"+i.ToString("00")+".mp3";AudioClip clip=AssetDatabase.LoadAssetAtPath<AudioClip>(voicePath);if(clip==null||clip.length<.1f)throw new Exception("Missing narration "+i);report.AppendLine("PASS narration "+i+" imported ("+clip.length.ToString("0.00")+" seconds)");}
     }
     sealed class Component {public int x0=int.MaxValue,x1,y0=int.MaxValue,y1,count;public List<int> pixels=new List<int>();}
     static List<Component> FindComponents(Color32[] pixels,int width,int height){

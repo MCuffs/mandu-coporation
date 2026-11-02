@@ -29,6 +29,14 @@ namespace SecondFistGame {
         public int chain;
         int nextId, pendingChoices;
         public const float Left=65,Right=475,Top=295,Bottom=745;
+        public Rect arena=new Rect(Left,Top,Right-Left,Bottom-Top);
+        public void SetArena(Rect next){
+            if(next.width<160||next.height<200)throw new ArgumentException("Arena is too small");
+            Rect previous=arena;
+            player=new Vector2(next.xMin+(player.x-previous.xMin)/previous.width*next.width,next.yMin+(player.y-previous.yMin)/previous.height*next.height);
+            foreach(Fighter enemy in enemies)enemy.pos=new Vector2(next.xMin+(enemy.pos.x-previous.xMin)/previous.width*next.width,next.yMin+(enemy.pos.y-previous.yMin)/previous.height*next.height);
+            arena=next;player=new Vector2(Mathf.Clamp(player.x,arena.xMin+12,arena.xMax-12),Mathf.Clamp(player.y,arena.yMin+12,arena.yMax-12));
+        }
         public AlleyCombat(int stage=0) { this.stage=stage; }
         public void Start() { state=RunState.Fighting; }
         public Fighter AddEnemy(Vector2 pos,int kind=0) {
@@ -51,7 +59,7 @@ namespace SecondFistGame {
             movement=Vector2.ClampMagnitude(movement,1);
             moveVelocity=Vector2.MoveTowards(moveVelocity,movement*172,dt*1350);
             player+=moveVelocity*dt;
-            player=new Vector2(Mathf.Clamp(player.x,Left+12,Right-12),Mathf.Clamp(player.y,Top+12,Bottom-12));
+            player=new Vector2(Mathf.Clamp(player.x,arena.xMin+12,arena.xMax-12),Mathf.Clamp(player.y,arena.yMin+12,arena.yMax-12));
             if(movement.sqrMagnitude>.03f&&attackAnimation<=0)direction=movement.normalized;
             if(special&&charge>=100) { attackLead=0;pendingTarget=null;Special(); }
             if(attackLead>0) {
@@ -69,10 +77,10 @@ namespace SecondFistGame {
             }
             spawnClock-=dt;
             if(spawning && spawnClock<=0 && !bossSpawned && enemies.Count<9) {
-                if(kills>=18) { AddEnemy(new Vector2(270,Top+35),2); bossSpawned=true; events.Add(new CombatEvent("골목 대장 등장",new Vector2(270,390),3)); }
+                if(kills>=18) { AddEnemy(new Vector2(arena.center.x,arena.yMin+35),2); bossSpawned=true; events.Add(new CombatEvent("골목 대장 등장",new Vector2(270,390),3)); }
                 else {
-                    float x=UnityEngine.Random.value<.5f?Left+12:Right-12;
-                    float y=UnityEngine.Random.Range(Top+45,Bottom-25);
+                    float x=UnityEngine.Random.value<.5f?arena.xMin+12:arena.xMax-12;
+                    float y=UnityEngine.Random.Range(arena.yMin+45,arena.yMax-25);
                     AddEnemy(new Vector2(x,y),kills>5&&UnityEngine.Random.value<.28f?1:0);
                     spawnClock=Mathf.Max(.65f,1.25f-kills*.025f);
                 }
@@ -84,8 +92,8 @@ namespace SecondFistGame {
                 if(e.velocity.sqrMagnitude>900) {
                     e.windup=0;
                     Vector2 desired=e.pos+e.velocity*dt;
-                    bool wall=desired.x<Left||desired.x>Right||desired.y<Top||desired.y>Bottom;
-                    e.pos=new Vector2(Mathf.Clamp(desired.x,Left,Right),Mathf.Clamp(desired.y,Top,Bottom));
+                    bool wall=desired.x<arena.xMin||desired.x>arena.xMax||desired.y<arena.yMin||desired.y>arena.yMax;
+                    e.pos=new Vector2(Mathf.Clamp(desired.x,arena.xMin,arena.xMax),Mathf.Clamp(desired.y,arena.yMin,arena.yMax));
                     if(wall && e.wallCooldown<=0) {
                         e.wallCooldown=.45f; wallHits++; chain++;bestChain=Mathf.Max(bestChain,chain);comboClock=2;
                         Damage(e,1+wallSkill,"벽꿍!",1);
@@ -99,7 +107,7 @@ namespace SecondFistGame {
                     if(e.dash>0) {
                         e.dash-=dt;e.pos+=e.aim*480*dt;
                         if((player-e.pos).magnitude<52) Hurt(e.boss?18:12,e.pos);
-                        e.pos=new Vector2(Mathf.Clamp(e.pos.x,Left,Right),Mathf.Clamp(e.pos.y,Top,Bottom));
+                        e.pos=new Vector2(Mathf.Clamp(e.pos.x,arena.xMin,arena.xMax),Mathf.Clamp(e.pos.y,arena.yMin,arena.yMax));
                     }
                     else if(e.windup>0) {
                         e.windup-=dt;
@@ -174,7 +182,7 @@ namespace SecondFistGame {
             health=Mathf.Max(0,health-amount);invulnerable=.7f;
             events.Add(new CombatEvent("−"+amount,player,4));
             Vector2 push=(player-origin).normalized*15;
-            player+=push; player=new Vector2(Mathf.Clamp(player.x,Left+12,Right-12),Mathf.Clamp(player.y,Top+12,Bottom-12));
+            player+=push; player=new Vector2(Mathf.Clamp(player.x,arena.xMin+12,arena.xMax-12),Mathf.Clamp(player.y,arena.yMin+12,arena.yMax-12));
         }
     }
 }

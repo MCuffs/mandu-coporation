@@ -1,4 +1,4 @@
-Second Fist v3 - gameplay checks
+Second Fist v4 - gameplay and prologue checks
 PASS  movement respects arena bounds
 PASS  attack anticipation precedes damage
 PASS  automatic attack deals damage and knockback
@@ -14,3 +14,10 @@ PASS  boss defeat ends the run
 PASS  bruiser telegraphs charge outside basic attack range
 PASS  standing still can be punished by a charge
 PASS  moving out of a telegraphed charge avoids damage
+PASS  first input reveals dialogue before advancing
+PASS  next input advances exactly one dialogue beat
+PASS  dialogue duration respects longer voice recording
+PASS  prologue ends and hands over combat exactly once
+PASS  skip completes prologue only once
+PASS  key story dialogue preserved
+PASS  arena and movement adapt to a wide fullscreen viewport

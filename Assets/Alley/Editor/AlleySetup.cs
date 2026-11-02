@@ -36,7 +36,7 @@ public static class AlleySetup {
     static AlleyCombat Empty(){var c=new AlleyCombat();c.spawning=false;c.Start();return c;}
     [MenuItem("Second Fist/Run Gameplay Checks")]
     public static void RunChecks(){
-        StringBuilder report=new StringBuilder("Second Fist v3 - gameplay checks\n");
+        StringBuilder report=new StringBuilder("Second Fist v4 - gameplay and prologue checks\n");
         var c=Empty();for(int i=0;i<200;i++)c.Tick(.02f,new Vector2(-1,-1),false);
         Expect(Mathf.Abs(c.player.x-(AlleyCombat.Left+12))<.1f&&Mathf.Abs(c.player.y-(AlleyCombat.Top+12))<.1f,"movement respects arena bounds",report);
         c=Empty();var target=c.AddEnemy(c.player+new Vector2(65,0));c.Tick(.02f,Vector2.zero,false);
@@ -65,14 +65,30 @@ public static class AlleySetup {
         c=Empty();c.attackCooldown=100;target=c.AddEnemy(c.player+new Vector2(180,0),1);target.attack=0;c.Tick(.02f,Vector2.zero,false);
         for(int i=0;i<75;i++)c.Tick(.02f,new Vector2(0,-1),false);
         Expect(c.health==100,"moving out of a telegraphed charge avoids damage",report);
+        CheckPrologue(report);
         Directory.CreateDirectory("Design");File.WriteAllText("Design/gameplay-checks.txt",report.ToString());Debug.Log("ALLEY_CHECKS_PASSED\n"+report);
     }
+
+    static void CheckPrologue(StringBuilder report){
+        var timeline=new PrologueTimeline();for(int i=0;i<4;i++)timeline.Step(.1f);timeline.Step(0,true);
+        Expect(timeline.index==0&&timeline.textComplete,"first input reveals dialogue before advancing",report);
+        timeline.Step(.1f,true);Expect(timeline.index==1,"next input advances exactly one dialogue beat",report);
+        timeline=new PrologueTimeline();timeline.SetMinimumDuration(0,8);
+        for(int i=0;i<70;i++)timeline.Step(.1f);
+        Expect(timeline.index==0,"dialogue duration respects longer voice recording",report);
+        int transitions=0;timeline=new PrologueTimeline();for(int i=0;i<2000;i++)if(timeline.Step(.1f))transitions++;
+        Expect(timeline.finished&&transitions==1,"prologue ends and hands over combat exactly once",report);
+        timeline=new PrologueTimeline();Expect(timeline.Step(.1f,false,true)&&!timeline.Step(.1f,false,true),"skip completes prologue only once",report);
+        Expect(PrologueTimeline.Beats[6].text=="야 가서 니네 부모 모셔와."&&PrologueTimeline.Beats[13].text=="나 팔룡회 정민수다!","key story dialogue preserved",report);
+        var c=Empty();c.SetArena(new Rect(54,126,1600,734));for(int i=0;i<900;i++)c.Tick(.02f,Vector2.right,false);
+        Expect(c.player.x<=c.arena.xMax-11&&c.player.x>1200,"arena and movement adapt to a wide fullscreen viewport",report);
+    }
     [MenuItem("Second Fist/Build Windows")]
-    static void Build(){
-        AlleyVisualPipeline.Prepare();RunChecks();PlayerSettings.productName="Second Fist - Motion Edition";Directory.CreateDirectory("Build/Windows-v3-polished");
-        BuildReport result=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{ScenePath},locationPathName="Build/Windows-v3-polished/SecondFist.exe",target=BuildTarget.StandaloneWindows64,options=BuildOptions.None});
+    public static void Build(){
+        AlleyVisualPipeline.Prepare();RunChecks();PlayerSettings.productName="Second Fist - Prologue";PlayerSettings.fullScreenMode=FullScreenMode.FullScreenWindow;PlayerSettings.defaultIsNativeResolution=true;Directory.CreateDirectory("Build/Windows-v4-prologue");
+        BuildReport result=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{ScenePath},locationPathName="Build/Windows-v4-prologue/SecondFist.exe",target=BuildTarget.StandaloneWindows64,options=BuildOptions.None});
         File.WriteAllText("Design/build-result.txt",result.summary.result+"\nErrors: "+result.summary.totalErrors+"\nBytes: "+result.summary.totalSize);
-        Directory.CreateDirectory("Build/Windows-v3-polished/Licenses");foreach(string license in Directory.GetFiles("Design/Licenses","*.txt"))File.Copy(license,"Build/Windows-v3-polished/Licenses/"+Path.GetFileName(license),true);
+        Directory.CreateDirectory("Build/Windows-v4-prologue/Licenses");foreach(string license in Directory.GetFiles("Design/Licenses","*.txt"))File.Copy(license,"Build/Windows-v4-prologue/Licenses/"+Path.GetFileName(license),true);
         if(result.summary.result!=BuildResult.Succeeded)throw new Exception("Build failed");Debug.Log("ALLEY_BUILD_SUCCEEDED");
     }
 }
