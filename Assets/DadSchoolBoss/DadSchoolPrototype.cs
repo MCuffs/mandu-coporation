@@ -6,8 +6,16 @@ using SecondFistGame;
 public sealed partial class DadSchoolPrototype : MonoBehaviour
 {
     public const float Width = 540, Height = 960;
-    public const float RunLimit = 180;
     public AlleyCombat Combat { get; private set; }
+    public DadProgress Progress { get; private set; }
+    public StageReward LastReward { get; private set; }
+    public int PlayingStage { get; private set; }
+    public float TimeLimit { get { return Director != null ? Director.Plan.timeLimit : 60; } }
+    static readonly string[] BossNames = { "학교 짱", "급식실 실세", "체육 선생님" };
+    static readonly string[] BossBanners = { "15년째 유급생 학교 짱 등장!", "30년째 급식 조리, 급식실 실세 등장!", "만년 기간제 체육 선생님 등장!" };
+    static readonly string[] EliteNames = { "왕 껌 짱", "왕 쟁반 짱", "왕 의자 짱" };
+    static readonly string[] UpgradeIcons = { "up_fist", "up_hp", "up_combo", "up_launch" };
+    float touchClock;
     public bool Home { get; private set; } = true;
     public bool Paused { get; private set; }
     public int BestChain { get; private set; }
@@ -40,13 +48,28 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
     static readonly Color Green = new Color(.32f, .48f, .36f);
     static readonly Color Yellow = new Color(1f, .78f, .15f);
     static readonly Color Red = new Color(.78f, .22f, .15f);
-    static readonly string[] SkillNames = { "사물함까지 가라", "친구 따라 교무실", "잠깐 반성해", "아빠 아직 빠르다", "도시락 한 입", "잔돈도 챙겨" };
+    static readonly string[] SkillNames = { "사물함까지 가라", "친구 따라 날아가", "잠깐 반성해", "아빠 아직 빠르다", "도시락 한 입", "잔돈도 챙겨" };
     static readonly string[] SkillEffects = { "벽 충돌 피해 +1", "충돌 전달 능력 강화", "벽 충돌 후 기절 연장", "자동 공격 간격 단축", "즉시 체력 15 회복\n제압할 때 체력 회복", "코인 흡수 범위 증가\n코인 보상 증가" };
     public Rect PlayArea { get { return new Rect(64, 240, 412, 520); } }
 
     void Awake()
     {
-        Application.targetFrameRate = 60;
+        Application.targetFrameRate = 60; LoadResources(); ReloadProgress();
+        Progress = new DadProgress(DadEconomy.Load(), DadProgress.DefaultPath);
+        Progress.AccrueIdle(System.DateTime.UtcNow); Progress.Persist();
+    }
+    // Tests and audits swap in a throwaway save so they never touch the player's progress.
+    public void UseProgress(DadProgress progress) { Progress = progress; }
+    void PersistNow() { if (Progress == null) return; Progress.Touch(System.DateTime.UtcNow); try { Progress.Persist(); } catch (System.Exception e) { Debug.LogWarning("Save failed: " + e.Message); } }
+    // Runtime-built frames and clips do not survive a script reload while playing in the editor; rebuild them if lost.
+    bool ResourcesLost { get { return art == null || heroFrames == null || enemyFrames == null || hitClip == null || wallClip == null || disc == null || audioSource == null || music == null; } }
+    DadArt art;
+    AudioSource music;
+    float walkPhase, specialPose, coinSoundClock;
+    readonly HashSet<int> dashing = new HashSet<int>();
+    bool NewArt { get { return art != null && art.HasCharacters; } }
+    void LoadResources()
+    {
         hero = LoadArt("Hero", out heroFrames);
         enemies = LoadArt("Enemies", out enemyFrames);
         arena = Resources.Load<Texture2D>("DadV2/Arena");
@@ -59,9 +82,12 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
         for (int y = 0; y < 64; y++) for (int x = 0; x < 64; x++)
             pixels[y * 64 + x] = new Color(1, 1, 1, Mathf.Clamp01(32 - Vector2.Distance(new Vector2(x, y), new Vector2(31.5f, 31.5f))));
         disc.SetPixels(pixels); disc.Apply();
-        audioSource = gameObject.AddComponent<AudioSource>();
+        audioSource = GetComponent<AudioSource>(); if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
         hitClip = MakeSound(150, .065f); wallClip = MakeSound(75, .13f);
-        ReloadProgress();
+        art = DadArt.Load();
+        AudioSource[] sources = GetComponents<AudioSource>();
+        music = sources.Length > 1 ? sources[1] : gameObject.AddComponent<AudioSource>();
+        music.loop = true; music.volume = .32f; music.playOnAwake = false;
         if (Camera.main != null) Camera.main.backgroundColor = Ink;
     }
 
@@ -153,16 +179,36 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
     static void Enqueue(int p, int label, Color32[] pixels, int[] labels, int[] queue, ref int tail)
     { if (labels[p] == 0 && pixels[p].a >= 8) { labels[p] = label; queue[tail++] = p; } }
 
-    public void StartRun()
+    public void StartRun() { StartRun(Progress.Save.currentStage); }
+    // Plays any unlocked stage (replays included); locked stages fall back to the furthest unlocked one.
+    public void StartRun(int stage) { StartStage(Mathf.Clamp(stage, 1, Progress.Save.bestStage)); }
+    public void StartStage(int stage)
     {
+        stage = Mathf.Clamp(stage, 1, Progress.Eco.TotalStages);
+        var plan = StagePlan.For(stage, Progress.Eco);
+        PlayingStage = stage; LastReward = null;
         Combat = new AlleyCombat(0); Combat.SetArena(PlayArea);
         Combat.hazardSpawnClock = 9999; // Environmental readability first; no random explosive barrels.
         Combat.player = new Vector2(270, 570);
         ConfigureGear(Combat, Gear);
-        Director = new SchoolRunDirector(); Director.Begin(Combat); ResetJuice();
+        ApplyPower(Combat, Progress, plan);
+        Director = new SchoolRunDirector(); Director.Begin(Combat, plan); ResetJuice();
         Combat.Start(); Home = false; Paused = false; resultSaved = false;
         dragging = false; finger = -1; stick = Vector2.zero; specialRequested = false;
-        popups.Clear(); banner = "드래그로 다가가세요 · 펀치는 자동!"; bannerTime = 2.5f; resultReason = "";
+        popups.Clear(); resultReason = ""; bannerTime = 2.5f;
+        banner = plan.lesson == 1 ? "드래그로 다가가세요 · 펀치는 자동!" : plan.floorBoss ? plan.Label + "  층 보스전!" : plan.midBoss ? plan.Label + "  " + EliteNames[Mathf.Clamp(plan.floor - 1, 0, 2)] + " 출현!" : plan.Label + "  출발!  적 " + plan.WaveTotal + "명";
+    }
+    // Recommended power vs dad's power stretches enemy HP and the hits dad takes; two upgrades also change the feel.
+    public static void ApplyPower(AlleyCombat combat, DadProgress progress, StagePlan plan)
+    {
+        ApplyRatio(combat, progress.Eco, plan.required / progress.EffectivePower(plan.stage));
+        combat.hasteBonus = Mathf.Min(.3f, progress.Save.upgrades[2] * .01f);
+        combat.punchKnockbackMultiplier *= 1 + Mathf.Min(.6f, progress.Save.upgrades[3] * .02f);
+    }
+    public static void ApplyRatio(AlleyCombat combat, DadEconomy eco, float requiredOverPower)
+    {
+        combat.enemyHpScale = eco.combatHpBase * Mathf.Clamp(Mathf.Pow(requiredOverPower, eco.combatHpExponent), eco.combatScaleMin, eco.combatScaleMax);
+        combat.incomingDamageScale = eco.combatDamageBase * Mathf.Clamp(Mathf.Pow(requiredOverPower, eco.combatDamageExponent), eco.combatScaleMin, eco.combatScaleMax);
     }
 
     public void SelectGear(int value)
@@ -192,6 +238,11 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
     }
     void Update()
     {
+        if (ResourcesLost) LoadResources();
+        touchClock += Time.unscaledDeltaTime;
+        if (touchClock > 30) { touchClock = 0; PersistNow(); }   // time spent playing must not count as offline time
+        specialPose = Mathf.Max(0, specialPose - Time.unscaledDeltaTime); coinSoundClock = Mathf.Max(0, coinSoundClock - Time.unscaledDeltaTime);
+        UpdateMusic();
         float dt = Mathf.Min(Time.unscaledDeltaTime, .1f); clock += dt;
         shake = Mathf.Max(0, shake - dt * 25); bannerTime = Mathf.Max(0, bannerTime - dt);
         for (int i = popups.Count - 1; i >= 0; i--) { popups[i].life -= dt; popups[i].position.y -= dt * 38; if (popups[i].life <= 0) popups.RemoveAt(i); }
@@ -206,16 +257,22 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
         Vector2 movement = stick + new Vector2(Input.GetAxisRaw("Horizontal"), -Input.GetAxisRaw("Vertical"));
         RememberEnemies();
         Combat.Tick(dt, movement, specialRequested || Input.GetKeyDown(KeyCode.Space)); specialRequested = false;
+        walkPhase += Combat.moveVelocity.magnitude * dt / 38f;   // one walk frame per 38 px travelled keeps the feet planted
+        foreach (Fighter f in Combat.enemies) { if (f.dash > 0) { if (dashing.Add(f.id)) PlaySfx("sfx_chair_dash", .55f); } else dashing.Remove(f.id); }
         int oldLesson = Director.Lesson;
         Director.Tick(Combat); UpdateJuice(dt);
-        if (Director.Lesson > oldLesson) { banner = Director.Lesson == 1 ? "펀치 성공! 이번엔 벽을 노려보세요" : Director.Lesson == 2 ? "벽꿍 성공! 적 둘을 일렬로!" : "연쇄 성공! 이제 감 잡았죠?"; bannerTime = 2.5f; }
-        if (Combat.elapsed >= RunLimit && Combat.state == RunState.Fighting) { Combat.health = 0; Combat.state = RunState.Lost; resultReason = "수업 종이 울렸습니다!"; }
+        if (Director.Lesson > oldLesson && Director.Plan.lesson > 0) { banner = Director.Lesson == 1 ? "펀치 성공! 다음엔 벽을 노려보세요" : Director.Lesson == 2 ? "벽꿍 성공! 다음엔 적 둘을 일렬로!" : "연쇄 성공! 이제 감 잡았죠?"; bannerTime = 2.5f; }
+        if (Combat.elapsed >= TimeLimit && Combat.state == RunState.Fighting) { Combat.health = 0; Combat.state = RunState.Lost; resultReason = "수업 종이 울렸습니다!"; }
         foreach (CombatEvent e in Combat.events)
         {
             ImpactJuice(e);
             if (e.text == "쟁반 짱 등장") { banner = "쟁반 짱!  위아래나 뒤에서 때리세요"; bannerTime = 2.8f; }
-            if (e.text == "골목 대장 등장") { banner = "학교 짱 등장!  졸개로 맞히세요"; bannerTime = 2.5f; }
+            if (e.text == "골목 대장 등장") { banner = BossBanners[Mathf.Clamp(Director.Plan.floor - 1, 0, 2)]; bannerTime = 2.5f; }
+            if (e.text == "왕 짱 등장") { banner = EliteNames[Mathf.Clamp(Director.Plan.floor - 1, 0, 2)] + " 출현!  벽으로 몰아붙이세요"; bannerTime = 2.5f; }
+            if (e.text.StartsWith("다음 무리")) { banner = e.text + "  몰려온다!"; bannerTime = 1.4f; }
             if (e.text == "대장 광폭화!!") { banner = "학교 짱이 제대로 삐졌습니다"; bannerTime = 2; }
+            if (e.text == "전성기의 한 방" || e.text == "엄마한테 전화한다!") specialPose = .45f;
+            if (e.style == 0 && e.text.StartsWith("+") && coinSoundClock <= 0) { coinSoundClock = .09f; PlaySfx("sfx_coin", .3f); }
             if (e.style > 0)
             {
                 string text = e.text == "전성기의 한 방" ? "아빠 화났다!!" : e.text == "BOSS DOWN" ? "도시락 배달 완료!" : e.text;
@@ -223,8 +280,7 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
                 shake = Mathf.Max(shake, e.style >= 2 ? 4 : 2);
                 bool wallImpact = e.text.StartsWith("벽꿍") || e.text.StartsWith("폭파벽");
                 bool clang = e.text == "쟁반 막기!" || e.text == "팅!" || e.text == "쟁반 박살!";
-                audioSource.pitch = clang ? 1.75f : wallImpact ? .8f : 1 + Mathf.Min(Combat.chain, 6) * .045f;
-                audioSource.PlayOneShot(wallImpact || e.style >= 2 ? wallClip : hitClip, wallImpact ? .34f : .18f);
+                PlayEventSound(e, wallImpact, clang);
             }
         }
         Combat.events.Clear(); SaveResult();
@@ -237,8 +293,17 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
         if (Combat.state == RunState.Won) Wins++;
         PlayerPrefs.SetInt("DadV2.BestChain", BestChain); PlayerPrefs.SetInt("DadV2.Wins", Wins);
         PlayerPrefs.SetInt("DadV2.TotalWallHits", TotalWallHits); PlayerPrefs.Save();
+        LastReward = Progress.ApplyResult(PlayingStage, Combat.state == RunState.Won, Combat.health / Combat.maxHealth, Combat.bestChain);
+        PlaySfx(Combat.state == RunState.Won ? "jingle_win" : "jingle_lose", .8f);
+        PersistNow();
     }
-    void OnApplicationFocus(bool focused) { if (!focused) { dragging = false; stick = Vector2.zero; if (!Home && Combat != null && Combat.state == RunState.Fighting) Paused = true; } }
+    void OnApplicationFocus(bool focused)
+    {
+        if (!focused) { dragging = false; stick = Vector2.zero; if (!Home && Combat != null && Combat.state == RunState.Fighting) Paused = true; PersistNow(); }
+        else if (Progress != null) { Progress.AccrueIdle(System.DateTime.UtcNow); PersistNow(); }
+    }
+    void OnApplicationPause(bool paused) { if (paused) PersistNow(); else if (Progress != null) Progress.AccrueIdle(System.DateTime.UtcNow); }
+    void OnApplicationQuit() { PersistNow(); }
     void OnDestroy()
     {
         if (disc != null) Destroy(disc); if (hitClip != null) Destroy(hitClip); if (wallClip != null) Destroy(wallClip);
@@ -261,7 +326,9 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
         Panel(new Rect(r.x, r.y + 5, r.width, r.height), Ink); Panel(r, enabled ? c : new Color(.6f, .6f, .55f));
         Text(r, s, size, Ink, true, TextAnchor.MiddleCenter);
         bool previous = GUI.enabled; GUI.enabled = previous && enabled;
-        bool clicked = GUI.Button(r, GUIContent.none, GUIStyle.none); GUI.enabled = previous; return clicked;
+        bool clicked = GUI.Button(r, GUIContent.none, GUIStyle.none); GUI.enabled = previous;
+        if (clicked) PlaySfx("sfx_button", .45f);
+        return clicked;
     }
     void Bar(Rect r, float value, Color c) { Box(r, Ink); Box(new Rect(r.x + 2, r.y + 2, (r.width - 4) * Mathf.Clamp01(value), r.height - 4), c); }
     void Ellipse(Vector2 center, float w, float h, Color c) { GUI.color = c; GUI.DrawTexture(new Rect(center.x - w / 2, center.y - h / 2, w, h), disc); GUI.color = Color.white; }
@@ -287,6 +354,7 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
     }
     void OnGUI()
     {
+        if (ResourcesLost) LoadResources();
         Matrix4x4 previous = GUI.matrix;
         GUI.matrix = Matrix4x4.TRS(new Vector3(Offset.x, Offset.y, 0), Quaternion.identity, Vector3.one * ViewScale);
         Box(new Rect(0, 0, Width, Height), Paper);
@@ -295,28 +363,50 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
     }
     void Backdrop()
     {
-        if (arena != null) GUI.DrawTexture(new Rect(0, 140, Width, 660), arena, ScaleMode.StretchToFill);
+        // v5 backgrounds are full 540x960 layouts whose floor matches PlayArea exactly (asset guide); older art is a cropped strip.
+        int floor = Home || Director == null ? Progress.Eco.Floor(Progress.Save.currentStage) : Director.Plan.floor;
+        Texture2D bg = art != null ? art.Background(floor) : null;
+        if (bg != null) GUI.DrawTexture(new Rect(0, 0, Width, Height), bg, ScaleMode.StretchToFill);
+        else if (arena != null) GUI.DrawTexture(new Rect(0, 140, Width, 660), arena, ScaleMode.StretchToFill);
         else Box(new Rect(0, 140, Width, 660), new Color(.68f, .69f, .58f));
     }
+    bool HasBackground { get { return art != null && art.backgrounds.Count > 0; } }
     void DrawHome()
     {
         Backdrop(); Box(new Rect(0, 0, Width, 350), Paper);
-        Text(new Rect(24, 18, 492, 35), "도시락 배달 갔다가 학교를 접수했다", 18, Green);
+        Text(new Rect(24, 18, 492, 35), "아들 학교를 점거한 건 졸업 못 한 아저씨들", 18, Green);
         Text(new Rect(23, 66, 500, 250), "아빠가\n학교 짱을\n너무 잘 잡음", 55, Ink, true);
         Ellipse(new Vector2(265, 702), 220, 38, new Color(0, 0, 0, .2f));
-        Sprite(hero, heroFrames, 0, new Vector2(267, 700), 375, false);
+        if (NewArt) DrawCharacter("dad", "idle", Mathf.FloorToInt(clock / .6f), new Vector2(267, 700), 330, false);
+        else Sprite(hero, heroFrames, 0, new Vector2(267, 700), 375, false);
+        DadSave save = Progress.Save; int stage = save.currentStage;
+        float power = Progress.EffectivePower(stage), required = Progress.Eco.RequiredPower(stage);
+        Icon("icon_coin", new Rect(22, 300, 32, 32)); Text(new Rect(58, 300, 140, 34), Mathf.FloorToInt((float)save.coins).ToString("N0"), 20, Ink, true);
+        Icon("icon_lunchbox", new Rect(196, 300, 32, 32)); Text(new Rect(232, 300, 80, 34), save.lunchboxes.ToString(), 20, Ink, true);
+        Text(new Rect(312, 300, 204, 34), "전투력 " + Mathf.RoundToInt(power).ToString("N0"), 20, Ink, true, TextAnchor.MiddleRight);
+        if (Progress.HasIdleReward && Button(new Rect(318, 362, 198, 74), "방치 보상 받기\n코인 " + Mathf.FloorToInt((float)save.pendingIdleCoins).ToString("N0") + " · 도시락 " + save.pendingIdleBoxes, Green, true, 17)) { Progress.ClaimIdle(); PersistNow(); PlaySfx("sfx_coin", .7f); }
         Panel(new Rect(25, 718, 490, 57), Paper);
-        Text(new Rect(37, 720, 466, 50), "최고 " + BestChain + "연쇄   /   배달 성공 " + Wins + "회", 21, Ink, false, TextAnchor.MiddleCenter);
-        if (Button(new Rect(25, 795, 490, 66), "도시락 배달 출발!", Yellow, true, 29)) StartRun();
-        if (Button(new Rect(25, 882, 490, 48), "아빠 장비  ·  " + GearName, Paper, true, 21)) gearPanel = true;
+        Text(new Rect(37, 720, 466, 50), Progress.Eco.Label(stage) + "  " + StagePlan.FloorNames[Mathf.Clamp(Progress.Eco.Floor(stage) - 1, 0, 2)] + "   ·   권장 " + Mathf.RoundToInt(required).ToString("N0") + (power < required ? "  (부족!)" : ""), 20, power < required ? Red : Ink, true, TextAnchor.MiddleCenter);
+        if (Button(new Rect(25, 795, 490, 66), Progress.Eco.Label(stage) + " 출발!", Yellow, true, 29)) StartRun();
+        if (Button(new Rect(25, 882, 490, 48), "아빠 장비 · 강화  ·  " + GearName, Paper, true, 20)) gearPanel = true;
         if (gearPanel)
         {
-            Box(new Rect(0, 0, Width, Height), new Color(0, 0, 0, .72f)); Panel(new Rect(25, 160, 490, 650), Paper);
-            Text(new Rect(45, 178, 450, 70), "아빠의 준비물", 35, Ink, true);
-            if (Button(new Rect(45, 270, 450, 95), "고무 슬리퍼\n날리는 힘 +25% · 벽 피해 +1", Gear == 0 ? Yellow : Color.white, true, 21)) SelectGear(0);
-            if (Button(new Rect(45, 390, 450, 95), ChainGearUnlocked ? "튼튼한 도시락\n처음부터 충돌 전달 강화" : "튼튼한 도시락  [잠김]\n3연쇄 또는 첫 배달 성공", Gear == 1 ? Yellow : Color.white, ChainGearUnlocked, 21)) SelectGear(1);
-            if (Button(new Rect(45, 510, 450, 110), PhoneGearUnlocked ? "폴더폰\n필살기가 공포 파동으로 변경 · 체력 +6\n넓게 밀기·돌진 취소·짱 겁먹음 / 폭주 없음" : "폴더폰  [잠김]\n누적 벽꿍 " + TotalWallHits + " / " + PhoneWallGoal + "회", Gear == 2 ? Yellow : Color.white, PhoneGearUnlocked, 20)) SelectGear(2);
-            if (Button(new Rect(45, 710, 450, 60), "준비 완료", Green)) gearPanel = false;
+            Box(new Rect(0, 0, Width, Height), new Color(0, 0, 0, .72f)); Panel(new Rect(25, 120, 490, 760), Paper);
+            Text(new Rect(45, 132, 450, 50), "아빠의 준비물", 30, Ink, true);
+            if (Button(new Rect(45, 186, 450, 74), "고무 슬리퍼\n날리는 힘 +25% · 벽 피해 +1", Gear == 0 ? Yellow : Color.white, true, 19)) SelectGear(0);
+            if (Button(new Rect(45, 272, 450, 74), ChainGearUnlocked ? "튼튼한 도시락\n처음부터 충돌 전달 강화" : "튼튼한 도시락  [잠김]\n3연쇄 또는 첫 배달 성공", Gear == 1 ? Yellow : Color.white, ChainGearUnlocked, 19)) SelectGear(1);
+            if (Button(new Rect(45, 358, 450, 92), PhoneGearUnlocked ? "폴더폰\n필살기가 공포 파동으로 변경 · 체력 +6\n넓게 밀기·돌진 취소·짱 겁먹음 / 폭주 없음" : "폴더폰  [잠김]\n누적 벽꿍 " + TotalWallHits + " / " + PhoneWallGoal + "회", Gear == 2 ? Yellow : Color.white, PhoneGearUnlocked, 18)) SelectGear(2);
+            // Temporary upgrade panel until the real upgrade screen (plan v5, step 5).
+            Text(new Rect(45, 466, 450, 36), "강화  ·  코인 " + Mathf.FloorToInt((float)Progress.Save.coins).ToString("N0") + "  ·  다음 " + Mathf.CeilToInt((float)Progress.NextUpgradeCost).ToString("N0"), 20, Ink, true);
+            for (int i = 0; i < DadProgress.StatCount; i++)
+            {
+                Rect r = new Rect(45 + (i % 2) * 230, 508 + (i / 2) * 76, 220, 64);
+                bool upgraded = Button(r, "     " + DadProgress.StatNames[i] + "  Lv." + Progress.Save.upgrades[i], Progress.Save.coins >= Progress.NextUpgradeCost ? Yellow : Color.white, Progress.Save.coins >= Progress.NextUpgradeCost, 20);
+                Icon(UpgradeIcons[i], new Rect(r.x + 10, r.y + 8, 48, 48));
+                if (upgraded && Progress.TryUpgrade(i)) PersistNow();
+            }
+            if (Button(new Rect(45, 670, 450, 56), "도시락 모두 열기 (" + Progress.Save.lunchboxes + ")  ·  장비 효과 ×" + Progress.GearMultiplier.ToString("F2"), Progress.Save.lunchboxes > 0 ? Yellow : Color.white, Progress.Save.lunchboxes > 0, 18)) { Progress.OpenAllLunchboxes(); PersistNow(); PlaySfx("sfx_box_common", .8f); }
+            if (Button(new Rect(45, 792, 450, 60), "준비 완료", Green)) gearPanel = false;
         }
     }
     void DrawBattle()
@@ -325,10 +415,14 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
         Matrix4x4 stageMatrix = GUI.matrix;
         GUI.matrix *= Matrix4x4.Translate(new Vector3(Mathf.Sin(clock * 61) * shake, Mathf.Cos(clock * 49) * shake * .5f, 0));
         Rect a = PlayArea;
-        Line(new Vector2(a.xMin, a.yMin), new Vector2(a.xMin, a.yMax), 5, Green);
-        Line(new Vector2(a.xMax, a.yMin), new Vector2(a.xMax, a.yMax), 5, Green);
-        Line(new Vector2(a.xMin, a.yMax), new Vector2(a.xMax, a.yMax), 3, Green);
-        DrawLockers(); DrawCorpses();
+        if (!HasBackground)
+        {
+            Line(new Vector2(a.xMin, a.yMin), new Vector2(a.xMin, a.yMax), 5, Green);
+            Line(new Vector2(a.xMax, a.yMin), new Vector2(a.xMax, a.yMax), 5, Green);
+            Line(new Vector2(a.xMin, a.yMax), new Vector2(a.xMax, a.yMax), 3, Green);
+            DrawLockers();
+        }
+        DrawCorpses();
         foreach (Fighter e in Combat.enemies)
         {
             if (e.windup > 0)
@@ -357,18 +451,27 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
                 float bob = pose == 1 ? 3 : 0;
                 Vector2 shape = Combat.attackLead > 0 ? new Vector2(.92f, 1.035f) : pose == 2 ? new Vector2(1.09f, .96f) : pose == 3 ? new Vector2(.97f, 1.02f) : Vector2.one;
                 float lean = Combat.attackLead > 0 ? -Combat.direction.x * 9 : Combat.playerReaction > 0 ? -9 : 0;
-                Sprite(hero, heroFrames, pose, actor.feet - new Vector2(0, bob), 155, Combat.direction.x < -.1f, lean, Combat.invulnerable > 0 && Mathf.Sin(clock * 35) > .3f, shape);
+                bool blink = Combat.invulnerable > 0 && Mathf.Sin(clock * 35) > .3f;
+                if (NewArt) { int index; string action = DadAction(out index); DrawCharacter("dad", action, index, actor.feet, DadHeight, Combat.direction.x < -.1f, lean * .5f, blink); }
+                else Sprite(hero, heroFrames, pose, actor.feet - new Vector2(0, bob), 155, Combat.direction.x < -.1f, lean, blink, shape);
                 if (Combat.attackLead > 0) { Vector2 end = actor.feet + Combat.direction * 80; Line(actor.feet, end, 4, Yellow); Ellipse(end, 12, 8, Yellow); }
             }
             else
             {
-                float size = e.boss ? 205 : e.kind == 1 ? 165 : 142;
+                float size = BodySize(e);
                 Ellipse(actor.feet, e.boss ? 90 : 50, 14, new Color(0, 0, 0, .22f));
                 int frame = EnemyFrame(e);
                 float bob = e.locomotion.magnitude > 20 ? Mathf.Sin(clock * 11 + e.id) * 2 : 0;
                 bool wallSquash = e.wallCooldown > .18f;
                 Vector2 shape = wallSquash ? new Vector2(1.22f, .70f) : e.reaction > 0 ? new Vector2(.9f, 1.1f) : e.windup > 0 ? new Vector2(1.07f, .94f) : Vector2.one;
-                Sprite(enemies, enemyFrames, frame, actor.feet - new Vector2(0, e.lift + bob), size, e.facing > 0, e.reaction > 0 ? Mathf.Clamp(e.velocity.x * .04f, -32, 32) : e.windup > 0 ? -e.facing * 8 : 0, e.flash > 0, shape);
+                float tilt = e.reaction > 0 ? Mathf.Clamp(e.velocity.x * .04f, -32, 32) : e.windup > 0 ? -e.facing * 8 : 0;
+                if (NewArt)
+                {
+                    int index; string action = EnemyAction(e, out index);
+                    // Real frames carry the pose; keep only the wall squash as an extra impact beat.
+                    DrawCharacter(EnemyId(e), action, index, actor.feet - new Vector2(0, e.lift), StandHeight(e), e.facing > 0, action == "fly" ? Mathf.Clamp(-e.velocity.x * .03f, -25, 25) : 0, e.flash > 0, wallSquash ? new Vector2(1.15f, .82f) : (Vector2?)null);
+                }
+                else Sprite(enemies, enemyFrames, frame, actor.feet - new Vector2(0, e.lift + bob), size, e.facing > 0, tilt, e.flash > 0, shape);
                 float front = actor.feet.x + e.facing * size * .21f, chest = actor.feet.y - e.lift - bob;
                 if (e.shield)
                 {
@@ -383,6 +486,7 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
                     Vector2 dent = new Vector2(front, chest - size * .5f);
                     Line(dent - new Vector2(8, 12), dent + new Vector2(5, -2), 3, Ink); Line(dent + new Vector2(5, -2), dent - new Vector2(6, -12), 3, Ink);
                 }
+                DrawNameTag(e, actor.feet, size);
                 if (e.hp < e.maxHp && !e.boss) Bar(new Rect(e.pos.x - 28, e.pos.y - size - 14, 56, 7), e.hp / (float)e.maxHp, Red);
                 if (e.groggy > 0)
                 {
@@ -396,20 +500,21 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
         foreach (Popup p in popups) Text(new Rect(p.position.x - 130, p.position.y, 260, 45), p.text, p.style >= 2 ? 28 : 21, p.style >= 2 ? Red : Ink, true, TextAnchor.MiddleCenter);
         GUI.matrix = stageMatrix;
         Panel(new Rect(0, 0, Width, 145), Paper);
-        Text(new Rect(18, 8, 390, 35), "1층 복도  /  도시락 배달", 24, Ink, true);
+        Text(new Rect(18, 8, 420, 35), Director.Plan.Label + "  /  " + Director.Plan.FloorName + (Director.Plan.lesson > 0 ? "  ·  연습" : ""), 24, Ink, true);
         if (Button(new Rect(454, 13, 68, 43), "정지", Color.white, true, 18)) { Paused = true; dragging = false; stick = Vector2.zero; }
         Bar(new Rect(20, 60, 500, 23), Combat.health / Combat.maxHealth, Combat.health < 30 ? Red : Green);
         Text(new Rect(24, 59, 490, 24), "아빠 체력  " + Mathf.CeilToInt(Combat.health) + " / " + Combat.maxHealth, 14, Color.white);
-        Fighter boss = Combat.enemies.Find(e => e.boss);
+        Fighter boss = Director.Key != null && Combat.enemies.Contains(Director.Key) ? Director.Key : null;
         if (boss != null)
         {
             bool groggy = boss.groggy > 0;
-            Text(new Rect(20, 93, 90, 36), "학교 짱", 20, Red, true);
+            int floorIndex = Mathf.Clamp(Director.Plan.floor - 1, 0, 2);
+            Text(new Rect(20, 93, 90, 36), boss.boss ? BossNames[floorIndex] : EliteNames[floorIndex], boss.boss && floorIndex == 0 ? 20 : 15, Red, true);
             Bar(new Rect(106, 100, 318, 22), boss.hp / (float)boss.maxHp, groggy ? Yellow : Red);
             Text(new Rect(106, 99, 318, 24), groggy ? "그로기!  벽으로 날려라" : boss.enraged ? "광폭화" : "", 14, groggy ? Ink : Color.white, true, TextAnchor.MiddleCenter);
-            Text(new Rect(430, 93, 90, 36), Mathf.CeilToInt(Mathf.Max(0, RunLimit - Combat.elapsed)) + "초", 20, Ink, false, TextAnchor.MiddleRight);
+            Text(new Rect(430, 93, 90, 36), Mathf.CeilToInt(Mathf.Max(0, TimeLimit - Combat.elapsed)) + "초", 20, Ink, false, TextAnchor.MiddleRight);
         }
-        else Text(new Rect(20, 93, 500, 36), "제압 " + Combat.kills + "/" + Combat.targetKills + "   벽꿍 " + Combat.wallHits + "   " + Mathf.CeilToInt(Mathf.Max(0, RunLimit - Combat.elapsed)) + "초", 20);
+        else Text(new Rect(20, 93, 500, 36), (Director.Plan.midBoss || Director.Plan.floorBoss ? "곧 등장" : "남은 적 " + Mathf.Max(0, Director.Plan.WaveTotal - Director.Defeated)) + "   벽꿍 " + Combat.wallHits + "   " + Mathf.CeilToInt(Mathf.Max(0, TimeLimit - Combat.elapsed)) + "초", 20);
         Bar(new Rect(20, 137, 500, 8), Combat.xp / (float)Combat.nextXp, Yellow);
         if (bannerTime > 0) { Panel(new Rect(25, 160, 490, 54), Yellow); Text(new Rect(30, 161, 480, 50), banner, 23, Ink, true, TextAnchor.MiddleCenter); }
         else
@@ -435,7 +540,7 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
         for (int i = 0; i < 3; i++)
         {
             int skill = Combat.currentChoices[i]; Rect r = new Rect(30, 325 + i * 155, 480, 128);
-            if (Button(r, SkillNames[skill] + "   Lv." + (Combat.GetSkillRank(skill) + 1) + "\n" + SkillEffects[skill], Paper, true, 22)) { Combat.Choose(i); dragging = false; stick = Vector2.zero; }
+            if (Button(r, SkillNames[skill] + "   Lv." + (Combat.GetSkillRank(skill) + 1) + "\n" + SkillEffects[skill], Paper, true, 22)) { Combat.Choose(i); dragging = false; stick = Vector2.zero; PlaySfx("sfx_skill_pick", .7f); }
         }
     }
     void DrawPause()
@@ -449,11 +554,22 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
     {
         bool won = Combat.state == RunState.Won;
         Box(new Rect(0, 0, Width, Height), new Color(0, 0, 0, .8f)); Panel(new Rect(25, 185, 490, 635), Paper);
-        Text(new Rect(45, 210, 450, 80), won ? "도시락 배달 완료!" : "아빠도 가끔은 진다", 34, won ? Green : Red, true, TextAnchor.MiddleCenter);
-        Text(new Rect(50, 305, 440, 110), "최대 " + Combat.bestChain + "연쇄\n벽꿍 " + Combat.wallHits + "회  ·  제압 " + Combat.kills + "명", 29, Ink, true, TextAnchor.MiddleCenter);
-        Text(new Rect(55, 430, 430, 95), resultReason != "" ? resultReason : won ? "다음에는 더 크게 한 방!" : "돌진 예고를 피하고 벽 쪽으로 몰아보세요", 21, Ink, false, TextAnchor.MiddleCenter);
-        Text(new Rect(55, 520, 430, 80), NextGoal, 18, Green, false, TextAnchor.MiddleCenter);
-        if (Button(new Rect(50, 615, 440, 68), "한 판 더!", Yellow, true, 29)) StartRun();
-        if (Button(new Rect(50, 715, 440, 58), "집으로 · 장비 바꾸기", Color.white)) GoHome();
+        Text(new Rect(45, 200, 450, 60), won ? Director.Plan.Label + " 클리어!" : "아빠도 가끔은 진다", 34, won ? Green : Red, true, TextAnchor.MiddleCenter);
+        if (won && LastReward != null)
+        {
+            if (art != null && art.Icon("star_full") != null) for (int s = 0; s < 3; s++) Icon(s < LastReward.stars ? "star_full" : "star_empty", new Rect(Width / 2 - 66 + s * 44, 258, 40, 40));
+            else Text(new Rect(45, 258, 450, 40), new string('★', LastReward.stars) + new string('☆', 3 - LastReward.stars), 30, Yellow, true, TextAnchor.MiddleCenter);
+        }
+        Text(new Rect(50, 300, 440, 70), "최대 " + Combat.bestChain + "연쇄  ·  벽꿍 " + Combat.wallHits + "회  ·  제압 " + Combat.kills + "명", 21, Ink, true, TextAnchor.MiddleCenter);
+        if (LastReward != null)
+            Text(new Rect(50, 368, 440, 56), "코인 +" + Mathf.RoundToInt((float)LastReward.coins) + (LastReward.boxes > 0 ? "   ·   도시락 +" + LastReward.boxes : "") + (LastReward.replay && !LastReward.firstClear && won ? "  (다시 하기)" : ""), 24, Ink, true, TextAnchor.MiddleCenter);
+        Fighter key = Director.Key;
+        string reason = resultReason != "" ? resultReason : won ? "다음에는 더 크게 한 방!" : key != null && key.hp > 0 ? (key.boss ? "짱" : "왕 짱") + " 체력 " + Mathf.CeilToInt(100f * key.hp / key.maxHp) + "% 남음 · 아깝다!" : "돌진 예고를 피하고 벽 쪽으로 몰아보세요";
+        Text(new Rect(55, 428, 430, 70), reason, 21, Ink, false, TextAnchor.MiddleCenter);
+        if (!won && Progress.StuckAssist(PlayingStage) > 1.001f) Text(new Rect(55, 492, 430, 30), "엄마의 응원 +" + Mathf.RoundToInt((Progress.StuckAssist(PlayingStage) - 1) * 100) + "% 적용 중", 18, Green, true, TextAnchor.MiddleCenter);
+        Text(new Rect(55, 524, 430, 80), NextGoal, 17, Green, false, TextAnchor.MiddleCenter);
+        int next = Progress.Save.currentStage;
+        if (Button(new Rect(50, 615, 440, 68), won ? "다음: " + Progress.Eco.Label(next) + " 출발!" : "다시 도전", Yellow, true, 29)) StartRun(won ? next : PlayingStage);
+        if (Button(new Rect(50, 715, 440, 58), "집으로 · 강화하기", Color.white)) GoHome();
     }
 }

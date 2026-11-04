@@ -29,6 +29,9 @@ namespace SecondFistGame {
         public bool shield,trayBroken;
         public int trayHits; // frontal hits absorbed; the tray gives way at TrayDurability
         public float turnDelay;
+        // School stages: an elite is a bigger, tougher version of a regular enemy (mid-boss); power scales the hits it lands.
+        public bool elite;
+        public float power=1;
         public bool boss { get { return kind==2; } }
         public bool enraged;
         public float lift { get { if(airDuration<=0)return 0;float t=Mathf.Clamp01(airElapsed/airDuration);return airPeak*4*t*(1-t); } }
@@ -62,6 +65,8 @@ namespace SecondFistGame {
         public int killTargetOverride,xpCurveScale=1;
         public bool groggyBoss;
         public const int TrayDurability=4;
+        // Stage scaling (school): recommended power vs dad's power stretches enemy HP and the damage dad takes.
+        public float enemyHpScale=1,incomingDamageScale=1,hasteBonus,eliteKnockback=.6f;
         public int kills,hits,wallHits,chainHits,level=1,xp,nextXp=3,stage,bestChain;
         public int wallSkill,chainSkill,stunSkill,fistSkill,vampSkill,magnetSkill;
         public readonly int[] currentChoices={0,1,2};
@@ -88,7 +93,7 @@ namespace SecondFistGame {
         static Vector2 Remap(Vector2 p,Rect from,Rect to){return new Vector2(to.xMin+(p.x-from.xMin)/from.width*to.width,to.yMin+(p.y-from.yMin)/from.height*to.height);}
         public void Start(){state=RunState.Fighting;partnerPos=player+new Vector2(-42,18);}
         public Fighter AddEnemy(Vector2 pos,int kind=0){
-            int hp=kind==2?18+stage*4:kind==1?5+stage/2:3;
+            int hp=Mathf.Max(1,Mathf.RoundToInt((kind==2?18+stage*4:kind==1?5+stage/2:3)*enemyHpScale));
             Fighter e=new Fighter{id=++nextId,kind=kind,hp=hp,maxHp=hp,appearance=kind==2?(stage==0?1:stage==1?0:stage==2?2:3):kind==1?1:stage==0?2:stage==1?0:(nextId%2==0?0:2),pos=pos,attack=.6f+(nextId%4)*.12f};enemies.Add(e);return e;
         }
         public AlleyHazard AddHazard(Vector2 pos,int kind=0){
@@ -226,7 +231,7 @@ namespace SecondFistGame {
                 Fighter target=AcquireTarget(movement);
                 if(target!=null){
                     trackedTarget=pendingTarget=target;
-                    float haste=1f/(1f+fistSkill*.16f+(isFever?.38f:0));
+                    float haste=1f/(1f+fistSkill*.16f+(isFever?.38f:0)+hasteBonus);
                     attackLead=.10f*haste;attackAnimation=.44f*haste;attackCooldown=.52f*haste;
                     strikeDirection=(target.pos-player).normalized;if(strikeDirection.sqrMagnitude<.01f)strikeDirection=direction;direction=strikeDirection;
                 }
@@ -381,7 +386,7 @@ namespace SecondFistGame {
             if(e.dash>0){
                 float started=.38f-e.dash;float ramp=Mathf.Min(Mathf.Clamp01(started/.055f),Mathf.Clamp01(e.dash/.10f));
                 e.locomotion=e.aim*(480*(e.enraged?1.22f:1f)*ramp);e.pos=ClampEnemy(e.pos+e.locomotion*dt);e.dash-=dt;
-                if((player-e.pos).magnitude<52)Hurt(e.boss?18:12,e.pos);
+                if((player-e.pos).magnitude<52)Hurt(Scaled(e,e.boss?18:12),e.pos);
                 if(e.dash<=0){
                     if(e.boss&&e.burstQueue>0){
                         e.burstQueue--;e.windup=.32f;e.aim=(player-e.pos).normalized;if(e.aim.sqrMagnitude<.01f)e.aim=Vector2.right;e.facing=e.aim.x>=0?1:-1;
@@ -389,7 +394,7 @@ namespace SecondFistGame {
                     }
                     if(e.boss&&stage>=2){
                         AddShockwave(e.pos,115,new Color(1,.3f,.18f),.28f);
-                        if((player-e.pos).magnitude<105)Hurt(12,e.pos);
+                        if((player-e.pos).magnitude<105)Hurt(Scaled(e,12),e.pos);
                     }
                     e.recovery=.32f;e.locomotion=e.aim*90;
                 }
@@ -399,7 +404,7 @@ namespace SecondFistGame {
                 e.locomotion=Vector2.MoveTowards(e.locomotion,Vector2.zero,900*dt);e.pos=ClampEnemy(e.pos+e.locomotion*dt);e.windup-=dt;
                 if(e.windup<=0){
                     if(e.kind>=1){e.dash=.38f;e.attack=e.boss?(e.enraged?1.8f:2.5f):2.1f;}
-                    else{if(distance<(e.appearance==0?111:83))Hurt(e.appearance==0?10:8,e.pos);e.attack=e.appearance==0?1.8f:1.5f;e.recovery=.22f;}
+                    else{if(distance<(e.appearance==0?111:83))Hurt(Scaled(e,e.appearance==0?10:8),e.pos);e.attack=e.appearance==0?1.8f:1.5f;e.recovery=.22f;}
                 }
                 return;
             }
@@ -458,7 +463,7 @@ namespace SecondFistGame {
         public void Attack(Fighter target){Vector2 aim=(target.pos-player).normalized;ResolvePunch(aim.sqrMagnitude>.01f?aim:direction);}
         void ResolvePunch(Vector2 aim){
             direction=aim;punch=.19f;
-            float haste=1f/(1f+fistSkill*.16f+(isFever?.38f:0));
+            float haste=1f/(1f+fistSkill*.16f+(isFever?.38f:0)+hasteBonus);
             attackCooldown=.43f*haste;hits++;comboStep=(comboStep+1)%3;
             bool finisher=comboStep==0||(isFever&&hits%2==0);
             if(attackAnimation<=0)attackAnimation=.34f*haste;
@@ -477,8 +482,11 @@ namespace SecondFistGame {
                 int hitDamage=dmg+(trayBreak?1:0);if(groggyBoss&&e.boss)hitDamage=e.groggy>0?dmg+1:finisher?1:0; // a fresh school boss only takes chip damage
                 Damage(e,hitDamage,dragonFist?"팔룡 핵주먹!":finisher?"강타!":"",finisher?1:0);
                 bool bossOpen=e.boss&&(groggyBoss?e.groggy>0:finisher&&(isFever||dragonFist));
-                if(e.kind==0||(e.kind==1&&(e.windup<=0&&e.dash<=0||finisher))||bossOpen)Launch(e,aim*knockback*(e.boss&&groggyBoss?.75f:1),finisher?.36f:.30f,finisher?18:12);
+                // Elites have super armor: only the combo finisher sends them flying; other punches land without interrupting.
+                bool canLaunch=e.elite?finisher:(e.kind==0||(e.kind==1&&(e.windup<=0&&e.dash<=0||finisher))||bossOpen);
+                if(canLaunch)Launch(e,aim*knockback*(e.boss&&groggyBoss?.75f:1)*(e.elite?eliteKnockback:1),finisher?.36f:.30f,finisher?18:12);
                 else if(e.boss&&groggyBoss)e.pos=ClampEnemy(e.pos+aim*(finisher?22:12)); // only a short shove until a collision opens it up
+                else if(e.elite)e.pos=ClampEnemy(e.pos+aim*10);
             }
             for(int i=hazards.Count-1;i>=0;i--){
                 AlleyHazard h=hazards[i];
@@ -514,6 +522,7 @@ namespace SecondFistGame {
         static bool Guarded(Fighter e,Vector2 incoming){return e.shield&&e.velocity.sqrMagnitude<120*120&&incoming.x*e.facing<-.5f;}
         void BreakTray(Fighter e){e.shield=false;e.trayBroken=true;e.windup=0;e.stun=Mathf.Max(e.stun,.6f);AddShockwave(e.pos,70,new Color(.85f,.88f,.9f),.22f);freeze=Mathf.Max(freeze,.03f);events.Add(new CombatEvent("쟁반 박살!",e.pos,2));}
         void Damage(Fighter e,int amount,string label,int style){if(e.hp<=0)return;e.hp-=amount;e.flash=.10f;charge=Mathf.Min(100,charge+(3+vampSkill)*chargeGainMultiplier);events.Add(new CombatEvent(label.Length>0?label:"−"+amount,e.pos,style));}
+        int Scaled(Fighter e,int amount){return Mathf.Max(1,Mathf.RoundToInt(amount*e.power*incomingDamageScale));}
         void Hurt(int amount,Vector2 origin){
             if(invulnerable>0||isFever)return;health=Mathf.Max(0,health-amount);invulnerable=.7f;playerReaction=.18f;
             playerImpulse=(player-origin).normalized*185;attackLead=0;pendingTarget=null;attackAnimation=Mathf.Min(attackAnimation,.12f);attackCooldown=Mathf.Max(attackCooldown,.20f);

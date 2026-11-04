@@ -1,0 +1,3 @@
+Original procedural audio for Dad asset pack v5.
+Source: Tools/dad_assets_v5_audio.py. All sound is synthesized from mathematical oscillators, filtered pseudorandom noise and original note patterns. No external recordings, sample libraries, existing songs or human voices are used. The source recipe and outputs are offered under CC0 1.0 Universal to the extent rights apply: https://creativecommons.org/publicdomain/zero/1.0/
+The boss roar is a synthetic growl. Music is provisional original synthesized music; audition in-game before release.

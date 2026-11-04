@@ -4,6 +4,16 @@ PASS Hero has real transparent background and visible pixels
 PASS Enemies asset resolves through Resources
 PASS Enemies has real transparent background and visible pixels
 PASS Arena asset resolves through Resources
+PASS v5 frames complete for dad (idle:2 walk:4 punch:3 special:1 hurt:1 win:1)
+PASS v5 frames complete for gum (walk:2 attack:2 hit:1 fly:1)
+PASS v5 frames complete for chair (walk:2 windup:1 dash:1 hit:1 fly:1)
+PASS v5 frames complete for tray (walk:2 block:1 attack:1 hit:1 fly:1 notray_walk:2 notray_hit:1)
+PASS v5 frames complete for boss1 (walk:2 windup:1 dash:1 groggy:1 hit:1 enrage:1 fly:1)
+PASS v5 frames complete for boss2 (walk:2 windup:1 dash:1 groggy:1 hit:1 enrage:1 fly:1)
+PASS v5 frames complete for boss3 (walk:2 windup:1 dash:1 groggy:1 hit:1 enrage:1 fly:1)
+PASS v5 frames complete for dodge (walk:2 throw:2 hit:1 fly:1)
+PASS v5 delivery: 21 UI icons, 18 gear icons, 3 backgrounds, 21 sounds, 2 props
+PASS v5 import rules: 512 compressed frames, 2048 backgrounds, streamed music
 PASS equipped slipper increases wall damage inside school arena
 PASS level up opens skill selection
 PASS choice applies and resumes battle

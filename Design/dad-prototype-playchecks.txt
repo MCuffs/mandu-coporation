@@ -1,5 +1,5 @@
 Dad School Boss Play Mode integration checks
-PASS start enters live battle
+PASS start plays the saved stage (1-1 on a fresh save)
 PASS rendering and simulation use the same arena
 PASS movement input changes the live player position
 PASS special triggers a live attack and fever
@@ -7,8 +7,11 @@ PASS selection resumes a live battle
 PASS victory commits exactly once
 PASS wall record commits once and unlocks phone
 PASS chain and win records persist
+PASS victory pays coins, unlocks 1-2 and saves to disk
+PASS start moves on to the next stage
+PASS a locked stage cannot be started from the menu
 PASS unlocked lunchbox changes the next run build
 PASS retry resets health and timer
 PASS phone replaces the special instead of stacking lunchbox
-PASS defeat does not award a win
+PASS defeat pays the consolation share and awards no win
 PASS home returns to a usable menu

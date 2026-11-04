@@ -1,16 +1,38 @@
-School first-minute and equipment checks
-PASS first encounter isolates one basic target
-PASS landing a punch advances to wall lesson
-PASS wall contact advances to chain lesson
-PASS real collision completes the chain lesson
-PASS early chain wave uses two aligned basic targets
-PASS charge enemy is introduced after the teaching beats
-PASS school run uses its own kill target and slower level curve
-PASS boss waits for the kill target after the floor time
-PASS boss appears by the fallback deadline with school HP
-PASS boss arrives with two escorts to throw
-PASS boss is never spawned twice
+School stage, economy and equipment checks
+PASS stage numbering: 3 floors x 20, mid-boss 10, floor boss 20
+PASS recommended power matches the progression simulation (shared JSON)
+PASS first stage of a floor relaxes after the boss spike
+PASS fresh save starts at 1-1 with base power
+PASS first clear pays full coins, a lunchbox, 3 stars and unlocks the next stage
+PASS replaying a cleared stage pays the replay share and keeps the best stars
+PASS a loss pays the consolation share and counts toward the stuck assist
+PASS no assist before the third loss
+PASS the third loss starts mom's cheer
+PASS mom's cheer is capped
+PASS winning clears the assist
+PASS an upgrade is refused without coins
+PASS any upgrade adds the same power and raises the shared cost
+PASS floor boss first clear pays boss coins and bonus lunchboxes
+PASS under a minute away pays nothing
+PASS idle reward accrues at the best farm stage and caps at 8 hours
+PASS an unclaimed idle chest never grows past the cap
+PASS claiming pays (ad doubles) and empties the idle chest
+PASS save round-trips through the file
+PASS an unreadable save starts fresh instead of crashing
+PASS 1-1 is a small teaching stage
+PASS chargers from 1-4, tray guys from 1-12 and on every later floor
+PASS stage 10 is an elite fight, stage 20 the floor boss
+PASS regular stages grow in enemy count within and across floors
+PASS the first encounter is one dazed target in front of dad
+PASS landing a punch advances the lesson
+PASS enemies walk in from the doors, never next to dad
+PASS clearing every wave wins a regular stage
+PASS the mid-boss elite walks in with two escorts
+PASS defeating the elite wins the mid-boss stage
+PASS the floor boss arrives with school HP and two escorts
 PASS escorts keep arriving during the boss fight
+PASS 1-12 introduces the tray guy once
+PASS the power ratio scales enemy HP and the damage dad takes
 PASS plain punch only shoves a fresh boss, even in fever
 PASS a thrown body makes the boss groggy
 PASS groggy boss can be launched toward a wall
@@ -29,4 +51,9 @@ PASS a body thrown into the tray face bounces off
 PASS a body hitting the tray from the side breaks it
 PASS tray guy turns around slowly, leaving a rear opening
 PASS dad's special smashes trays
-PASS tray guy is introduced after the charger and before the boss
+PASS opponent profile is an adult: 껌 짱 (34세)
+PASS opponent profile is an adult: 의자 짱 (41세)
+PASS opponent profile is an adult: 쟁반 짱 (47세)
+PASS opponent profile is an adult: 학교 짱 (42세)
+PASS opponent profile is an adult: 급식실 실세 (52세)
+PASS opponent profile is an adult: 체육 선생님 (51세)

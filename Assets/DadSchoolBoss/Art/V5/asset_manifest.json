@@ -1,0 +1,2789 @@
+{
+  "ui/icon_coin.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "ui_1",
+    "source_cell": [
+      0,
+      0,
+      512,
+      512
+    ],
+    "source_bounds_in_cell": [
+      79,
+      80,
+      446,
+      463
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "ui/icon_lunchbox.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "ui_1",
+    "source_cell": [
+      512,
+      0,
+      1024,
+      512
+    ],
+    "source_bounds_in_cell": [
+      49,
+      87,
+      438,
+      465
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "ui/tab_shop.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "ui_1",
+    "source_cell": [
+      1024,
+      0,
+      1536,
+      512
+    ],
+    "source_bounds_in_cell": [
+      15,
+      114,
+      468,
+      425
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "ui/tab_lunchbox.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "ui_1",
+    "source_cell": [
+      0,
+      512,
+      512,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      70,
+      64,
+      437,
+      469
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "ui/tab_go.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "ui_1",
+    "source_cell": [
+      512,
+      512,
+      1024,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      32,
+      139,
+      366,
+      463
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "ui/tab_upgrade.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "ui_1",
+    "source_cell": [
+      1024,
+      512,
+      1536,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      49,
+      47,
+      446,
+      459
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "ui/tab_school.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "ui_2",
+    "source_cell": [
+      0,
+      0,
+      512,
+      512
+    ],
+    "source_bounds_in_cell": [
+      64,
+      73,
+      465,
+      467
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "ui/up_fist.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "ui_2",
+    "source_cell": [
+      512,
+      0,
+      1024,
+      512
+    ],
+    "source_bounds_in_cell": [
+      72,
+      73,
+      425,
+      467
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "ui/up_hp.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "ui_2",
+    "source_cell": [
+      1024,
+      0,
+      1536,
+      512
+    ],
+    "source_bounds_in_cell": [
+      60,
+      98,
+      444,
+      449
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "ui/up_combo.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "ui_2",
+    "source_cell": [
+      0,
+      512,
+      512,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      40,
+      87,
+      468,
+      463
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "ui/up_launch.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "ui_2",
+    "source_cell": [
+      512,
+      512,
+      1024,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      146,
+      85,
+      441,
+      338
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "ui/btn_free_lunchbox.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "ui_2",
+    "source_cell": [
+      1024,
+      512,
+      1536,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      27,
+      111,
+      467,
+      424
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "ui/btn_idle_chest.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "ui_3",
+    "source_cell": [
+      512,
+      0,
+      1024,
+      512
+    ],
+    "source_bounds_in_cell": [
+      52,
+      56,
+      463,
+      491
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "ui/btn_attendance.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "ui_3",
+    "source_cell": [
+      1024,
+      0,
+      1536,
+      512
+    ],
+    "source_bounds_in_cell": [
+      42,
+      70,
+      447,
+      479
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "ui/star_full.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "ui_3",
+    "source_cell": [
+      0,
+      512,
+      512,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      77,
+      74,
+      449,
+      452
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "ui/star_empty.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "ui_3",
+    "source_cell": [
+      512,
+      512,
+      1024,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      69,
+      75,
+      442,
+      453
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "ui/lock.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "ui_3",
+    "source_cell": [
+      1024,
+      512,
+      1536,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      65,
+      48,
+      416,
+      473
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "ui/mom_call.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "ui_4",
+    "source_cell": [
+      0,
+      0,
+      512,
+      512
+    ],
+    "source_bounds_in_cell": [
+      110,
+      89,
+      427,
+      486
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "ui/mom_cheer.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "ui_4",
+    "source_cell": [
+      512,
+      0,
+      1024,
+      512
+    ],
+    "source_bounds_in_cell": [
+      107,
+      83,
+      413,
+      488
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "ui/distance.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "ui_4",
+    "source_cell": [
+      1024,
+      0,
+      1536,
+      512
+    ],
+    "source_bounds_in_cell": [
+      42,
+      129,
+      449,
+      454
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "gear/gear_shoes_1.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "gear_1",
+    "source_cell": [
+      0,
+      0,
+      512,
+      512
+    ],
+    "source_bounds_in_cell": [
+      48,
+      109,
+      461,
+      441
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "gear/gear_shoes_2.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "gear_1",
+    "source_cell": [
+      512,
+      0,
+      1024,
+      512
+    ],
+    "source_bounds_in_cell": [
+      38,
+      109,
+      464,
+      444
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "gear/gear_shoes_3.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "gear_1",
+    "source_cell": [
+      1024,
+      0,
+      1536,
+      512
+    ],
+    "source_bounds_in_cell": [
+      37,
+      77,
+      469,
+      448
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "gear/gear_hand_1.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "gear_1",
+    "source_cell": [
+      0,
+      512,
+      512,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      56,
+      90,
+      465,
+      472
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "gear/gear_hand_2.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "gear_1",
+    "source_cell": [
+      512,
+      512,
+      1024,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      68,
+      58,
+      423,
+      486
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "gear/gear_hand_3.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "gear_1",
+    "source_cell": [
+      1024,
+      512,
+      1536,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      40,
+      88,
+      463,
+      478
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "gear/gear_top_1.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "gear_2",
+    "source_cell": [
+      0,
+      0,
+      512,
+      512
+    ],
+    "source_bounds_in_cell": [
+      79,
+      57,
+      444,
+      486
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "gear/gear_top_2.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "gear_2",
+    "source_cell": [
+      512,
+      0,
+      1024,
+      512
+    ],
+    "source_bounds_in_cell": [
+      82,
+      76,
+      398,
+      480
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "gear/gear_top_3.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "gear_2",
+    "source_cell": [
+      1024,
+      0,
+      1536,
+      512
+    ],
+    "source_bounds_in_cell": [
+      38,
+      73,
+      442,
+      483
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "gear/gear_head_1.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "gear_2",
+    "source_cell": [
+      0,
+      512,
+      512,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      46,
+      140,
+      462,
+      371
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "gear/gear_head_2.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "gear_2",
+    "source_cell": [
+      512,
+      512,
+      1024,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      33,
+      162,
+      461,
+      375
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "gear/gear_head_3.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "gear_2",
+    "source_cell": [
+      1024,
+      512,
+      1536,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      25,
+      108,
+      465,
+      429
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "gear/gear_item_1.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "gear_3",
+    "source_cell": [
+      0,
+      0,
+      512,
+      512
+    ],
+    "source_bounds_in_cell": [
+      106,
+      38,
+      423,
+      492
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "gear/gear_item_2.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "gear_3",
+    "source_cell": [
+      512,
+      0,
+      1024,
+      512
+    ],
+    "source_bounds_in_cell": [
+      98,
+      51,
+      407,
+      475
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "gear/gear_item_3.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "gear_3",
+    "source_cell": [
+      1024,
+      0,
+      1536,
+      512
+    ],
+    "source_bounds_in_cell": [
+      40,
+      103,
+      470,
+      438
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "gear/gear_tool_1.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "gear_3",
+    "source_cell": [
+      0,
+      512,
+      512,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      116,
+      45,
+      428,
+      475
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "gear/gear_tool_2.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "gear_3",
+    "source_cell": [
+      512,
+      512,
+      1024,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      109,
+      36,
+      429,
+      480
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "gear/gear_tool_3.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "gear_3",
+    "source_cell": [
+      1024,
+      512,
+      1536,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      71,
+      38,
+      429,
+      476
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/dad/dad_idle_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.204301,
+    "content_height": 560,
+    "animation_review_required": true,
+    "source": "char_dad_locomotion",
+    "source_cell": [
+      0,
+      0,
+      512,
+      512
+    ],
+    "source_bounds_in_cell": [
+      137,
+      11,
+      370,
+      476
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/dad/dad_idle_1.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.204301,
+    "content_height": 536,
+    "animation_review_required": true,
+    "source": "char_dad_locomotion",
+    "source_cell": [
+      512,
+      0,
+      1024,
+      512
+    ],
+    "source_bounds_in_cell": [
+      127,
+      31,
+      346,
+      476
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/dad/dad_walk_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.204301,
+    "content_height": 553,
+    "animation_review_required": true,
+    "source": "char_dad_locomotion",
+    "source_cell": [
+      1024,
+      0,
+      1536,
+      512
+    ],
+    "source_bounds_in_cell": [
+      60,
+      16,
+      359,
+      475
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/dad/dad_walk_1.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.204301,
+    "content_height": 573,
+    "animation_review_required": true,
+    "source": "char_dad_locomotion",
+    "source_cell": [
+      0,
+      512,
+      512,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      111,
+      13,
+      375,
+      489
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/dad/dad_walk_2.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.204301,
+    "content_height": 570,
+    "animation_review_required": true,
+    "source": "char_dad_locomotion",
+    "source_cell": [
+      512,
+      512,
+      1024,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      95,
+      15,
+      419,
+      488
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/dad/dad_walk_3.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.204301,
+    "content_height": 572,
+    "animation_review_required": true,
+    "source": "char_dad_locomotion",
+    "source_cell": [
+      1024,
+      512,
+      1536,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      84,
+      13,
+      352,
+      488
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/dad/dad_punch_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.175166,
+    "content_height": 530,
+    "animation_review_required": true,
+    "source": "char_dad_combat",
+    "source_cell": [
+      0,
+      0,
+      512,
+      512
+    ],
+    "source_bounds_in_cell": [
+      82,
+      25,
+      411,
+      476
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/dad/dad_punch_1.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.175166,
+    "content_height": 532,
+    "animation_review_required": true,
+    "source": "char_dad_combat",
+    "source_cell": [
+      512,
+      0,
+      1024,
+      512
+    ],
+    "source_bounds_in_cell": [
+      48,
+      23,
+      502,
+      476
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/dad/dad_punch_2.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.175166,
+    "content_height": 512,
+    "animation_review_required": true,
+    "source": "char_dad_combat",
+    "source_cell": [
+      1024,
+      0,
+      1536,
+      512
+    ],
+    "source_bounds_in_cell": [
+      86,
+      40,
+      375,
+      476
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/dad/dad_special_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.175166,
+    "content_height": 559,
+    "animation_review_required": true,
+    "source": "char_dad_combat",
+    "source_cell": [
+      0,
+      512,
+      512,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      32,
+      15,
+      512,
+      491
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/dad/dad_hurt_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.175166,
+    "content_height": 538,
+    "animation_review_required": true,
+    "source": "char_dad_combat",
+    "source_cell": [
+      512,
+      512,
+      1024,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      0,
+      33,
+      424,
+      491
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/dad/dad_win_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.175166,
+    "content_height": 565,
+    "animation_review_required": true,
+    "source": "char_dad_combat",
+    "source_cell": [
+      1024,
+      512,
+      1536,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      63,
+      10,
+      447,
+      491
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/gum/gum_walk_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.176471,
+    "content_height": 560,
+    "animation_review_required": true,
+    "source": "char_gum",
+    "source_cell": [
+      0,
+      0,
+      512,
+      512
+    ],
+    "source_bounds_in_cell": [
+      139,
+      18,
+      414,
+      494
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/gum/gum_walk_1.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.176471,
+    "content_height": 554,
+    "animation_review_required": true,
+    "source": "char_gum",
+    "source_cell": [
+      512,
+      0,
+      1024,
+      512
+    ],
+    "source_bounds_in_cell": [
+      150,
+      21,
+      398,
+      492
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/gum/gum_attack_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.176471,
+    "content_height": 565,
+    "animation_review_required": true,
+    "source": "char_gum",
+    "source_cell": [
+      1024,
+      0,
+      1536,
+      512
+    ],
+    "source_bounds_in_cell": [
+      92,
+      13,
+      424,
+      493
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/gum/gum_attack_1.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.176471,
+    "content_height": 546,
+    "animation_review_required": true,
+    "source": "char_gum",
+    "source_cell": [
+      0,
+      512,
+      512,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      53,
+      26,
+      476,
+      490
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/gum/gum_hit_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.176471,
+    "content_height": 544,
+    "animation_review_required": true,
+    "source": "char_gum",
+    "source_cell": [
+      512,
+      512,
+      1024,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      93,
+      27,
+      431,
+      489
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/chair/chair_walk_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.27027,
+    "content_height": 545,
+    "animation_review_required": true,
+    "source": "char_chair",
+    "source_cell": [
+      0,
+      0,
+      512,
+      512
+    ],
+    "source_bounds_in_cell": [
+      109,
+      61,
+      408,
+      490
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/chair/chair_windup_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.27027,
+    "content_height": 602,
+    "animation_review_required": true,
+    "source": "char_chair",
+    "source_cell": [
+      1024,
+      0,
+      1536,
+      512
+    ],
+    "source_bounds_in_cell": [
+      104,
+      17,
+      384,
+      491
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/chair/chair_dash_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.27027,
+    "content_height": 466,
+    "animation_review_required": true,
+    "source": "char_chair",
+    "source_cell": [
+      0,
+      512,
+      512,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      37,
+      88,
+      510,
+      455
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/chair/chair_hit_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.27027,
+    "content_height": 483,
+    "animation_review_required": true,
+    "source": "char_chair",
+    "source_cell": [
+      512,
+      512,
+      1024,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      40,
+      76,
+      426,
+      456
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/tray/tray_walk_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.369193,
+    "content_height": 560,
+    "animation_review_required": true,
+    "source": "char_tray",
+    "source_cell": [
+      0,
+      0,
+      444,
+      444
+    ],
+    "source_bounds_in_cell": [
+      88,
+      12,
+      395,
+      421
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/tray/tray_walk_1.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.369193,
+    "content_height": 555,
+    "animation_review_required": true,
+    "source": "char_tray",
+    "source_cell": [
+      444,
+      0,
+      887,
+      444
+    ],
+    "source_bounds_in_cell": [
+      65,
+      16,
+      362,
+      421
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/tray/tray_block_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.369193,
+    "content_height": 531,
+    "animation_review_required": true,
+    "source": "char_tray",
+    "source_cell": [
+      887,
+      0,
+      1330,
+      444
+    ],
+    "source_bounds_in_cell": [
+      19,
+      32,
+      402,
+      420
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/tray/tray_attack_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.369193,
+    "content_height": 520,
+    "animation_review_required": true,
+    "source": "char_tray",
+    "source_cell": [
+      1330,
+      0,
+      1774,
+      444
+    ],
+    "source_bounds_in_cell": [
+      1,
+      40,
+      423,
+      420
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/tray/tray_hit_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.369193,
+    "content_height": 552,
+    "animation_review_required": true,
+    "source": "char_tray",
+    "source_cell": [
+      0,
+      444,
+      444,
+      887
+    ],
+    "source_bounds_in_cell": [
+      67,
+      18,
+      390,
+      421
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/tray/tray_notray_walk_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.369193,
+    "content_height": 555,
+    "animation_review_required": true,
+    "source": "char_tray",
+    "source_cell": [
+      444,
+      444,
+      887,
+      887
+    ],
+    "source_bounds_in_cell": [
+      65,
+      17,
+      369,
+      422
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/tray/tray_notray_walk_1.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.369193,
+    "content_height": 564,
+    "animation_review_required": true,
+    "source": "char_tray",
+    "source_cell": [
+      887,
+      444,
+      1330,
+      887
+    ],
+    "source_bounds_in_cell": [
+      65,
+      9,
+      351,
+      421
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/tray/tray_notray_hit_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.369193,
+    "content_height": 553,
+    "animation_review_required": true,
+    "source": "char_tray",
+    "source_cell": [
+      1330,
+      444,
+      1774,
+      887
+    ],
+    "source_bounds_in_cell": [
+      61,
+      17,
+      380,
+      421
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/boss1/boss1_walk_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.596603,
+    "content_height": 635,
+    "animation_review_required": true,
+    "source": "char_boss1",
+    "source_cell": [
+      0,
+      0,
+      444,
+      444
+    ],
+    "source_bounds_in_cell": [
+      68,
+      23,
+      391,
+      421
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/boss1/boss1_walk_1.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.596603,
+    "content_height": 635,
+    "animation_review_required": true,
+    "source": "char_boss1",
+    "source_cell": [
+      444,
+      0,
+      887,
+      444
+    ],
+    "source_bounds_in_cell": [
+      87,
+      23,
+      368,
+      421
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/boss1/boss1_windup_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.596603,
+    "content_height": 552,
+    "animation_review_required": true,
+    "source": "char_boss1",
+    "source_cell": [
+      887,
+      0,
+      1330,
+      444
+    ],
+    "source_bounds_in_cell": [
+      41,
+      75,
+      424,
+      421
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/boss1/boss1_dash_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.596603,
+    "content_height": 540,
+    "animation_review_required": true,
+    "source": "char_boss1",
+    "source_cell": [
+      1330,
+      0,
+      1774,
+      444
+    ],
+    "source_bounds_in_cell": [
+      24,
+      83,
+      424,
+      421
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/boss1/boss1_groggy_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.596603,
+    "content_height": 618,
+    "animation_review_required": true,
+    "source": "char_boss1",
+    "source_cell": [
+      0,
+      444,
+      444,
+      887
+    ],
+    "source_bounds_in_cell": [
+      72,
+      34,
+      395,
+      421
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/boss1/boss1_hit_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.596603,
+    "content_height": 623,
+    "animation_review_required": true,
+    "source": "char_boss1",
+    "source_cell": [
+      444,
+      444,
+      887,
+      887
+    ],
+    "source_bounds_in_cell": [
+      22,
+      31,
+      398,
+      421
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/boss1/boss1_enrage_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.596603,
+    "content_height": 637,
+    "animation_review_required": true,
+    "source": "char_boss1",
+    "source_cell": [
+      887,
+      444,
+      1330,
+      887
+    ],
+    "source_bounds_in_cell": [
+      36,
+      22,
+      409,
+      421
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/boss2/boss2_walk_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.612091,
+    "content_height": 640,
+    "animation_review_required": true,
+    "source": "char_boss2",
+    "source_cell": [
+      0,
+      0,
+      444,
+      444
+    ],
+    "source_bounds_in_cell": [
+      57,
+      29,
+      386,
+      426
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/boss2/boss2_windup_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.612091,
+    "content_height": 651,
+    "animation_review_required": true,
+    "source": "char_boss2",
+    "source_cell": [
+      887,
+      0,
+      1330,
+      444
+    ],
+    "source_bounds_in_cell": [
+      42,
+      22,
+      420,
+      426
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/boss2/boss2_groggy_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.612091,
+    "content_height": 638,
+    "animation_review_required": true,
+    "source": "char_boss2",
+    "source_cell": [
+      0,
+      444,
+      444,
+      887
+    ],
+    "source_bounds_in_cell": [
+      56,
+      27,
+      395,
+      423
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/boss2/boss2_hit_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.612091,
+    "content_height": 630,
+    "animation_review_required": true,
+    "source": "char_boss2",
+    "source_cell": [
+      444,
+      444,
+      887,
+      887
+    ],
+    "source_bounds_in_cell": [
+      43,
+      32,
+      407,
+      423
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/boss2/boss2_enrage_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.612091,
+    "content_height": 640,
+    "animation_review_required": true,
+    "source": "char_boss2",
+    "source_cell": [
+      887,
+      444,
+      1330,
+      887
+    ],
+    "source_bounds_in_cell": [
+      36,
+      26,
+      418,
+      423
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/boss3/boss3_walk_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.572482,
+    "content_height": 640,
+    "animation_review_required": true,
+    "source": "char_boss3",
+    "source_cell": [
+      0,
+      0,
+      444,
+      444
+    ],
+    "source_bounds_in_cell": [
+      93,
+      29,
+      363,
+      436
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/boss3/boss3_windup_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.572482,
+    "content_height": 653,
+    "animation_review_required": true,
+    "source": "char_boss3",
+    "source_cell": [
+      887,
+      0,
+      1330,
+      444
+    ],
+    "source_bounds_in_cell": [
+      14,
+      24,
+      394,
+      439
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/boss3/boss3_dash_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.572482,
+    "content_height": 602,
+    "animation_review_required": true,
+    "source": "char_boss3",
+    "source_cell": [
+      1330,
+      0,
+      1774,
+      444
+    ],
+    "source_bounds_in_cell": [
+      28,
+      51,
+      414,
+      434
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/boss3/boss3_groggy_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.572482,
+    "content_height": 626,
+    "animation_review_required": true,
+    "source": "char_boss3",
+    "source_cell": [
+      0,
+      444,
+      444,
+      887
+    ],
+    "source_bounds_in_cell": [
+      69,
+      32,
+      380,
+      430
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/boss3/boss3_hit_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.572482,
+    "content_height": 618,
+    "animation_review_required": true,
+    "source": "char_boss3",
+    "source_cell": [
+      444,
+      444,
+      887,
+      887
+    ],
+    "source_bounds_in_cell": [
+      32,
+      40,
+      401,
+      433
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/boss3/boss3_enrage_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.572482,
+    "content_height": 615,
+    "animation_review_required": true,
+    "source": "char_boss3",
+    "source_cell": [
+      887,
+      444,
+      1330,
+      887
+    ],
+    "source_bounds_in_cell": [
+      57,
+      42,
+      386,
+      433
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/dodge/dodge_walk_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.191489,
+    "content_height": 560,
+    "animation_review_required": true,
+    "source": "char_dodge",
+    "source_cell": [
+      0,
+      0,
+      512,
+      512
+    ],
+    "source_bounds_in_cell": [
+      111,
+      16,
+      417,
+      486
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/dodge/dodge_throw_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.191489,
+    "content_height": 524,
+    "animation_review_required": true,
+    "source": "char_dodge",
+    "source_cell": [
+      1024,
+      0,
+      1536,
+      512
+    ],
+    "source_bounds_in_cell": [
+      50,
+      48,
+      442,
+      488
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/dodge/dodge_throw_1.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.191489,
+    "content_height": 523,
+    "animation_review_required": true,
+    "source": "char_dodge",
+    "source_cell": [
+      0,
+      512,
+      512,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      29,
+      46,
+      459,
+      485
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/dodge/dodge_hit_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 1.191489,
+    "content_height": 548,
+    "animation_review_required": true,
+    "source": "char_dodge",
+    "source_cell": [
+      512,
+      512,
+      1024,
+      1024
+    ],
+    "source_bounds_in_cell": [
+      104,
+      28,
+      417,
+      488
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "bg/bg_floor1_corridor.png": {
+    "size": [
+      1080,
+      1920
+    ],
+    "source": "bg_floor1_corridor",
+    "opaque": true
+  },
+  "bg/bg_floor2_cafeteria.png": {
+    "size": [
+      1080,
+      1920
+    ],
+    "source": "bg_floor2_cafeteria",
+    "opaque": true
+  },
+  "bg/bg_floor3_gym.png": {
+    "size": [
+      1080,
+      1920
+    ],
+    "source": "bg_floor3_gym",
+    "opaque": true
+  },
+  "story/intro_1.png": {
+    "size": [
+      1080,
+      1350
+    ],
+    "source": "intro_1",
+    "opaque": true
+  },
+  "story/intro_2.png": {
+    "size": [
+      1080,
+      1350
+    ],
+    "source": "intro_2",
+    "opaque": true
+  },
+  "story/intro_3.png": {
+    "size": [
+      1080,
+      1350
+    ],
+    "source": "intro_3",
+    "opaque": true
+  },
+  "app/app_icon.png": {
+    "size": [
+      1024,
+      1024
+    ],
+    "source": "app_icon",
+    "opaque": true
+  },
+  "chars/tray/prop_tray_dented.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "props",
+    "source_cell": [
+      0,
+      0,
+      887,
+      887
+    ],
+    "source_bounds_in_cell": [
+      139,
+      119,
+      789,
+      788
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/dodge/prop_dodgeball.png": {
+    "size": [
+      128,
+      128
+    ],
+    "source": "props",
+    "source_cell": [
+      887,
+      0,
+      1774,
+      887
+    ],
+    "source_bounds_in_cell": [
+      116,
+      133,
+      743,
+      778
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/chair/chair_walk_1.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 0.440939,
+    "content_height": 545,
+    "animation_review_required": true,
+    "source": "walkfix_chair",
+    "source_cell": [
+      0,
+      0,
+      1024,
+      1536
+    ],
+    "source_bounds_in_cell": [
+      153,
+      145,
+      841,
+      1381
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/boss2/boss2_walk_1.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 0.518219,
+    "content_height": 640,
+    "animation_review_required": true,
+    "source": "walkfix_boss2",
+    "source_cell": [
+      0,
+      0,
+      1024,
+      1536
+    ],
+    "source_bounds_in_cell": [
+      112,
+      150,
+      875,
+      1385
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/boss3/boss3_walk_1.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 0.566873,
+    "content_height": 640,
+    "animation_review_required": true,
+    "source": "walkfix_boss3",
+    "source_cell": [
+      0,
+      0,
+      1199,
+      1312
+    ],
+    "source_bounds_in_cell": [
+      281,
+      83,
+      887,
+      1212
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/dodge/dodge_walk_1.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 0.459016,
+    "content_height": 560,
+    "animation_review_required": true,
+    "source": "walkfix_dodge",
+    "source_cell": [
+      0,
+      0,
+      1199,
+      1312
+    ],
+    "source_bounds_in_cell": [
+      365,
+      36,
+      830,
+      1256
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/gum/gum_fly_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "center": [
+      384,
+      384
+    ],
+    "flying": true,
+    "source": "fly_gum",
+    "source_cell": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "source_bounds_in_cell": [
+      94,
+      183,
+      1159,
+      1063
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/chair/chair_fly_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "center": [
+      384,
+      384
+    ],
+    "flying": true,
+    "source": "fly_chair",
+    "source_cell": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "source_bounds_in_cell": [
+      70,
+      144,
+      1132,
+      1107
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/tray/tray_fly_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "center": [
+      384,
+      384
+    ],
+    "flying": true,
+    "source": "fly_tray",
+    "source_cell": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "source_bounds_in_cell": [
+      66,
+      144,
+      1156,
+      1091
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/boss1/boss1_fly_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "center": [
+      384,
+      384
+    ],
+    "flying": true,
+    "source": "fly_boss1",
+    "source_cell": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "source_bounds_in_cell": [
+      53,
+      134,
+      1148,
+      1125
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/boss2/boss2_fly_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "center": [
+      384,
+      384
+    ],
+    "flying": true,
+    "source": "fly_boss2",
+    "source_cell": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "source_bounds_in_cell": [
+      72,
+      162,
+      1146,
+      1094
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/boss3/boss3_fly_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "center": [
+      384,
+      384
+    ],
+    "flying": true,
+    "source": "fly_boss3",
+    "source_cell": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "source_bounds_in_cell": [
+      87,
+      166,
+      1156,
+      1093
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/dodge/dodge_fly_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "center": [
+      384,
+      384
+    ],
+    "flying": true,
+    "source": "fly_dodge",
+    "source_cell": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "source_bounds_in_cell": [
+      74,
+      161,
+      1123,
+      1081
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "ui/btn_awaken.png": {
+    "size": [
+      256,
+      256
+    ],
+    "source": "fix_awaken",
+    "source_cell": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "source_bounds_in_cell": [
+      142,
+      60,
+      1072,
+      1212
+    ],
+    "matte_alpha_threshold": 220
+  },
+  "chars/boss2/boss2_dash_0.png": {
+    "size": [
+      768,
+      768
+    ],
+    "feet": [
+      384,
+      720
+    ],
+    "pivot_unity": [
+      0.5,
+      0.0625
+    ],
+    "scale": 0.614379,
+    "content_height": 451,
+    "animation_review_required": true,
+    "source": "fix_boss2_dash",
+    "source_cell": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "source_bounds_in_cell": [
+      74,
+      273,
+      1097,
+      1007
+    ],
+    "matte_alpha_threshold": 220
+  }
+}
