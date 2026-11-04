@@ -23,11 +23,11 @@ public sealed class SlingshotSim
         public Kind kind;
         public bool shield, trayBroken, enraged;
         public Vector2 pos, vel, aim, face = Vector2.down;   // face: the side the tray covers, kept turned toward dad
-        public float stun, flash, wallCooldown, contact, windup, dash, cooldown, groggy, air, walked, attackPose;
+        public float stun, flash, wallCooldown, contact, windup, dash, cooldown, groggy, air, walked, attackPose, scale = 1;
         public bool Boss { get { return kind == Kind.Boss; } }
         public bool Flying { get { return vel.sqrMagnitude > MinFlySpeed * MinFlySpeed; } }
-        public float Radius { get { return kind == Kind.Boss ? 38 : kind == Kind.Chair ? 30 : kind == Kind.Tray ? 27 : 25; } }
-        public float Lift { get { return Flying ? 14 * Mathf.Clamp01(air / .12f) : 0; } }   // airborne bodies ride a little above their shadow
+        public float Radius { get { return (kind == Kind.Boss ? 38 : kind == Kind.Chair ? 30 : kind == Kind.Tray ? 27 : 25) * scale; } }
+        public float Lift { get { return Flying ? 14 * scale * Mathf.Clamp01(air / .12f) : 0; } }   // airborne bodies ride a little above their shadow
     }
     public sealed class Spawn { public float at, x; public Kind kind; }
     public sealed class Stage
@@ -45,11 +45,13 @@ public sealed class SlingshotSim
     }
     public sealed class Corpse { public Kind kind; public Vector2 pos, vel; public float life = .6f; public int facing; }
 
-    public const float DadRadius = 26, MinFlySpeed = 60, PullDeadZone = 24, PullMax = 150;
+    public const float DadRadiusBase = 26, MinFlySpeed = 60, PullDeadZone = 24, PullMax = 150;
     public const float LaunchMin = 420, LaunchMax = 1150, DadDrag = 1.3f, DadBounce = .88f, StopSpeed = 80, MaxFlight = 2.4f;
     const float FoeDrag = 3.0f, BossDrag = 1.8f, FoeWallBounce = .35f, ChainSpeed = 230, BossGroggy = 2.6f;
 
     public readonly Rect arena;
+    public readonly float scale;   // body size against the art: 1 = the battle size of the main prototype (design: 0.72 wide view)
+    public float DadRadius { get { return DadRadiusBase * scale; } }
     public readonly Stage stage;
     public readonly Dad dad = new Dad();
     public readonly List<Foe> foes = new List<Foe>();
@@ -62,10 +64,10 @@ public sealed class SlingshotSim
     int nextSpawn, nextId, escortsCalled;
     float escortClock;
 
-    public SlingshotSim(Stage stage, Rect arena, int seed = 1)
+    public SlingshotSim(Stage stage, Rect arena, int seed = 1, float scale = 1)
     {
-        this.stage = stage; this.arena = arena; rng = new System.Random(seed);
-        dad.pos = new Vector2(arena.center.x, arena.yMax - 60);
+        this.stage = stage; this.arena = arena; this.scale = scale; rng = new System.Random(seed);
+        dad.pos = new Vector2(arena.center.x, arena.yMax - 40);
         stage.spawns.Sort((a, b) => a.at.CompareTo(b.at));
     }
     public bool Over { get { return phase == Phase.Won || phase == Phase.Lost; } }
@@ -91,13 +93,13 @@ public sealed class SlingshotSim
     }
     // The aiming guide: straight to the first wall, then a short stretch after the bounce. Bodies are not shown; reading
     // the crowd is the player's job.
-    public static List<Vector2> Predict(Vector2 from, Vector2 pull, Rect arena)
+    public static List<Vector2> Predict(Vector2 from, Vector2 pull, Rect arena, float dadRadius)
     {
         var points = new List<Vector2> { from };
         if (pull.magnitude < PullDeadZone) return points;
         Vector2 v = LaunchVelocity(pull), dir = v.normalized, p = from;
         float budget = v.magnitude / DadDrag * .9f, after = -1;
-        Rect inner = new Rect(arena.xMin + DadRadius, arena.yMin + DadRadius, arena.width - 2 * DadRadius, arena.height - 2 * DadRadius);
+        Rect inner = new Rect(arena.xMin + dadRadius, arena.yMin + dadRadius, arena.width - 2 * dadRadius, arena.height - 2 * dadRadius);
         for (float travelled = 0; travelled < budget; travelled += 6)
         {
             p += dir * 6;
@@ -157,7 +159,7 @@ public sealed class SlingshotSim
     }
     public Foe Add(Kind kind, float x, float y = -1)
     {
-        var f = new Foe { id = nextId++, kind = kind, pos = new Vector2(x, y < 0 ? arena.yMin + 22 : y) };
+        var f = new Foe { id = nextId++, kind = kind, scale = scale, pos = new Vector2(x, y < 0 ? arena.yMin + 22 * scale : y) };
         f.maxHp = f.hp = kind == Kind.Boss ? 12 : kind == Kind.Tray ? 3 : 2;
         f.shield = kind == Kind.Tray;
         f.cooldown = .5f + (float)rng.NextDouble() * .5f;   // a short grace so a fresh arrival does not swing at once
@@ -223,22 +225,22 @@ public sealed class SlingshotSim
             else
             {
                 f.attackPose = .25f; f.cooldown = 1.5f;
-                if (distance < f.Radius + DadRadius + 22) Hurt(f.kind == Kind.Tray ? 10 : 8, f.pos);
+                if (distance < f.Radius + DadRadius + 22 * scale) Hurt(f.kind == Kind.Tray ? 10 : 8, f.pos);
             }
             return;
         }
         bool charger = f.kind == Kind.Chair || f.Boss;
         if (charger && f.cooldown <= 0 && distance < (f.Boss ? 340 : 280) && !dad.flying && NoOtherChargerWinding(f))
         { f.windup = f.Boss ? (f.enraged ? .65f : .85f) : .9f; f.aim = delta.normalized; f.facing = f.aim.x >= 0 ? 1 : -1; return; }
-        if (!charger && f.cooldown <= 0 && distance < f.Radius + DadRadius + 14 && !dad.flying)
+        if (!charger && f.cooldown <= 0 && distance < f.Radius + DadRadius + 14 * scale && !dad.flying)
         { f.windup = .4f; f.aim = delta.normalized; return; }
-        if (distance < f.Radius + DadRadius + 4) return;
+        if (distance < f.Radius + DadRadius + 4 * scale) return;
         // Walk toward dad, spreading out so a crowd stays readable and leaves angles to shoot through.
         Vector2 steer = delta / Mathf.Max(1, distance);
         foreach (Foe o in foes)
         {
             if (o == f || o.hp <= 0) continue;
-            Vector2 away = f.pos - o.pos; float d = away.magnitude, clear = f.Radius + o.Radius + 20;
+            Vector2 away = f.pos - o.pos; float d = away.magnitude, clear = f.Radius + o.Radius + 20 * scale;
             if (d > .01f && d < clear) steer += away / d * (1 - d / clear) * 1.2f;
         }
         float speed = (f.Boss ? (f.enraged ? 42 : 32) : f.kind == Kind.Chair ? 42 : f.kind == Kind.Tray ? 40 : 50) * stage.speedScale;
@@ -352,7 +354,7 @@ public sealed class SlingshotSim
                 if (target.shield) BreakTray(target);
                 target.vel = source.vel.normalized * Mathf.Max(300, source.vel.magnitude * .8f);
                 target.air = 0; target.windup = 0; target.dash = 0; target.stun = .6f;
-                Damage(target, 1); source.vel *= .55f;
+                Damage(target, 1); source.vel *= source.Boss ? .85f : .55f;   // a heavy boss ploughs through the small fry
                 events.Add(new Event { text = "연쇄!", pos = target.pos, style = 1, sound = "sfx_chain" });
             }
             else
@@ -379,10 +381,10 @@ public sealed class SlingshotSim
         var s2 = new Stage { label = "B-2", title = "벽꿍과 연쇄", lesson = "맞은 아빠가 사물함이나 다른 아빠에게 부딪히면 연쇄!", par = 4 };
         Add(s2, 0, Kind.Gum, c - 50); Add(s2, 0, Kind.Gum, c - 10); Add(s2, .3f, Kind.Gum, c + 40);
         Add(s2, 5, Kind.Gum, c - 70); Add(s2, 5, Kind.Gum, c); Add(s2, 5.3f, Kind.Gum, c + 70);
-        var s3 = new Stage { label = "B-3", title = "의자 돌진과 쟁반", lesson = "의자 아빠는 돌진 전에 먼저! 쟁반은 옆이나 뒤에서", par = 8 };
+        var s3 = new Stage { label = "B-3", title = "의자 돌진과 쟁반", lesson = "의자 아빠는 돌진 전에 먼저! 쟁반은 옆이나 뒤에서", par = 9 };
         Add(s3, 0, Kind.Gum, c - 40); Add(s3, 0, Kind.Gum, c + 40); Add(s3, 2, Kind.Chair, c);
         Add(s3, 6, Kind.Tray, c - 50); Add(s3, 6.5f, Kind.Gum, c + 50); Add(s3, 10, Kind.Chair, c + 30); Add(s3, 11, Kind.Tray, c - 30); Add(s3, 11.5f, Kind.Gum, c + 70);
-        var s4 = new Stage { label = "B-보스", title = "학부모회장 아빠", lesson = "아빠를 날려 회장님에게 맞히면 그로기! 그때 들이받아 벽으로", par = 12, bossEscorts = true };
+        var s4 = new Stage { label = "B-보스", title = "학부모회장 아빠", lesson = "아빠를 날려 회장님에게 맞히면 그로기! 그때 들이받아 벽으로", par = 15, bossEscorts = true };
         Add(s4, 0, Kind.Boss, c); Add(s4, .5f, Kind.Gum, c - 70); Add(s4, .5f, Kind.Gum, c + 70);
         return new[] { s1, s2, s3, s4 };
     }

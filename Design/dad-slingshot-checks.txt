@@ -18,4 +18,6 @@ PASS clearing every dad wins, three stars with full health and few shots
 PASS too many shots drops the third star
 PASS losing all health loses
 PASS the aiming guide bends at the first wall
+PASS wide view: bodies shrink with the art and dad starts at the bottom of the corridor
+PASS dad touches the painted floor edge before bouncing
 PASS four prototype stages, the last one a boss with escorts

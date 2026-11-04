@@ -68,7 +68,8 @@ public static class SlingshotChecks
         Run(s, 3); var thrown = Parked(s, SlingshotSim.Kind.Gum, Arena.center.x, 600); thrown.vel = new Vector2(0, -800);
         for (int i = 0; i < 60 && boss.groggy <= 0; i++) s.Tick(1 / 120f);
         Expect(boss.groggy > 0, "a dad thrown into the boss makes him groggy", report);
-        int before = boss.hp; s.dad.pos = new Vector2(Arena.center.x, 700); s.Launch(new Vector2(0, -150));
+        thrown.hp = 0; s.Tick(1 / 120f);   // the thrown dad is out of the way; this checks dad's own hit on the opened boss
+        int before = boss.hp; s.dad.pos = boss.pos + new Vector2(0, 240); s.Launch(new Vector2(0, -150));
         bool bossFlew = false; for (int i = 0; i < 240 && boss.hp > before - 4; i++) { s.Tick(1 / 120f); bossFlew |= boss.Flying; }
         Expect(bossFlew && boss.hp <= before - 4, "while groggy, dad sends the boss into the wall for a big hit", report);
 
@@ -80,8 +81,15 @@ public static class SlingshotChecks
         Expect(s.Stars == 2, "too many shots drops the third star", report);
         s = Sim(); gum = s.Add(SlingshotSim.Kind.Gum, Arena.center.x, 650); gum.cooldown = 0; s.dad.health = 1; s.dad.pos = new Vector2(Arena.center.x, 700); Run(s, .8f);
         Expect(s.phase == SlingshotSim.Phase.Lost, "losing all health loses", report);
-        var path = SlingshotSim.Predict(new Vector2(Arena.center.x, 700), new Vector2(150, -40), Arena);
-        Expect(path.Count >= 3 && Mathf.Abs(path[1].x - (Arena.xMax - SlingshotSim.DadRadius)) < 1, "the aiming guide bends at the first wall", report);
+        var path = SlingshotSim.Predict(new Vector2(Arena.center.x, 700), new Vector2(150, -40), Arena, SlingshotSim.DadRadiusBase);
+        Expect(path.Count >= 3 && Mathf.Abs(path[1].x - (Arena.xMax - SlingshotSim.DadRadiusBase)) < 1, "the aiming guide bends at the first wall", report);
+        var small = new SlingshotSim(new SlingshotSim.Stage { label = "T", title = "check", lesson = "", par = 3 }, Arena, 1, DadSlingshotPrototype.DefaultScale);
+        var smallGum = small.Add(SlingshotSim.Kind.Gum, Arena.center.x, 400);
+        Expect(Mathf.Abs(small.DadRadius - 26 * DadSlingshotPrototype.DefaultScale) < .01f && Mathf.Abs(smallGum.Radius - 25 * DadSlingshotPrototype.DefaultScale) < .01f && small.dad.pos.y > Arena.yMax - 60,
+            "wide view: bodies shrink with the art and dad starts at the bottom of the corridor", report);
+        small.dad.pos = new Vector2(Arena.center.x, 600); small.Launch(new Vector2(-150, 0));
+        for (int i = 0; i < 120 && small.dad.vel.x < 0; i++) small.Tick(1 / 120f);
+        Expect(small.dad.pos.x - small.DadRadius <= Arena.xMin + 1, "dad touches the painted floor edge before bouncing", report);
         var stages = SlingshotSim.PrototypeStages(Arena);
         Expect(stages.Length == 4 && stages[3].bossEscorts && stages.All(st => st.spawns.Count > 0), "four prototype stages, the last one a boss with escorts", report);
         return report.ToString();
@@ -92,7 +100,7 @@ public static class SlingshotChecks
     // walkers run at the aiming slow-down. Not a player model; it shows whether stages are clearable and how long they run.
     public static string RunBot()
     {
-        var report = new StringBuilder("Prototype B pacing bot (60 runs per stage per profile)\n");
+        var report = new StringBuilder("Prototype B pacing bot (60 runs per stage per profile; wide view, bodies at " + Mathf.RoundToInt(DadSlingshotPrototype.DefaultScale * 100) + "%)\n");
         // aim error in degrees, seconds spent aiming (min, max), weakest pull share
         var profiles = new[] { new[] { 5f, .8f, 1.4f, .8f }, new[] { 15f, .8f, 1.4f, .8f }, new[] { 20f, 1.5f, 2.5f, .5f } };
         string[] names = { "careful: 5 deg, 0.8-1.4 s aim", "sloppy: 15 deg, 0.8-1.4 s aim", "beginner: 20 deg, 1.5-2.5 s aim, 50-100% pull" };
@@ -105,7 +113,7 @@ public static class SlingshotChecks
                 var wins = new List<SlingshotSim>(); int lost = 0, timeout = 0, stars3 = 0;
                 for (int run = 0; run < 60; run++)
                 {
-                    var stages = SlingshotSim.PrototypeStages(Arena); var s = new SlingshotSim(stages[si], Arena, 100 + run);
+                    var stages = SlingshotSim.PrototypeStages(Arena); var s = new SlingshotSim(stages[si], Arena, 100 + run, DadSlingshotPrototype.DefaultScale);
                     var rng = new System.Random(run * 31 + si * 7); float t = 0;
                     while (!s.Over && t < 180)
                     {

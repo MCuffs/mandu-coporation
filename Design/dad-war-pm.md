@@ -10,6 +10,7 @@
 | 조작·경제·광고·검증 지표 | [dad-war-product-v2.md](dad-war-product-v2.md) | 11/4 채택. 수치는 플레이 관찰 전까지 가설 |
 | 첫 10판·광고 지점·초깃값 | [dad-war-first10-v2.csv](dad-war-first10-v2.csv), [dad-war-ad-placements-v2.csv](dad-war-ad-placements-v2.csv), [dad-war-tuning-v2.json](dad-war-tuning-v2.json) | 게임이 아직 읽지 않는 제안 데이터 |
 | 전체 단계·관문·필요 에셋 | [dad-war-roadmap.md](dad-war-roadmap.md) | 0~4단계, G1~G5, 단계별 에셋 |
+| B안 전환 변경·넓은 시야 | [dad-war-b-changes-v1.md](dad-war-b-changes-v1.md) | 변경 요청 C-01~C-17, 에셋 요청 A-B01~A-B14 |
 | 화면 디자인 진행 | [dad-war-design-roadmap-v1.md](dad-war-design-roadmap-v1.md) | 디자인 세션 작성(D0~D7), 전체 로드맵 단계에 배치 |
 | 결정·2주 상세·위험 | 이 문서 | |
 
