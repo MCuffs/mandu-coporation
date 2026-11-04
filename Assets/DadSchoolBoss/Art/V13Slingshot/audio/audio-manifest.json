@@ -1,0 +1,45 @@
+{
+  "method": "original procedural synthesis; no external samples",
+  "usage": {
+    "pull_pitch_range": [
+      0.8,
+      1.8
+    ],
+    "pull_loop": true,
+    "launch_wall_land": "one shot at event; pool concurrent voices"
+  },
+  "files": [
+    {
+      "file": "sfx_pull_tension.wav",
+      "seconds": 0.8,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak": 0.31999999999999995,
+      "rms": 0.14860920906127714
+    },
+    {
+      "file": "sfx_launch_whoosh.wav",
+      "seconds": 0.36,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak": 0.56,
+      "rms": 0.10440131846765366
+    },
+    {
+      "file": "sfx_wall_boing.wav",
+      "seconds": 0.32,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak": 0.6,
+      "rms": 0.12075766831003902
+    },
+    {
+      "file": "sfx_landing_skid.wav",
+      "seconds": 0.28,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak": 0.48000000000000004,
+      "rms": 0.07326956371205977
+    }
+  ]
+}

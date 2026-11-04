@@ -1,0 +1,14 @@
+{
+  "image": "bg/corridor_floor1_long.png",
+  "nativeSize": [1080, 2340],
+  "coordinateSystem": "pixels, origin top-left; references measured from the illustration, verify in renderer",
+  "verticalWallFrontX": {"left": 103, "right": 976, "tolerancePixels": 4},
+  "floorTopY": 532,
+  "floorBottomY": 2285,
+  "doorRect": [449, 294, 185, 238],
+  "centerCrop9x16": [0, 210, 1080, 1920],
+  "lockerIntervalsY": [[568, 820], [1029, 1277], [1488, 1735], [1935, 2188]],
+  "sides": ["left", "right"],
+  "cropMapping": {"9x16": "screenX = pixelX / 2; screenY = (pixelY - 210) / 2", "9x19.5": "screenX = pixelX / 2; screenY = pixelY / 2"},
+  "integrationNotes": ["Apply character collision radius inside these wall planes.", "Lockers share these same front X positions; do not derive a sloped collision wall from the art.", "Only locker intervals receive locker dents. Window intervals are separate.", "These are asset references, not an automatic change to the current prototype arena."]
+}
