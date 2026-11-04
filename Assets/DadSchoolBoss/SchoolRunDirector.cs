@@ -60,8 +60,8 @@ public sealed class SchoolRunDirector
     {
         get
         {
-            if (Plan.floorBoss) return BossGroggy ? "그로기!  지금 벽으로 날리세요" : "졸개를 짱에게 날리면 그로기!";
-            if (Plan.midBoss) return "왕 짱은 무거워요 · 벽꿍과 연쇄로 몰아붙이세요";
+            if (Plan.floorBoss) return BossGroggy ? "그로기!  지금 벽으로 날리세요" : "다른 아빠를 보스에게 날리면 그로기!";
+            if (Plan.midBoss) return "큰아빠는 무거워요 · 벽꿍과 연쇄로 몰아붙이세요";
             if (Lesson == 0) return "① 드래그로 다가가면 아빠가 자동으로 펀치!";
             if (Lesson == 1) return "② 적의 뒤에 벽이 오도록 자리를 잡으세요";
             if (Lesson == 2) return "③ 적 둘을 일렬로 세워 한 번에 날리세요";

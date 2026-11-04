@@ -15,3 +15,15 @@ PASS retry resets health and timer
 PASS phone replaces the special instead of stacking lunchbox
 PASS defeat pays the consolation share and awards no win
 PASS home returns to a usable menu
+PASS tapping a lunchbox starts the opening animation
+PASS the opening ends on a gear card
+PASS equipping the card raises power and closes the reveal
+PASS a wall slam next to a locker dents it
+PASS boss slams count too, and a spot stops at stage 3
+PASS doors and the back wall take no locker dents
+PASS a new battle starts with clean lockers
+PASS dad: idle > start > walk > stop > idle, and a quick restart skips the start pose (movestart walk movestop idle walk)
+PASS gum walks walk_0 > pass_0 > walk_1 > pass_1 by distance (walk0 pass0 walk1 pass1 walk0)
+PASS knockback does not advance the walk cycle
+PASS gum shows the wall pose only right after a side-wall contact (wallhit0 pass0 fly0)
+PASS a gum knocked out on the wall slumps there; one knocked out mid-floor still flies off

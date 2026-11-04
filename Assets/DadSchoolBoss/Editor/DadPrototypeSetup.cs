@@ -53,6 +53,76 @@ public static class DadPrototypeSetup
             PlayerPrefs.Save(); g.ReloadProgress(); g.UseProgress(original); DeleteTemp(temp); g.GoHome(); Debug.Log("DAD_SCREENS_DONE: " + dir);
         });
     }
+    // v6 reward screens on a temporary save: lunchbox poses, the card, the gear panel, the result button and dents per floor.
+    static void QueueRewardAudit(string dir)
+    {
+        Directory.CreateDirectory(dir);
+        var g = UnityEngine.Object.FindObjectOfType<DadSchoolPrototype>();
+        Action<string> shot = name => ScreenCapture.CaptureScreenshot(Path.Combine(dir, name + ".png"), 2);
+        DadProgress original = g.Progress; string temp = TempSavePath("rewards");
+        Step(1, () => { var p = new DadProgress(DadEconomy.Load(), temp) { Rng = new System.Random(3) }; p.Save.lunchboxes = 12; p.Save.bestStage = 41; p.Save.coins = 500; g.UseProgress(p); g.GoHome(); SetMember(g, "gearPanel", true); });
+        Step(10, () => shot("r01-gear-empty"));
+        Step(1, () => g.BeginReveal());
+        foreach (float t in new[] { .1f, .28f, .45f, .62f, 1.2f }) { float at = t; Step(1, () => SetMember(g, "revealClock", at)); Step(1, () => shot("r02-reveal-" + Mathf.RoundToInt(at * 100))); }
+        Step(1, () => g.DecideReveal(true)); Step(6, () => shot("r03-equipped"));
+        Step(1, () => { g.Progress.Save.lunchboxes = 1; g.BeginReveal(); g.SkipRevealToCard(); }); Step(1, () => SetMember(g, "revealClock", 1.2f)); Step(2, () => shot("r04-card-compare"));
+        Step(1, () => g.DecideReveal(false));
+        Step(1, () => { g.Progress.Save.lunchboxes = 30; SetMember(g, "toastTime", 0f); }); Step(1, () => g.SendMessage("OpenAllBoxes")); Step(4, () => shot("r05-open-all"));
+        Step(1, () => { SetMember(g, "gearPanel", false); g.Progress.Save.lunchboxes = 1; g.StartRun(1); g.Combat.state = RunState.Won; });
+        Step(10, () => shot("r06-result-lunchbox"));
+        foreach (int stage in new[] { 1, 21, 41 })
+        {
+            int s = stage;
+            Step(1, () =>
+            {
+                g.StartStage(s); g.Combat.enemies.Clear(); g.Combat.spawning = false; Rect a = g.PlayArea; int n = 0;
+                foreach (float y in new[] { 290f, 365f, 440f, 466f, 515f, 548f, 580f, 590f, 652f, 665f, 740f })
+                    for (int k = 0; k <= (n++ % 3); k++) { g.DentWall(new Vector2(a.xMin, y + 60)); g.DentWall(new Vector2(a.xMax, y + 60)); }
+            });
+            Step(12, () => shot("r07-dents-" + s));
+        }
+        Step(2, () => { g.UseProgress(original); DeleteTemp(temp); g.GoHome(); Debug.Log("DAD_REWARDS_DONE: " + dir); });
+    }
+    // v7 poses in the real battle view, held long enough to photograph (they last 70-120 ms in play).
+    static void QueueMotionAudit(string dir)
+    {
+        Directory.CreateDirectory(dir);
+        var g = UnityEngine.Object.FindObjectOfType<DadSchoolPrototype>();
+        Action<string> shot = name => ScreenCapture.CaptureScreenshot(Path.Combine(dir, name + ".png"), 2);
+        DadProgress original = g.Progress; string temp = TempSavePath("motion");
+        var mine = new HashSet<Fighter>();
+        Action keepMine = () => g.Combat.enemies.RemoveAll(e => !mine.Contains(e));
+        Step(1, () => { g.UseProgress(new DadProgress(DadEconomy.Load(), temp)); g.StartRun(1); g.Combat.enemies.Clear(); g.Combat.spawning = false; });
+        Step(20, () => SetMember(g, "stick", new Vector2(1, 0)));
+        Step(5, () => SetMember(g, "dadStartPose", 30f)); Step(2, () => shot("m01-dad-start"));
+        Step(1, () => SetMember(g, "dadStartPose", 0f)); Step(3, () => shot("m02-dad-walk"));
+        Step(1, () => SetMember(g, "stick", Vector2.zero)); Step(12, () => SetMember(g, "dadStopPose", 30f)); Step(2, () => shot("m03-dad-stop"));
+        Step(1, () =>
+        {
+            SetMember(g, "dadStopPose", 0f); var c = g.Combat; Rect a = g.PlayArea; c.enemies.Clear();
+            var w = c.AddEnemy(new Vector2(a.xMax, 470), 0); w.stun = 30; mine.Add(w);
+            var k = c.AddEnemy(new Vector2(a.xMin, 600), 0); k.stun = 30; k.wallCooldown = .3f; k.hp = 0; mine.Add(k);
+            var walker = c.AddEnemy(new Vector2(130, 300), 0); mine.Add(walker);
+        });
+        Step(1, () => { keepMine(); foreach (Fighter e in g.Combat.enemies) if (e.pos.x > 400) e.wallCooldown = 30; var list = (System.Collections.IList)ProtoField("corpses").GetValue(g); foreach (object o in list) o.GetType().GetField("life").SetValue(o, .4f); });
+        Step(1, () => shot("m04-wall-hit-and-crumple"));
+        for (int i = 0; i < 4; i++) { int n = i; Step(4, () => { keepMine(); foreach (Fighter e in g.Combat.enemies) if (e.pos.x > 400) e.wallCooldown = 30; shot("m05-gum-walk-" + n); }); }
+        Step(2, () => { g.UseProgress(original); DeleteTemp(temp); g.GoHome(); Debug.Log("DAD_MOTION_DONE: " + dir); });
+    }
+    // "아빠 전쟁" story text on a temporary save: floor-boss clear, the ending, a timeout loss and the lunchbox line.
+    static void QueueStoryAudit(string dir)
+    {
+        Directory.CreateDirectory(dir);
+        var g = UnityEngine.Object.FindObjectOfType<DadSchoolPrototype>();
+        Action<string> shot = name => ScreenCapture.CaptureScreenshot(Path.Combine(dir, name + ".png"), 2);
+        DadProgress original = g.Progress; string temp = TempSavePath("story");
+        Step(1, () => { var p = new DadProgress(DadEconomy.Load(), temp); p.Save.bestStage = 60; g.UseProgress(p); });
+        foreach (int stage in new[] { 20, 60 }) { int st = stage; Step(1, () => { g.StartStage(st); g.Combat.state = RunState.Won; }); Step(10, () => shot("s-clear-" + st)); }
+        Step(1, () => { g.StartStage(3); g.Combat.elapsed = 999; }); Step(10, () => shot("s-timeout"));
+        Step(1, () => { g.GoHome(); g.Progress.Save.lunchboxes = 1; g.BeginReveal(); }); Step(1, () => SetMember(g, "revealClock", .1f)); Step(1, () => shot("s-lunchbox"));
+        Step(1, () => g.DecideReveal(true));
+        Step(2, () => { g.UseProgress(original); DeleteTemp(temp); g.GoHome(); Debug.Log("DAD_STORY_DONE: " + dir); });
+    }
     static void Poll()
     {
         if (pump && EditorApplication.isPlaying) { EditorApplication.QueuePlayerLoopUpdate(); UnityEditorInternal.InternalEditorUtility.RepaintAllViews(); }
@@ -81,6 +151,7 @@ public static class DadPrototypeSetup
             else if (command.StartsWith("stage:") && EditorApplication.isPlaying) UnityEngine.Object.FindObjectOfType<DadSchoolPrototype>().StartStage(int.Parse(command.Substring(6))); // debug
             else if (command == "refresh") AssetDatabase.Refresh();
             else if (command == "applyicon") ApplyAppIcon();
+            else if (command == "retitle") Retitle();
             else if (command.StartsWith("simdebug:"))
             {
                 // debug: simdebug:<stage>:<power ratio>:<0 novice | 1 skilled> -> one line per seed in the log
@@ -113,6 +184,9 @@ public static class DadPrototypeSetup
                 var charger = c.AddEnemy(c.player + new Vector2(-30, 160), 1); charger.windup = 3; charger.aim = (c.player - charger.pos).normalized; // long telegraph for the capture
             }
             else if (command.StartsWith("screens:") && EditorApplication.isPlaying) QueueScreenAudit(command.Substring(8));
+            else if (command.StartsWith("rewards:") && EditorApplication.isPlaying) QueueRewardAudit(command.Substring(8));
+            else if (command.StartsWith("motion:") && EditorApplication.isPlaying) QueueMotionAudit(command.Substring(7));
+            else if (command.StartsWith("story:") && EditorApplication.isPlaying) QueueStoryAudit(command.Substring(6));
             else if (command == "pump" && EditorApplication.isPlaying) { pump = true; Application.runInBackground = true; }
             else if (command == "stop") { pump = false; EditorApplication.isPlaying = false; }
             Debug.Log("DAD_COMMAND_OK: " + command);
@@ -143,7 +217,7 @@ public static class DadPrototypeSetup
         var scenes = new System.Collections.Generic.List<EditorBuildSettingsScene>();
         foreach (var item in EditorBuildSettings.scenes) if (item.path != ScenePath) scenes.Add(new EditorBuildSettingsScene(item.path, false));
         scenes.Insert(0, new EditorBuildSettingsScene(ScenePath, true)); EditorBuildSettings.scenes = scenes.ToArray();
-        PlayerSettings.productName = "아빠가 학교 짱을 너무 잘 잡음";
+        PlayerSettings.productName = DadSchoolPrototype.Title;
         PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
         PlayerSettings.defaultScreenWidth = 540; PlayerSettings.defaultScreenHeight = 960;
         PlayerSettings.defaultIsNativeResolution = false; PlayerSettings.fullScreenMode = FullScreenMode.Windowed;
@@ -227,6 +301,80 @@ public static class DadPrototypeSetup
         var bgm = (AudioImporter)AssetImporter.GetAtPath("Assets/DadSchoolBoss/Resources/DadV5/audio/bgm_battle.wav");
         Expect(frame.maxTextureSize == 512 && frame.textureCompression != TextureImporterCompression.Uncompressed && !frame.mipmapEnabled && backdrop.maxTextureSize == 2048
             && bgm.defaultSampleSettings.loadType == AudioClipLoadType.Streaming, "v5 import rules: 512 compressed frames, 2048 backgrounds, streamed music", report);
+        // v6 reward art (Design/dad-reward-assets-v6.md), prepared by Tools/prepare_dad_rewards_v6.py
+        bool rewards = art.rewards.Count == 12;
+        foreach (string n in new[] { "lunchbox_closed", "lunchbox_opening", "lunchbox_open", "gear_card_common", "gear_card_rare", "gear_card_best", "locker_damage_1", "locker_damage_2", "locker_damage_3", "locker_damage_3_steel" }) if (art.Reward(n) == null) rewards = false;
+        Expect(rewards, "v6 rewards: 3 lunchbox poses, 3 card frames, 3 locker dents and their steel copies", report);
+        var lunch = (TextureImporter)AssetImporter.GetAtPath("Assets/DadSchoolBoss/Resources/DadV6/lunchbox_open.png");
+        var card = (TextureImporter)AssetImporter.GetAtPath("Assets/DadSchoolBoss/Resources/DadV6/gear_card_rare.png");
+        var dent = (TextureImporter)AssetImporter.GetAtPath("Assets/DadSchoolBoss/Resources/DadV6/locker_damage_2.png");
+        Expect(lunch != null && card != null && dent != null && lunch.maxTextureSize == 1024 && card.maxTextureSize == 512 && dent.maxTextureSize == 512 && card.alphaIsTransparency && !card.mipmapEnabled && card.wrapMode == TextureWrapMode.Clamp,
+            "v6 import rules: lunchbox 1024, cards and dents 512, alpha, no mips, clamp", report);
+        bool icons = true;
+        for (int s = 0; s < DadProgress.SlotCount; s++) for (int r = 0; r < DadProgress.RarityCount; r++) if (art.Gear(DadProgress.ItemIcon(s, r)) == null) icons = false;
+        Expect(icons, "every gear slot x rarity has its v5 icon", report);
+        // v7 motion poses (Design/dad-motion-assets-v7.md), normalized by Tools/prepare_dad_motion_v7.py
+        DadArt.Character dadArt, gumArt;
+        Expect(art.characters.TryGetValue("dad", out dadArt) && art.characters.TryGetValue("gum", out gumArt) && dadArt.Count("movestart") == 1 && dadArt.Count("movestop") == 1
+            && gumArt.Count("pass") == 2 && gumArt.Count("wallhit") == 1 && gumArt.Count("crumple") == 1 && gumArt.Count("walk") == 2, "v7 motion: dad start/stop, gum passing x2, wall hit, crumple (v5 walk untouched)", report);
+        var motionPose = (TextureImporter)AssetImporter.GetAtPath("Assets/DadSchoolBoss/Resources/DadV7/gum_pass_0.png");
+        Expect(motionPose != null && motionPose.maxTextureSize == 512 && motionPose.alphaIsTransparency && !motionPose.mipmapEnabled, "v7 import rules match the v5 character frames", report);
+    }
+    static MethodInfo ProtoMethod(string name) { return typeof(DadSchoolPrototype).GetMethod(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance); }
+    static FieldInfo ProtoField(string name) { return typeof(DadSchoolPrototype).GetField(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance); }
+    // Lunchbox gear: rolls, equip/dismantle, persistence, v1 migration, and calibration against the simulation's curve.
+    static void RunGearChecks(StringBuilder report)
+    {
+        var eco = DadEconomy.Load(); string temp = TempSavePath("gear");
+        try
+        {
+            var p = new DadProgress(eco, temp) { Rng = new System.Random(7) };
+            Expect(Mathf.Abs(p.GearMultiplier - 1) < 1e-5f && !p.HasPendingGear && !p.OpenLunchbox(), "fresh save: no gear and nothing to open", report);
+            p.Save.lunchboxes = 8;
+            Expect(p.OpenLunchbox() && p.HasPendingGear && p.Save.pendingRarity == eco.gearFirstRarity && p.Save.lunchboxes == 7 && !p.OpenLunchbox(), "first lunchbox is a guaranteed rare card, decided before the next box opens", report);
+            float value = p.Save.pendingValue; int first = p.Save.pendingSlot;
+            p.EquipPending();
+            Expect(!p.HasPendingGear && p.HasGear(first) && Mathf.Abs(p.GearMultiplier - (1 + value)) < 1e-5f, "equipping adds the card's value to power", report);
+            var slots = new HashSet<int> { first };
+            for (int i = 0; i < 5; i++) { p.OpenLunchbox(); slots.Add(p.Save.pendingSlot); p.EquipPending(); }
+            Expect(slots.Count == DadProgress.SlotCount, "the first six boxes fill six different slots", report);
+            p.OpenLunchbox(); int rarity = p.Save.pendingRarity; double coins = p.Save.coins, pay = p.DismantleCoins(rarity); float mult = p.GearMultiplier;
+            p.DismantlePending();
+            Expect(pay > 0 && Math.Abs(p.Save.coins - coins - pay) < 1e-6 && Mathf.Abs(p.GearMultiplier - mult) < 1e-6f, "dismantling pays coins and leaves the gear alone", report);
+            p.Save.lunchboxes = 1; p.OpenLunchbox(); int oldRarity = p.Save.gearRarity[p.Save.pendingSlot]; coins = p.Save.coins;
+            p.EquipPending();
+            Expect(Math.Abs(p.Save.coins - coins - p.DismantleCoins(oldRarity)) < 1e-6, "equipping over an item dismantles the old one for coins", report);
+            p.Save.lunchboxes = 1; p.OpenLunchbox(); int pendingSlot = p.Save.pendingSlot; float pendingValue = p.Save.pendingValue; p.Persist();
+            var back = new DadProgress(eco, temp);
+            Expect(back.HasPendingGear && back.Save.pendingSlot == pendingSlot && Mathf.Abs(back.Save.pendingValue - pendingValue) < 1e-6f && Mathf.Abs(back.GearMultiplier - p.GearMultiplier) < 1e-5f,
+                "an undecided card and the equipped set survive a reload", report);
+            back.Save.lunchboxes = 40; float beforeAll = back.GearMultiplier; int equipped; double paid;
+            int opened = back.OpenAllLunchboxes(out equipped, out paid);
+            Expect(opened == 40 && back.Save.lunchboxes == 0 && !back.HasPendingGear && back.GearMultiplier >= beforeAll && paid > 0, "open all decides every box, never lowers power and pays for the rest", report);
+            foreach (int boxes in new[] { 50, 150 })
+            {
+                double sum = 0; const int seeds = 150;
+                for (int seed = 0; seed < seeds; seed++)
+                {
+                    var q = new DadProgress(eco, TempSavePath("calib")) { Rng = new System.Random(seed) };   // never persisted
+                    q.Save.lunchboxes = boxes; int e; double c; q.OpenAllLunchboxes(out e, out c);
+                    sum += q.GearMultiplier - 1;
+                }
+                float ratio = (float)(sum / seeds) / (eco.gearLogScale * Mathf.Log(1 + boxes / 10f));
+                Expect(ratio > .8f && ratio < 1.2f, "rolled gear after " + boxes + " boxes stays within 20% of the simulation curve (" + ratio.ToString("F2") + "x)", report);
+            }
+            File.WriteAllText(temp, "{\"version\":1,\"coins\":10,\"lunchboxes\":2,\"boxesOpened\":30,\"bestStage\":5,\"currentStage\":5}");
+            var old = new DadProgress(eco, temp);
+            Expect(old.Save.version == 2 && !old.HasPendingGear && old.Save.lunchboxes == 2 && Mathf.Abs(old.GearMultiplier - (1 + eco.gearLogScale * Mathf.Log(4f))) < 1e-4f, "a v1 save keeps its gear power as a starter set", report);
+        }
+        finally { DeleteTemp(temp); }
+    }
+    // The app name follows the game title (11/4: "아빠 전쟁"). Editor saves live under the product name, so copy them first.
+    static void Retitle()
+    {
+        if (EditorApplication.isPlaying) { Debug.LogWarning("Stop Play Mode before renaming the app."); return; }
+        PlayerSettings.productName = DadSchoolPrototype.Title; AssetDatabase.SaveAssets();
+        Debug.Log("DAD_RETITLED: " + PlayerSettings.productName + " data=" + Application.persistentDataPath);
     }
     [MenuItem("Dad School Boss/Apply App Icon")]
     public static void ApplyAppIcon()
@@ -250,6 +398,7 @@ public static class DadPrototypeSetup
         try
         {
             game.UseProgress(new DadProgress(DadEconomy.Load(), temp));
+            game.SelectGear(0);   // the player's own loadout (e.g. the phone, which has no fever) is restored in finally
             game.StartRun();
             Expect(!game.Home && game.Combat.state == RunState.Fighting && game.PlayingStage == 1 && game.Director.Plan.lesson == 1, "start plays the saved stage (1-1 on a fresh save)", report);
             Expect(game.Combat.arena == game.PlayArea, "rendering and simulation use the same arena", report);
@@ -281,6 +430,54 @@ public static class DadPrototypeSetup
             game.Combat.health = 0; game.Combat.state = RunState.Lost; game.SendMessage("Update");
             Expect(game.Wins == oldWins + 1 && game.LastReward != null && !game.LastReward.won && game.Progress.Save.coins > coins && game.Progress.Save.lossesAtStage == 1, "defeat pays the consolation share and awards no win", report);
             game.GoHome(); Expect(game.Home && !game.Paused, "home returns to a usable menu", report);
+            // v6: the lunchbox opens into a gear card; equipping it raises power.
+            game.Progress.Save.lunchboxes = 2; float gearBefore = game.Progress.GearMultiplier;
+            Expect(game.BeginReveal() && game.Revealing && !game.RevealShowsCard, "tapping a lunchbox starts the opening animation", report);
+            game.SkipRevealToCard();
+            Expect(game.RevealShowsCard && game.Progress.HasPendingGear, "the opening ends on a gear card", report);
+            game.DecideReveal(true);
+            Expect(!game.Revealing && game.Progress.GearMultiplier > gearBefore && game.Progress.Save.lunchboxes == 1, "equipping the card raises power and closes the reveal", report);
+            // v6: side-wall slams dent the lockers on 1F; three stages per spot; doors and the back wall stay clean.
+            game.StartRun(1); Rect a = game.PlayArea;
+            MethodInfo impact = typeof(DadSchoolPrototype).GetMethod("ImpactJuice", BindingFlags.NonPublic | BindingFlags.Instance);
+            impact.Invoke(game, new object[] { new CombatEvent("벽꿍!", new Vector2(a.xMin, 466 + 60), 1) });
+            Expect(game.DentCount == 1 && game.MaxDentLevel == 1, "a wall slam next to a locker dents it", report);
+            for (int i = 0; i < 4; i++) impact.Invoke(game, new object[] { new CombatEvent("짱 벽꿍!!", new Vector2(a.xMax, 548 + 70), 3) });
+            Expect(game.DentCount == 2 && game.MaxDentLevel == 3, "boss slams count too, and a spot stops at stage 3", report);
+            game.DentWall(new Vector2(a.xMin, 300 + 60)); game.DentWall(new Vector2(a.center.x, a.yMin));
+            Expect(game.DentCount == 2, "doors and the back wall take no locker dents", report);
+            game.StartRun(1); Expect(game.DentCount == 0, "a new battle starts with clean lockers", report);
+            // v7: transition poses (README order) — dad idle > start > walk > stop > idle; gum walk_0 > pass_0 > walk_1 > pass_1.
+            game.Combat.enemies.Clear(); game.Combat.spawning = false;
+            Func<string> dadPose = () => (string)ProtoMethod("DadAction").Invoke(game, new object[] { 0 });
+            Action<float> motion = dt => ProtoMethod("UpdateMotion").Invoke(game, new object[] { dt });
+            Func<Fighter, string> enemyPose = f => { var args = new object[] { f, 0 }; string act = (string)ProtoMethod("EnemyAction").Invoke(game, args); return act + (int)args[1]; };
+            game.Combat.moveVelocity = Vector2.zero; motion(.3f);
+            game.Combat.moveVelocity = new Vector2(172, 0); motion(.016f); string start = dadPose(); motion(.1f); string walk = dadPose(); motion(.3f);
+            game.Combat.moveVelocity = Vector2.zero; motion(.016f); string stop = dadPose(); motion(.12f); string idle = dadPose();
+            game.Combat.moveVelocity = new Vector2(172, 0); motion(.016f); string jiggle = dadPose();
+            Expect(start == "movestart" && walk == "walk" && stop == "movestop" && idle == "idle" && jiggle == "walk", "dad: idle > start > walk > stop > idle, and a quick restart skips the start pose (" + start + " " + walk + " " + stop + " " + idle + " " + jiggle + ")", report);
+            game.Combat.moveVelocity = Vector2.zero;
+            var gumGuy = game.Combat.AddEnemy(game.PlayArea.center, 0); gumGuy.locomotion = new Vector2(75, 0);
+            var seen = new List<string> { enemyPose(gumGuy) };
+            for (int i = 0; i < 30; i++) { motion(.05f); string pose = enemyPose(gumGuy); if (seen[seen.Count - 1] != pose) seen.Add(pose); }
+            string cycle = string.Join(" ", seen.GetRange(0, Mathf.Min(5, seen.Count)));
+            Expect(cycle == "walk0 pass0 walk1 pass1 walk0", "gum walks walk_0 > pass_0 > walk_1 > pass_1 by distance (" + cycle + ")", report);
+            string held = enemyPose(gumGuy); gumGuy.velocity = new Vector2(30, 0); motion(.5f); gumGuy.velocity = Vector2.zero;
+            Expect(enemyPose(gumGuy) == held, "knockback does not advance the walk cycle", report);
+            gumGuy.pos = new Vector2(game.PlayArea.xMax, 500); gumGuy.wallCooldown = .30f; string wallPose = enemyPose(gumGuy);
+            gumGuy.wallCooldown = .20f; string recovered = enemyPose(gumGuy);
+            gumGuy.pos = new Vector2(game.PlayArea.center.x, game.PlayArea.yMin); gumGuy.wallCooldown = .30f; gumGuy.velocity = new Vector2(0, -400); string backWall = enemyPose(gumGuy);
+            Expect(wallPose == "wallhit0" && recovered != "wallhit0" && backWall != "wallhit0", "gum shows the wall pose only right after a side-wall contact (" + wallPose + " " + recovered + " " + backWall + ")", report);
+            var corpses = (System.Collections.IList)ProtoField("corpses").GetValue(game); corpses.Clear();
+            var flyer = game.Combat.AddEnemy(game.PlayArea.center, 0);
+            gumGuy.pos = new Vector2(game.PlayArea.xMin, 520); gumGuy.wallCooldown = .29f; gumGuy.velocity = Vector2.zero;
+            ProtoMethod("RememberEnemies").Invoke(game, null); gumGuy.hp = 0; flyer.hp = 0;
+            ProtoMethod("UpdateJuice").Invoke(game, new object[] { .016f });
+            Func<object, string, bool> flag = (o, n) => (bool)o.GetType().GetField(n).GetValue(o);
+            int wallBodies = 0, flying = 0; foreach (object o in corpses) { if (flag(o, "wall") && !flag(o, "right")) wallBodies++; else if (!flag(o, "wall")) flying++; }
+            Expect(corpses.Count == 2 && wallBodies == 1 && flying == 1, "a gum knocked out on the wall slumps there; one knocked out mid-floor still flies off", report);
+            game.GoHome();
         }
         finally
         {
@@ -295,6 +492,7 @@ public static class DadPrototypeSetup
     {
         var report = new StringBuilder("School stage, economy and equipment checks\n");
         RunEconomyChecks(report);
+        RunGearChecks(report);
         RunStageChecks(report);
         // Boss break rule: punches only shove; a thrown body makes it groggy; only then can it be launched.
         var rule = new AlleyCombat(); rule.Start(); rule.spawning = false; rule.groggyBoss = true;
@@ -362,14 +560,17 @@ public static class DadPrototypeSetup
         c = new AlleyCombat(); c.Start(); c.spawning = false;
         var smashed = Tray(c, c.player + new Vector2(80, 0), -1); c.Special();
         Expect(!smashed.shield, "dad's special smashes trays", report);
-        // Opponents must read as adults: every profile states an adult age.
+        // "아빠 전쟁": every opponent is an adult and some kid's dad (the name tag or its line says whose).
         var ages = new System.Text.RegularExpressions.Regex(@"\((\d+)세\)");
-        var allNames = new List<string>();
-        foreach (string f in new[] { "ProfileNames", "BossTagNames" }) allNames.AddRange((string[])typeof(DadSchoolPrototype).GetField(f, BindingFlags.NonPublic | BindingFlags.Static).GetValue(null));
-        foreach (string name in new[] { "껌 짱 (34세)", "의자 짱 (41세)", "쟁반 짱 (47세)", "학교 짱 (42세)", "급식실 실세 (52세)", "체육 선생님 (51세)" })
+        Func<string, string[]> table = f => (string[])typeof(DadSchoolPrototype).GetField(f, BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
+        foreach (var pair in new[] { new[] { "ProfileNames", "ProfileLines" }, new[] { "EliteTagNames", "EliteTagLines" }, new[] { "BossTagNames", "BossTagLines" } })
         {
-            string[] names = allNames.ToArray();
-            Expect(Array.IndexOf(names, name) >= 0 && int.Parse(ages.Match(name).Groups[1].Value) >= 30, "opponent profile is an adult: " + name, report);
+            string[] names = table(pair[0]), lines = table(pair[1]);
+            for (int i = 0; i < names.Length; i++)
+            {
+                var age = ages.Match(names[i]);
+                Expect(age.Success && int.Parse(age.Groups[1].Value) >= 30 && (names[i] + lines[i]).Contains("아빠"), "opponent is an adult dad: " + names[i] + " / " + lines[i], report);
+            }
         }
     }
     static void RunEconomyChecks(StringBuilder report)

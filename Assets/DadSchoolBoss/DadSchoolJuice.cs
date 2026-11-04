@@ -5,19 +5,22 @@ using SecondFistGame;
 public sealed partial class DadSchoolPrototype
 {
     sealed class Debris { public Vector2 p, v; public float life, total; public Color color; }
-    sealed class Corpse { public Vector2 p, v; public int frame; public bool flip; public float size, stand, spin, life = .55f; public string id; }
+    sealed class Corpse { public Vector2 p, v; public int frame; public bool flip, wall, right; public float size, stand, spin, lift, life = .55f; public string id; }
     readonly List<Debris> debris = new List<Debris>();
     readonly List<Corpse> corpses = new List<Corpse>();
     readonly Dictionary<int, Fighter> remembered = new Dictionary<int, Fighter>();
     readonly int[] lockerDamage = new int[6];
-    // Every opponent is a grown man who never left school; the first of each kind per run wears a name tag saying so.
+    // "아빠 전쟁": every opponent is some other kid's dad (Design/dad-war-plan.md); the first of each kind per run wears a name tag.
     readonly HashSet<int> introducedKinds = new HashSet<int>();
     readonly Dictionary<int, float> nameTags = new Dictionary<int, float>();
     static int ProfileKind(Fighter e) { return e.boss ? 3 : e.kind == 1 ? 1 : e.shield || e.trayBroken ? 2 : 0; }
-    static readonly string[] ProfileNames = { "껌 짱 (34세)", "의자 짱 (41세)", "쟁반 짱 (47세)", "학교 짱 (42세)" };
-    static readonly string[] ProfileLines = { "12년째 휴학 중", "동창회 난동 전문", "급식실 무단 점거", "15년째 유급 중" };
-    static readonly string[] BossTagNames = { "학교 짱 (42세)", "급식실 실세 (52세)", "체육 선생님 (51세)" };
-    static readonly string[] BossTagLines = { "15년째 유급 중", "30년째 급식 조리 중", "만년 기간제" };
+    static readonly string[] ProfileNames = { "지호 아빠 (34세)", "서연이 아빠 (41세)", "민준이 아빠 (47세)", "학부모회장 아빠 (42세)" };
+    static readonly string[] ProfileLines = { "육아휴직 3개월 차", "운동회 자리 맡기 전문", "급식 봉사 12년 차", "학부모 단톡방 방장" };
+    // Mid-bosses are the bigger brother of a regular: 큰아빠 (the kid's uncle, literally "big dad").
+    static readonly string[] EliteTagNames = { "지호 큰아빠 (39세)", "서연이 큰아빠 (46세)", "민준이 큰아빠 (52세)" };
+    static readonly string[] EliteTagLines = { "동생 대신 출동", "의자도 두 개", "쟁반도 두 배" };
+    static readonly string[] BossTagNames = { "학부모회장 아빠 (42세)", "급식 봉사 반장 (52세)", "체육 선생님 (51세)" };
+    static readonly string[] BossTagLines = { "학부모 단톡방 방장", "세쌍둥이 아빠", "두 아이 아빠 · 계주 10연패" };
     static int TagKey(Fighter e) { return ProfileKind(e) + (e.elite ? 10 : 0); }
     static float BodySize(Fighter e) { return (e.boss ? 205 : e.kind == 1 ? 165 : 142) * (e.elite ? 1.45f : 1); }
     float chainBadge;
@@ -64,12 +67,55 @@ public sealed partial class DadSchoolPrototype
         if (Combat.attackLead > 0) return "punch";
         if (Combat.punch > .01f) { index = 1; return "punch"; }
         if (Combat.attackAnimation > .05f) { index = 2; return "punch"; }
-        if (Combat.moveVelocity.magnitude > 15) { index = Mathf.FloorToInt(walkPhase); return "walk"; }
+        if (Combat.moveVelocity.magnitude > 15)
+        {
+            if (dadStartPose > 0 && HasPose("dad", "movestart")) return "movestart";
+            index = Mathf.FloorToInt(walkPhase); return "walk";
+        }
+        if (dadStopPose > 0 && HasPose("dad", "movestop")) return "movestop";
         index = Mathf.FloorToInt(clock / .6f); return "idle";
+    }
+    // ---- v7 motion links (Design/dad-motion-assets-v7.md) ------------------------------------------
+    const float GumStride = 20;           // px walked per frame of the gum cycle walk_0 > pass_0 > walk_1 > pass_1
+    const float WallBackOffset = 150;     // canvas px from the pivot to the back of the wall poses (Tools/prepare_dad_motion_v7.py)
+    const float WallPress = 12;           // how far the back may sink into the wall line on impact
+    const float WallHitTime = .07f, CrumpleTime = .23f;
+    readonly Dictionary<int, float> strides = new Dictionary<int, float>();
+    bool dadWasMoving;
+    float dadStateTime, dadStartPose, dadStopPose;
+    bool HasPose(string id, string action) { DadArt.Character c; return art != null && art.characters.TryGetValue(id, out c) && c.Has(action); }
+    bool AtSideWall(Fighter e) { return Mathf.Abs(e.pos.x - PlayArea.xMin) < 1.5f || Mathf.Abs(e.pos.x - PlayArea.xMax) < 1.5f; }
+    // Only a real side-wall contact in the last few frames counts; being airborne alone never plays the wall pose.
+    bool WallHitNow(Fighter e) { return e.wallCooldown > .30f - WallHitTime && AtSideWall(e); }
+    float WallPoseX(bool right, float stand, float feetX, bool impact)
+    {
+        WallFace face = CurrentWall; float line = right ? face.backRight : face.backLeft, off = WallBackOffset * stand / 560f;
+        if (!impact) return right ? line - off : line + off;                       // slumped with the back on the wall
+        return right ? Mathf.Min(feetX, line + WallPress - off) : Mathf.Max(feetX, line - WallPress + off);
+    }
+    void UpdateMotion(float dt)
+    {
+        // Physics already moved; these poses only dress the transition, and a quick jiggle gets neither.
+        bool moving = Combat.moveVelocity.magnitude > 15;
+        if (moving != dadWasMoving)
+        {
+            if (moving) { dadStopPose = 0; if (dadStateTime > .18f) { dadStartPose = .08f; walkPhase = 0; } }
+            else { dadStartPose = 0; if (dadStateTime > .25f) dadStopPose = .1f; }
+            dadWasMoving = moving; dadStateTime = 0;
+        }
+        dadStateTime += dt; dadStartPose = Mathf.Max(0, dadStartPose - dt); dadStopPose = Mathf.Max(0, dadStopPose - dt);
+        foreach (Fighter e in Combat.enemies)
+        {
+            float walked; strides.TryGetValue(e.id, out walked);
+            if (e.velocity.sqrMagnitude <= 28 * 28 && e.lift <= 0) walked += e.locomotion.magnitude * dt;   // knockback and flight never advance the walk
+            strides[e.id] = walked;
+        }
     }
     string EnemyAction(Fighter e, out int index)
     {
         index = 0;
+        bool gum = !e.boss && e.kind != 1 && !e.shield && !e.trayBroken;
+        if (gum && WallHitNow(e) && HasPose("gum", "wallhit")) return "wallhit";
         bool airborne = e.airDuration > 0 && e.airElapsed < e.airDuration || e.velocity.sqrMagnitude > 220 * 220;
         if (airborne) return "fly";
         int step = Mathf.FloorToInt(clock * 4 + e.id);
@@ -100,6 +146,13 @@ public sealed partial class DadSchoolPrototype
             if (e.windup > 0) return "attack";
             if (e.recovery > 0) { index = 1; return "attack"; }
             if (e.reaction > 0 || e.flash > 0) return "hit";
+            if (HasPose("gum", "pass"))
+            {
+                float walked; strides.TryGetValue(e.id, out walked);
+                int phase = Mathf.FloorToInt(walked / GumStride) % 4;
+                if (e.locomotion.magnitude <= 20) { index = (phase + 1) / 2 % 2; return "walk"; }   // standing still: nearest contact pose, frozen
+                index = phase / 2; return phase % 2 == 1 ? "pass" : "walk";
+            }
         }
         index = e.locomotion.magnitude > 20 ? step : 0; return "walk";
     }
@@ -141,6 +194,7 @@ public sealed partial class DadSchoolPrototype
     {
         debris.Clear(); corpses.Clear(); remembered.Clear(); chainBadge = 0; displayedChain = 0; introducedKinds.Clear(); nameTags.Clear();
         for (int i = 0; i < lockerDamage.Length; i++) lockerDamage[i] = 0;
+        dents.Clear(); strides.Clear(); dadWasMoving = false; dadStateTime = 0; dadStartPose = 0; dadStopPose = 0;
     }
     void RememberEnemies()
     {
@@ -152,6 +206,13 @@ public sealed partial class DadSchoolPrototype
         foreach (Fighter e in remembered.Values)
         {
             if (e.hp > 0) continue;
+            if (EnemyId(e) == "gum" && NewArt && HasPose("gum", "crumple") && e.wallCooldown > .30f - .12f && AtSideWall(e))
+            {
+                // Knocked out against the wall: wall hit, then he slumps down where he hit instead of flying off.
+                bool right = e.pos.x > PlayArea.center.x;
+                corpses.Add(new Corpse { p = e.pos, wall = true, right = right, flip = !right, lift = e.lift, id = "gum", stand = StandHeight(e), size = BodySize(e), frame = EnemyFrame(e) });
+                continue;
+            }
             // The knocked-out body keeps flying out of the fight instead of fading on the spot (v4 M5).
             // Always away from dad and a little upward, even after a wall bounce sent the body back toward him.
             Vector2 fromDad = e.pos - Combat.player; if (fromDad.sqrMagnitude < 1) fromDad = new Vector2(-e.facing, 0);
@@ -160,7 +221,9 @@ public sealed partial class DadSchoolPrototype
         }
         for (int i = corpses.Count - 1; i >= 0; i--)
         {
-            Corpse c = corpses[i]; c.life -= dt; c.p += c.v * dt; c.v *= Mathf.Exp((NewArt ? -2.5f : -8) * dt);
+            Corpse c = corpses[i]; c.life -= dt;
+            if (c.wall) { if (c.life <= 0) corpses.RemoveAt(i); continue; }
+            c.p += c.v * dt; c.v *= Mathf.Exp((NewArt ? -2.5f : -8) * dt);
             c.p.x = Mathf.Clamp(c.p.x, PlayArea.xMin, PlayArea.xMax); c.p.y = Mathf.Clamp(c.p.y, PlayArea.yMin, PlayArea.yMax);
             if (c.life <= 0) corpses.RemoveAt(i);
         }
@@ -177,10 +240,10 @@ public sealed partial class DadSchoolPrototype
     void DrawNameTag(Fighter e, Vector2 feet, float size)
     {
         float t; if (!nameTags.TryGetValue(e.id, out t)) return;
-        float alpha = Mathf.Clamp01(t / .4f), x = Mathf.Clamp(feet.x, 112, Width - 112), y = feet.y - e.lift - size - 58;
+        float alpha = Mathf.Clamp01(t / .4f), x = Mathf.Clamp(feet.x, 122, Width - 122), y = feet.y - e.lift - size - 58;
         if (y < 220) y = feet.y + 12; // above the head would sit under the banner strip (bosses enter at the top), so hang it below the feet
-        int k = ProfileKind(e), floor = Director != null ? Mathf.Clamp(Director.Plan.floor - 1, 0, 2) : 0; Rect r = new Rect(x - 100, y, 200, 48);
-        string name = e.boss ? BossTagNames[floor] : (e.elite ? "왕 " : "") + ProfileNames[k], line = e.boss ? BossTagLines[floor] : ProfileLines[k];
+        int k = ProfileKind(e), floor = Director != null ? Mathf.Clamp(Director.Plan.floor - 1, 0, 2) : 0; Rect r = new Rect(x - 118, y, 236, 48);
+        string name = e.boss ? BossTagNames[floor] : e.elite && k < 3 ? EliteTagNames[k] : ProfileNames[k], line = e.boss ? BossTagLines[floor] : e.elite && k < 3 ? EliteTagLines[k] : ProfileLines[k];
         Box(r, new Color(Ink.r, Ink.g, Ink.b, alpha)); Box(new Rect(r.x + 3, r.y + 3, r.width - 6, r.height - 6), new Color(Paper.r, Paper.g, Paper.b, alpha));
         Text(new Rect(r.x, r.y + 2, r.width, 24), name, 18, new Color(Red.r, Red.g, Red.b, alpha), true, TextAnchor.MiddleCenter);
         Text(new Rect(r.x, r.y + 24, r.width, 20), line, 14, new Color(Ink.r, Ink.g, Ink.b, alpha), false, TextAnchor.MiddleCenter);
@@ -190,6 +253,7 @@ public sealed partial class DadSchoolPrototype
         bool wall = e.text.StartsWith("벽꿍") || e.text.StartsWith("폭파벽");
         bool tray = e.text == "쟁반 박살!", blocked = e.text == "쟁반 막기!" || e.text == "팅!";
         bool hit = wall || tray || blocked || e.text == "퍽!" || e.text == "크리티컬!" || e.text.StartsWith("연쇄");
+        if (wall || e.text.StartsWith("짱 벽꿍")) DentWall(e.pos);
         if (!hit) return;
         Vector2 center = e.pos - new Vector2(0, 65);
         int count = wall ? 14 : tray ? 12 : blocked ? 5 : 7;
@@ -231,6 +295,13 @@ public sealed partial class DadSchoolPrototype
     {
         foreach (Corpse c in corpses)
         {
+            if (c.wall)
+            {
+                bool impact = .55f - c.life < WallHitTime;
+                Vector2 at = new Vector2(WallPoseX(c.right, c.stand, c.p.x, impact), c.p.y - (impact ? c.lift : 0));
+                DrawCharacter("gum", impact ? "wallhit" : "crumple", 0, at, c.stand, c.flip, 0, impact, null, Mathf.Clamp01(c.life / (.55f - WallHitTime - CrumpleTime)));
+                continue;
+            }
             float progress = 1 - c.life / .55f;
             if (NewArt && c.id != null) DrawCharacter(c.id, "fly", 0, c.p - new Vector2(0, 30 + progress * 40), c.stand, c.flip, c.spin * progress * .55f, false, null, Mathf.Clamp01(c.life / .25f));
             else Sprite(enemies, enemyFrames, c.frame, c.p, c.size, c.flip, (c.flip ? 1 : -1) * (20 + progress * 60), false, new Vector2(1 + progress * .2f, 1 - progress * .6f), Mathf.Clamp01(c.life / .22f));

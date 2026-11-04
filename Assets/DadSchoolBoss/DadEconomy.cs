@@ -15,6 +15,11 @@ public sealed class DadEconomy
     public int stuckAssistAfter = 3;
     public float stuckAssistStep = .05f, stuckAssistCap = .25f;
     public float gearLogScale = .35f;
+    // Lunchbox gear (6 slots x 3 rarities): an item rolled from the n-th box is worth gearLogScale*ln(1+n/10)/6 times its
+    // rarity factor, so the equipped set tracks the log curve the simulation uses (Tools/progression_sim.py rolls the same way).
+    public float[] gearRarityWeights = { 70, 25, 5 }, gearRarityFactor = { .8f, .95f, 1.15f }, gearDismantleShare = { .04f, .1f, .25f };
+    public float gearJitter = .1f;
+    public int gearFirstRarity = 1;
     public float combatHpBase = 1, combatDamageBase = 1, combatHpExponent = 1.5f, combatDamageExponent = 1.5f, combatScaleMin = .4f, combatScaleMax = 4;
     public int eliteHpMultiplier = 20;
     public float elitePower = 2, eliteKnockback = .45f;
@@ -48,6 +53,13 @@ public sealed class DadEconomy
     public double BaseCoins(int stage) { return coinBase * Math.Pow(coinGrowth, stage - 1); }
     public double ClearCoins(int stage) { return BaseCoins(stage) * (IsBoss(stage) ? bossCoinMult : 1); }
     public double UpgradeCost(int totalLevel) { return upgradeCostBase * Math.Pow(upgradeCostGrowth, totalLevel); }
+    public int RollRarity(System.Random rng)
+    {
+        float total = 0; foreach (float w in gearRarityWeights) total += w;
+        double roll = rng.NextDouble() * total;
+        for (int r = 0; r < gearRarityWeights.Length; r++) { roll -= gearRarityWeights[r]; if (roll < 0) return r; }
+        return gearRarityWeights.Length - 1;
+    }
     // Design-model win chance (used by the progression simulation and as the calibration target for real combat).
     public float ModelWinChance(float power, float required) { return Mathf.Clamp(.5f + winSlope * (power / required - 1), .03f, .99f); }
 }

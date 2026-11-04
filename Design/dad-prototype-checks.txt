@@ -14,6 +14,11 @@ PASS v5 frames complete for boss3 (walk:2 windup:1 dash:1 groggy:1 hit:1 enrage:
 PASS v5 frames complete for dodge (walk:2 throw:2 hit:1 fly:1)
 PASS v5 delivery: 21 UI icons, 18 gear icons, 3 backgrounds, 21 sounds, 2 props
 PASS v5 import rules: 512 compressed frames, 2048 backgrounds, streamed music
+PASS v6 rewards: 3 lunchbox poses, 3 card frames, 3 locker dents and their steel copies
+PASS v6 import rules: lunchbox 1024, cards and dents 512, alpha, no mips, clamp
+PASS every gear slot x rarity has its v5 icon
+PASS v7 motion: dad start/stop, gum passing x2, wall hit, crumple (v5 walk untouched)
+PASS v7 import rules match the v5 character frames
 PASS equipped slipper increases wall damage inside school arena
 PASS level up opens skill selection
 PASS choice applies and resumes battle

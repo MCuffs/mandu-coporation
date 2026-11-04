@@ -68,6 +68,9 @@ FAIL_COIN_SHARE, FARM_COIN_SHARE = ECO["failCoinShare"], ECO["replayCoinShare"]
 BOXES_PER_CLEAR, BOSS_FIRST_CLEAR_BOXES = ECO["boxesPerClear"], ECO["floorBossFirstClearBoxes"]
 OFFLINE_CLEARS_PER_HOUR, OFFLINE_BOXES_PER_HOUR, OFFLINE_CAP_H = ECO["offlineClearsPerHour"], ECO["offlineBoxesPerHour"], ECO["offlineCapHours"]
 GEAR_LOG_SCALE = ECO["gearLogScale"]
+GEAR_SLOTS = 6
+GEAR_WEIGHTS, GEAR_FACTOR, GEAR_DISMANTLE = ECO["gearRarityWeights"], ECO["gearRarityFactor"], ECO["gearDismantleShare"]
+GEAR_JITTER, GEAR_FIRST_RARITY = ECO["gearJitter"], ECO["gearFirstRarity"]
 STAGE_SECONDS, BOSS_SECONDS, OVERHEAD_SECONDS, AD_SECONDS = 45, 75, 20, 30
 
 
@@ -77,7 +80,12 @@ def coins_for(stage):
 
 
 def gear_mult(boxes):
-    return 1.0 + GEAR_LOG_SCALE * math.log(1.0 + boxes / 10.0)   # best-of-many gear: strong early, diminishing later
+    # Design target the rolled gear is calibrated against (DadProgress.GearValueAt): strong early, diminishing later.
+    return 1.0 + GEAR_LOG_SCALE * math.log(1.0 + boxes / 10.0)
+
+
+def gear_value(opened):
+    return GEAR_LOG_SCALE * math.log(1.0 + opened / 10.0) / GEAR_SLOTS
 
 
 # ---- player profiles (daily caps mirror the v4 ad table) --------------------------------------
@@ -96,6 +104,8 @@ class Player:
     def __init__(self, profile, rng):
         self.p, self.rng = PROFILES[profile], rng
         self.stage, self.coins, self.boxes, self.level = 1, 0.0, 0, 0
+        self.gear_rng = random.Random(rng.random())
+        self.gear = [None] * GEAR_SLOTS   # (rarity, value) per slot, rolled exactly like DadProgress.OpenLunchbox
         self.attempts = [0] * (STAGES + 2)
         self.fails_in_row = 0
         self.farm_clears = 0
@@ -105,7 +115,27 @@ class Player:
 
     @property
     def cp(self):
-        return BASE_POWER * (1 + UPGRADE_CP) ** self.level * gear_mult(self.boxes)
+        return BASE_POWER * (1 + UPGRADE_CP) ** self.level * (1 + sum(v for _, v in filter(None, self.gear)))
+
+    def dismantle(self, rarity):
+        farm = max(1, self.stage - 1)
+        return COIN_BASE * COIN_GROWTH ** (farm - 1) * GEAR_DISMANTLE[rarity]
+
+    def add_boxes(self, n):
+        # Players open every box at once ("모두 열기"): keep what is better, dismantle the rest.
+        for _ in range(n):
+            self.boxes += 1
+            r = GEAR_FIRST_RARITY if self.boxes == 1 else self.gear_rng.choices(range(len(GEAR_WEIGHTS)), GEAR_WEIGHTS)[0]
+            empty = [i for i, g in enumerate(self.gear) if g is None]
+            slot = self.gear_rng.choice(empty) if empty else self.gear_rng.randrange(GEAR_SLOTS)
+            value = gear_value(self.boxes) * GEAR_FACTOR[r] * (1 + GEAR_JITTER * (self.gear_rng.random() * 2 - 1))
+            old = self.gear[slot]
+            if old is None or value > old[1]:
+                if old is not None:
+                    self.coins += self.dismantle(old[0])
+                self.gear[slot] = (r, value)
+            else:
+                self.coins += self.dismantle(r)
 
     def spend(self):
         while self.coins >= UPGRADE_COST_BASE * UPGRADE_COST_GROWTH ** self.level:
@@ -127,14 +157,14 @@ class Player:
             mult = 2
             self.watch()
         self.coins += coins * mult
-        self.boxes += boxes * mult
+        self.add_boxes(boxes * mult)
         self.spend()
 
     def session(self, minutes, caps):
         t = 0.0
         if caps["free_boxes"] > 0:
             for _ in range(caps["free_boxes"]):
-                self.boxes += 5
+                self.add_boxes(5)
                 t += self.watch()
             caps["free_boxes"] = 0
         boost_left = 0.0
@@ -174,7 +204,7 @@ class Player:
                     t += self.watch()
                     reward *= 2
                 self.coins += reward
-                self.boxes += BOXES_PER_CLEAR + (BOSS_FIRST_CLEAR_BOXES if is_boss(s) and s not in self.cleared else 0)
+                self.add_boxes(BOXES_PER_CLEAR + (BOSS_FIRST_CLEAR_BOXES if is_boss(s) and s not in self.cleared else 0))
                 self.cleared.add(s)
                 self.stage += 1
                 self.fails_in_row = 0

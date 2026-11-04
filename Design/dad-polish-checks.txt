@@ -19,6 +19,17 @@ PASS an unclaimed idle chest never grows past the cap
 PASS claiming pays (ad doubles) and empties the idle chest
 PASS save round-trips through the file
 PASS an unreadable save starts fresh instead of crashing
+PASS fresh save: no gear and nothing to open
+PASS first lunchbox is a guaranteed rare card, decided before the next box opens
+PASS equipping adds the card's value to power
+PASS the first six boxes fill six different slots
+PASS dismantling pays coins and leaves the gear alone
+PASS equipping over an item dismantles the old one for coins
+PASS an undecided card and the equipped set survive a reload
+PASS open all decides every box, never lowers power and pays for the rest
+PASS rolled gear after 50 boxes stays within 20% of the simulation curve (0.87x)
+PASS rolled gear after 150 boxes stays within 20% of the simulation curve (0.98x)
+PASS a v1 save keeps its gear power as a starter set
 PASS 1-1 is a small teaching stage
 PASS chargers from 1-4, tray guys from 1-12 and on every later floor
 PASS stage 10 is an elite fight, stage 20 the floor boss
@@ -51,9 +62,13 @@ PASS a body thrown into the tray face bounces off
 PASS a body hitting the tray from the side breaks it
 PASS tray guy turns around slowly, leaving a rear opening
 PASS dad's special smashes trays
-PASS opponent profile is an adult: 껌 짱 (34세)
-PASS opponent profile is an adult: 의자 짱 (41세)
-PASS opponent profile is an adult: 쟁반 짱 (47세)
-PASS opponent profile is an adult: 학교 짱 (42세)
-PASS opponent profile is an adult: 급식실 실세 (52세)
-PASS opponent profile is an adult: 체육 선생님 (51세)
+PASS opponent is an adult dad: 지호 아빠 (34세) / 육아휴직 3개월 차
+PASS opponent is an adult dad: 서연이 아빠 (41세) / 운동회 자리 맡기 전문
+PASS opponent is an adult dad: 민준이 아빠 (47세) / 급식 봉사 12년 차
+PASS opponent is an adult dad: 학부모회장 아빠 (42세) / 학부모 단톡방 방장
+PASS opponent is an adult dad: 지호 큰아빠 (39세) / 동생 대신 출동
+PASS opponent is an adult dad: 서연이 큰아빠 (46세) / 의자도 두 개
+PASS opponent is an adult dad: 민준이 큰아빠 (52세) / 쟁반도 두 배
+PASS opponent is an adult dad: 학부모회장 아빠 (42세) / 학부모 단톡방 방장
+PASS opponent is an adult dad: 급식 봉사 반장 (52세) / 세쌍둥이 아빠
+PASS opponent is an adult dad: 체육 선생님 (51세) / 두 아이 아빠 · 계주 10연패

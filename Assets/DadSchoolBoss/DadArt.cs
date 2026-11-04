@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// Art and sound from the v5 delivery (Design/dad-asset-request-v5.md), loaded from Resources/DadV5.
+// Art and sound from the v5 delivery (Design/dad-asset-request-v5.md), loaded from Resources/DadV5, plus the v6 reward
+// art (Design/dad-reward-assets-v6.md) in Resources/DadV6, prepared from Art/V6Rewards by Tools/prepare_dad_rewards_v6.py,
+// and the v7 motion poses (Design/dad-motion-assets-v7.md) in Resources/DadV7, normalized by Tools/prepare_dad_motion_v7.py.
 // Every character frame is a 768x768 canvas with the feet at (384, 720); dad faces right, everyone else faces left.
 public sealed class DadArt
 {
@@ -30,16 +32,20 @@ public sealed class DadArt
     public readonly Dictionary<string, Texture2D> gear = new Dictionary<string, Texture2D>();
     public readonly Dictionary<string, Texture2D> backgrounds = new Dictionary<string, Texture2D>();
     public readonly Dictionary<string, AudioClip> audio = new Dictionary<string, AudioClip>();
+    public readonly Dictionary<string, Texture2D> rewards = new Dictionary<string, Texture2D>();
     public bool HasCharacters { get { return characters.ContainsKey("dad") && characters.ContainsKey("gum"); } }
 
     public static DadArt Load()
     {
         var art = new DadArt();
+        Texture2D[] motion = Resources.LoadAll<Texture2D>("DadV7");   // extra named actions on the same canvas (movestart, pass, wallhit...)
         foreach (string id in CharacterIds)
         {
             var c = new Character { id = id, standHeight = id.StartsWith("boss") ? 640 : 560 };
             var sorted = new Dictionary<string, SortedDictionary<int, Texture2D>>();
-            foreach (Texture2D t in Resources.LoadAll<Texture2D>("DadV5/chars/" + id))
+            var frames = new List<Texture2D>(Resources.LoadAll<Texture2D>("DadV5/chars/" + id));
+            foreach (Texture2D t in motion) if (t.name.StartsWith(id + "_")) frames.Add(t);
+            foreach (Texture2D t in frames)
             {
                 // <id>_<action>_<n>; actions may contain underscores (tray_notray_walk_0). Anything else is a prop.
                 if (!t.name.StartsWith(id + "_")) { art.props[t.name] = t; continue; }
@@ -57,6 +63,7 @@ public sealed class DadArt
         foreach (Texture2D t in Resources.LoadAll<Texture2D>("DadV5/gear")) art.gear[t.name] = t;
         foreach (Texture2D t in Resources.LoadAll<Texture2D>("DadV5/bg")) art.backgrounds[t.name] = t;
         foreach (AudioClip a in Resources.LoadAll<AudioClip>("DadV5/audio")) art.audio[a.name] = a;
+        foreach (Texture2D t in Resources.LoadAll<Texture2D>("DadV6")) art.rewards[t.name] = t;
         return art;
     }
 
@@ -67,5 +74,7 @@ public sealed class DadArt
         return backgrounds.TryGetValue(FloorBackgrounds[Mathf.Clamp(floor - 1, 0, FloorBackgrounds.Length - 1)], out t) ? t : null;
     }
     public Texture2D Icon(string name) { Texture2D t; return ui.TryGetValue(name, out t) ? t : null; }
+    public Texture2D Gear(string name) { Texture2D t; return gear.TryGetValue(name, out t) ? t : null; }
+    public Texture2D Reward(string name) { Texture2D t; return rewards.TryGetValue(name, out t) ? t : null; }
     public AudioClip Clip(string name) { AudioClip a; return audio.TryGetValue(name, out a) ? a : null; }
 }
