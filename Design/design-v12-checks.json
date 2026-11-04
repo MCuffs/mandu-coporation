@@ -1,0 +1,21 @@
+{
+  "checks": [
+    "PASS size home-corridor-v1",
+    "PASS size locker-gag-v1",
+    "PASS transparency locker-gag-v1",
+    "PASS size impact-fx-v1",
+    "PASS transparency impact-fx-v1",
+    "PASS transparent FX cell gutters",
+    "PASS SVG parses",
+    "PASS tokens and prompt JSON parse",
+    "PASS 14 local HTML references resolve"
+  ],
+  "visualReview": [
+    "Layered home composition reviewed at 1280x1080",
+    "Existing dad identity reused",
+    "Adult opponent matches orange tracksuit reference",
+    "Text and numbers are live HTML, not baked into raster assets"
+  ],
+  "unityRuntimeConnected": false,
+  "androidDeviceTested": false
+}

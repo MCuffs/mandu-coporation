@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="760" viewBox="0 0 1080 760">
+  <title>Dad War UI shape kit v1 — live labels supplied by the game</title>
+  <defs>
+    <g id="primary"><rect y="7" width="300" height="64" rx="14" fill="#242B25"/><rect x="1.5" y="1.5" width="297" height="61" rx="12.5" fill="#FFD33D" stroke="#242B25" stroke-width="3"/><path d="M18 7H282" stroke="#FFF3AE" stroke-width="3" stroke-linecap="round"/></g>
+    <g id="pressed"><rect y="7" width="300" height="64" rx="14" fill="#242B25"/><rect x="1.5" y="6.5" width="297" height="61" rx="12.5" fill="#E3B526" stroke="#242B25" stroke-width="3"/></g>
+    <g id="disabled"><rect y="5" width="300" height="64" rx="14" fill="#87928A"/><rect x="1.5" y="1.5" width="297" height="61" rx="12.5" fill="#D8DED5" stroke="#87928A" stroke-width="3"/></g>
+    <g id="secondary"><rect y="5" width="300" height="64" rx="14" fill="#C5C9B9"/><rect x="1.5" y="1.5" width="297" height="61" rx="12.5" fill="#FFFBF1" stroke="#375B4B" stroke-width="3"/></g>
+    <g id="panel"><rect y="5" width="300" height="144" rx="18" fill="#D5D2BF"/><rect x="1.5" y="1.5" width="297" height="141" rx="16.5" fill="#FFFBF1" stroke="#375B4B" stroke-width="3"/></g>
+    <g id="currency-chip"><rect x="1" y="1" width="298" height="50" rx="25" fill="#F5EEDC" stroke="#D5D2BF" stroke-width="2"/></g>
+    <g id="health-track"><rect width="300" height="16" rx="8" fill="#242B25"/><rect x="3" y="3" width="294" height="10" rx="5" fill="#72776B"/></g>
+    <g id="health-fill"><rect width="300" height="10" rx="5" fill="#C9563D"/><path d="M6 3H294" stroke="#F3A277" stroke-width="2" stroke-linecap="round"/></g>
+    <g id="warning"><path d="M32 3L62 54Q64 59 57 59H7Q0 59 3 54L29 3Q31 0 32 3Z" fill="#C9563D" stroke="#242B25" stroke-width="3"/><path d="M31 18V36" stroke="#FFFBF1" stroke-width="5" stroke-linecap="round"/><circle cx="31" cy="46" r="3" fill="#FFFBF1"/></g>
+  </defs>
+  <use href="#primary" x="30" y="30"/><use href="#pressed" x="390" y="30"/><use href="#disabled" x="750" y="30"/>
+  <use href="#secondary" x="30" y="140"/><use href="#currency-chip" x="390" y="145"/><use href="#warning" x="760" y="140"/>
+  <use href="#panel" x="30" y="260"/><use href="#panel" x="390" y="260"/><use href="#panel" x="750" y="260"/>
+  <use href="#health-track" x="30" y="460"/><use href="#health-fill" x="33" y="463"/>
+  <use href="#health-track" x="390" y="460"/><use href="#health-fill" x="393" y="463" transform="translate(0 0)"/>
+</svg>

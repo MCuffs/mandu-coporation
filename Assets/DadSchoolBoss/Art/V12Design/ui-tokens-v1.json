@@ -1,0 +1,9 @@
+{
+  "status": "design-reference-not-runtime",
+  "canvas": {"width": 540, "height": 960, "safeMargin": 24, "spacingUnit": 8},
+  "color": {"background": "#F5EEDC", "paper": "#FFFBF1", "ink": "#242B25", "muted": "#59645C", "primary": "#FFD33D", "primaryPressed": "#E3B526", "schoolGreen": "#375B4B", "danger": "#C9563D", "success": "#287A5B", "disabled": "#D8DED5"},
+  "type": {"bodyFont": "Gothic A1", "displayFont": "Black Han Sans", "body": 18, "caption": 16, "button": 24, "screenTitle": 32},
+  "shape": {"buttonHeight": 64, "buttonRadius": 14, "cardRadius": 18, "outlineWidth": 3, "buttonShadowOffset": 7},
+  "components": ["primary", "pressed", "disabled", "secondary", "panel", "currency-chip", "health-track", "health-fill", "warning"],
+  "unityNote": "Recreate these shapes in runtime UI or import through an explicitly configured SVG pipeline. No SVG package or automatic runtime connection is added in this delivery."
+}

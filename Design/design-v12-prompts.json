@@ -1,0 +1,28 @@
+{
+  "tool": "built-in image_gen",
+  "purpose": "layered design assets; no runtime connection",
+  "jobs": [
+    {
+      "id": "home-corridor-v1",
+      "transparent": false,
+      "refs": [
+        "C:\\Users\\user\\SecondFistReview\\Assets\\DadSchoolBoss\\Resources\\DadV5\\bg\\bg_floor1_corridor.png"
+      ],
+      "prompt": "Reference image is a style reference only. Generate a new production background plate for a Korean comic casual mobile game home lobby. Portrait 1024x1536. A small school corridor corner in warm cream and desaturated school green, dark ink outlines, flat cel shading, simple graphic shapes consistent with the reference. Slightly elevated front view, low perspective. Three modest green metal lockers at the FAR RIGHT edge around middle height and a small window upper left with warm soft light. Broad QUIET EMPTY center and left area for a full-body character to be composited later. Floor begins at 55% of image height, grounded horizontal wall-floor junction. Keep upper 20% and bottom 22% especially simple for runtime UI. Subtle wear, no abundant cracks or debris, no dramatic cinematic lights, no gradients on every surface. NO people, NO letters, NO signage, NO UI, NO logo, NO numbers, NO speech bubbles. Clean readable designed graphic background, not a detailed empty realistic hallway."
+    },
+    {
+      "id": "locker-gag-v1",
+      "transparent": true,
+      "refs": [
+        "C:\\Users\\user\\SecondFistReview\\Assets\\DadSchoolBoss\\Resources\\DadV5\\chars\\gum\\gum_walk_0.png"
+      ],
+      "prompt": "Reference character is identity and art-style reference. Make one isolated game prop illustration on actual transparent background with generous empty margins, no checkerboard. A single muted green school metal locker in three quarter front view, comically dented inward, and the SAME obviously adult middle-aged balding man from the reference (long nose, facial stubble, orange striped track jacket, navy trousers and slippers) sitting dazed on the floor leaning against the dented locker. Full body including both slipper feet visible. Slumped funny defeated pose, one bent knee, head tilted and tired annoyed expression, NO injury, NO blood, no youth. The locker is slightly taller than the sitting man. One little loose slipper on floor next to him, no floating stars, no motion lines, no text, no glow, no background wall/floor. Match bold irregular dark outlines and simple flat color with one shadow step, exact clothing and face identity. This is a small secondary comedy layer beside our hero, not a poster. Full object centered and not touching canvas edges."
+    },
+    {
+      "id": "impact-fx-v1",
+      "transparent": true,
+      "prompt": "Production sprite effects atlas for warm hand-inked Korean comic mobile brawler. Actual transparent background. Exact 2 columns by 2 rows equal grid, no visible grid lines, large clear transparent gutters. Each cell contains a single entirely isolated full effect centered, nothing touches cell edges. Top left: compact warm yellow and orange sharp impact starburst with cream center and dark irregular ink outline, no text. Top right: three or four pale cream-grey rounded cartoon dust puffs as one compact cloud, dark green-grey outline. Bottom left: a wide curved orange punch swoosh with a tapered cream inner stripe, dark ink outer stroke. Bottom right: a compact cluster of five uneven gold small stars and two short curved trails for a comic dazed reaction. Simple flat cel shaded game illustration, no painterly texture, no lens flare, no photorealism, no black background, no typography or numbers. Consistent stroke weight and restrained palette, readable at small scale."
+    }
+  ],
+  "fx_revision": "Edit this transparent 2x2 game effects atlas. Keep the four effect designs and positions exactly. REMOVE ALL outer glow, colored haze, vignette, blurred soft shadow, gradients and diffuse light surrounding every effect. Only the crisp flat filled shapes and dark outlines remain visible; ALL space outside the hard outlined shapes must have alpha exactly zero, including gutters and edges. Convert the fill shading to simple flat cel color, no bloom. Preserve the impact starburst top left, dust top right, punch swoosh bottom left, five stars bottom right. No text or new objects. Keep generous transparent margins between the four cells and do not add grid lines."
+}

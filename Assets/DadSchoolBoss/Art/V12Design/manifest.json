@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "scope": "layered design assets; not connected to runtime",
+  "generator": "built-in image_gen",
+  "prompts": "../../../../Design/design-v12-prompts.json",
+  "entries": [
+    {
+      "id": "home-corridor-v1",
+      "file": "home-corridor-v1.png",
+      "width": 1024,
+      "height": 1536,
+      "mode": "RGB",
+      "status": "art-reviewed-preview-only",
+      "runtimeConnected": false
+    },
+    {
+      "id": "locker-gag-v1",
+      "file": "locker-gag-v1.png",
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "status": "art-reviewed-preview-only",
+      "runtimeConnected": false,
+      "alpha_range": [
+        0,
+        255
+      ],
+      "transparent_fraction": 0.7163
+    },
+    {
+      "id": "impact-fx-v1",
+      "file": "impact-fx-v1.png",
+      "width": 1536,
+      "height": 1024,
+      "mode": "RGBA",
+      "status": "art-reviewed-preview-only",
+      "runtimeConnected": false,
+      "alpha_range": [
+        0,
+        254
+      ],
+      "transparent_fraction": 0.7778,
+      "cells": [
+        {
+          "name": "impact",
+          "rect_pixels_top_left": [
+            0,
+            0,
+            768,
+            512
+          ]
+        },
+        {
+          "name": "dust",
+          "rect_pixels_top_left": [
+            768,
+            0,
+            768,
+            512
+          ]
+        },
+        {
+          "name": "swoosh",
+          "rect_pixels_top_left": [
+            0,
+            512,
+            768,
+            512
+          ]
+        },
+        {
+          "name": "daze",
+          "rect_pixels_top_left": [
+            768,
+            512,
+            768,
+            512
+          ]
+        }
+      ]
+    }
+  ],
+  "vector": "ui-kit-v1.svg",
+  "tokens": "ui-tokens-v1.json",
+  "reuse": [
+    "Resources/DadV5/chars/dad/dad_idle_0.png",
+    "Resources/DadV5/chars/gum/gum_walk_0.png",
+    "Resources/DadV5/ui/icon_coin.png",
+    "Resources/DadV5/ui/icon_lunchbox.png"
+  ]
+}
