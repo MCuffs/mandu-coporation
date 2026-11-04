@@ -175,7 +175,7 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
     {
         combat.wallSkill = gear == 0 ? 1 : 0; combat.chainSkill = gear == 1 ? 1 : 0;
         combat.punchKnockbackMultiplier = gear == 0 ? 1.25f : 1;
-        combat.phoneSpecial = gear == 2; combat.feverDuration = 2.4f; combat.chargeGainMultiplier = .55f;
+        combat.phoneSpecial = gear == 2; combat.phoneHeal = gear == 2 ? 6 : 0; combat.feverDuration = 2.4f; combat.chargeGainMultiplier = .55f;
     }
     public void GoHome() { Home = true; Paused = false; dragging = false; stick = Vector2.zero; }
     float ViewScale { get { return Mathf.Min(Screen.safeArea.width / Width, Screen.safeArea.height / Height); } }
@@ -213,6 +213,7 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
         foreach (CombatEvent e in Combat.events)
         {
             ImpactJuice(e);
+            if (e.text == "쟁반 짱 등장") { banner = "쟁반 짱!  위아래나 뒤에서 때리세요"; bannerTime = 2.8f; }
             if (e.text == "골목 대장 등장") { banner = "학교 짱 등장!  졸개로 맞히세요"; bannerTime = 2.5f; }
             if (e.text == "대장 광폭화!!") { banner = "학교 짱이 제대로 삐졌습니다"; bannerTime = 2; }
             if (e.style > 0)
@@ -221,7 +222,8 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
                 popups.Add(new Popup { text = text, position = e.pos - new Vector2(0, 70), style = e.style });
                 shake = Mathf.Max(shake, e.style >= 2 ? 4 : 2);
                 bool wallImpact = e.text.StartsWith("벽꿍") || e.text.StartsWith("폭파벽");
-                audioSource.pitch = wallImpact ? .8f : 1 + Mathf.Min(Combat.chain, 6) * .045f;
+                bool clang = e.text == "쟁반 막기!" || e.text == "팅!" || e.text == "쟁반 박살!";
+                audioSource.pitch = clang ? 1.75f : wallImpact ? .8f : 1 + Mathf.Min(Combat.chain, 6) * .045f;
                 audioSource.PlayOneShot(wallImpact || e.style >= 2 ? wallClip : hitClip, wallImpact ? .34f : .18f);
             }
         }
@@ -265,8 +267,11 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
     void Ellipse(Vector2 center, float w, float h, Color c) { GUI.color = c; GUI.DrawTexture(new Rect(center.x - w / 2, center.y - h / 2, w, h), disc); GUI.color = Color.white; }
     void Line(Vector2 a, Vector2 b, float width, Color c)
     {
-        Matrix4x4 old = GUI.matrix; GUIUtility.RotateAroundPivot(Mathf.Atan2(b.y - a.y, b.x - a.x) * Mathf.Rad2Deg, a);
-        Box(new Rect(a.x, a.y - width / 2, (b - a).magnitude, width), c); GUI.matrix = old;
+        // Rotate in the current (scaled, offset, shaking) GUI space. GUIUtility.RotateAroundPivot treats the pivot as
+        // screen space, which threw every non-horizontal line off position once the view was scaled.
+        Matrix4x4 old = GUI.matrix;
+        GUI.matrix = old * Matrix4x4.TRS(new Vector3(a.x, a.y, 0), Quaternion.Euler(0, 0, Mathf.Atan2(b.y - a.y, b.x - a.x) * Mathf.Rad2Deg), Vector3.one);
+        Box(new Rect(0, -width / 2, (b - a).magnitude, width), c); GUI.matrix = old;
     }
     void Sprite(Texture2D atlas, Frame[] frames, int index, Vector2 feet, float height, bool flip, float tilt = 0, bool flash = false, Vector2? stretch = null, float opacity = 1)
     {
@@ -310,7 +315,7 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
             Text(new Rect(45, 178, 450, 70), "아빠의 준비물", 35, Ink, true);
             if (Button(new Rect(45, 270, 450, 95), "고무 슬리퍼\n날리는 힘 +25% · 벽 피해 +1", Gear == 0 ? Yellow : Color.white, true, 21)) SelectGear(0);
             if (Button(new Rect(45, 390, 450, 95), ChainGearUnlocked ? "튼튼한 도시락\n처음부터 충돌 전달 강화" : "튼튼한 도시락  [잠김]\n3연쇄 또는 첫 배달 성공", Gear == 1 ? Yellow : Color.white, ChainGearUnlocked, 21)) SelectGear(1);
-            if (Button(new Rect(45, 510, 450, 110), PhoneGearUnlocked ? "폴더폰\n필살기가 공포 파동으로 변경\n넓게 밀기·돌진 취소·짱 겁먹음 / 폭주 없음" : "폴더폰  [잠김]\n누적 벽꿍 " + TotalWallHits + " / " + PhoneWallGoal + "회", Gear == 2 ? Yellow : Color.white, PhoneGearUnlocked, 20)) SelectGear(2);
+            if (Button(new Rect(45, 510, 450, 110), PhoneGearUnlocked ? "폴더폰\n필살기가 공포 파동으로 변경 · 체력 +6\n넓게 밀기·돌진 취소·짱 겁먹음 / 폭주 없음" : "폴더폰  [잠김]\n누적 벽꿍 " + TotalWallHits + " / " + PhoneWallGoal + "회", Gear == 2 ? Yellow : Color.white, PhoneGearUnlocked, 20)) SelectGear(2);
             if (Button(new Rect(45, 710, 450, 60), "준비 완료", Green)) gearPanel = false;
         }
     }
@@ -359,11 +364,25 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
             {
                 float size = e.boss ? 205 : e.kind == 1 ? 165 : 142;
                 Ellipse(actor.feet, e.boss ? 90 : 50, 14, new Color(0, 0, 0, .22f));
-                int frame = e.boss ? 3 : e.kind == 1 ? 1 : e.id % 2 == 0 ? 2 : 0;
+                int frame = EnemyFrame(e);
                 float bob = e.locomotion.magnitude > 20 ? Mathf.Sin(clock * 11 + e.id) * 2 : 0;
                 bool wallSquash = e.wallCooldown > .18f;
                 Vector2 shape = wallSquash ? new Vector2(1.22f, .70f) : e.reaction > 0 ? new Vector2(.9f, 1.1f) : e.windup > 0 ? new Vector2(1.07f, .94f) : Vector2.one;
                 Sprite(enemies, enemyFrames, frame, actor.feet - new Vector2(0, e.lift + bob), size, e.facing > 0, e.reaction > 0 ? Mathf.Clamp(e.velocity.x * .04f, -32, 32) : e.windup > 0 ? -e.facing * 8 : 0, e.flash > 0, shape);
+                float front = actor.feet.x + e.facing * size * .21f, chest = actor.feet.y - e.lift - bob;
+                if (e.shield)
+                {
+                    // Tray rim glint marks the guarded side; it flickers while the tray guy is turning around.
+                    Color rim = e.turnDelay > 0 && Mathf.Sin(clock * 40) > 0 ? new Color(1, .78f, .15f, .9f) : new Color(1, 1, 1, .85f);
+                    Vector2 rimTop = new Vector2(front, chest - size * .70f), rimBottom = new Vector2(front, chest - size * .28f);
+                    Line(rimTop, rimBottom, 10, Ink); Line(rimTop, rimBottom, 5, rim);
+                    for (int d = 0; d < e.trayHits; d++) Line(new Vector2(front - 6, chest - size * (.62f - d * .09f)), new Vector2(front + 6, chest - size * (.58f - d * .09f)), 3, Ink); // dents
+                }
+                else if (e.trayBroken)
+                {
+                    Vector2 dent = new Vector2(front, chest - size * .5f);
+                    Line(dent - new Vector2(8, 12), dent + new Vector2(5, -2), 3, Ink); Line(dent + new Vector2(5, -2), dent - new Vector2(6, -12), 3, Ink);
+                }
                 if (e.hp < e.maxHp && !e.boss) Bar(new Rect(e.pos.x - 28, e.pos.y - size - 14, 56, 7), e.hp / (float)e.maxHp, Red);
                 if (e.groggy > 0)
                 {

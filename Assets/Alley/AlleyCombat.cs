@@ -25,6 +25,10 @@ namespace SecondFistGame {
         public float attack,windup,stun,flash,contact,dash,wallCooldown,recovery,reaction;
         public float airElapsed,airDuration,airPeak;
         public float groggy;
+        // School tray enemy: blocks hits that arrive at its front, turns slowly, loses the tray to side or rear hits.
+        public bool shield,trayBroken;
+        public int trayHits; // frontal hits absorbed; the tray gives way at TrayDurability
+        public float turnDelay;
         public bool boss { get { return kind==2; } }
         public bool enraged;
         public float lift { get { if(airDuration<=0)return 0;float t=Mathf.Clamp01(airElapsed/airDuration);return airPeak*4*t*(1-t); } }
@@ -53,9 +57,11 @@ namespace SecondFistGame {
         public float punchKnockbackMultiplier=1;
         public float chargeGainMultiplier=1;
         public bool phoneSpecial;
+        public float phoneHeal;
         // School rules: longer run, fewer level-ups, and a boss that only opens up after a body collision.
         public int killTargetOverride,xpCurveScale=1;
         public bool groggyBoss;
+        public const int TrayDurability=4;
         public int kills,hits,wallHits,chainHits,level=1,xp,nextXp=3,stage,bestChain;
         public int wallSkill,chainSkill,stunSkill,fistSkill,vampSkill,magnetSkill;
         public readonly int[] currentChoices={0,1,2};
@@ -341,7 +347,11 @@ namespace SecondFistGame {
                 events.Add(new CombatEvent("대장 광폭화!!",e.pos,3));
             }
             if(e.airDuration>0)e.airElapsed=Mathf.Min(e.airDuration,e.airElapsed+dt);
-            if(e.windup<=0&&e.dash<=0){if(player.x-e.pos.x>18)e.facing=1;else if(player.x-e.pos.x<-18)e.facing=-1;}
+            if(e.windup<=0&&e.dash<=0){
+                int want=player.x-e.pos.x>18?1:player.x-e.pos.x<-18?-1:e.facing;
+                if(e.shield&&want!=e.facing){e.turnDelay+=dt;if(e.turnDelay>=.55f){e.facing=want;e.turnDelay=0;}}
+                else{e.facing=want;e.turnDelay=0;}
+            }
             if(e.velocity.sqrMagnitude>28*28){
                 e.windup=0;e.locomotion=Vector2.zero;
                 Vector2 desired=e.pos+e.velocity*dt;bool hitX=desired.x<arena.xMin||desired.x>arena.xMax,hitY=desired.y<arena.yMin||desired.y>arena.yMax;
@@ -406,7 +416,7 @@ namespace SecondFistGame {
                 Vector2 target=player+lane*Mathf.Clamp01((190-distance)/100f);
                 Vector2 steering=(target-e.pos).normalized;
                 foreach(Fighter other in enemies){if(other==e||other.hp<=0)continue;Vector2 away=e.pos-other.pos;float d=away.magnitude;float clearance=BodyRadius(e)+BodyRadius(other)+24;if(d>.01f&&d<clearance)steering+=away/d*(1-d/clearance)*1.15f;}
-                float speed=e.boss?(e.enraged?62:45):e.kind==1?55:72+stage*4;
+                float speed=e.boss?(e.enraged?62:45):e.kind==1?55:(72+stage*4)*(e.shield?.85f:1);
                 desiredVelocity=Vector2.ClampMagnitude(steering,1)*speed;
             }
             e.locomotion=Vector2.MoveTowards(e.locomotion,desiredVelocity,360*dt);e.pos=ClampEnemy(e.pos+e.locomotion*dt);
@@ -421,12 +431,18 @@ namespace SecondFistGame {
                 Vector2 normal=distance>.01f?delta/distance:Vector2.right;
                 Fighter source=a.velocity.sqrMagnitude>b.velocity.sqrMagnitude?a:b;Fighter target=source==a?b:a;
                 if(source.velocity.sqrMagnitude>180*180&&source.contact<=0&&target.contact<=0){
+                    if(Guarded(target,source.velocity.normalized)&&++target.trayHits<TrayDurability){
+                        // A body thrown into the tray face bounces off without a chain.
+                        source.velocity=Vector2.Reflect(source.velocity,normal)*.45f;source.contact=.14f;target.contact=.30f;
+                        target.reaction=Mathf.Max(target.reaction,.15f);events.Add(new CombatEvent("팅!",target.pos,1));continue;
+                    }
+                    bool trayBreak=target.shield;if(trayBreak)BreakTray(target);
                     source.contact=.14f;target.contact=.30f;chainHits++;CountChain();
                     bool bossBreak=groggyBoss&&target.boss;
                     Vector2 impulse=source.velocity.normalized*(420+chainSkill*110)*(bossBreak?.55f:1);Launch(target,impulse,.27f,9);target.contact=.30f;target.stun=.34f+stunSkill*.45f;
                     source.velocity*=chainSkill>=3?.88f:.64f;
                     if(bossBreak){target.groggy=1.8f+stunSkill*.3f;target.stun=Mathf.Max(target.stun,target.groggy);Damage(target,2+chainSkill,"그로기!!",3);}
-                    else Damage(target,1+chainSkill,chainSkill>=3?"핀볼 폭격!":"연쇄!",2);
+                    else Damage(target,1+chainSkill+(trayBreak?1:0),chainSkill>=3?"핀볼 폭격!":"연쇄!",2);
                     AddShockwave(target.pos,65+chainSkill*18,new Color(.32f,.85f,.66f),.22f);
                 }else{
                     float settle=(required-distance)*.5f*(1-Mathf.Exp(-20*dt));
@@ -456,7 +472,9 @@ namespace SecondFistGame {
             }
             foreach(Fighter e in enemies){
                 Vector2 delta=e.pos-player;if(e.hp<=0||delta.magnitude>=reach||Vector2.Dot(aim,delta.normalized)<=(finisher?.05f:.25f))continue;
-                int hitDamage=dmg;if(groggyBoss&&e.boss)hitDamage=e.groggy>0?dmg+1:finisher?1:0; // a fresh school boss only takes chip damage
+                if(Guarded(e,aim)&&++e.trayHits<TrayDurability){e.pos=ClampEnemy(e.pos+aim*(finisher?18:10));e.flash=.06f;e.reaction=Mathf.Max(e.reaction,.12f);events.Add(new CombatEvent("쟁반 막기!",e.pos,1));continue;}
+                bool trayBreak=e.shield;if(trayBreak)BreakTray(e);
+                int hitDamage=dmg+(trayBreak?1:0);if(groggyBoss&&e.boss)hitDamage=e.groggy>0?dmg+1:finisher?1:0; // a fresh school boss only takes chip damage
                 Damage(e,hitDamage,dragonFist?"팔룡 핵주먹!":finisher?"강타!":"",finisher?1:0);
                 bool bossOpen=e.boss&&(groggyBoss?e.groggy>0:finisher&&(isFever||dragonFist));
                 if(e.kind==0||(e.kind==1&&(e.windup<=0&&e.dash<=0||finisher))||bossOpen)Launch(e,aim*knockback*(e.boss&&groggyBoss?.75f:1),finisher?.36f:.30f,finisher?18:12);
@@ -474,11 +492,12 @@ namespace SecondFistGame {
         public bool Special(){
             if(state!=RunState.Fighting||charge<100)return false;
             if(phoneSpecial){
-                charge=0;attackLead=0;pendingTarget=null;invulnerable=.8f;
+                charge=0;attackLead=0;pendingTarget=null;invulnerable=.8f;health=Mathf.Min(maxHealth,health+phoneHeal); // mom's pep talk: no fever, a little sustain
                 AddShockwave(player,290,new Color(.45f,.85f,.65f),.5f);
                 foreach(Fighter e in enemies){
                     Vector2 delta=e.pos-player;if(e.hp<=0||delta.magnitude>280)continue;
                     Vector2 away=delta.sqrMagnitude>.01f?delta.normalized:Vector2.right;
+                    if(e.shield)BreakTray(e);
                     Launch(e,away*(e.boss?250:720),.38f,e.boss?5:18);
                     e.stun=Mathf.Max(e.stun,e.boss?.65f:1.6f);
                     if(groggyBoss&&e.boss){e.groggy=Mathf.Max(e.groggy,1.4f);e.stun=Mathf.Max(e.stun,e.groggy);events.Add(new CombatEvent("짱 겁먹음!",e.pos,3));}
@@ -488,9 +507,12 @@ namespace SecondFistGame {
             charge=0;attackLead=0;pendingTarget=null;attackCooldown=Mathf.Max(attackCooldown,.36f);punch=.25f;attackAnimation=.32f;invulnerable=1.2f;
             feverClock=feverDuration+vampSkill*.8f;
             AddShockwave(player,210,new Color(1,.78f,.24f),.38f);
-            foreach(Fighter e in enemies){Vector2 delta=e.pos-player;if(e.hp<=0||delta.magnitude>195)continue;Vector2 aim=delta.sqrMagnitude>.01f?delta.normalized:Vector2.up;Damage(e,2+baseDamage,"",0);Launch(e,aim*(e.boss?320:880),e.boss?.26f:.44f,e.boss?8:26);}
+            foreach(Fighter e in enemies){Vector2 delta=e.pos-player;if(e.hp<=0||delta.magnitude>195)continue;Vector2 aim=delta.sqrMagnitude>.01f?delta.normalized:Vector2.up;if(e.shield)BreakTray(e);Damage(e,2+baseDamage,"",0);Launch(e,aim*(e.boss?320:880),e.boss?.26f:.44f,e.boss?8:26);}
             freeze=Mathf.Max(freeze,.065f);events.Add(new CombatEvent("전성기의 한 방",player,3));return true;
         }
+        // incoming = travel direction of the hit. The tray covers about 60 degrees either side of the facing direction.
+        static bool Guarded(Fighter e,Vector2 incoming){return e.shield&&e.velocity.sqrMagnitude<120*120&&incoming.x*e.facing<-.5f;}
+        void BreakTray(Fighter e){e.shield=false;e.trayBroken=true;e.windup=0;e.stun=Mathf.Max(e.stun,.6f);AddShockwave(e.pos,70,new Color(.85f,.88f,.9f),.22f);freeze=Mathf.Max(freeze,.03f);events.Add(new CombatEvent("쟁반 박살!",e.pos,2));}
         void Damage(Fighter e,int amount,string label,int style){if(e.hp<=0)return;e.hp-=amount;e.flash=.10f;charge=Mathf.Min(100,charge+(3+vampSkill)*chargeGainMultiplier);events.Add(new CombatEvent(label.Length>0?label:"−"+amount,e.pos,style));}
         void Hurt(int amount,Vector2 origin){
             if(invulnerable>0||isFever)return;health=Mathf.Max(0,health-amount);invulnerable=.7f;playerReaction=.18f;

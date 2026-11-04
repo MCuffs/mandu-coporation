@@ -13,11 +13,15 @@ public static class DadPrototypeSetup
     const string CommandPath = "Library/DadPrototypeCommand.txt";
     static DadPrototypeSetup() { EditorApplication.update += Poll; }
     static bool pump; // debug: keep Play Mode rendering while the editor window is in the background (for captures)
+    static string delayedCapture; static int delayedCaptureFrame;
     static void Poll()
     {
         if (pump && EditorApplication.isPlaying) { EditorApplication.QueuePlayerLoopUpdate(); UnityEditorInternal.InternalEditorUtility.RepaintAllViews(); }
+        if (delayedCapture != null && EditorApplication.isPlaying && Time.frameCount >= delayedCaptureFrame) { ScreenCapture.CaptureScreenshot(delayedCapture); Debug.Log("DAD_CAPTURED: " + delayedCapture); delayedCapture = null; }
         if (EditorApplication.isCompiling || EditorApplication.isUpdating || !File.Exists(CommandPath)) return;
-        string command = File.ReadAllText(CommandPath).Trim(); File.Delete(CommandPath);
+        string command = File.ReadAllText(CommandPath).Trim();
+        if (command.Length == 0) return; // writer has not finished yet; try again next update
+        File.Delete(CommandPath);
         try
         {
             if (command == "setup") Setup();
@@ -45,6 +49,15 @@ public static class DadPrototypeSetup
                 var g = UnityEngine.Object.FindObjectOfType<DadSchoolPrototype>(); var b = g.Combat == null ? null : g.Combat.enemies.Find(e => e.boss);
                 Debug.Log("DAD_STATUS frame=" + Time.frameCount + " realtime=" + Time.realtimeSinceStartup.ToString("F1") + " elapsed=" + (g.Combat == null ? -1 : g.Combat.elapsed).ToString("F2")
                     + " state=" + (g.Combat == null ? "-" : g.Combat.state.ToString()) + " paused=" + g.Paused + " boss=" + (b == null ? "none" : b.hp + "/" + b.maxHp + " groggy=" + b.groggy.ToString("F2")));
+            }
+            else if ((command == "spawntray" || command.StartsWith("traycapture:")) && EditorApplication.isPlaying)
+            {
+                if (command.StartsWith("traycapture:")) { delayedCapture = command.Substring(12); delayedCaptureFrame = Time.frameCount + 45; }
+                // debug: drop a tray guy in front of dad, with the intro banner
+                var c = UnityEngine.Object.FindObjectOfType<DadSchoolPrototype>().Combat; c.enemies.RemoveAll(e => !e.boss); c.xp = 0;
+                var t = Tray(c, c.player + new Vector2(105, -10), -1); c.events.Add(new CombatEvent("쟁반 짱 등장", t.pos, 3));
+                Tray(c, c.player + new Vector2(-60, -150), 1);
+                var charger = c.AddEnemy(c.player + new Vector2(-30, 160), 1); charger.windup = 3; charger.aim = (c.player - charger.pos).normalized; // long telegraph for the capture
             }
             else if (command == "pump" && EditorApplication.isPlaying) { pump = true; Application.runInBackground = true; }
             else if (command == "stop") { pump = false; EditorApplication.isPlaying = false; }
@@ -228,11 +241,53 @@ public static class DadPrototypeSetup
         Expect(phone.Special() && charging.velocity.magnitude > 0 && charging.windup == 0 && charging.stun >= 1.5f, "phone interrupts and scatters beyond normal special reach", report);
         Expect(charging.hp == hp && !phone.isFever && phone.charge == 0, "phone trades damage and fever for crowd control", report);
         Expect(!phone.Special(), "phone cannot be spammed without charge", report);
+        var pep = new AlleyCombat(); pep.Start(); pep.spawning = false; DadSchoolPrototype.ConfigureGear(pep, 2); pep.health = 50; pep.Special();
+        Expect(pep.health == 56 && !pep.isFever, "phone call restores a little health instead of fever", report);
         var scare = new AlleyCombat(); scare.Start(); scare.spawning = false; scare.phoneSpecial = true; scare.groggyBoss = true;
         var scared = scare.AddEnemy(scare.player + new Vector2(150, 0), 2); scare.Special();
         Expect(scared.groggy > 1 && scared.stun >= scared.groggy, "phone call scares the school boss into a groggy opening", report);
+        RunTrayChecks(report);
         RunChecks(); AlleySetup.RunChecks();
         File.WriteAllText("Design/dad-polish-checks.txt", report.ToString()); Debug.Log(report.ToString());
+    }
+    static Fighter Tray(AlleyCombat c, Vector2 pos, int facing)
+    { var t = c.AddEnemy(pos); t.shield = true; t.hp = t.maxHp = 4; t.facing = facing; return t; }
+    static void RunTrayChecks(StringBuilder report)
+    {
+        var c = new AlleyCombat(); c.Start(); c.spawning = false;
+        var front = Tray(c, c.player + new Vector2(60, 0), -1); c.Attack(front);
+        Expect(front.hp == 4 && front.shield && front.velocity == Vector2.zero, "tray blocks a punch from the front", report);
+        front.pos = c.player + new Vector2(0, 60); c.Attack(front);
+        Expect(!front.shield && front.trayBroken && front.hp <= 2 && front.velocity.magnitude > 300, "punch from below the tray breaks it and launches", report);
+        c = new AlleyCombat(); c.Start(); c.spawning = false;
+        var brute = Tray(c, c.player + new Vector2(60, 0), -1); int blocked = 0;
+        for (int i = 0; i < AlleyCombat.TrayDurability && brute.shield; i++) { brute.pos = c.player + new Vector2(60, 0); brute.velocity = Vector2.zero; c.Attack(brute); if (brute.shield) blocked++; }
+        Expect(blocked == AlleyCombat.TrayDurability - 1 && !brute.shield && brute.hp < 4, "frontal punches dent the tray until it gives way", report);
+        c = new AlleyCombat(); c.Start(); c.spawning = false;
+        var rear = Tray(c, c.player + new Vector2(-60, 0), -1); c.Attack(rear);
+        Expect(!rear.shield && rear.hp <= 2, "punch from behind breaks the tray", report);
+        c = new AlleyCombat(); c.Start(); c.spawning = false; c.player = new Vector2(120, 690);
+        var wallTray = Tray(c, new Vector2(300, 450), -1); var body = c.AddEnemy(new Vector2(250, 450)); body.velocity = new Vector2(700, 0);
+        c.Tick(.02f, Vector2.zero, false);
+        Expect(wallTray.shield && wallTray.hp == 4 && body.velocity.x < 0, "a body thrown into the tray face bounces off", report);
+        c = new AlleyCombat(); c.Start(); c.spawning = false; c.player = new Vector2(120, 690);
+        var sideTray = Tray(c, new Vector2(300, 450), -1); var drop = c.AddEnemy(new Vector2(300, 400)); drop.velocity = new Vector2(0, 700);
+        c.Tick(.02f, Vector2.zero, false);
+        Expect(!sideTray.shield && sideTray.hp <= 2, "a body hitting the tray from the side breaks it", report);
+        c = new AlleyCombat(); c.Start(); c.spawning = false; c.player = new Vector2(150, 500);
+        var turner = Tray(c, new Vector2(300, 500), -1); turner.stun = 5; c.player = new Vector2(450, 500);
+        for (int i = 0; i < 10; i++) c.Tick(.02f, Vector2.zero, false);
+        bool stillFacing = turner.facing == -1;
+        for (int i = 0; i < 30; i++) c.Tick(.02f, Vector2.zero, false);
+        Expect(stillFacing && turner.facing == 1, "tray guy turns around slowly, leaving a rear opening", report);
+        c = new AlleyCombat(); c.Start(); c.spawning = false;
+        var smashed = Tray(c, c.player + new Vector2(80, 0), -1); c.Special();
+        Expect(!smashed.shield, "dad's special smashes trays", report);
+        var run = new AlleyCombat(); run.SetArena(new Rect(64, 240, 412, 520)); run.player = new Vector2(270, 570); run.Start();
+        var director = new SchoolRunDirector(); director.Begin(run); float introducedAt = -1;
+        for (int i = 0; i < 28 && introducedAt < 0; i++)
+        { run.enemies.Clear(); run.elapsed = 5 + i * 4; director.Tick(run); if (run.enemies.Exists(e => e.shield)) introducedAt = run.elapsed; }
+        Expect(introducedAt >= SchoolRunDirector.TrayIntro && introducedAt < SchoolRunDirector.BossFloor && director.TrayOnField, "tray guy is introduced after the charger and before the boss", report);
     }
     [MenuItem("Dad School Boss/Run Full Run Simulation")]
     public static void RunFlowCheck()
@@ -255,13 +310,13 @@ public static class DadPrototypeSetup
     public struct SimResult
     {
         public RunState state; public float end, bossAt, bossFight, hpLeft, minHp, damage, feverTime;
-        public int kills, wall, chain, choices, specials, level;
+        public int kills, wall, chain, choices, specials, level, trayBlocks, trayBreaks;
         public System.Collections.Generic.Dictionary<string, int> bossDamage;
         public string Line()
         {
             return state + " t=" + end.ToString("F1") + " boss@" + (bossAt < 0 ? "-" : bossAt.ToString("F1")) + " bossFight=" + bossFight.ToString("F1")
                 + " HP=" + hpLeft.ToString("F0") + " min=" + minHp.ToString("F0") + " dmg=" + damage.ToString("F0") + " kills=" + kills + " wall=" + wall
-                + " chain=" + chain + " Lv=" + level + " specials=" + specials + " fever=" + feverTime.ToString("F1") + "s";
+                + " chain=" + chain + " Lv=" + level + " specials=" + specials + " fever=" + feverTime.ToString("F1") + "s tray=" + trayBreaks + "/" + trayBlocks + "blk";
         }
     }
     public static SimResult SimulateRun(int seed, bool skilled, int gear = 0)
@@ -286,6 +341,14 @@ public static class DadPrototypeSetup
                 {
                     Vector2 delta = nearest.pos - combat.player;
                     movement = distance > 75 ? delta.normalized : Vector2.zero;
+                    if (skilled && boss == null && nearest.shield)
+                    {
+                        // Flank the tray: stand above or below it instead of in front of it.
+                        Vector2 flank = nearest.pos + new Vector2(0, combat.player.y <= nearest.pos.y ? -78 : 78);
+                        if (flank.y < combat.arena.yMin + 14 || flank.y > combat.arena.yMax - 14) flank = nearest.pos + new Vector2(0, combat.player.y <= nearest.pos.y ? 78 : -78);
+                        Vector2 toFlank = flank - combat.player;
+                        movement = toFlank.magnitude > 14 ? toFlank.normalized : Vector2.zero;
+                    }
                     if (skilled && boss != null)
                     {
                         // Line an escort up between dad and the boss; once the boss is groggy, go hit it directly.
@@ -316,6 +379,7 @@ public static class DadPrototypeSetup
                 if (request && combat.charge < 100) r.specials++;
                 if (combat.isFever) r.feverTime += .02f;
                 r.damage += Mathf.Max(0, hpBefore - combat.health); r.minHp = Mathf.Min(r.minHp, combat.health);
+                foreach (CombatEvent ev in combat.events) { if (ev.text == "쟁반 막기!" || ev.text == "팅!") r.trayBlocks++; else if (ev.text == "쟁반 박살!") r.trayBreaks++; }
                 bool hadBoss = director.BossReleased; director.Tick(combat);
                 if (!hadBoss && director.BossReleased) r.bossAt = combat.elapsed;
                 combat.events.Clear();

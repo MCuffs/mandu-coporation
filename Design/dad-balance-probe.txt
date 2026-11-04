@@ -1,67 +1,67 @@
 Balance probe: 8 seeds x 2 scripted players x 3 gears (not a human fun test)
 == slipper / skilled
-  seed 0: Won t=102.5 boss@86.8 bossFight=15.7 HP=100 min=100 dmg=0 kills=51 wall=37 chain=6 Lv=4 specials=6 fever=15.7s
-  seed 1: Won t=122.6 boss@87.6 bossFight=35.0 HP=82 min=82 dmg=18 kills=57 wall=41 chain=6 Lv=5 specials=7 fever=15.5s
-  seed 2: Won t=119.1 boss@87.2 bossFight=31.9 HP=100 min=100 dmg=0 kills=56 wall=35 chain=6 Lv=5 specials=7 fever=17.3s
-  seed 3: Won t=97.6 boss@87.8 bossFight=9.8 HP=100 min=100 dmg=0 kills=52 wall=32 chain=6 Lv=4 specials=5 fever=12.3s
-  seed 4: Won t=94.1 boss@84.9 bossFight=9.1 HP=100 min=100 dmg=0 kills=50 wall=38 chain=10 Lv=4 specials=5 fever=9.9s
-  seed 5: Won t=101.9 boss@87.2 bossFight=14.7 HP=82 min=82 dmg=18 kills=53 wall=40 chain=8 Lv=4 specials=5 fever=12.1s
-  seed 6: Won t=93.9 boss@84.9 bossFight=9.0 HP=100 min=100 dmg=0 kills=49 wall=38 chain=10 Lv=4 specials=5 fever=9.9s
-  seed 7: Won t=105.5 boss@87.5 bossFight=18.1 HP=82 min=82 dmg=18 kills=53 wall=35 chain=6 Lv=4 specials=6 fever=12.5s
-  AVG win=8/8 t=104.7 boss@86.7 bossFight=17.9 HP=93 dmg=7 specials=5.8 fever=13.2s
-  boss HP lost per run by source: −n(punch/special):7.1  폭파벽!!:2.5  강타!:4.4  그로기!!:3.8  짱 벽꿍!!:4.6  벽꿍!:3.4  크리티컬!:0.9  BOSS DOWN:0.4  폭발 파편!:1.0
+  seed 0: Won t=131.9 boss@103.9 bossFight=27.9 HP=72 min=67 dmg=36 kills=66 wall=42 chain=8 Lv=4 specials=9 fever=25.4s tray=4/2blk
+  seed 1: Won t=128.0 boss@103.7 bossFight=24.3 HP=92 min=92 dmg=8 kills=65 wall=42 chain=6 Lv=4 specials=7 fever=17.4s tray=4/7blk
+  seed 2: Won t=135.7 boss@102.9 bossFight=32.8 HP=82 min=82 dmg=18 kills=64 wall=47 chain=7 Lv=4 specials=8 fever=17.4s tray=4/6blk
+  seed 3: Won t=116.5 boss@101.5 bossFight=15.0 HP=87 min=82 dmg=18 kills=61 wall=43 chain=6 Lv=4 specials=7 fever=17.4s tray=4/4blk
+  seed 4: Won t=119.4 boss@103.7 bossFight=15.7 HP=82 min=62 dmg=38 kills=63 wall=44 chain=10 Lv=5 specials=6 fever=15.0s tray=4/5blk
+  seed 5: Won t=130.0 boss@103.7 bossFight=26.3 HP=100 min=92 dmg=8 kills=65 wall=45 chain=10 Lv=5 specials=9 fever=24.3s tray=4/5blk
+  seed 6: Won t=114.8 boss@102.9 bossFight=11.9 HP=100 min=100 dmg=0 kills=60 wall=46 chain=15 Lv=4 specials=6 fever=15.0s tray=4/6blk
+  seed 7: Won t=140.9 boss@104.3 bossFight=36.5 HP=38 min=38 dmg=62 kills=68 wall=42 chain=6 Lv=4 specials=9 fever=20.0s tray=4/4blk
+  AVG win=8/8 t=127.1 boss@103.3 bossFight=23.8 HP=82 dmg=24 specials=7.6 fever=19.0s
+  boss HP lost per run by source: 강타!:7.5  −n(punch/special):8.6  그로기!!:3.8  짱 벽꿍!!:4.5  크리티컬!:0.6  벽꿍!:2.6  BOSS DOWN:0.4
 == slipper / novice
-  seed 0: Won t=99.2 boss@87.6 bossFight=11.5 HP=82 min=82 dmg=18 kills=51 wall=33 chain=9 Lv=4 specials=8 fever=17.4s
-  seed 1: Won t=97.5 boss@87.2 bossFight=10.3 HP=92 min=82 dmg=18 kills=51 wall=33 chain=9 Lv=4 specials=8 fever=21.1s
-  seed 2: Won t=98.2 boss@88.1 bossFight=10.0 HP=64 min=64 dmg=36 kills=51 wall=29 chain=5 Lv=4 specials=7 fever=17.5s
-  seed 3: Won t=99.8 boss@87.2 bossFight=12.6 HP=2 min=2 dmg=98 kills=51 wall=36 chain=5 Lv=4 specials=8 fever=17.5s
-  seed 4: Won t=98.1 boss@87.6 bossFight=10.4 HP=82 min=82 dmg=18 kills=50 wall=35 chain=8 Lv=5 specials=8 fever=20.1s
-  seed 5: Won t=98.4 boss@88.2 bossFight=10.2 HP=52 min=52 dmg=48 kills=51 wall=40 chain=11 Lv=4 specials=8 fever=17.4s
-  seed 6: Won t=95.9 boss@88.2 bossFight=7.7 HP=82 min=82 dmg=18 kills=50 wall=31 chain=6 Lv=4 specials=7 fever=17.0s
-  seed 7: Won t=98.7 boss@88.3 bossFight=10.4 HP=87 min=82 dmg=18 kills=51 wall=36 chain=7 Lv=4 specials=9 fever=24.9s
-  AVG win=8/8 t=98.2 boss@87.8 bossFight=10.4 HP=68 dmg=34 specials=7.9 fever=19.1s
-  boss HP lost per run by source: 폭발 파편!:0.8  강타!:8.1  −n(punch/special):6.3  그로기!!:4.5  짱 벽꿍!!:3.4  벽꿍!:4.1  크리티컬!:0.5  BOSS DOWN:0.3  대장 광폭화!!:0.1
+  seed 0: Won t=116.7 boss@105.3 bossFight=11.4 HP=69 min=67 dmg=60 kills=60 wall=43 chain=9 Lv=4 specials=11 fever=30.0s tray=4/12blk
+  seed 1: Won t=120.0 boss@104.1 bossFight=15.9 HP=72 min=69 dmg=52 kills=61 wall=45 chain=9 Lv=4 specials=11 fever=32.6s tray=4/12blk
+  seed 2: Won t=112.3 boss@105.2 bossFight=7.2 HP=42 min=42 dmg=58 kills=60 wall=35 chain=9 Lv=4 specials=9 fever=21.0s tray=4/11blk
+  seed 3: Won t=117.2 boss@104.4 bossFight=12.8 HP=44 min=44 dmg=56 kills=61 wall=46 chain=10 Lv=4 specials=10 fever=23.9s tray=4/12blk
+  seed 4: Won t=113.3 boss@105.2 bossFight=8.1 HP=92 min=92 dmg=8 kills=60 wall=37 chain=10 Lv=4 specials=9 fever=22.0s tray=4/12blk
+  seed 5: Won t=118.0 boss@104.1 bossFight=13.9 HP=100 min=85 dmg=32 kills=61 wall=30 chain=7 Lv=4 specials=11 fever=35.9s tray=4/12blk
+  seed 6: Won t=110.7 boss@104.0 bossFight=6.7 HP=100 min=72 dmg=36 kills=60 wall=47 chain=13 Lv=4 specials=9 fever=24.6s tray=4/12blk
+  seed 7: Won t=115.8 boss@104.5 bossFight=11.4 HP=74 min=74 dmg=26 kills=61 wall=47 chain=9 Lv=4 specials=9 fever=22.5s tray=4/12blk
+  AVG win=8/8 t=115.5 boss@104.6 bossFight=10.9 HP=74 dmg=41 specials=9.9 fever=26.6s
+  boss HP lost per run by source: −n(punch/special):5.0  벽꿍!:6.1  강타!:7.3  크리티컬!:2.0  그로기!!:2.8  짱 벽꿍!!:3.1  폭파벽!!:1.4  BOSS DOWN:0.4
 == lunchbox / skilled
-  seed 0: Won t=107.6 boss@87.0 bossFight=20.6 HP=100 min=100 dmg=0 kills=52 wall=19 chain=5 Lv=4 specials=5 fever=13.4s
-  seed 1: Won t=115.5 boss@87.3 bossFight=28.2 HP=82 min=82 dmg=18 kills=56 wall=21 chain=5 Lv=5 specials=5 fever=10.0s
-  seed 2: Won t=125.0 boss@87.1 bossFight=37.9 HP=82 min=82 dmg=18 kills=58 wall=17 chain=5 Lv=5 specials=5 fever=12.5s
-  seed 3: Won t=133.0 boss@84.8 bossFight=48.2 HP=46 min=46 dmg=54 kills=58 wall=28 chain=5 Lv=5 specials=7 fever=15.6s
-  seed 4: Won t=119.0 boss@87.0 bossFight=31.9 HP=64 min=64 dmg=36 kills=55 wall=22 chain=5 Lv=4 specials=5 fever=10.1s
-  seed 5: Won t=119.1 boss@87.1 bossFight=31.9 HP=100 min=100 dmg=0 kills=57 wall=25 chain=5 Lv=5 specials=5 fever=10.0s
-  seed 6: Won t=117.5 boss@87.1 bossFight=30.4 HP=46 min=46 dmg=54 kills=56 wall=20 chain=5 Lv=5 specials=5 fever=11.2s
-  seed 7: Won t=116.8 boss@87.0 bossFight=29.8 HP=46 min=46 dmg=54 kills=54 wall=22 chain=5 Lv=5 specials=5 fever=10.1s
-  AVG win=8/8 t=119.2 boss@86.8 bossFight=32.4 HP=71 dmg=29 specials=5.3 fever=11.6s
-  boss HP lost per run by source: 그로기!!:3.1  −n(punch/special):10.3  짱 벽꿍!!:3.1  강타!:7.0  대장 광폭화!!:0.3  크리티컬!:1.0  벽꿍!:2.9  BOSS DOWN:0.4
+  seed 0: Won t=119.7 boss@104.2 bossFight=15.4 HP=90 min=82 dmg=26 kills=63 wall=28 chain=6 Lv=4 specials=7 fever=17.5s tray=4/7blk
+  seed 1: Won t=127.5 boss@103.7 bossFight=23.8 HP=82 min=82 dmg=18 kills=65 wall=32 chain=6 Lv=4 specials=7 fever=15.0s tray=4/7blk
+  seed 2: Won t=129.5 boss@102.0 bossFight=27.5 HP=100 min=100 dmg=0 kills=64 wall=31 chain=4 Lv=4 specials=5 fever=10.1s tray=4/5blk
+  seed 3: Won t=138.6 boss@104.0 bossFight=34.5 HP=74 min=74 dmg=26 kills=67 wall=33 chain=6 Lv=4 specials=7 fever=17.6s tray=4/7blk
+  seed 4: Won t=115.3 boss@100.6 bossFight=14.7 HP=85 min=82 dmg=18 kills=60 wall=34 chain=5 Lv=4 specials=4 fever=11.0s tray=4/5blk
+  seed 5: Won t=127.2 boss@103.7 bossFight=23.5 HP=72 min=69 dmg=36 kills=64 wall=35 chain=8 Lv=5 specials=7 fever=20.9s tray=4/3blk
+  seed 6: Won t=142.0 boss@100.8 bossFight=41.1 HP=82 min=82 dmg=18 kills=67 wall=34 chain=8 Lv=4 specials=8 fever=17.5s tray=4/2blk
+  seed 7: Won t=127.3 boss@100.7 bossFight=26.7 HP=100 min=100 dmg=0 kills=63 wall=30 chain=8 Lv=4 specials=7 fever=15.5s tray=4/2blk
+  AVG win=8/8 t=128.4 boss@102.5 bossFight=25.9 HP=85 dmg=18 specials=6.5 fever=15.7s
+  boss HP lost per run by source: −n(punch/special):8.3  그로기!!:4.6  강타!:8.4  짱 벽꿍!!:2.9  벽꿍!:1.5  크리티컬!:1.1  BOSS DOWN:0.3  대장 광폭화!!:0.1  폭파벽!!:0.9
 == lunchbox / novice
-  seed 0: Won t=96.8 boss@87.3 bossFight=9.4 HP=64 min=64 dmg=36 kills=50 wall=17 chain=5 Lv=4 specials=7 fever=17.5s
-  seed 1: Won t=97.3 boss@87.4 bossFight=9.9 HP=64 min=64 dmg=36 kills=50 wall=19 chain=6 Lv=5 specials=7 fever=17.4s
-  seed 2: Won t=103.9 boss@88.1 bossFight=15.8 HP=72 min=64 dmg=36 kills=52 wall=24 chain=8 Lv=4 specials=10 fever=27.5s
-  seed 3: Won t=104.3 boss@87.5 bossFight=16.8 HP=46 min=46 dmg=54 kills=51 wall=15 chain=7 Lv=4 specials=8 fever=20.0s
-  seed 4: Lost t=99.7 boss@87.2 bossFight=12.5 HP=0 min=0 dmg=100 kills=50 wall=17 chain=6 Lv=4 specials=7 fever=17.5s
-  seed 5: Won t=99.2 boss@88.1 bossFight=11.1 HP=82 min=82 dmg=18 kills=51 wall=21 chain=9 Lv=4 specials=7 fever=17.5s
-  seed 6: Won t=98.7 boss@88.1 bossFight=10.6 HP=62 min=62 dmg=38 kills=50 wall=23 chain=6 Lv=5 specials=8 fever=20.0s
-  seed 7: Won t=93.3 boss@87.4 bossFight=5.9 HP=92 min=82 dmg=42 kills=50 wall=19 chain=8 Lv=4 specials=7 fever=18.3s
-  AVG win=7/8 t=99.1 boss@87.6 bossFight=11.5 HP=60 dmg=45 specials=7.6 fever=19.5s
-  boss HP lost per run by source: 크리티컬!:1.3  −n(punch/special):6.1  강타!:7.3  그로기!!:6.8  짱 벽꿍!!:2.4  벽꿍!:2.5  대장 광폭화!!:0.4
+  seed 0: Won t=116.4 boss@104.1 bossFight=12.3 HP=28 min=28 dmg=72 kills=60 wall=18 chain=6 Lv=4 specials=9 fever=22.5s tray=4/12blk
+  seed 1: Won t=116.7 boss@103.9 bossFight=12.8 HP=4 min=4 dmg=96 kills=61 wall=25 chain=7 Lv=4 specials=10 fever=23.1s tray=4/12blk
+  seed 2: Won t=114.6 boss@104.6 bossFight=9.9 HP=76 min=76 dmg=24 kills=61 wall=25 chain=6 Lv=4 specials=9 fever=22.2s tray=4/10blk
+  seed 3: Won t=117.1 boss@103.9 bossFight=13.2 HP=4 min=4 dmg=96 kills=61 wall=30 chain=7 Lv=4 specials=10 fever=23.1s tray=4/12blk
+  seed 4: Won t=115.8 boss@103.8 bossFight=12.0 HP=75 min=70 dmg=66 kills=61 wall=27 chain=8 Lv=4 specials=10 fever=26.9s tray=4/12blk
+  seed 5: Won t=116.8 boss@103.9 bossFight=12.9 HP=10 min=10 dmg=90 kills=60 wall=25 chain=6 Lv=4 specials=9 fever=22.5s tray=4/12blk
+  seed 6: Won t=116.5 boss@103.9 bossFight=12.6 HP=100 min=88 dmg=44 kills=61 wall=23 chain=6 Lv=4 specials=11 fever=32.5s tray=4/12blk
+  seed 7: Won t=122.0 boss@104.2 bossFight=17.8 HP=12 min=12 dmg=88 kills=62 wall=33 chain=7 Lv=4 specials=11 fever=25.1s tray=4/12blk
+  AVG win=8/8 t=117.0 boss@104.1 bossFight=12.9 HP=39 dmg=72 specials=9.9 fever=24.7s
+  boss HP lost per run by source: −n(punch/special):7.8  강타!:8.4  그로기!!:6.1  짱 벽꿍!!:1.5  대장 광폭화!!:0.4  벽꿍!:3.0  크리티컬!:0.8  BOSS DOWN:0.1
 == phone / skilled
-  seed 0: Won t=116.4 boss@88.0 bossFight=28.4 HP=72 min=67 dmg=36 kills=55 wall=39 chain=9 Lv=5 specials=8 fever=0.0s
-  seed 1: Won t=115.9 boss@85.1 bossFight=30.7 HP=46 min=46 dmg=54 kills=54 wall=36 chain=8 Lv=4 specials=6 fever=0.0s
-  seed 2: Won t=129.5 boss@88.7 bossFight=40.8 HP=28 min=28 dmg=72 kills=58 wall=37 chain=8 Lv=5 specials=8 fever=0.0s
-  seed 3: Won t=104.3 boss@87.2 bossFight=17.1 HP=100 min=100 dmg=0 kills=51 wall=34 chain=7 Lv=4 specials=5 fever=0.0s
-  seed 4: Lost t=135.4 boss@89.7 bossFight=45.7 HP=0 min=0 dmg=100 kills=59 wall=35 chain=8 Lv=5 specials=8 fever=0.0s
-  seed 5: Won t=118.3 boss@87.5 bossFight=30.9 HP=82 min=82 dmg=18 kills=56 wall=41 chain=8 Lv=5 specials=7 fever=0.0s
-  seed 6: Won t=129.5 boss@87.9 bossFight=41.6 HP=87 min=82 dmg=18 kills=58 wall=44 chain=9 Lv=5 specials=9 fever=0.0s
-  seed 7: Won t=122.0 boss@89.7 bossFight=32.3 HP=100 min=100 dmg=0 kills=56 wall=32 chain=8 Lv=5 specials=7 fever=0.0s
-  AVG win=7/8 t=121.4 boss@88.0 bossFight=33.4 HP=64 dmg=37 specials=7.3 fever=0.0s
-  boss HP lost per run by source: 강타!:5.8  −n(punch/special):6.6  크리티컬!:0.5  벽꿍!:0.6  그로기!!:3.3  짱 벽꿍!!:9.5  폭발 파편!:1.0  폭파벽!!:0.5  대장 광폭화!!:0.1
+  seed 0: Won t=127.6 boss@104.0 bossFight=23.6 HP=62 min=62 dmg=44 kills=65 wall=38 chain=6 Lv=4 specials=5 fever=0.0s tray=4/4blk
+  seed 1: Won t=148.8 boss@105.0 bossFight=43.8 HP=100 min=100 dmg=0 kills=69 wall=49 chain=9 Lv=4 specials=8 fever=0.0s tray=4/5blk
+  seed 2: Won t=162.4 boss@104.8 bossFight=57.6 HP=34 min=34 dmg=72 kills=72 wall=50 chain=9 Lv=5 specials=9 fever=0.0s tray=4/5blk
+  seed 3: Won t=136.3 boss@102.0 bossFight=34.3 HP=98 min=82 dmg=18 kills=65 wall=50 chain=12 Lv=4 specials=9 fever=0.0s tray=4/4blk
+  seed 4: Won t=123.5 boss@102.0 bossFight=21.6 HP=82 min=82 dmg=18 kills=62 wall=46 chain=8 Lv=4 specials=7 fever=0.0s tray=4/4blk
+  seed 5: Won t=120.7 boss@101.7 bossFight=19.0 HP=100 min=100 dmg=0 kills=61 wall=43 chain=7 Lv=4 specials=7 fever=0.0s tray=4/4blk
+  seed 6: Won t=134.1 boss@104.3 bossFight=29.7 HP=82 min=82 dmg=18 kills=66 wall=49 chain=8 Lv=5 specials=8 fever=0.0s tray=4/4blk
+  seed 7: Won t=116.6 boss@104.0 bossFight=12.6 HP=100 min=92 dmg=8 kills=62 wall=40 chain=9 Lv=4 specials=6 fever=0.0s tray=4/8blk
+  AVG win=8/8 t=133.7 boss@103.5 bossFight=30.3 HP=82 dmg=22 specials=7.4 fever=0.0s
+  boss HP lost per run by source: 그로기!!:6.3  퍽!:0.3  −n(punch/special):5.5  강타!:4.9  짱 벽꿍!!:8.9  대장 광폭화!!:0.3  벽꿍!:0.4  크리티컬!:0.4  짱 겁먹음!:0.4  BOSS DOWN:0.4  폭파벽!!:0.5
 == phone / novice
-  seed 0: Won t=98.2 boss@85.9 bossFight=12.3 HP=53 min=48 dmg=62 kills=49 wall=42 chain=24 Lv=4 specials=10 fever=0.0s
-  seed 1: Won t=96.6 boss@86.0 bossFight=10.7 HP=52 min=52 dmg=48 kills=49 wall=38 chain=19 Lv=5 specials=9 fever=0.0s
-  seed 2: Won t=103.8 boss@85.5 bossFight=18.3 HP=9 min=4 dmg=106 kills=51 wall=40 chain=15 Lv=5 specials=11 fever=0.0s
-  seed 3: Won t=100.8 boss@85.6 bossFight=15.2 HP=43 min=40 dmg=82 kills=50 wall=32 chain=10 Lv=4 specials=9 fever=0.0s
-  seed 4: Won t=99.0 boss@85.9 bossFight=13.0 HP=18 min=18 dmg=82 kills=49 wall=36 chain=9 Lv=4 specials=9 fever=0.0s
-  seed 5: Won t=99.4 boss@86.2 bossFight=13.1 HP=36 min=36 dmg=64 kills=50 wall=30 chain=10 Lv=5 specials=8 fever=0.0s
-  seed 6: Lost t=101.7 boss@85.7 bossFight=16.1 HP=0 min=0 dmg=127 kills=48 wall=36 chain=8 Lv=4 specials=10 fever=0.0s
-  seed 7: Won t=98.7 boss@86.0 bossFight=12.7 HP=64 min=61 dmg=56 kills=49 wall=38 chain=22 Lv=4 specials=9 fever=0.0s
-  AVG win=7/8 t=99.8 boss@85.8 bossFight=13.9 HP=34 dmg=78 specials=9.4 fever=0.0s
-  boss HP lost per run by source: 그로기!!:6.8  −n(punch/special):5.3  짱 벽꿍!!:8.4  벽꿍!:0.8  강타!:4.6  대장 광폭화!!:0.5  크리티컬!:0.8  퍽!:0.3
+  seed 0: Lost t=124.1 boss@102.3 bossFight=21.8 HP=0 min=0 dmg=142 kills=60 wall=60 chain=11 Lv=4 specials=12 fever=0.0s tray=4/12blk
+  seed 1: Won t=117.6 boss@102.3 bossFight=15.2 HP=40 min=34 dmg=88 kills=60 wall=41 chain=9 Lv=4 specials=11 fever=0.0s tray=4/12blk
+  seed 2: Lost t=124.5 boss@103.1 bossFight=21.4 HP=0 min=0 dmg=138 kills=60 wall=54 chain=15 Lv=4 specials=11 fever=0.0s tray=4/11blk
+  seed 3: Won t=109.4 boss@102.2 bossFight=7.2 HP=82 min=78 dmg=54 kills=59 wall=43 chain=8 Lv=4 specials=9 fever=0.0s tray=4/12blk
+  seed 4: Lost t=120.9 boss@102.2 bossFight=18.8 HP=0 min=0 dmg=140 kills=58 wall=48 chain=12 Lv=4 specials=11 fever=0.0s tray=4/12blk
+  seed 5: Lost t=119.7 boss@102.3 bossFight=17.4 HP=0 min=0 dmg=138 kills=60 wall=45 chain=9 Lv=4 specials=11 fever=0.0s tray=4/12blk
+  seed 6: Won t=125.8 boss@102.7 bossFight=23.1 HP=14 min=9 dmg=154 kills=60 wall=60 chain=11 Lv=4 specials=14 fever=0.0s tray=4/12blk
+  seed 7: Lost t=115.3 boss@102.3 bossFight=13.0 HP=0 min=0 dmg=142 kills=59 wall=42 chain=12 Lv=4 specials=10 fever=0.0s tray=4/12blk
+  AVG win=3/8 t=119.7 boss@102.4 bossFight=17.2 HP=17 dmg=124 specials=11.1 fever=0.0s
+  boss HP lost per run by source: −n(punch/special):5.1  짱 벽꿍!!:8.0  강타!:6.6  크리티컬!:0.1  그로기!!:4.0  대장 광폭화!!:0.1

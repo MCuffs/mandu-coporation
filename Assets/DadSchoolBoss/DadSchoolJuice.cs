@@ -22,6 +22,8 @@ public sealed partial class DadSchoolPrototype
             return "준비물 3종 해금 완료!\n다른 장비로 최고 " + BestChain + "연쇄에 도전하세요";
         }
     }
+    // Atlas frames: 0 gum guy (basic), 1 chair charger, 2 tray guy, 3 school boss. The tray look is reserved for the tray role.
+    static int EnemyFrame(Fighter e) { return e.boss ? 3 : e.kind == 1 ? 1 : e.shield || e.trayBroken ? 2 : 0; }
     void ResetJuice()
     {
         debris.Clear(); corpses.Clear(); remembered.Clear(); chainBadge = 0; displayedChain = 0;
@@ -37,7 +39,7 @@ public sealed partial class DadSchoolPrototype
         foreach (Fighter e in remembered.Values)
         {
             if (e.hp > 0) continue;
-            corpses.Add(new Corpse { p = e.pos, v = e.velocity * .25f, frame = e.boss ? 3 : e.kind == 1 ? 1 : e.id % 2 == 0 ? 2 : 0, flip = e.facing > 0, size = e.boss ? 205 : e.kind == 1 ? 165 : 142 });
+            corpses.Add(new Corpse { p = e.pos, v = e.velocity * .25f, frame = EnemyFrame(e), flip = e.facing > 0, size = e.boss ? 205 : e.kind == 1 ? 165 : 142 });
         }
         for (int i = corpses.Count - 1; i >= 0; i--)
         {
@@ -55,10 +57,11 @@ public sealed partial class DadSchoolPrototype
     void ImpactJuice(CombatEvent e)
     {
         bool wall = e.text.StartsWith("벽꿍") || e.text.StartsWith("폭파벽");
-        bool hit = wall || e.text == "퍽!" || e.text == "크리티컬!" || e.text.StartsWith("연쇄");
+        bool tray = e.text == "쟁반 박살!", blocked = e.text == "쟁반 막기!" || e.text == "팅!";
+        bool hit = wall || tray || blocked || e.text == "퍽!" || e.text == "크리티컬!" || e.text.StartsWith("연쇄");
         if (!hit) return;
         Vector2 center = e.pos - new Vector2(0, 65);
-        int count = wall ? 14 : 7;
+        int count = wall ? 14 : tray ? 12 : blocked ? 5 : 7;
         if (wall)
         {
             bool right = e.pos.x > PlayArea.center.x;
@@ -71,7 +74,7 @@ public sealed partial class DadSchoolPrototype
         for (int i = 0; i < count && debris.Count < 100; i++)
         {
             float angle = i * Mathf.PI * 2 / count;
-            debris.Add(new Debris { p = center, v = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * (wall ? 150 : 95), total = .3f, life = .3f, color = wall ? Yellow : Color.white });
+            debris.Add(new Debris { p = center, v = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * (wall ? 150 : tray ? 170 : 95), total = .3f, life = .3f, color = wall ? Yellow : tray ? new Color(.72f, .76f, .78f) : Color.white });
         }
     }
     void DrawLockers()

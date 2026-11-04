@@ -6,11 +6,14 @@ using SecondFistGame;
 // that the player throws into the boss to open it up.
 public sealed class SchoolRunDirector
 {
-    public const int KillTarget = 45, BossHp = 28, MaxEscorts = 3, XpCurveScale = 3;
-    public const float BossFloor = 80, BossDeadline = 120, EscortInterval = 4.5f;
+    public const int KillTarget = 55, BossHp = 28, MaxEscorts = 3, XpCurveScale = 4;
+    public const float BossFloor = 100, BossDeadline = 135, EscortInterval = 4.5f, TrayIntro = 36;
+    public const int MaxTrays = 2;
     public int Lesson { get; private set; }
     public bool BossReleased { get; private set; }
     public bool BossGroggy { get; private set; }
+    public bool TrayOnField { get; private set; }
+    bool trayIntroduced;
     float nextWave = 5, nextEscort;
     int wave;
     public string Hint
@@ -21,12 +24,13 @@ public sealed class SchoolRunDirector
             if (Lesson == 0) return "① 드래그로 다가가면 아빠가 자동으로 펀치!";
             if (Lesson == 1) return "② 적의 뒤에 벽이 오도록 자리를 잡으세요";
             if (Lesson == 2) return "③ 적 둘을 일렬로 세워 한 번에 날리세요";
+            if (TrayOnField) return "쟁반은 정면만 막아요 · 위아래나 뒤에서!";
             return "벽꿍과 연쇄로 정리!  ·  학교 짱이 오고 있습니다";
         }
     }
     public void Begin(AlleyCombat combat)
     {
-        Lesson = 0; BossReleased = BossGroggy = false; wave = 0; nextWave = 5; nextEscort = 0;
+        Lesson = 0; BossReleased = BossGroggy = TrayOnField = trayIntroduced = false; wave = 0; nextWave = 5; nextEscort = 0;
         combat.killTargetOverride = KillTarget; combat.xpCurveScale = XpCurveScale; combat.nextXp = 3 * combat.xpCurveScale; combat.groggyBoss = true;
         combat.spawning = false; combat.enemies.Clear();
         Fighter first = combat.AddEnemy(new Vector2(combat.player.x + 132, combat.player.y));
@@ -38,6 +42,7 @@ public sealed class SchoolRunDirector
         if (Lesson == 0 && combat.hits > 0) { Lesson = 1; nextWave = Mathf.Min(nextWave, combat.elapsed + 1); }
         if (Lesson == 1 && combat.wallHits > 0) { Lesson = 2; nextWave = Mathf.Min(nextWave, combat.elapsed + 1); }
         if (Lesson == 2 && combat.chainHits > 0) Lesson = 3;
+        TrayOnField = combat.enemies.Exists(e => e.shield);
         if (!BossReleased && (combat.kills >= combat.targetKills && combat.elapsed >= BossFloor || combat.elapsed >= BossDeadline))
         {
             Fighter boss = combat.AddEnemy(new Vector2(combat.arena.center.x, combat.arena.yMin + 45), 2);
@@ -55,9 +60,17 @@ public sealed class SchoolRunDirector
         float x = Mathf.Clamp(combat.player.x + side * 115, combat.arena.xMin + 20, combat.arena.xMax - 20);
         float y = Mathf.Clamp(combat.player.y + (wave % 2 == 0 ? -65 : 50), combat.arena.yMin + 35, combat.arena.yMax - 30);
         bool charger = combat.elapsed >= 24 && wave % 3 == 0 || combat.elapsed >= 60 && wave % 2 == 0;
-        combat.AddEnemy(new Vector2(x, y), charger ? 1 : 0);
+        Fighter lead = combat.AddEnemy(new Vector2(x, y), charger ? 1 : 0);
+        if (!charger && combat.elapsed >= TrayIntro && wave % 3 == 1 && combat.enemies.FindAll(e => e.shield).Count < MaxTrays) MakeTray(combat, lead);
         if ((Lesson >= 2 || combat.elapsed >= 15) && combat.enemies.Count < 6)
             combat.AddEnemy(new Vector2(Mathf.Clamp(x + side * 44, combat.arena.xMin + 12, combat.arena.xMax - 12), y));
+    }
+    // Tray guy: a basic enemy that blocks frontal punches and thrown bodies until it is hit from above, below or behind.
+    void MakeTray(AlleyCombat combat, Fighter f)
+    {
+        f.shield = true; f.hp = f.maxHp = 4; f.facing = combat.player.x >= f.pos.x ? 1 : -1;
+        if (!trayIntroduced) { trayIntroduced = true; combat.events.Add(new CombatEvent("쟁반 짱 등장", f.pos, 3)); }
+        TrayOnField = true;
     }
     // Escorts are ammunition: the boss only becomes launchable after another body hits it.
     void TickBossFight(AlleyCombat combat)

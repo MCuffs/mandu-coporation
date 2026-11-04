@@ -1,5 +1,5 @@
 Deterministic full-run simulation (not a human fun test)
-Result: Won t=123.2 boss@87.2 bossFight=36.1 HP=100 min=100 dmg=0 kills=57 wall=37 chain=6 Lv=5 specials=9 fever=26.6s
+Result: Won t=128.5 boss@103.7 bossFight=24.8 HP=92 min=92 dmg=8 kills=65 wall=40 chain=5 Lv=4 specials=7 fever=17.5s tray=4/5blk
 PASS first skill choice is reachable through normal combat
 PASS boss is reachable through a continuous run
 PASS a full run can be won without editing health or enemy HP

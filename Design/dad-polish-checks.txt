@@ -19,4 +19,14 @@ PASS slipper changes actual punch trajectory strength
 PASS phone interrupts and scatters beyond normal special reach
 PASS phone trades damage and fever for crowd control
 PASS phone cannot be spammed without charge
+PASS phone call restores a little health instead of fever
 PASS phone call scares the school boss into a groggy opening
+PASS tray blocks a punch from the front
+PASS punch from below the tray breaks it and launches
+PASS frontal punches dent the tray until it gives way
+PASS punch from behind breaks the tray
+PASS a body thrown into the tray face bounces off
+PASS a body hitting the tray from the side breaks it
+PASS tray guy turns around slowly, leaving a rear opening
+PASS dad's special smashes trays
+PASS tray guy is introduced after the charger and before the boss
