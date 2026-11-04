@@ -35,16 +35,49 @@ public sealed partial class DadSchoolPrototype
         SlingBattle = true; SlingResult = null; Home = false; Paused = false; Combat = null; Director = null;
         popups.Clear(); resultReason = "";
     }
-    // 주먹 -> 들이받기, 체력, 연타 -> 도움닫기, 날리기 -> 멀리 날리기 (+1 wall damage from Lv.10). Gear: 벽꿍형 adds wall
-    // damage, 연쇄형 sends hit dads further, 폭주형 starts with a rage shot. 엄마의 응원 (losing streak) adds health.
+    // Upgrades in the fight, per level and capped (the 강화 tab reads the same numbers): 들이받기 = how hard a hit dad is
+    // sent, 체력 = dad's health (no cap), 도움닫기 = launch speed, 멀리 날리기 = how far a hit dad flies, +1 wall damage
+    // from Lv.10. Special launches: 벽꿍형 adds wall damage, 연쇄형 sends hit dads further, 폭주형 starts with a rage shot.
+    // 엄마의 응원 (losing streak) adds health.
+    public static readonly float[] GrowthStep = { .03f, .08f, .015f, .02f };
+    static readonly float[] GrowthCap = { .6f, float.MaxValue, .3f, .5f };
+    public const int FarThrowWallLevel = 10;
+    public const float ChainLaunchThrow = .15f;
+    public static float GrowthBonus(int stat, int level) { return Mathf.Min(GrowthCap[stat], GrowthStep[stat] * level); }
+    public static bool GrowthCapped(int stat, int level) { return GrowthStep[stat] * level >= GrowthCap[stat] - 1e-4f; }   // .03f * 20 lands just under .6f
     public static void ApplyGrowth(SlingshotSim sim, int[] up, int gear, float assist)
     {
-        sim.knockBonus = Mathf.Min(1.6f, 1 + .03f * up[0]);
-        sim.SetHealth(100 * (1 + .08f * up[1]) * assist);
-        sim.launchBonus = Mathf.Min(1.3f, 1 + .015f * up[2]);
-        sim.throwBonus = Mathf.Min(1.5f, 1 + .02f * up[3]) * (gear == 1 ? 1.15f : 1);
-        sim.wallBonus = (up[3] >= 10 ? 1 : 0) + (gear == 0 ? 1 : 0);
+        sim.knockBonus = 1 + GrowthBonus(0, up[0]);
+        sim.SetHealth(100 * (1 + GrowthBonus(1, up[1])) * assist);
+        sim.launchBonus = 1 + GrowthBonus(2, up[2]);
+        sim.throwBonus = (1 + GrowthBonus(3, up[3])) * (gear == 1 ? 1 + ChainLaunchThrow : 1);
+        sim.wallBonus = (up[3] >= FarThrowWallLevel ? 1 : 0) + (gear == 0 ? 1 : 0);
         if (gear == 2) sim.ragePending = true;
+    }
+
+    // ---- the 출발 card: what the next fight holds -------------------------------------------------------------------------
+    public static readonly string[] KindNames = { "껌 아빠", "의자 아빠", "쟁반 아빠", "보스", "피구 아빠" };   // by SlingshotSim.Kind
+    SlingshotSim.Stage cardStage; int cardStageNo; string cardFoe, cardTag, cardName; bool cardElite;
+    public static SlingshotSim.Stage MainStage(DadEconomy eco, int stage) { return SlingshotSim.ForMain(eco.Floor(stage), eco.Number(stage), DadSlingshotPrototype.Arena); }
+    // A role no earlier stage had (the first chair, tray and dodgeball dad), or -1. Plain dads and bosses are not roles.
+    public static int NewKind(DadEconomy eco, int stage)
+    {
+        var seen = new System.Collections.Generic.HashSet<SlingshotSim.Kind> { SlingshotSim.Kind.Gum, SlingshotSim.Kind.Boss };
+        for (int s = 1; s < stage; s++) foreach (SlingshotSim.Spawn sp in MainStage(eco, s).spawns) seen.Add(sp.kind);
+        foreach (SlingshotSim.Spawn sp in MainStage(eco, stage).spawns) if (!seen.Contains(sp.kind)) return (int)sp.kind;
+        return -1;
+    }
+    // Cached per stage: the stage, and the dad to show on the card (floor boss, big-dad or a first appearance).
+    SlingshotSim.Stage CardStage(int stage)
+    {
+        if (cardStage != null && cardStageNo == stage) return cardStage;
+        DadEconomy eco = Progress.Eco; int floorIndex = Mathf.Clamp(eco.Floor(stage) - 1, 0, 2), kind = NewKind(eco, stage);
+        cardStage = MainStage(eco, stage); cardStageNo = stage; cardFoe = cardTag = cardName = null; cardElite = false;
+        SlingshotSim.Spawn elite = cardStage.spawns.Find(sp => sp.elite);
+        if (cardStage.spawns.Exists(sp => sp.kind == SlingshotSim.Kind.Boss)) { cardTag = "층 보스"; cardFoe = "boss" + (floorIndex + 1); cardName = BossNames[floorIndex]; }
+        else if (elite != null) { cardTag = "큰아빠"; cardFoe = DadSlingshotPrototype.FoeId(elite.kind); cardName = EliteNames[floorIndex]; cardElite = true; }
+        else if (kind >= 0) { cardTag = "첫 등장"; cardFoe = DadSlingshotPrototype.FoeId((SlingshotSim.Kind)kind); cardName = KindNames[kind]; }
+        return cardStage;
     }
 
     void OnSlingFinished(SlingshotSim sim)

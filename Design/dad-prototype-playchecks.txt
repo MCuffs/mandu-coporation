@@ -38,6 +38,8 @@ PASS the fight's own stars are saved
 PASS start moves on to 1-2 in a fresh fight
 PASS a lost fight pays the consolation share and stays on the stage
 PASS upgrades reach the fight (들이받기, 체력, 도움닫기, 멀리 날리기)
+PASS upgrade caps the 강화 tab shows: 들이받기 stops at +60%, 체력 has none
+PASS the 출발 card flags only the first chair (1-4), tray (1-7) and dodgeball dad (1-9) (1-1..1-10: -1,-1,-1,1,-1,-1,2,-1,4,-1)
 PASS 1-20 is the floor-1 boss fight
 PASS 2-10 is floor 2's big-dad
 PASS home ends the fight

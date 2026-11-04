@@ -25,14 +25,16 @@ public sealed partial class DadSchoolPrototype
     static float BodySize(Fighter e) { return (e.boss ? 205 : e.kind == 1 ? 165 : 142) * (e.elite ? 1.45f : 1); }
     float chainBadge;
     int displayedChain;
-    string GearName { get { return Gear == 0 ? "고무 슬리퍼" : Gear == 1 ? "튼튼한 도시락" : "폴더폰"; } }
+    // The three loadouts are the special launches (C-10; their old item names clashed with lunchbox gear, PM R8).
+    public static readonly string[] LaunchNames = { "벽꿍형", "연쇄형", "폭주형" };
+    string GearName { get { return LaunchNames[Mathf.Clamp(Gear, 0, 2)]; } }
     string NextGoal
     {
         get
         {
-            if (!ChainGearUnlocked) return "다음 준비물: 튼튼한 도시락\n최고 " + BestChain + " / 3연쇄 또는 첫 승리";
-            if (!PhoneGearUnlocked) return "다음 준비물: 폴더폰\n누적 벽꿍 " + TotalWallHits + " / " + PhoneWallGoal + "회  (" + (PhoneWallGoal - TotalWallHits) + "회 남음)";
-            return "준비물 3종 해금 완료!\n다른 장비로 최고 " + BestChain + "연쇄에 도전하세요";
+            if (!ChainGearUnlocked) return "다음 특수 발사: 연쇄형\n최고 " + BestChain + " / 3연쇄 또는 첫 승리";
+            if (!PhoneGearUnlocked) return "다음 특수 발사: 폭주형\n누적 벽꿍 " + TotalWallHits + " / " + PhoneWallGoal + "회  (" + (PhoneWallGoal - TotalWallHits) + "회 남음)";
+            return "특수 발사 3종 해금 완료!\n한 발 최고 " + BestChain + "연쇄, 더 늘려 보세요";
         }
     }
     // Atlas frames: 0 gum guy (basic), 1 chair charger, 2 tray guy, 3 school boss. The tray look is reserved for the tray role.

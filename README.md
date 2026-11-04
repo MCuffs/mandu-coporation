@@ -20,7 +20,7 @@
 ## 현재 구현
 
 - 오프닝: 회사 스플래시, 키아트 타이틀, 의리 테스트 6컷 시나리오(자막·건너뛰기·다시 보기)
-- 홈 하단 3탭: 출발(아빠와 사물함에 박힌 지호 아빠, 엄마 방치 보상, 스테이지 카드) · 도시락(6부위 장비, 개봉, 등급 확률 표시) · 강화(4종 강화, 출동 준비물)
+- 홈 하단 3탭: 출발(아빠와 사물함에 박힌 지호 아빠, 엄마 방치 보상, 스테이지 카드) · 도시락(6부위 장비, 개봉, 등급 확률 표시) · 강화(들이받기·체력·도움닫기·멀리 날리기, 특수 발사 3종)
 - 전투(11/5부터 슬링샷, [PM 문서](Design/dad-war-pm.md) D-008): 당겨 쏘기, 벽 튕김 보너스, 연쇄와 분노 발사, 사물함 찌그러짐, 다가오는 껌·의자·쟁반·피구 아빠, 두 번 맞혀야 날아가는 큰아빠, 날린 아빠로 그로기를 만드는 층 보스
 - 3층 × 20스테이지, 결과 「복도 정리 끝!」(발사/목표·최대 연쇄·벽꿍), 별 3개, 3패 이후 엄마의 응원 보정, 최대 8시간 방치 보상, 로컬 저장
 - 옛 자동 펀치 전투는 비교·검사용으로 코드에 남아 있습니다(`DadSchoolPrototype.UseSlingshot = false`).
@@ -36,7 +36,7 @@
 | Run Prototype Checks (`checks`) | 에셋·import 규칙·전투 기본 | [dad-prototype-checks.txt](Design/dad-prototype-checks.txt) |
 | Run Play Mode Checks (`playchecks`, Play 중) | 오프닝 흐름, 옛 전투·보상·저장, 사물함, 모션, 슬링샷 전투 연결(시작·승패 저장·성장·층 보스·홈) | [dad-prototype-playchecks.txt](Design/dad-prototype-playchecks.txt) |
 | Run Polish Checks (`polishchecks`) | 경제·스테이지·쟁반·장비 | [dad-polish-checks.txt](Design/dad-polish-checks.txt) |
-| `slingmain:<폴더>` (Play 중) | 홈 → 전투 → 조준·비행 → 승리·패배 결과 → 층 보스·큰아빠 → 결말 10장 캡처 | [dad-war-main-slingshot-v1.png](Design/dad-war-main-slingshot-v1.png) |
+| `slingmain:<폴더>` (Play 중) | 홈·출발 카드·강화 탭 → 전투 → 조준·비행 → 승리·패배 결과 → 층 보스·큰아빠 → 결말 13장 캡처 | [dad-war-main-slingshot-v1.png](Design/dad-war-main-slingshot-v1.png) |
 | `ui:<폴더>` (Play 중) | 오프닝·홈 3탭·옛 전투 버튼·결과 화면 16장 캡처 | — |
 | 슬링샷 규칙 (`Library/DadSlingshotCommand.txt`의 `checks`) | 발사·튕김·연쇄·역할 아빠·보스·60판 생성·성장 | [dad-slingshot-checks.txt](Design/dad-slingshot-checks.txt), 봇 [dad-slingshot-mainbot.txt](Design/dad-slingshot-mainbot.txt) |
 

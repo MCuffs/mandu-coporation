@@ -173,6 +173,11 @@ public static class DadPrototypeSetup
         DadProgress original = g.Progress; string temp = TempSavePath("slingmain"); int gear = g.Gear;
         Step(1, () => { var p = new DadProgress(DadEconomy.Load(), temp) { Rng = new System.Random(5) }; p.Save.coins = 320; p.Save.bestStage = 3; p.Save.currentStage = 3; p.Save.lunchboxes = 1; g.UseProgress(p); g.GoHome(); });
         Step(10, () => shot("sm01-home"));
+        // 출발 card with a first appearance and with the floor boss; 강화 tab with one stat at its cap.
+        Step(1, () => { g.Progress.Save.bestStage = g.Progress.Save.currentStage = 9; }); Step(4, () => shot("sm01b-card-new-foe"));
+        Step(1, () => { g.Progress.Save.bestStage = g.Progress.Save.currentStage = 20; }); Step(4, () => shot("sm01c-card-boss"));
+        Step(1, () => { g.Progress.Save.upgrades = new[] { 20, 5, 8, 12 }; g.Tab = DadSchoolPrototype.HomeTab.Upgrade; }); Step(4, () => shot("sm01d-upgrade"));
+        Step(1, () => { g.Progress.Save.upgrades = new[] { 0, 0, 0, 0 }; g.Progress.Save.bestStage = g.Progress.Save.currentStage = 3; g.Tab = DadSchoolPrototype.HomeTab.Go; });
         Step(1, () => g.StartRun()); Step(100, () => shot("sm02-fight-1-3"));
         Step(1, () => g.SlingView.DebugAim(new Vector2(270, 700), new Vector2(250, 830))); Step(20, () => shot("sm03-aim"));
         Step(1, () => g.SlingView.DebugRelease()); Step(10, () => shot("sm04-flight"));
@@ -584,6 +589,11 @@ public static class DadPrototypeSetup
             Expect(!game.LastReward.won && game.Progress.Save.coins > slingCoins && game.Progress.Save.lossesAtStage == 1 && game.Progress.Save.currentStage == 2, "a lost fight pays the consolation share and stays on the stage", report);
             game.Progress.Save.upgrades = new[] { 10, 5, 10, 10 }; game.StartRun();
             Expect(game.Sling.knockBonus > 1.29f && game.Sling.launchBonus > 1.14f && game.Sling.dad.maxHealth > 139 && game.Sling.wallBonus == 2, "upgrades reach the fight (들이받기, 체력, 도움닫기, 멀리 날리기)", report);
+            Expect(Mathf.Approximately(DadSchoolPrototype.GrowthBonus(0, 30), .6f) && DadSchoolPrototype.GrowthCapped(0, 20) && !DadSchoolPrototype.GrowthCapped(1, 500), "upgrade caps the 강화 tab shows: 들이받기 stops at +60%, 체력 has none", report);
+            DadEconomy cardEco = game.Progress.Eco;
+            int[] firsts = new int[10]; for (int s = 1; s <= 10; s++) firsts[s - 1] = DadSchoolPrototype.NewKind(cardEco, s);
+            Expect(firsts[3] == (int)SlingshotSim.Kind.Chair && firsts[6] == (int)SlingshotSim.Kind.Tray && firsts[8] == (int)SlingshotSim.Kind.Dodge && DadSchoolPrototype.NewKind(cardEco, 30) < 0
+                && System.Array.FindAll(firsts, k => k >= 0).Length == 3, "the 출발 card flags only the first chair (1-4), tray (1-7) and dodgeball dad (1-9) (1-1..1-10: " + string.Join(",", firsts) + ")", report);
             game.StartStage(20);
             Expect(game.Sling.stage.floor == 1 && game.Sling.stage.spawns.Exists(sp => sp.kind == SlingshotSim.Kind.Boss), "1-20 is the floor-1 boss fight", report);
             game.StartStage(30);

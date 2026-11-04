@@ -36,7 +36,7 @@ public sealed class StageReward
 public sealed class DadProgress
 {
     public const int StatCount = 4;
-    public static readonly string[] StatNames = { "주먹", "체력", "연타", "날리기" };
+    public static readonly string[] StatNames = { "들이받기", "체력", "도움닫기", "멀리 날리기" };   // slingshot names (C-08); was 주먹·체력·연타·날리기
     public readonly DadEconomy Eco;
     public DadSave Save { get; private set; }
     readonly string path;

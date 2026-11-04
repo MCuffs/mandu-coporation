@@ -10,7 +10,7 @@ public sealed partial class DadSchoolPrototype
     public HomeTab Tab { get; set; } = HomeTab.Go;
     static readonly string[] TabNames = { "도시락", "출발", "강화" };
     static readonly string[] TabIcons = { "tab_lunchbox", "tab_go", "tab_upgrade" };
-    static readonly string[] UpgradeQuips = { "주먹 쥘 일은 없었으면 했다", "계단은 아직 쉬었다 간다", "리모컨 누르던 엄지다", "이불 털던 어깨다" };
+    static readonly string[] UpgradeQuips = { "출근길 지하철에서 단련된 어깨다", "계단은 아직 쉬었다 간다", "막차 한 번 놓친 적 없는 다리다", "이불 털던 팔이다" };
     static readonly string[] FloorDone = { "복도 정리 끝!", "급식실 정리 끝!", "체육관 정리 끝!" };
     static readonly Color Night = new Color(.15f, .24f, .18f);   // v9 top bar and result header
     static readonly Color Muted = new Color(.45f, .44f, .4f);
@@ -58,16 +58,18 @@ public sealed partial class DadSchoolPrototype
         Text(new Rect(c.x - 20, c.y - 14, 40, 28), s, 16, Color.white, true, TextAnchor.MiddleCenter);
     }
 
-    // ---- 출발: the son's line, the title and power, the scene, mom's idle stash, the stage and the go button ----------
+    // ---- 출발: the son's line, the title and stars, the scene, mom's idle stash, the stage and the go button ----------
     void DrawGoTab()
     {
         DadSave save = Progress.Save; int stage = save.currentStage, floor = Progress.Eco.Floor(stage);
-        float power = Progress.EffectivePower(stage), required = Progress.Eco.RequiredPower(stage);
         Box(new Rect(0, BarHeight, Width, 146), Paper); Box(new Rect(0, BarHeight + 146, Width, 3), Ink);
         Text(new Rect(22, 70, 340, 26), "아들: \"지호가 자기 아빠 데려왔대…\"", 17, Red, true);
         Text(new Rect(18, 94, 330, 104), Title, 64, Ink, true);
-        Text(new Rect(330, 82, 188, 26), "전투력", 17, Ink, true, TextAnchor.MiddleRight);
-        Text(new Rect(290, 106, 228, 56), Mathf.RoundToInt(power).ToString("N0"), 42, Ink, true, TextAnchor.MiddleRight);
+        // Stars collected over the school (C-13: the power number moved out; the fight runs on upgrades, not power).
+        int stars = 0; foreach (int s in save.stars) stars += s;
+        Text(new Rect(330, 82, 188, 26), "모은 별 / " + 3 * Progress.Eco.TotalStages, 17, Ink, true, TextAnchor.MiddleRight);
+        Icon("star_full", new Rect(376, 112, 42, 42));
+        Text(new Rect(418, 106, 100, 56), stars.ToString(), 42, Ink, true, TextAnchor.MiddleRight);
         DrawHomeScene(floor);
 
         // Mom's stash (idle reward): always on its own row so it never covers dad's face (v9).
@@ -79,15 +81,23 @@ public sealed partial class DadSchoolPrototype
                                               : "모으는 중 · 최대 " + Mathf.RoundToInt(Progress.Eco.offlineCapHours) + "시간", 16, idle ? Ink : Muted);
         if (Button(new Rect(404, 610, 104, 50), "받기", Yellow, idle, 22)) { Progress.ClaimIdle(); PersistNow(); PlaySfx("sfx_coin", .7f); }
 
+        // The stage card (C-13): best stars so far, the shot target and how many dads, and who is new or big on the right.
         Panel(new Rect(20, 684, 500, 66), Paper);
         Text(new Rect(34, 686, 330, 34), Progress.Eco.Label(stage) + " · " + StagePlan.FloorNames[Mathf.Clamp(floor - 1, 0, 2)], 24, Ink, true);
-        bool weak = power < required;
-        Text(new Rect(34, 716, 360, 30), "권장 " + Mathf.RoundToInt(required).ToString("N0") + (weak ? " · 조금 더 준비하고 갈까?" : " · 준비 완료"), 17, weak ? Red : Green, true);
+        SlingshotSim.Stage next = CardStage(stage); int best = Progress.Stars(stage);
+        for (int s = 0; s < 3; s++) Icon(s < best ? "star_full" : "star_empty", new Rect(32 + s * 24, 720, 24, 24));
+        Text(new Rect(112, 716, 270, 30), "목표 " + next.par + "발 · 상대 " + next.spawns.Count + "명" + (next.bossEscorts ? "+" : ""), 17, Green, true);
         float assist = Progress.StuckAssist(stage);
         if (assist > 1.001f)
         {
             Icon("mom_cheer", new Rect(392, 690, 52, 52));
-            Text(new Rect(442, 688, 76, 60), "엄마 응원\n+" + Mathf.RoundToInt((assist - 1) * 100) + "%", 15, Green, true);
+            Text(new Rect(442, 688, 76, 60), "엄마 응원\n체력+" + Mathf.RoundToInt((assist - 1) * 100) + "%", 15, Green, true);
+        }
+        else if (cardFoe != null)
+        {
+            DrawCharacter(cardFoe, "walk", 0, new Vector2(412, 746), cardElite ? 66 : 58, false);
+            Text(new Rect(440, 688, 78, 22), cardTag, 15, Red, true);
+            Text(new Rect(440, 708, 78, 40), cardName, 14, Ink, true, TextAnchor.UpperLeft);
         }
         if (Button(new Rect(20, 764, 500, 84), Progress.Eco.Label(stage) + " 출발!", Yellow, true, 38)) StartRun();
     }
@@ -147,49 +157,56 @@ public sealed partial class DadSchoolPrototype
         Text(new Rect(24, 790, 492, 60), "\"밥 먹으려고 열었는데 효자손이 나왔다.\"", 18, Green, true, TextAnchor.MiddleCenter);
     }
 
-    // ---- 강화: four rows with what each level really does, then the loadout that changes how a fight plays -------------
+    // ---- 강화: four rows with what each level does in the fight, then the special launch that changes how it plays ---------
     void DrawUpgradeTab()
     {
         double cost = Progress.NextUpgradeCost; bool afford = Progress.Save.coins >= cost;
-        int step = Mathf.RoundToInt(Progress.Eco.upgradePower * 100);
         Text(new Rect(24, 70, 492, 54), "생활 체력 단련", 36, Ink, true);
-        Text(new Rect(24, 120, 492, 26), "어느 강화든 전투력 +" + step + "% · 다음 비용 " + Mathf.CeilToInt((float)cost).ToString("N0") + "코인", 16, Green, true);
+        Text(new Rect(24, 120, 492, 26), "어느 항목이든 같은 비용 · 다음 " + Mathf.CeilToInt((float)cost).ToString("N0") + "코인", 16, Green, true);
         for (int i = 0; i < DadProgress.StatCount; i++)
         {
             Rect row = new Rect(20, 154 + i * 98, 500, 88); Panel(row, Paper);
             Icon(UpgradeIcons[i], new Rect(30, row.y + 10, 68, 68));
-            Text(new Rect(108, row.y + 4, 180, 32), DadProgress.StatNames[i] + "  Lv." + Progress.Save.upgrades[i], 23, Ink, true);
-            Text(new Rect(236, row.y + 8, 150, 26), UpgradeNow(i), 14, Green, true, TextAnchor.MiddleRight);
-            Text(new Rect(108, row.y + 36, 280, 24), UpgradeEffect(i, step), 15, Ink);
+            Text(new Rect(108, row.y + 4, 210, 32), DadProgress.StatNames[i] + "  Lv." + Progress.Save.upgrades[i], 23, Ink, true);
+            Text(new Rect(296, row.y + 8, 90, 26), UpgradeNow(i), 14, Green, true, TextAnchor.MiddleRight);
+            Text(new Rect(108, row.y + 36, 280, 24), UpgradeEffect(i), 15, Ink);
             Text(new Rect(108, row.y + 59, 280, 24), UpgradeQuips[i], 14, Green);
             if (Button(new Rect(394, row.y + 16, 114, 56), "강화\n" + Mathf.CeilToInt((float)cost).ToString("N0"), afford ? Yellow : Color.white, afford, 19) && Progress.TryUpgrade(i))
             { PersistNow(); PlaySfx("sfx_skill_pick", .6f); }
         }
-        Text(new Rect(24, 552, 492, 34), "출동 준비물  ·  싸우는 방식이 바뀝니다", 21, Ink, true);
-        string[] names = { "고무 슬리퍼", "튼튼한 도시락", "폴더폰" };
-        string[] effects = { "날리는 힘 +25%\n벽 피해 +1", ChainGearUnlocked ? "처음부터\n충돌 전달 강화" : "[잠김]\n3연쇄 또는 첫 승리", PhoneGearUnlocked ? "필살기가 공포 파동\n체력 +6 · 폭주 없음" : "[잠김]\n누적 벽꿍 " + TotalWallHits + "/" + PhoneWallGoal };
+        Text(new Rect(24, 552, 492, 34), "특수 발사  ·  하나를 골라 출동합니다", 21, Ink, true);
+        string[] effects = { "벽에 박을 때\n피해 +1", ChainGearUnlocked ? "맞은 아빠가\n" + Mathf.RoundToInt(ChainLaunchThrow * 100) + "% 더 멀리" : "[잠김]\n3연쇄 또는 첫 승리", PhoneGearUnlocked ? "첫 발부터\n분노 발사" : "[잠김]\n누적 벽꿍 " + TotalWallHits + "/" + PhoneWallGoal };
         bool[] open = { true, ChainGearUnlocked, PhoneGearUnlocked };
         for (int i = 0; i < 3; i++)
         {
             Rect c = new Rect(20 + i * 170, 590, 160, 150);
             if (Button(c, "", Gear == i ? Yellow : Color.white, open[i])) { SelectGear(i); }
-            Text(new Rect(c.x + 6, c.y + 10, c.width - 12, 34), names[i], 20, Ink, true, TextAnchor.MiddleCenter);
-            Text(new Rect(c.x + 8, c.y + 48, c.width - 16, 70), effects[i], 15, open[i] ? Ink : Muted, false, TextAnchor.UpperCenter);
-            if (Gear == i) Text(new Rect(c.x, c.y + 116, c.width, 26), "장착 중", 16, Red, true, TextAnchor.MiddleCenter);
+            Texture2D icon = LaunchIcon(i);
+            if (icon != null) { GUI.color = open[i] ? Color.white : new Color(1, 1, 1, .45f); GUI.DrawTexture(new Rect(c.center.x - 32, c.y + 4, 64, 64), icon, ScaleMode.ScaleToFit); GUI.color = Color.white; }
+            Text(new Rect(c.x + 6, c.y + 66, c.width - 12, 24), LaunchNames[i], 20, Ink, true, TextAnchor.MiddleCenter);
+            Text(new Rect(c.x + 8, c.y + 90, c.width - 16, 36), effects[i], 15, open[i] ? Ink : Muted, false, TextAnchor.UpperCenter);
+            if (Gear == i) Text(new Rect(c.x, c.y + 126, c.width, 20), "장착 중", 16, Red, true, TextAnchor.MiddleCenter);
         }
         Text(new Rect(24, 754, 492, 56), NextGoal, 16, Green, false, TextAnchor.MiddleCenter);
     }
-    // What a level really changes today: every level raises the shared power; combo and launch also feed combat directly
-    // (ApplyPower). Fist and stamina are not split yet, so no separate number is shown for them (v9 강화).
-    static string UpgradeEffect(int stat, int step)
+    // V13 special-launch icons (A-B09), loaded once.
+    Texture2D[] launchIcons;
+    Texture2D LaunchIcon(int i)
     {
-        return "전투력 +" + step + "%" + (stat == 2 ? " · 공격 간격 -1%" : stat == 3 ? " · 날리는 힘 +2%" : "");
+        if (launchIcons == null) launchIcons = new[] { Resources.Load<Texture2D>("DadV13/ui/wall_launch"), Resources.Load<Texture2D>("DadV13/ui/chain_launch"), Resources.Load<Texture2D>("DadV13/ui/rage_launch") };
+        return launchIcons[i];
     }
-    // The combat bonus reached so far, with the caps ApplyPower uses (combo 30%, launch 60%).
+    // What one level does in the fight, from the numbers ApplyGrowth uses.
+    static string UpgradeEffect(int stat)
+    {
+        string per = "레벨당 " + (stat == 0 ? "미는 힘" : stat == 1 ? "체력" : stat == 2 ? "발사 속도" : "비거리") + " +" + (GrowthStep[stat] * 100).ToString("0.#") + "%";
+        return stat == 3 ? per + " · Lv." + FarThrowWallLevel + " 벽꿍 +1" : per;
+    }
+    // The bonus reached so far; "최대" once the cap is hit (health has none).
     string UpgradeNow(int stat)
     {
         int lv = Progress.Save.upgrades[stat];
-        return stat == 2 ? "지금 간격 -" + Mathf.Min(30, lv) + "%" : stat == 3 ? "지금 힘 +" + Mathf.Min(60, lv * 2) + "%" : "";
+        return (GrowthCapped(stat, lv) ? "최대 +" : "지금 +") + (GrowthBonus(stat, lv) * 100).ToString("0.#") + "%";
     }
 
     // ---- result: today's job report (v9 03) -----------------------------------------------------------------------------
@@ -242,7 +259,7 @@ public sealed partial class DadSchoolPrototype
         else if (!won && Progress.StuckAssist(PlayingStage) > 1.001f)
         {
             Icon("mom_cheer", new Rect(120, 664, 30, 30));
-            Text(new Rect(154, 666, 300, 26), "엄마의 응원 +" + Mathf.RoundToInt((Progress.StuckAssist(PlayingStage) - 1) * 100) + "% 적용 중", 17, Green, true);
+            Text(new Rect(154, 666, 300, 26), "엄마의 응원 " + (UseSlingshot ? "체력 +" : "+") + Mathf.RoundToInt((Progress.StuckAssist(PlayingStage) - 1) * 100) + "% 적용 중", 17, Green, true);
         }
         Text(new Rect(44, 694, 452, 46), NextGoal, 15, Green, false, TextAnchor.MiddleCenter);
         int next = Progress.Save.currentStage;
