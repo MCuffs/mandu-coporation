@@ -1,0 +1,5 @@
+PASS start button opens story 1
+PASS all six cuts reach battle connection
+PASS return and skip
+PASS company splash reaches title and waits for input
+Images loaded: 2

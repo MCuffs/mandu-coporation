@@ -1,0 +1,60 @@
+{
+  "status": "art-ready; Unity integration pending",
+  "tool": "built-in image_gen",
+  "assets": [
+    {
+      "file": "story_01_home.png",
+      "width": 941,
+      "height": 1672,
+      "mode": "RGB",
+      "sha256": "8d789f5e18f8ab00181e61243fbbdf9169d6c44fd0a8c988d9b4321aa4763f01"
+    },
+    {
+      "file": "story_02_prank.png",
+      "width": 941,
+      "height": 1672,
+      "mode": "RGB",
+      "sha256": "b3e0991f38e77bf5e322483e5a2c54d9c391a92c3543481b95efc7cc538af1ff"
+    },
+    {
+      "file": "story_03_where.png",
+      "width": 941,
+      "height": 1672,
+      "mode": "RGB",
+      "sha256": "e4e9ff76f8d399c596487ec0a559ae96e066229b6d7ebef695ac05c5fd8a2fa1"
+    },
+    {
+      "file": "story_04_dash.png",
+      "width": 941,
+      "height": 1672,
+      "mode": "RGB",
+      "sha256": "8bd2c52a8e1aa24a96ad20ab01c999e65e248a88e4d397d91e4411e21d4a32bd"
+    },
+    {
+      "file": "story_05_panic.png",
+      "width": 941,
+      "height": 1672,
+      "mode": "RGB",
+      "sha256": "626605539286f8aa649ee0911d4537deffda2d6898de00a3f42a50adfc511614"
+    },
+    {
+      "file": "story_06_school.png",
+      "width": 941,
+      "height": 1672,
+      "mode": "RGB",
+      "sha256": "f38d079caccdb56624e530ab4ed2c62bf19b1c5b4e628a5ba641b533931d62c5"
+    },
+    {
+      "file": "title_keyart.png",
+      "width": 941,
+      "height": 1672,
+      "mode": "RGB",
+      "sha256": "9f14848e30bc1ea97fccb6d58da5ae7cac5204ca19c96647e7ed605ee2604b5e"
+    }
+  ],
+  "notes": [
+    "No baked text or buttons",
+    "Full-scene stills, not separated character layers",
+    "Cuts use stylized room continuity, not matched video frames"
+  ]
+}

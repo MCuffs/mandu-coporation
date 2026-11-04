@@ -1,0 +1,155 @@
+[
+  {
+    "file": "lunchbox_closed.png",
+    "width": 1254,
+    "height": 1254,
+    "mode": "RGBA",
+    "alphaRange": [
+      0,
+      255
+    ],
+    "contentBoundsAtAlpha220": [
+      259,
+      456,
+      995,
+      1090
+    ],
+    "sha256": "b0d1aca7c7e48b79f24a4ce938b119e84e298e1b05ef38110598dc03a30b6f74"
+  },
+  {
+    "file": "lunchbox_opening.png",
+    "width": 1254,
+    "height": 1254,
+    "mode": "RGBA",
+    "alphaRange": [
+      0,
+      255
+    ],
+    "contentBoundsAtAlpha220": [
+      246,
+      405,
+      1004,
+      1099
+    ],
+    "sha256": "b7573b3a02034990ef036bb27236cd644a42a0b3d689fad8e0cdea372b1c3d30"
+  },
+  {
+    "file": "lunchbox_open.png",
+    "width": 1254,
+    "height": 1254,
+    "mode": "RGBA",
+    "alphaRange": [
+      0,
+      255
+    ],
+    "contentBoundsAtAlpha220": [
+      151,
+      84,
+      1121,
+      1176
+    ],
+    "sha256": "2ff7ce407a45a3727016cffbdc74b392a2227901d031c0f1316820075ad18f26"
+  },
+  {
+    "file": "gear_card_common.png",
+    "width": 1024,
+    "height": 1536,
+    "mode": "RGBA",
+    "alphaRange": [
+      0,
+      254
+    ],
+    "contentBoundsAtAlpha220": [
+      109,
+      128,
+      915,
+      1415
+    ],
+    "sha256": "74a9a608c967be7356e3494b5defe5463521c02e74d2380b6357d78b3dda3f17"
+  },
+  {
+    "file": "gear_card_rare.png",
+    "width": 1086,
+    "height": 1448,
+    "mode": "RGBA",
+    "alphaRange": [
+      0,
+      255
+    ],
+    "contentBoundsAtAlpha220": [
+      106,
+      96,
+      979,
+      1362
+    ],
+    "sha256": "e2f971af8df3b61a48a702f126b3dfed37564d009a5f65461ee12ec2faac5b97"
+  },
+  {
+    "file": "gear_card_best.png",
+    "width": 1086,
+    "height": 1448,
+    "mode": "RGBA",
+    "alphaRange": [
+      0,
+      255
+    ],
+    "contentBoundsAtAlpha220": [
+      75,
+      69,
+      1010,
+      1380
+    ],
+    "sha256": "bf51541a43a401c523ff7c06400ae610edcf172654cdf15b318d61d76c9a6614"
+  },
+  {
+    "file": "locker_damage_1.png",
+    "width": 1024,
+    "height": 1536,
+    "mode": "RGBA",
+    "alphaRange": [
+      0,
+      254
+    ],
+    "contentBoundsAtAlpha220": [
+      336,
+      423,
+      654,
+      1108
+    ],
+    "sha256": "36ff237664296298295ce111ea0849fda5b7eda5a4127215205381ac82faa06e"
+  },
+  {
+    "file": "locker_damage_2.png",
+    "width": 1024,
+    "height": 1536,
+    "mode": "RGBA",
+    "alphaRange": [
+      0,
+      254
+    ],
+    "contentBoundsAtAlpha220": [
+      185,
+      66,
+      823,
+      1421
+    ],
+    "sha256": "021c0ca08018ba4b1c24a69113b1f2d7a4fd59ad98e623bab4e88fcb6c71a767"
+  },
+  {
+    "file": "locker_damage_3.png",
+    "width": 1024,
+    "height": 1536,
+    "mode": "RGBA",
+    "alphaRange": [
+      0,
+      254
+    ],
+    "contentBoundsAtAlpha220": [
+      81,
+      74,
+      945,
+      1450
+    ],
+    "sha256": "af091f91627f84a5250ea78aca8855666f5f614e2e13a0e15491093b47fbafaf"
+  }
+]

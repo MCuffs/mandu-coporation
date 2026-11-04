@@ -1,0 +1,60 @@
+{
+  "mode": "built-in image_gen",
+  "transparent_background": true,
+  "jobs": [
+    {
+      "id": "gum_walk_pass_a",
+      "refs": [
+        "gum/gum_walk_0.png",
+        "gum/gum_walk_1.png"
+      ],
+      "pose": "Create LEFT-facing passing pose halfway AFTER image1 contact stride: leading foot planted under hip, trailing knee bent moving forward beneath body, feet nearly together rather than a wide stride. BOTH hands remain in pockets, pink gum bubble, scruffy thinning hair, gold hoop, orange jacket white stripes, stained cream undershirt, dark striped track pants, beige flipflops unchanged. Keep torso/head size and location as image1. Change leg pose only.",
+      "prompt": "Use case: identity-preserve. Edit target Image1; Image2 is supporting pose/style reference. One production 2D animation sprite, not a sheet. Preserve EXACT character identity, face proportions, outfit colors and details, thick near-black cartoon outlines, flat cheap absurd mobile-game comic look. Actual transparent background. No ground, cast shadow, glow, text, border, UI or extra objects. Keep full body visible on square canvas with generous padding. Match 768x768 reference composition; standing height about560 pixels, floor line y720, body center x384. Facing stays as reference. Create LEFT-facing passing pose halfway AFTER image1 contact stride: leading foot planted under hip, trailing knee bent moving forward beneath body, feet nearly together rather than a wide stride. BOTH hands remain in pockets, pink gum bubble, scruffy thinning hair, gold hoop, orange jacket white stripes, stained cream undershirt, dark striped track pants, beige flipflops unchanged. Keep torso/head size and location as image1. Change leg pose only."
+    },
+    {
+      "id": "gum_walk_pass_b",
+      "refs": [
+        "gum/gum_walk_1.png",
+        "gum/gum_walk_0.png"
+      ],
+      "pose": "Create LEFT-facing passing pose halfway AFTER image1 opposite contact stride: opposite leg supports the body under hip, other knee moving past it toward next step. Feet nearly together, one foot slightly raised. Both hands remain in pockets, same gum bubble and scruffy face, orange white-striped jacket, stained undershirt, striped dark trackpants and flipflops. Preserve torso/head from image1. This is opposite-leg counterpart of pass_a.",
+      "prompt": "Use case: identity-preserve. Edit target Image1; Image2 is supporting pose/style reference. One production 2D animation sprite, not a sheet. Preserve EXACT character identity, face proportions, outfit colors and details, thick near-black cartoon outlines, flat cheap absurd mobile-game comic look. Actual transparent background. No ground, cast shadow, glow, text, border, UI or extra objects. Keep full body visible on square canvas with generous padding. Match 768x768 reference composition; standing height about560 pixels, floor line y720, body center x384. Facing stays as reference. Create LEFT-facing passing pose halfway AFTER image1 opposite contact stride: opposite leg supports the body under hip, other knee moving past it toward next step. Feet nearly together, one foot slightly raised. Both hands remain in pockets, same gum bubble and scruffy face, orange white-striped jacket, stained undershirt, striped dark trackpants and flipflops. Preserve torso/head from image1. This is opposite-leg counterpart of pass_a."
+    },
+    {
+      "id": "dad_move_start",
+      "refs": [
+        "dad/dad_idle_0.png",
+        "dad/dad_walk_0.png"
+      ],
+      "pose": "Create RIGHT-facing first-step anticipation pose between idle image1 and walk image2. Same tired balding dad, olive sleeveless zip vest, cream undershirt, navy trousers, striped black slides. Plant front foot, rear heel lifts, knees bend very slightly, torso inclines forward about5degrees, arms just start gentle counter-swing. Preserve head proportions and bored expression. Subtle weight shift, no sprint, no fist attack.",
+      "prompt": "Use case: identity-preserve. Edit target Image1; Image2 is supporting pose/style reference. One production 2D animation sprite, not a sheet. Preserve EXACT character identity, face proportions, outfit colors and details, thick near-black cartoon outlines, flat cheap absurd mobile-game comic look. Actual transparent background. No ground, cast shadow, glow, text, border, UI or extra objects. Keep full body visible on square canvas with generous padding. Match 768x768 reference composition; standing height about560 pixels, floor line y720, body center x384. Facing stays as reference. Create RIGHT-facing first-step anticipation pose between idle image1 and walk image2. Same tired balding dad, olive sleeveless zip vest, cream undershirt, navy trousers, striped black slides. Plant front foot, rear heel lifts, knees bend very slightly, torso inclines forward about5degrees, arms just start gentle counter-swing. Preserve head proportions and bored expression. Subtle weight shift, no sprint, no fist attack."
+    },
+    {
+      "id": "dad_move_stop",
+      "refs": [
+        "dad/dad_walk_0.png",
+        "dad/dad_idle_0.png"
+      ],
+      "pose": "Create RIGHT-facing braking/settling pose between walking image1 and idle image2. Same dad and all outfit details. Front slide planted slightly ahead, knees softly bent absorbing movement, rear foot comes near supporting foot; torso upright with tiny backward settling lean, arms returning down. Preserve head proportions and bored expression. Subtle stop, no exaggerated skid, no action lines.",
+      "prompt": "Use case: identity-preserve. Edit target Image1; Image2 is supporting pose/style reference. One production 2D animation sprite, not a sheet. Preserve EXACT character identity, face proportions, outfit colors and details, thick near-black cartoon outlines, flat cheap absurd mobile-game comic look. Actual transparent background. No ground, cast shadow, glow, text, border, UI or extra objects. Keep full body visible on square canvas with generous padding. Match 768x768 reference composition; standing height about560 pixels, floor line y720, body center x384. Facing stays as reference. Create RIGHT-facing braking/settling pose between walking image1 and idle image2. Same dad and all outfit details. Front slide planted slightly ahead, knees softly bent absorbing movement, rear foot comes near supporting foot; torso upright with tiny backward settling lean, arms returning down. Preserve head proportions and bored expression. Subtle stop, no exaggerated skid, no action lines."
+    },
+    {
+      "id": "gum_wall_hit",
+      "refs": [
+        "gum/gum_walk_0.png",
+        "gum/gum_fly_0.png"
+      ],
+      "pose": "Create wall-impact pose for this SAME adult gum enemy knocked BACKWARDS to wall on RIGHT. Isolated character ONLY, no wall. Back and shoulder flattened vertically against invisible wall at right, head jolts forward left, spine compressed, knees bent, feet lifted a little, arms flung forward toward left. Scrunched comic face, gum bubble collapsed at lips. Maintain exact outfit and human anatomy, not gore or injury. Full figure, compressed standing-height roughly500pixels with lowest foot y700. This bridges fly to crumpled fall.",
+      "prompt": "Use case: identity-preserve. Edit target Image1; Image2 is supporting pose/style reference. One production 2D animation sprite, not a sheet. Preserve EXACT character identity, face proportions, outfit colors and details, thick near-black cartoon outlines, flat cheap absurd mobile-game comic look. Actual transparent background. No ground, cast shadow, glow, text, border, UI or extra objects. Keep full body visible on square canvas with generous padding. Match 768x768 reference composition; standing height about560 pixels, floor line y720, body center x384. Facing stays as reference. Create wall-impact pose for this SAME adult gum enemy knocked BACKWARDS to wall on RIGHT. Isolated character ONLY, no wall. Back and shoulder flattened vertically against invisible wall at right, head jolts forward left, spine compressed, knees bent, feet lifted a little, arms flung forward toward left. Scrunched comic face, gum bubble collapsed at lips. Maintain exact outfit and human anatomy, not gore or injury. Full figure, compressed standing-height roughly500pixels with lowest foot y700. This bridges fly to crumpled fall."
+    },
+    {
+      "id": "gum_crumple",
+      "refs": [
+        "gum/gum_walk_0.png",
+        "gum/gum_fly_0.png"
+      ],
+      "pose": "Create post-impact collapsed seated pose for SAME adult gum enemy at invisible wall on RIGHT. Character ONLY, no wall, no ground. Bottom seated low, back slumped, head droops toward left, one knee up and one leg folded, both flipflops visible, arms hanging loosely, dazed eyes. Retain full exact orange striped jacket, stained cream undershirt, navy striped trousers, gold hoop and scruffy balding face; no pink bubble, no stars. Full figure centered x384, bottom at y720. Seated head naturally lower, do not enlarge to fill standing height. Funny exhausted defeat, no wounds.",
+      "prompt": "Use case: identity-preserve. Edit target Image1; Image2 is supporting pose/style reference. One production 2D animation sprite, not a sheet. Preserve EXACT character identity, face proportions, outfit colors and details, thick near-black cartoon outlines, flat cheap absurd mobile-game comic look. Actual transparent background. No ground, cast shadow, glow, text, border, UI or extra objects. Keep full body visible on square canvas with generous padding. Match 768x768 reference composition; standing height about560 pixels, floor line y720, body center x384. Facing stays as reference. Create post-impact collapsed seated pose for SAME adult gum enemy at invisible wall on RIGHT. Character ONLY, no wall, no ground. Bottom seated low, back slumped, head droops toward left, one knee up and one leg folded, both flipflops visible, arms hanging loosely, dazed eyes. Retain full exact orange striped jacket, stained cream undershirt, navy striped trousers, gold hoop and scruffy balding face; no pink bubble, no stars. Full figure centered x384, bottom at y720. Seated head naturally lower, do not enlarge to fill standing height. Funny exhausted defeat, no wounds."
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+[
+  {
+    "file": "gum_walk_pass_a.png",
+    "width": 1254,
+    "height": 1254,
+    "alphaRange": [
+      0,
+      255
+    ],
+    "solidBounds": [
+      411,
+      262,
+      842,
+      1167
+    ],
+    "sha256": "6c27cda2c7017557975bca4b70cd0bb961777635eddef80087218b3bf9744bba",
+    "status": "reference-ready; Unity alignment and animation QA pending"
+  },
+  {
+    "file": "gum_walk_pass_b.png",
+    "width": 1254,
+    "height": 1254,
+    "alphaRange": [
+      0,
+      255
+    ],
+    "solidBounds": [
+      417,
+      269,
+      840,
+      1165
+    ],
+    "sha256": "6510f612357d118d374d8050e3461696386c30285a71c0da0cbf5144fc941417",
+    "status": "reference-ready; Unity alignment and animation QA pending"
+  },
+  {
+    "file": "dad_move_start.png",
+    "width": 1254,
+    "height": 1254,
+    "alphaRange": [
+      0,
+      255
+    ],
+    "solidBounds": [
+      369,
+      281,
+      883,
+      1163
+    ],
+    "sha256": "6a83b24a002cd21b60676a3113919f5a9b0a240f146e5ea931b5a7de6dea7723",
+    "status": "reference-ready; Unity alignment and animation QA pending"
+  },
+  {
+    "file": "dad_move_stop.png",
+    "width": 1254,
+    "height": 1254,
+    "alphaRange": [
+      0,
+      255
+    ],
+    "solidBounds": [
+      427,
+      273,
+      842,
+      1155
+    ],
+    "sha256": "e4999fce5a01932ef62dc66180c98f9cca0f03cbbf125a0e1b1a1233a6bb01fd",
+    "status": "reference-ready; Unity alignment and animation QA pending"
+  },
+  {
+    "file": "gum_wall_hit.png",
+    "width": 1254,
+    "height": 1254,
+    "alphaRange": [
+      0,
+      255
+    ],
+    "solidBounds": [
+      416,
+      137,
+      1036,
+      1138
+    ],
+    "sha256": "9bbff610436e08d078eac2ddb10d44b0fabfe2d3a9d5366c1143f2b5e04e4f9d",
+    "status": "reference-ready; Unity alignment and animation QA pending"
+  },
+  {
+    "file": "gum_crumple.png",
+    "width": 1254,
+    "height": 1254,
+    "alphaRange": [
+      0,
+      255
+    ],
+    "solidBounds": [
+      260,
+      464,
+      988,
+      1136
+    ],
+    "sha256": "b2ba779cd82ca8d3598ddf41ef910cd0016c800328d92a7d05e8c491ea1fc44b",
+    "status": "reference-ready; Unity alignment and animation QA pending"
+  }
+]
