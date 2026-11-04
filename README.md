@@ -42,7 +42,9 @@
 
 | 문서 | 맡는 내용 |
 | --- | --- |
-| [dad-war-pm.md](Design/dad-war-pm.md) | 결정 기록, 2주 계획과 관문, 위험, 열린 질문 |
+| [dad-war-roadmap.md](Design/dad-war-roadmap.md) | 개발·에셋 통합 로드맵(0~4단계, 관문, 필요 에셋) |
+| [dad-war-slingshot-v1.md](Design/dad-war-slingshot-v1.md) | 시제품 B: 아빠를 당겨 쏘는 새 핵심 조작(메뉴 `Dad School Boss > Slingshot B`) |
+| [dad-war-pm.md](Design/dad-war-pm.md) | 결정 기록, 2주 상세 계획, 디자인 검토, 위험, 열린 질문 |
 | [dad-war-plan.md](Design/dad-war-plan.md) | 제목·시나리오·인물·표현 규칙 |
 | [dad-war-product-v2.md](Design/dad-war-product-v2.md) | 조작·경제·광고·검증 지표 |
 | [dad-war-design-roadmap-v1.md](Design/dad-war-design-roadmap-v1.md) | UI·아트·모션 개선 로드맵 |

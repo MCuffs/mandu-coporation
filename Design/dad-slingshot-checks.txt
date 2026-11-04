@@ -1,0 +1,21 @@
+Prototype B (slingshot dad) rule checks
+PASS a pull inside the dead zone does not launch
+PASS letting go flies dad along the pull at full speed for a full pull
+PASS a half pull flies slower than a full one
+PASS dad bounces off the side lockers and keeps flying
+PASS dad comes to rest on his own and the next shot is ready
+PASS flying dad knocks a dad away and ploughs on
+PASS a knocked dad slams the lockers for two damage (a gum dad goes down)
+PASS a side-wall slam reports which locker side to dent
+PASS a knocked dad bowls over the next one (chain)
+PASS a straight shot into the tray bounces dad back without damage
+PASS coming in from the side gets past the tray and knocks it out of his hands
+PASS a fresh boss bounces dad off for a chip of damage
+PASS a dad thrown into the boss makes him groggy
+PASS while groggy, dad sends the boss into the wall for a big hit
+PASS a dad who reaches grounded dad swings and hurts him
+PASS clearing every dad wins, three stars with full health and few shots
+PASS too many shots drops the third star
+PASS losing all health loses
+PASS the aiming guide bends at the first wall
+PASS four prototype stages, the last one a boss with escorts

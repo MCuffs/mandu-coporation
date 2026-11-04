@@ -1,0 +1,19 @@
+Prototype B pacing bot (60 runs per stage per profile)
+
+[careful: 5 deg, 0.8-1.4 s aim]
+B-1 당겨서 날아가기: win 60/60, lost 0, timeout 0 | median shots 3 (par 3), time 5.8s, health 100, best chain 2 | 3 stars 60
+B-2 벽꿍과 연쇄: win 60/60, lost 0, timeout 0 | median shots 4 (par 4), time 8s, health 100, best chain 4 | 3 stars 50
+B-3 의자 돌진과 쟁반: win 60/60, lost 0, timeout 0 | median shots 8 (par 8), time 18s, health 92, best chain 4 | 3 stars 34
+B-보스 학부모회장 아빠: win 60/60, lost 0, timeout 0 | median shots 17 (par 12), time 35.2s, health 92, best chain 4 | 3 stars 5
+
+[sloppy: 15 deg, 0.8-1.4 s aim]
+B-1 당겨서 날아가기: win 60/60, lost 0, timeout 0 | median shots 3 (par 3), time 6s, health 100, best chain 2 | 3 stars 37
+B-2 벽꿍과 연쇄: win 60/60, lost 0, timeout 0 | median shots 4 (par 4), time 8.3s, health 100, best chain 5 | 3 stars 41
+B-3 의자 돌진과 쟁반: win 60/60, lost 0, timeout 0 | median shots 9 (par 8), time 19.6s, health 92, best chain 4 | 3 stars 23
+B-보스 학부모회장 아빠: win 60/60, lost 0, timeout 0 | median shots 14 (par 12), time 29s, health 92, best chain 4 | 3 stars 20
+
+[beginner: 20 deg, 1.5-2.5 s aim, 50-100% pull]
+B-1 당겨서 날아가기: win 60/60, lost 0, timeout 0 | median shots 3 (par 3), time 7s, health 100, best chain 3 | 3 stars 38
+B-2 벽꿍과 연쇄: win 60/60, lost 0, timeout 0 | median shots 5 (par 4), time 11.1s, health 92, best chain 4 | 3 stars 26
+B-3 의자 돌진과 쟁반: win 60/60, lost 0, timeout 0 | median shots 10 (par 8), time 23.4s, health 80, best chain 4 | 3 stars 11
+B-보스 학부모회장 아빠: win 52/60, lost 8, timeout 0 | median shots 16 (par 12), time 37.1s, health 40, best chain 4 | 3 stars 5
