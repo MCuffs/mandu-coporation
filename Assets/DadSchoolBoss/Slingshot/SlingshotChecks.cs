@@ -90,8 +90,42 @@ public static class SlingshotChecks
         small.dad.pos = new Vector2(Arena.center.x, 600); small.Launch(new Vector2(-150, 0));
         for (int i = 0; i < 120 && small.dad.vel.x < 0; i++) small.Tick(1 / 120f);
         Expect(small.dad.pos.x - small.DadRadius <= Arena.xMin + 1, "dad touches the painted floor edge before bouncing", report);
+        // ---- fun pass: bank shots, rage shot, dodgeball dad, heavy big-dad ----
+        float[] launched = new float[2]; int[] left = new int[2];
+        for (int k = 0; k < 2; k++)
+        {
+            var bs = Sim(); Parked(bs, SlingshotSim.Kind.Tray, Arena.xMin + 40, Arena.yMin + 30);
+            var g = Parked(bs, SlingshotSim.Kind.Gum, Arena.center.x, 560); bs.dad.pos = new Vector2(Arena.center.x, 700);
+            bs.Launch(new Vector2(0, -150)); bs.dad.bounces = k * 2;   // as if he had come off two lockers
+            for (int i = 0; i < 120 && !g.Flying; i++) bs.Tick(1 / 120f);
+            launched[k] = g.vel.magnitude; left[k] = g.hp;
+        }
+        Expect(launched[1] > launched[0] * 1.25f && left[1] < left[0], "a bank shot off two lockers hits harder and for more damage", report);
+        s = Sim(); Parked(s, SlingshotSim.Kind.Tray, Arena.xMin + 40, Arena.yMin + 30);
+        s.dad.pos = new Vector2(Arena.center.x, 700); s.Launch(new Vector2(150, -20)); s.shotChain = 5; Run(s, 3);
+        Expect(s.ragePending && s.phase == SlingshotSim.Phase.Ready, "a five-chain shot earns the next shot as a rage shot", report);
+        s.Launch(new Vector2(0, -150));
+        Expect(s.dad.rage && !s.ragePending && s.dad.vel.magnitude > SlingshotSim.LaunchMax, "the rage shot flies faster and is used up", report);
+        s = Sim(); tray = Parked(s, SlingshotSim.Kind.Tray, Arena.center.x, 560); s.dad.pos = new Vector2(Arena.center.x, 700); Run(s, .05f);
+        s.ragePending = true; s.Launch(new Vector2(0, -150)); for (int i = 0; i < 120 && !tray.Flying; i++) s.Tick(1 / 120f);
+        Expect(tray.trayBroken && tray.Flying, "a rage shot goes straight through a tray's front", report);
+        s = Sim(); var dodge = s.Add(SlingshotSim.Kind.Dodge, Arena.center.x, 500); dodge.cooldown = 0; s.dad.pos = new Vector2(Arena.center.x, 760); Run(s, 2.5f);
+        Expect(s.dad.health < s.dad.maxHealth, "the dodgeball dad keeps his distance and hits a dad who stands still", report);
+        s = Sim(); Parked(s, SlingshotSim.Kind.Tray, Arena.xMin + 40, Arena.yMin + 30);
+        var ball = new SlingshotSim.Ball { pos = new Vector2(Arena.center.x, 600), vel = Vector2.zero }; s.balls.Add(ball);
+        s.dad.pos = new Vector2(Arena.center.x, 760); s.Launch(new Vector2(0, -150)); for (int i = 0; i < 60 && !ball.returned; i++) s.Tick(1 / 120f);
+        Expect(ball.returned && ball.vel.y < -600, "a flying dad bats the ball back the way he is going", report);
+        s = Sim(); Parked(s, SlingshotSim.Kind.Tray, Arena.xMin + 40, Arena.yMin + 30); gum = Parked(s, SlingshotSim.Kind.Gum, Arena.center.x, 420);
+        s.balls.Add(new SlingshotSim.Ball { pos = new Vector2(Arena.center.x, 560), vel = new Vector2(0, -760), returned = true });
+        for (int i = 0; i < 60 && !gum.Flying; i++) s.Tick(1 / 120f);
+        Expect(gum.Flying && gum.hp == gum.maxHp - 1, "a returned ball knocks a dad over", report);
+        s = Sim(); Parked(s, SlingshotSim.Kind.Tray, Arena.xMin + 40, Arena.yMin + 30); var big = s.Add(SlingshotSim.Kind.Gum, Arena.center.x, 520, true); big.cooldown = 99;
+        s.dad.pos = new Vector2(Arena.center.x, 760); s.Launch(new Vector2(0, -150)); for (int i = 0; i < 120 && big.heavyHits == 0; i++) s.Tick(1 / 120f);
+        bool firstHitHeld = !big.Flying && big.heavyHits == 1;
+        Run(s, 2.4f); s.dad.pos = big.pos + new Vector2(0, 200); s.Launch(new Vector2(0, -150)); for (int i = 0; i < 120 && !big.Flying; i++) s.Tick(1 / 120f);
+        Expect(firstHitHeld && big.Flying, "a big-dad only staggers on the first hit and flies on a second hit within three seconds", report);
         var stages = SlingshotSim.PrototypeStages(Arena);
-        Expect(stages.Length == 4 && stages[3].bossEscorts && stages.All(st => st.spawns.Count > 0), "four prototype stages, the last one a boss with escorts", report);
+        Expect(stages.Length == 6 && stages[5].bossEscorts && stages.All(st => st.spawns.Count > 0), "six prototype stages, the last one a boss with escorts", report);
         return report.ToString();
     }
 
@@ -108,7 +142,7 @@ public static class SlingshotChecks
         {
             float error = profiles[pi][0], aimMin = profiles[pi][1], aimMax = profiles[pi][2], weakest = profiles[pi][3];
             report.AppendLine("\n[" + names[pi] + "]");
-            for (int si = 0; si < 4; si++)
+            for (int si = 0; si < SlingshotSim.PrototypeStages(Arena).Length; si++)
             {
                 var wins = new List<SlingshotSim>(); int lost = 0, timeout = 0, stars3 = 0;
                 for (int run = 0; run < 60; run++)

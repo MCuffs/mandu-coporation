@@ -20,4 +20,12 @@ PASS losing all health loses
 PASS the aiming guide bends at the first wall
 PASS wide view: bodies shrink with the art and dad starts at the bottom of the corridor
 PASS dad touches the painted floor edge before bouncing
-PASS four prototype stages, the last one a boss with escorts
+PASS a bank shot off two lockers hits harder and for more damage
+PASS a five-chain shot earns the next shot as a rage shot
+PASS the rage shot flies faster and is used up
+PASS a rage shot goes straight through a tray's front
+PASS the dodgeball dad keeps his distance and hits a dad who stands still
+PASS a flying dad bats the ball back the way he is going
+PASS a returned ball knocks a dad over
+PASS a big-dad only staggers on the first hit and flies on a second hit within three seconds
+PASS six prototype stages, the last one a boss with escorts

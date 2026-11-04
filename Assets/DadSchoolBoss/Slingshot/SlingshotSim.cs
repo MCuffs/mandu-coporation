@@ -9,27 +9,30 @@ using UnityEngine;
 public sealed class SlingshotSim
 {
     public enum Phase { Ready, Flying, Won, Lost }
-    public enum Kind { Gum, Chair, Tray, Boss }
+    public enum Kind { Gum, Chair, Tray, Boss, Dodge }
 
     public sealed class Dad
     {
         public Vector2 pos, vel;
         public float health = 100, maxHealth = 100, flightTime, hurt, landed;
-        public bool flying;
+        public bool flying, rage;   // rage: this shot is the reward for a 5-chain
+        public int bounces;         // locker bounces so far this shot (bank-shot bonus, up to 3)
     }
     public sealed class Foe
     {
-        public int id, hp, maxHp, trayHits, facing = -1, lastShot = -1;
+        public int id, hp, maxHp, trayHits, facing = -1, lastShot = -1, heavyHits;
         public Kind kind;
-        public bool shield, trayBroken, enraged;
-        public Vector2 pos, vel, aim, face = Vector2.down;   // face: the side the tray covers, kept turned toward dad
-        public float stun, flash, wallCooldown, contact, windup, dash, cooldown, groggy, air, walked, attackPose, scale = 1;
+        public bool shield, trayBroken, enraged, elite;   // elite: a big-dad, too heavy to send flying with one hit
+        public Vector2 pos, vel, aim, target, face = Vector2.down;   // face: the side the tray covers, kept turned toward dad
+        public float stun, flash, wallCooldown, contact, windup, dash, cooldown, groggy, air, walked, attackPose, heavyClock, scale = 1;
         public bool Boss { get { return kind == Kind.Boss; } }
         public bool Flying { get { return vel.sqrMagnitude > MinFlySpeed * MinFlySpeed; } }
-        public float Radius { get { return (kind == Kind.Boss ? 38 : kind == Kind.Chair ? 30 : kind == Kind.Tray ? 27 : 25) * scale; } }
+        public float Radius { get { return (kind == Kind.Boss ? 38 : kind == Kind.Chair ? 30 : kind == Kind.Tray ? 27 : 25) * (elite ? 1.3f : 1) * scale; } }
         public float Lift { get { return Flying ? 14 * scale * Mathf.Clamp01(air / .12f) : 0; } }   // airborne bodies ride a little above their shadow
     }
-    public sealed class Spawn { public float at, x; public Kind kind; }
+    public sealed class Spawn { public float at, x; public Kind kind; public bool elite; }
+    // A dodgeball in the air: thrown at where dad stood, or batted back by a flying dad into the crowd.
+    public sealed class Ball { public Vector2 pos, vel; public float life = 2.6f; public bool returned; public int hits, lastFoe = -1; }
     public sealed class Stage
     {
         public string label, title, lesson;
@@ -43,7 +46,7 @@ public sealed class SlingshotSim
         public string text, sound; public Vector2 pos; public int style;   // style 0 small, 1 medium, 2 big, 3 banner
         public int dentSide = -1;                                          // a side-wall slam: 0 left, 1 right
     }
-    public sealed class Corpse { public Kind kind; public Vector2 pos, vel; public float life = .6f; public int facing; }
+    public sealed class Corpse { public Kind kind; public bool elite; public Vector2 pos, vel; public float life = .6f; public int facing; }
 
     public const float DadRadiusBase = 26, MinFlySpeed = 60, PullDeadZone = 24, PullMax = 150;
     public const float LaunchMin = 420, LaunchMax = 1150, DadDrag = 1.3f, DadBounce = .88f, StopSpeed = 80, MaxFlight = 2.4f;
@@ -57,7 +60,9 @@ public sealed class SlingshotSim
     public readonly List<Foe> foes = new List<Foe>();
     public readonly List<Event> events = new List<Event>();
     public readonly List<Corpse> corpses = new List<Corpse>();
+    public readonly List<Ball> balls = new List<Ball>();
     public Phase phase = Phase.Ready;
+    public bool ragePending;   // earned by a 5-chain: the next shot is a rage shot
     public int shots, kills, wallSlams, shotChain, bestChain;
     public float elapsed, freeze;
     readonly System.Random rng;
@@ -86,9 +91,10 @@ public sealed class SlingshotSim
     public bool Launch(Vector2 pull)
     {
         if (phase != Phase.Ready || pull.magnitude < PullDeadZone) return false;
-        dad.vel = LaunchVelocity(pull); dad.flying = true; dad.flightTime = 0;
+        dad.rage = ragePending; ragePending = false; dad.bounces = 0;
+        dad.vel = LaunchVelocity(pull) * (dad.rage ? 1.15f : 1); dad.flying = true; dad.flightTime = 0;
         shots++; shotChain = 0; phase = Phase.Flying;
-        events.Add(new Event { text = "", sound = "sfx_skill_pick", pos = dad.pos });
+        events.Add(new Event { text = dad.rage ? "분노 발사!" : "", style = 2, sound = dad.rage ? "sfx_boss_enrage" : "sfx_skill_pick", pos = dad.pos });
         return true;
     }
     // The aiming guide: straight to the first wall, then a short stretch after the bounce. Bodies are not shown; reading
@@ -121,7 +127,8 @@ public sealed class SlingshotSim
     // ---- simulation -----------------------------------------------------------------------------------------------
     public void Tick(float dt)
     {
-        if (Over || dt <= 0) return;
+        if (dt <= 0) return;
+        if (Over) { UpdateCorpses(Mathf.Min(dt, .1f)); return; }   // the last bodies keep flying under the finisher
         float remaining = Mathf.Min(dt, .1f);
         while (remaining > 1e-6f && !Over)
         {
@@ -137,34 +144,44 @@ public sealed class SlingshotSim
         foreach (Foe f in foes) if (f.hp > 0) UpdateFoe(f, dt);
         DadContacts();
         FoeContacts(dt);
-        for (int i = corpses.Count - 1; i >= 0; i--) { Corpse c = corpses[i]; c.life -= dt; c.pos += c.vel * dt; c.vel *= Mathf.Exp(-2 * dt); if (c.life <= 0) corpses.RemoveAt(i); }
+        UpdateBalls(dt);
+        UpdateCorpses(dt);
         for (int i = foes.Count - 1; i >= 0; i--)
         {
             Foe f = foes[i]; if (f.hp > 0) continue;
             foes.RemoveAt(i); kills++;
-            corpses.Add(new Corpse { kind = f.kind, pos = f.pos, vel = f.vel.sqrMagnitude > 1 ? f.vel * .6f : new Vector2(f.facing * -120, -160), facing = f.facing });
+            corpses.Add(new Corpse { kind = f.kind, elite = f.elite, pos = f.pos, vel = f.vel.sqrMagnitude > 1 ? f.vel * .6f : new Vector2(f.facing * -120, -160), facing = f.facing });
             events.Add(new Event { text = "제압", pos = f.pos, style = 0 });
             if (f.Boss) { phase = Phase.Won; events.Add(new Event { text = "의리 증명 완료!", pos = f.pos, style = 3, sound = "jingle_win" }); return; }
         }
         if (dad.health <= 0) { phase = Phase.Lost; events.Add(new Event { text = "", sound = "jingle_lose", pos = dad.pos }); return; }
         if (nextSpawn >= stage.spawns.Count && AliveCount == 0 && !stage.bossEscorts) { phase = Phase.Won; events.Add(new Event { text = "", sound = "jingle_win", pos = dad.pos }); }
     }
+    void UpdateCorpses(float dt)
+    {
+        for (int i = corpses.Count - 1; i >= 0; i--) { Corpse c = corpses[i]; c.life -= dt; c.pos += c.vel * dt; c.vel *= Mathf.Exp(-2 * dt); if (c.life <= 0) corpses.RemoveAt(i); }
+    }
     void SpawnDue(float dt)
     {
-        while (nextSpawn < stage.spawns.Count && stage.spawns[nextSpawn].at <= elapsed && AliveCount < 8) { Spawn s = stage.spawns[nextSpawn++]; Add(s.kind, s.x); }
+        while (nextSpawn < stage.spawns.Count && stage.spawns[nextSpawn].at <= elapsed && AliveCount < 8) { Spawn s = stage.spawns[nextSpawn++]; Add(s.kind, s.x, -1, s.elite); }
         // Boss stage: while the boss stands, dads keep coming (they are the ammunition that opens him up).
         if (!stage.bossEscorts || Boss == null) return;
         escortClock -= dt;
-        if (escortClock <= 0 && AliveCount < 4) { escortClock = 3.2f; Add(Kind.Gum, arena.center.x + (escortsCalled++ % 2 == 0 ? -46 : 46)); }
+        if (escortClock <= 0 && AliveCount < 4)
+        {
+            escortClock = 3.2f; int n = escortsCalled++;
+            Add(n % 3 == 2 ? Kind.Dodge : Kind.Gum, arena.center.x + (n % 2 == 0 ? -46 : 46));   // every third is a dodgeball dad: his ball, batted back, opens the boss too
+        }
     }
-    public Foe Add(Kind kind, float x, float y = -1)
+    public Foe Add(Kind kind, float x, float y = -1, bool elite = false)
     {
-        var f = new Foe { id = nextId++, kind = kind, scale = scale, pos = new Vector2(x, y < 0 ? arena.yMin + 22 * scale : y) };
-        f.maxHp = f.hp = kind == Kind.Boss ? 12 : kind == Kind.Tray ? 3 : 2;
+        var f = new Foe { id = nextId++, kind = kind, elite = elite, scale = scale, pos = new Vector2(x, y < 0 ? arena.yMin + 22 * scale : y) };
+        f.maxHp = f.hp = kind == Kind.Boss ? 12 : elite ? 8 : kind == Kind.Tray ? 3 : 2;
         f.shield = kind == Kind.Tray;
         f.cooldown = .5f + (float)rng.NextDouble() * .5f;   // a short grace so a fresh arrival does not swing at once
         foes.Add(f);
         if (kind == Kind.Boss) events.Add(new Event { text = "학부모회장 아빠 등장!  단톡방 방장이다", pos = f.pos, style = 3, sound = "sfx_boss_enrage" });
+        if (elite) events.Add(new Event { text = "지호 큰아빠 등장!  무거워요, 두 번 들이받으세요", pos = f.pos, style = 3, sound = "sfx_boss_enrage" });
         return f;
     }
 
@@ -178,7 +195,11 @@ public sealed class SlingshotSim
         if (p.x > arena.xMax - DadRadius) { p.x = arena.xMax - DadRadius; dad.vel.x = -Mathf.Abs(dad.vel.x) * DadBounce; bumped = true; }
         if (p.y < arena.yMin + DadRadius) { p.y = arena.yMin + DadRadius; dad.vel.y = Mathf.Abs(dad.vel.y) * DadBounce; bumped = true; }
         if (p.y > arena.yMax - DadRadius) { p.y = arena.yMax - DadRadius; dad.vel.y = -Mathf.Abs(dad.vel.y) * DadBounce; bumped = true; }
-        if (bumped) events.Add(new Event { text = "쿵", pos = p, style = 0, sound = "sfx_punch_3" });
+        if (bumped)
+        {
+            dad.bounces = Mathf.Min(3, dad.bounces + 1);
+            events.Add(new Event { text = dad.bounces == 1 ? "쿵" : "튕김 x" + dad.bounces, pos = p, style = dad.bounces == 1 ? 0 : 1, sound = "sfx_punch_3" });
+        }
         dad.pos = p; dad.vel *= Mathf.Exp(-DadDrag * dt);
         if (dad.vel.magnitude < StopSpeed || dad.flightTime > MaxFlight) Land();
     }
@@ -187,6 +208,8 @@ public sealed class SlingshotSim
         dad.flying = false; dad.vel = Vector2.zero; dad.landed = .2f;
         if (!Over) phase = Phase.Ready;
         if (shotChain >= 3) events.Add(new Event { text = shotChain + "연쇄!!", pos = dad.pos, style = 2, sound = "sfx_chain" });
+        if (shotChain >= 5 && !Over) { ragePending = true; events.Add(new Event { text = "아빠 화났다!  다음 발은 분노 발사", pos = dad.pos, style = 3, sound = "sfx_boss_enrage" }); }
+        dad.rage = false;
     }
     void Hurt(int amount, Vector2 from)
     {
@@ -198,7 +221,7 @@ public sealed class SlingshotSim
     void UpdateFoe(Foe f, float dt)
     {
         f.flash = Mathf.Max(0, f.flash - dt); f.stun -= dt; f.wallCooldown -= dt; f.contact -= dt; f.cooldown -= dt; f.attackPose = Mathf.Max(0, f.attackPose - dt);
-        f.groggy = Mathf.Max(0, f.groggy - dt);
+        f.groggy = Mathf.Max(0, f.groggy - dt); f.heavyClock = Mathf.Max(0, f.heavyClock - dt); if (f.heavyClock <= 0) f.heavyHits = 0;
         if (f.Boss && !f.enraged && f.hp <= f.maxHp / 2)
         {
             f.enraged = true; f.flash = .3f;
@@ -221,18 +244,33 @@ public sealed class SlingshotSim
         {
             f.windup -= dt;
             if (f.windup > 0) return;
+            if (f.kind == Kind.Dodge)
+            {
+                // The throw goes where dad stood at the wind-up; moving (flying) is how you dodge it.
+                Vector2 hand = f.pos - new Vector2(0, 60 * scale), dir = (f.target - f.pos).normalized;
+                balls.Add(new Ball { pos = hand, vel = (dir.sqrMagnitude > .01f ? dir : Vector2.down) * 480 });
+                f.attackPose = .3f; f.cooldown = 2.4f;
+                events.Add(new Event { text = "", pos = f.pos, sound = "sfx_skill_pick" });
+                return;
+            }
             if (f.kind == Kind.Chair || f.Boss) { f.dash = .5f; events.Add(new Event { text = "", pos = f.pos, sound = "sfx_chair_dash" }); }
             else
             {
                 f.attackPose = .25f; f.cooldown = 1.5f;
-                if (distance < f.Radius + DadRadius + 22 * scale) Hurt(f.kind == Kind.Tray ? 10 : 8, f.pos);
+                if (distance < f.Radius + DadRadius + 22 * scale) Hurt(f.elite ? 14 : f.kind == Kind.Tray ? 10 : 8, f.pos);
             }
             return;
+        }
+        if (f.kind == Kind.Dodge)
+        {
+            // Keeps his distance: walks in to throwing range, winds up (the target mark shows), throws.
+            if (f.cooldown <= 0 && distance < 520 && !dad.flying) { f.windup = .8f; f.target = dad.pos; f.facing = delta.x >= 0 ? 1 : -1; return; }
+            if (distance < 300) return;
         }
         bool charger = f.kind == Kind.Chair || f.Boss;
         if (charger && f.cooldown <= 0 && distance < (f.Boss ? 340 : 280) && !dad.flying && NoOtherChargerWinding(f))
         { f.windup = f.Boss ? (f.enraged ? .65f : .85f) : .9f; f.aim = delta.normalized; f.facing = f.aim.x >= 0 ? 1 : -1; return; }
-        if (!charger && f.cooldown <= 0 && distance < f.Radius + DadRadius + 14 * scale && !dad.flying)
+        if (!charger && f.kind != Kind.Dodge && f.cooldown <= 0 && distance < f.Radius + DadRadius + 14 * scale && !dad.flying)
         { f.windup = .4f; f.aim = delta.normalized; return; }
         if (distance < f.Radius + DadRadius + 4 * scale) return;
         // Walk toward dad, spreading out so a crowd stays readable and leaves angles to shoot through.
@@ -243,7 +281,7 @@ public sealed class SlingshotSim
             Vector2 away = f.pos - o.pos; float d = away.magnitude, clear = f.Radius + o.Radius + 20 * scale;
             if (d > .01f && d < clear) steer += away / d * (1 - d / clear) * 1.2f;
         }
-        float speed = (f.Boss ? (f.enraged ? 42 : 32) : f.kind == Kind.Chair ? 42 : f.kind == Kind.Tray ? 40 : 50) * stage.speedScale;
+        float speed = (f.Boss ? (f.enraged ? 42 : 32) : f.elite ? 34 : f.kind == Kind.Chair ? 42 : f.kind == Kind.Tray || f.kind == Kind.Dodge ? 40 : 50) * stage.speedScale;
         Vector2 step = Vector2.ClampMagnitude(steer, 1) * speed * dt;
         f.pos = Clamp(f.pos + step, f.Radius); f.walked += step.magnitude;
     }
@@ -300,7 +338,8 @@ public sealed class SlingshotSim
             f.lastShot = shots;
             float speed = dad.vel.magnitude;
             dad.pos = f.pos - n * (required + 1);
-            if (Guarded(f, dad.vel))
+            bool rage = dad.rage;
+            if (Guarded(f, dad.vel) && !rage)
             {
                 dad.vel = Vector2.Reflect(dad.vel, n) * .7f;
                 if (++f.trayHits >= 2) BreakTray(f);
@@ -309,20 +348,33 @@ public sealed class SlingshotSim
             }
             if (f.Boss && f.groggy <= 0)
             {
-                // A fresh boss is a wall: dad bounces off with a chip of damage. A thrown dad has to open him up first.
-                dad.vel = Vector2.Reflect(dad.vel, n) * .65f; Damage(f, 1); f.pos = Clamp(f.pos + n * 10, f.Radius);
-                events.Add(new Event { text = "퍽!", pos = f.pos, style = 0, sound = "sfx_punch_1" });
+                // A fresh boss is a wall: dad bounces off with a chip of damage. A thrown dad has to open him up first;
+                // a rage shot knocks the wind out of him for a moment instead.
+                dad.vel = Vector2.Reflect(dad.vel, n) * .65f; Damage(f, rage ? 2 : 1); f.pos = Clamp(f.pos + n * 10, f.Radius);
+                if (rage) f.groggy = 1.2f;
+                events.Add(new Event { text = rage ? "분노의 들이받기!" : "퍽!", pos = f.pos, style = rage ? 2 : 0, sound = "sfx_punch_1" });
+                continue;
+            }
+            if (f.elite && !rage && f.heavyHits == 0)
+            {
+                // Too heavy for one hit: he staggers and dad bounces off. A second hit within three seconds sends him.
+                f.heavyHits = 1; f.heavyClock = 3; f.stun = Mathf.Max(f.stun, .5f); f.windup = 0; Damage(f, 1);
+                f.pos = Clamp(f.pos + n * 24 * scale, f.Radius); dad.vel = Vector2.Reflect(dad.vel, n) * .6f;
+                events.Add(new Event { text = "무거워!  한 번 더", pos = f.pos, style = 1, sound = "sfx_tray_block" });
                 continue;
             }
             if (f.shield) BreakTray(f);
+            // Bank shot: every locker bounce before the hit adds 15% (and the second one adds a point of damage).
+            float bank = 1 + .15f * dad.bounces;
             Vector2 dir = (dad.vel.normalized * .55f + n * .45f).normalized;
-            f.vel = dir * Mathf.Max(380, speed * .95f);
-            f.air = 0; f.windup = 0; f.dash = 0; f.stun = .6f; f.contact = .15f;
-            Damage(f, 1); shotChain++; bestChain = Mathf.Max(bestChain, shotChain);
-            // Dad ploughs on at 80% speed: straight through a head-on hit, glancing off a side hit.
-            Vector2 heading = Vector2.Lerp(dad.vel.normalized, Vector2.Reflect(dad.vel, n).normalized, .35f);
-            dad.vel = (heading.sqrMagnitude > .01f ? heading.normalized : dad.vel.normalized) * speed * .8f;
-            events.Add(new Event { text = speed > 820 ? "크리티컬!" : "퍽!", pos = f.pos, style = speed > 820 ? 1 : 0, sound = speed > 820 ? "sfx_punch_3" : "sfx_punch_1" });
+            f.vel = dir * Mathf.Max(380, speed * .95f) * bank * (f.elite ? .8f : 1);
+            f.air = 0; f.windup = 0; f.dash = 0; f.stun = .6f; f.contact = .15f; f.heavyHits = 0;
+            Damage(f, 1 + (dad.bounces >= 2 ? 1 : 0) + (rage ? 1 : 0)); shotChain++; bestChain = Mathf.Max(bestChain, shotChain);
+            // Dad ploughs on at 80% speed (95% in a rage): straight through a head-on hit, glancing off a side hit.
+            Vector2 heading = Vector2.Lerp(dad.vel.normalized, Vector2.Reflect(dad.vel, n).normalized, rage ? .1f : .35f);
+            dad.vel = (heading.sqrMagnitude > .01f ? heading.normalized : dad.vel.normalized) * speed * (rage ? .95f : .8f);
+            bool big = speed * bank > 820 || rage;
+            events.Add(new Event { text = rage ? "분노!" : dad.bounces > 0 ? "튕김 강타!" : big ? "크리티컬!" : "퍽!", pos = f.pos, style = big || dad.bounces > 0 ? 1 : 0, sound = big ? "sfx_punch_3" : "sfx_punch_1" });
         }
     }
     void FoeContacts(float dt)
@@ -351,7 +403,14 @@ public sealed class SlingshotSim
                     events.Add(new Event { text = "그로기!!  지금 아빠로 들이받아요", pos = target.pos, style = 3, sound = "sfx_chain" });
                     continue;
                 }
+                if (target.elite && target.heavyHits == 0)
+                {
+                    target.heavyHits = 1; target.heavyClock = 3; target.stun = Mathf.Max(target.stun, .5f); Damage(target, 1); source.vel *= .4f;
+                    events.Add(new Event { text = "무거워!", pos = target.pos, style = 1, sound = "sfx_tray_block" });
+                    continue;
+                }
                 if (target.shield) BreakTray(target);
+                target.heavyHits = 0;
                 target.vel = source.vel.normalized * Mathf.Max(300, source.vel.magnitude * .8f);
                 target.air = 0; target.windup = 0; target.dash = 0; target.stun = .6f;
                 Damage(target, 1); source.vel *= source.Boss ? .85f : .55f;   // a heavy boss ploughs through the small fry
@@ -365,28 +424,76 @@ public sealed class SlingshotSim
             }
         }
     }
+    void UpdateBalls(float dt)
+    {
+        for (int i = balls.Count - 1; i >= 0; i--)
+        {
+            Ball b = balls[i]; b.life -= dt; b.pos += b.vel * dt;
+            bool gone = b.life <= 0 || !arena.Contains(b.pos);
+            if (!gone && !b.returned)
+            {
+                float d = (b.pos - (dad.pos - new Vector2(0, 40 * scale))).magnitude;
+                if (dad.flying && d < DadRadius + 16 * scale)
+                {
+                    // A flying dad bats the ball back the way he is going, much faster.
+                    b.returned = true; b.vel = dad.vel.normalized * 760; b.life = 1.6f; shotChain++; bestChain = Mathf.Max(bestChain, shotChain);
+                    events.Add(new Event { text = "되받아치기!", pos = b.pos, style = 2, sound = "sfx_punch_3" });
+                }
+                else if (!dad.flying && d < DadRadius + 10 * scale) { Hurt(12, b.pos); gone = true; }
+            }
+            if (!gone && b.returned)
+            {
+                foreach (Foe f in foes)
+                {
+                    if (f.hp <= 0 || f.id == b.lastFoe || (f.pos - new Vector2(0, 40 * scale) - b.pos).magnitude > f.Radius + 10 * scale) continue;
+                    b.lastFoe = f.id; b.hits++; shotChain++; bestChain = Mathf.Max(bestChain, shotChain);
+                    if (f.Boss && f.groggy <= 0) { f.groggy = BossGroggy; Damage(f, 1); events.Add(new Event { text = "그로기!!  지금 아빠로 들이받아요", pos = f.pos, style = 3, sound = "sfx_chain" }); }
+                    else
+                    {
+                        if (f.shield) BreakTray(f);
+                        if (!f.elite || f.heavyHits > 0) { f.vel = b.vel.normalized * 520; f.air = 0; f.windup = 0; f.dash = 0; f.stun = .6f; f.heavyHits = 0; }
+                        else { f.heavyHits = 1; f.heavyClock = 3; f.stun = Mathf.Max(f.stun, .5f); }
+                        Damage(f, 1); events.Add(new Event { text = "명중!", pos = f.pos, style = 1, sound = "sfx_chain" });
+                    }
+                    b.vel *= .8f;
+                    if (b.hits >= 3) gone = true;
+                    break;
+                }
+            }
+            if (gone) balls.RemoveAt(i);
+        }
+    }
     Vector2 Clamp(Vector2 p, float margin)
     {
         return new Vector2(Mathf.Clamp(p.x, arena.xMin + margin, arena.xMax - margin), Mathf.Clamp(p.y, arena.yMin + 8, arena.yMax - 8));
     }
 
     // ---- stages -----------------------------------------------------------------------------------------------------
-    // Four prototype stages: the first fight teaches the pull, then walls and chains, then the chair rush and the tray,
-    // then the 1-20 boss. Times are seconds from the start; x is where in the doorway the dad walks in.
+    // Six prototype stages: the pull, then walls / bank shots / chains, the chair rush and the tray, the dodgeball dad,
+    // the heavy big-dad (mid-boss), then the 1-20 boss. Times are seconds from the start; x is where in the doorway the dad
+    // walks in.
     public static Stage[] PrototypeStages(Rect arena)
     {
         float c = arena.center.x;
         var s1 = new Stage { label = "B-1", title = "당겨서 날아가기", lesson = "화면 아무 데나 누르고 뒤로 당겼다 놓으세요", par = 3, speedScale = .8f };
         Add(s1, 0, Kind.Gum, c); Add(s1, 2.5f, Kind.Gum, c - 60); Add(s1, 5, Kind.Gum, c + 60);
-        var s2 = new Stage { label = "B-2", title = "벽꿍과 연쇄", lesson = "맞은 아빠가 사물함이나 다른 아빠에게 부딪히면 연쇄!", par = 4 };
+        var s2 = new Stage { label = "B-2", title = "벽꿍과 연쇄", lesson = "사물함에 튕긴 뒤 맞히면 더 세게! 날아간 아빠끼리 부딪히면 연쇄", par = 4 };
         Add(s2, 0, Kind.Gum, c - 50); Add(s2, 0, Kind.Gum, c - 10); Add(s2, .3f, Kind.Gum, c + 40);
         Add(s2, 5, Kind.Gum, c - 70); Add(s2, 5, Kind.Gum, c); Add(s2, 5.3f, Kind.Gum, c + 70);
         var s3 = new Stage { label = "B-3", title = "의자 돌진과 쟁반", lesson = "의자 아빠는 돌진 전에 먼저! 쟁반은 옆이나 뒤에서", par = 9 };
         Add(s3, 0, Kind.Gum, c - 40); Add(s3, 0, Kind.Gum, c + 40); Add(s3, 2, Kind.Chair, c);
         Add(s3, 6, Kind.Tray, c - 50); Add(s3, 6.5f, Kind.Gum, c + 50); Add(s3, 10, Kind.Chair, c + 30); Add(s3, 11, Kind.Tray, c - 30); Add(s3, 11.5f, Kind.Gum, c + 70);
-        var s4 = new Stage { label = "B-보스", title = "학부모회장 아빠", lesson = "아빠를 날려 회장님에게 맞히면 그로기! 그때 들이받아 벽으로", par = 15, bossEscorts = true };
-        Add(s4, 0, Kind.Boss, c); Add(s4, .5f, Kind.Gum, c - 70); Add(s4, .5f, Kind.Gum, c + 70);
-        return new[] { s1, s2, s3, s4 };
+        var s4 = new Stage { label = "B-4", title = "피구 아빠", lesson = "날아가는 아빠로 공을 맞히면 되받아쳐요. 서 있으면 맞아요", par = 8 };
+        Add(s4, 0, Kind.Gum, c - 50); Add(s4, 0, Kind.Gum, c + 50); Add(s4, 1, Kind.Dodge, c);
+        Add(s4, 6, Kind.Gum, c - 70); Add(s4, 6.3f, Kind.Dodge, c + 60); Add(s4, 6.6f, Kind.Gum, c);
+        Add(s4, 11, Kind.Dodge, c - 60); Add(s4, 11.3f, Kind.Gum, c + 70); Add(s4, 11.6f, Kind.Chair, c);
+        var s5 = new Stage { label = "B-5", title = "지호 큰아빠", lesson = "큰아빠는 무거워요. 3초 안에 두 번 들이받거나 분노 발사로!", par = 11 };
+        Add(s5, 0, Kind.Gum, c, true); Add(s5, .5f, Kind.Gum, c - 70); Add(s5, .5f, Kind.Gum, c + 70);
+        Add(s5, 5, Kind.Tray, c - 40); Add(s5, 5.3f, Kind.Gum, c + 40); Add(s5, 9, Kind.Chair, c); Add(s5, 9.3f, Kind.Dodge, c - 60);
+        Add(s5, 13, Kind.Gum, c - 70); Add(s5, 13.3f, Kind.Gum, c + 70);
+        var s6 = new Stage { label = "B-보스", title = "학부모회장 아빠", lesson = "아빠를 날려 회장님에게 맞히면 그로기! 그때 들이받아 벽으로", par = 15, bossEscorts = true };
+        Add(s6, 0, Kind.Boss, c); Add(s6, .5f, Kind.Gum, c - 70); Add(s6, .5f, Kind.Gum, c + 70);
+        return new[] { s1, s2, s3, s4, s5, s6 };
     }
-    static void Add(Stage s, float at, Kind kind, float x) { s.spawns.Add(new Spawn { at = at, kind = kind, x = x }); }
+    static void Add(Stage s, float at, Kind kind, float x, bool elite = false) { s.spawns.Add(new Spawn { at = at, kind = kind, x = x, elite = elite }); }
 }

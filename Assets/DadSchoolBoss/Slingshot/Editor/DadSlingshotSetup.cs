@@ -88,9 +88,13 @@ public static class DadSlingshotSetup
         Step(14, () => shot("b05-impact"));
         Step(40, () => shot("b06-after-shot"));
         Step(1, () => g.StartStage(2)); Step(420, () => shot("b07-chair-and-tray"));
-        Step(1, () => g.StartStage(3)); Step(120, () => { var boss = g.Sim.Boss; if (boss != null) { boss.groggy = 3; boss.cooldown = 5; } }); Step(4, () => shot("b08-boss-groggy"));
-        Step(1, () => { g.StartStage(1); g.Sim.shots = 3; g.Sim.bestChain = 4; g.Sim.foes.Clear(); g.Sim.phase = SlingshotSim.Phase.Won; }); Step(6, () => shot("b09-result-win"));
-        Step(1, () => { g.StartStage(2); g.Sim.dad.health = 0; g.Sim.phase = SlingshotSim.Phase.Lost; }); Step(6, () => shot("b10-result-lose"));
+        Step(1, () => g.StartStage(3)); Step(300, () => shot("b07b-dodgeball"));
+        Step(1, () => g.StartStage(4)); Step(150, () => shot("b07c-big-dad"));
+        Step(1, () => { g.StartStage(1); g.Sim.ragePending = true; }); Step(40, () => shot("b07d-rage-ready"));
+        Step(1, () => g.StartStage(5)); Step(120, () => { var boss = g.Sim.Boss; if (boss != null) { boss.groggy = 3; boss.cooldown = 5; } }); Step(4, () => shot("b08-boss-groggy"));
+        // Results wait out the finisher (about a second of slow motion) before the card comes up.
+        Step(1, () => { g.StartStage(1); g.Sim.shots = 3; g.Sim.bestChain = 6; g.Sim.foes.Clear(); g.Sim.phase = SlingshotSim.Phase.Won; }); Step(100, () => shot("b09-result-win"));
+        Step(1, () => { g.StartStage(2); g.Sim.dad.health = 0; g.Sim.phase = SlingshotSim.Phase.Lost; }); Step(100, () => shot("b10-result-lose"));
         Step(2, () =>
         {
             for (int i = 0; i < stars.Length; i++) { if (stars[i] > 0) PlayerPrefs.SetInt("DadSlingshot.Stars." + i, stars[i]); else PlayerPrefs.DeleteKey("DadSlingshot.Stars." + i); }

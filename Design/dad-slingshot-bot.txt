@@ -1,19 +1,25 @@
 Prototype B pacing bot (60 runs per stage per profile; wide view, bodies at 72%)
 
 [careful: 5 deg, 0.8-1.4 s aim]
-B-1 당겨서 날아가기: win 60/60, lost 0, timeout 0 | median shots 3 (par 3), time 5.9s, health 100, best chain 2 | 3 stars 57
-B-2 벽꿍과 연쇄: win 60/60, lost 0, timeout 0 | median shots 4 (par 4), time 8.2s, health 100, best chain 4 | 3 stars 43
-B-3 의자 돌진과 쟁반: win 60/60, lost 0, timeout 0 | median shots 10 (par 9), time 21.7s, health 100, best chain 4 | 3 stars 29
-B-보스 학부모회장 아빠: win 60/60, lost 0, timeout 0 | median shots 19 (par 15), time 40.7s, health 92, best chain 4 | 3 stars 13
+B-1 당겨서 날아가기: win 60/60, lost 0, timeout 0 | median shots 3 (par 3), time 5.9s, health 100, best chain 2 | 3 stars 58
+B-2 벽꿍과 연쇄: win 60/60, lost 0, timeout 0 | median shots 4 (par 4), time 8.5s, health 100, best chain 4 | 3 stars 38
+B-3 의자 돌진과 쟁반: win 60/60, lost 0, timeout 0 | median shots 9 (par 9), time 20.2s, health 100, best chain 4 | 3 stars 36
+B-4 피구 아빠: win 60/60, lost 0, timeout 0 | median shots 7 (par 8), time 15.3s, health 100, best chain 5 | 3 stars 58
+B-5 지호 큰아빠: win 60/60, lost 0, timeout 0 | median shots 10 (par 11), time 19.7s, health 100, best chain 5 | 3 stars 42
+B-보스 학부모회장 아빠: win 60/60, lost 0, timeout 0 | median shots 18 (par 15), time 37.6s, health 100, best chain 4 | 3 stars 17
 
 [sloppy: 15 deg, 0.8-1.4 s aim]
-B-1 당겨서 날아가기: win 60/60, lost 0, timeout 0 | median shots 4 (par 3), time 7.3s, health 100, best chain 4 | 3 stars 29
-B-2 벽꿍과 연쇄: win 60/60, lost 0, timeout 0 | median shots 5 (par 4), time 9.7s, health 100, best chain 4 | 3 stars 20
-B-3 의자 돌진과 쟁반: win 60/60, lost 0, timeout 0 | median shots 11 (par 9), time 23.3s, health 100, best chain 4 | 3 stars 16
-B-보스 학부모회장 아빠: win 60/60, lost 0, timeout 0 | median shots 18 (par 15), time 37.4s, health 92, best chain 4 | 3 stars 13
+B-1 당겨서 날아가기: win 60/60, lost 0, timeout 0 | median shots 3 (par 3), time 6.2s, health 100, best chain 4 | 3 stars 34
+B-2 벽꿍과 연쇄: win 60/60, lost 0, timeout 0 | median shots 5 (par 4), time 10s, health 100, best chain 4 | 3 stars 18
+B-3 의자 돌진과 쟁반: win 60/60, lost 0, timeout 0 | median shots 11 (par 9), time 23s, health 100, best chain 4 | 3 stars 20
+B-4 피구 아빠: win 60/60, lost 0, timeout 0 | median shots 7 (par 8), time 16.4s, health 100, best chain 6 | 3 stars 49
+B-5 지호 큰아빠: win 60/60, lost 0, timeout 0 | median shots 11 (par 11), time 23s, health 92, best chain 5 | 3 stars 34
+B-보스 학부모회장 아빠: win 60/60, lost 0, timeout 0 | median shots 19 (par 15), time 40.4s, health 92, best chain 4 | 3 stars 19
 
 [beginner: 20 deg, 1.5-2.5 s aim, 50-100% pull]
-B-1 당겨서 날아가기: win 60/60, lost 0, timeout 0 | median shots 4 (par 3), time 9.2s, health 100, best chain 3 | 3 stars 23
-B-2 벽꿍과 연쇄: win 60/60, lost 0, timeout 0 | median shots 6 (par 4), time 15.2s, health 92, best chain 4 | 3 stars 8
-B-3 의자 돌진과 쟁반: win 60/60, lost 0, timeout 0 | median shots 11 (par 9), time 27.5s, health 80, best chain 4 | 3 stars 14
-B-보스 학부모회장 아빠: win 49/60, lost 11, timeout 0 | median shots 19 (par 15), time 45.2s, health 30, best chain 4 | 3 stars 3
+B-1 당겨서 날아가기: win 60/60, lost 0, timeout 0 | median shots 4 (par 3), time 9.2s, health 100, best chain 3 | 3 stars 24
+B-2 벽꿍과 연쇄: win 60/60, lost 0, timeout 0 | median shots 6 (par 4), time 14.7s, health 92, best chain 4 | 3 stars 13
+B-3 의자 돌진과 쟁반: win 60/60, lost 0, timeout 0 | median shots 12 (par 9), time 29.4s, health 82, best chain 4 | 3 stars 19
+B-4 피구 아빠: win 60/60, lost 0, timeout 0 | median shots 8 (par 8), time 19.3s, health 92, best chain 6 | 3 stars 39
+B-5 지호 큰아빠: win 60/60, lost 0, timeout 0 | median shots 12 (par 11), time 28.3s, health 74, best chain 5 | 3 stars 27
+B-보스 학부모회장 아빠: win 54/60, lost 6, timeout 0 | median shots 21 (par 15), time 50.2s, health 42, best chain 5 | 3 stars 7
