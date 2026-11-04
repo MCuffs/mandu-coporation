@@ -9,11 +9,23 @@ public sealed class DadV5AssetImport : AssetPostprocessor
     const string RewardRoot = "Assets/DadSchoolBoss/Resources/DadV6/";   // v6 reward art (Design/dad-reward-assets-v6.md)
     const string MotionRoot = "Assets/DadSchoolBoss/Resources/DadV7/";   // v7 motion poses on the v5 character canvas
     const string OpeningRoot = "Assets/DadSchoolBoss/Resources/DadV11/"; // v11 title and story stills (Design/dad-war-opening-assets-v11.md)
+    const string SlingRoot = "Assets/DadSchoolBoss/Resources/DadV13/";   // V13 slingshot pack (Art/V13Slingshot/README.md)
 
     void OnPreprocessTexture()
     {
-        if (!assetPath.StartsWith(Root) && !assetPath.StartsWith(RewardRoot) && !assetPath.StartsWith(MotionRoot) && !assetPath.StartsWith(OpeningRoot) && assetPath != "Assets/DadSchoolBoss/Art/V5/app_icon.png") return;
+        if (!assetPath.StartsWith(Root) && !assetPath.StartsWith(RewardRoot) && !assetPath.StartsWith(MotionRoot) && !assetPath.StartsWith(OpeningRoot) && !assetPath.StartsWith(SlingRoot) && assetPath != "Assets/DadSchoolBoss/Art/V5/app_icon.png") return;
         var t = (TextureImporter)assetImporter;
+        if (assetPath.StartsWith(SlingRoot))
+        {
+            // Native sizes (apply request: background up to 4096, characters and effects up to 1024): the 1080x2340
+            // corridor stays opaque, poses (768) and effects (512) keep alpha, hand and icons 256. No mips, clamp, no NPOT.
+            bool bg = assetPath.Contains("/bg/");
+            t.textureType = TextureImporterType.Default; t.alphaIsTransparency = !bg; t.mipmapEnabled = false;
+            t.npotScale = TextureImporterNPOTScale.None; t.wrapMode = TextureWrapMode.Clamp; t.filterMode = FilterMode.Bilinear; t.isReadable = false;
+            t.maxTextureSize = bg ? 4096 : assetPath.Contains("/ui/") ? 256 : 1024;
+            t.textureCompression = TextureImporterCompression.CompressedHQ;
+            return;
+        }
         if (assetPath.StartsWith(OpeningRoot))
         {
             // 941x1672 opaque full-screen stills: same treatment as the v5 backgrounds.
@@ -46,7 +58,7 @@ public sealed class DadV5AssetImport : AssetPostprocessor
 
     void OnPreprocessAudio()
     {
-        if (!assetPath.StartsWith(Root)) return;
+        if (!assetPath.StartsWith(Root) && !assetPath.StartsWith(SlingRoot)) return;
         var a = (AudioImporter)assetImporter;
         bool music = System.IO.Path.GetFileName(assetPath).StartsWith("bgm_");
         a.forceToMono = true;

@@ -29,3 +29,5 @@ PASS a flying dad bats the ball back the way he is going
 PASS a returned ball knocks a dad over
 PASS a big-dad only staggers on the first hit and flies on a second hit within three seconds
 PASS six prototype stages, the last one a boss with escorts
+PASS V13 pack: 14 images and 4 sounds resolve through Resources/DadV13
+PASS V13 import rules: opaque corridor at native 1080x2340 (cap 4096), alpha poses and effects at native size (cap 1024) without mips, 256 hand and icons

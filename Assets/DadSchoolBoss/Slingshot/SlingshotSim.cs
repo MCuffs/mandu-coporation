@@ -17,6 +17,8 @@ public sealed class SlingshotSim
         public float health = 100, maxHealth = 100, flightTime, hurt, landed;
         public bool flying, rage;   // rage: this shot is the reward for a 5-chain
         public int bounces;         // locker bounces so far this shot (bank-shot bonus, up to 3)
+        public int bounceSide = -1; // the side wall he last bounced off (0 left, 1 right), for the wall-bounce pose
+        public float bounceClock;   // how long ago that was, counting down from the pose time
     }
     public sealed class Foe
     {
@@ -94,7 +96,7 @@ public sealed class SlingshotSim
         dad.rage = ragePending; ragePending = false; dad.bounces = 0;
         dad.vel = LaunchVelocity(pull) * (dad.rage ? 1.15f : 1); dad.flying = true; dad.flightTime = 0;
         shots++; shotChain = 0; phase = Phase.Flying;
-        events.Add(new Event { text = dad.rage ? "분노 발사!" : "", style = 2, sound = dad.rage ? "sfx_boss_enrage" : "sfx_skill_pick", pos = dad.pos });
+        events.Add(new Event { text = dad.rage ? "분노 발사!" : "", style = 2, sound = dad.rage ? "sfx_boss_enrage" : "sfx_launch_whoosh", pos = dad.pos });
         return true;
     }
     // The aiming guide: straight to the first wall, then a short stretch after the bounce. Bodies are not shown; reading
@@ -187,25 +189,26 @@ public sealed class SlingshotSim
 
     void UpdateDad(float dt)
     {
-        dad.hurt = Mathf.Max(0, dad.hurt - dt); dad.landed = Mathf.Max(0, dad.landed - dt);
+        dad.hurt = Mathf.Max(0, dad.hurt - dt); dad.landed = Mathf.Max(0, dad.landed - dt); dad.bounceClock = Mathf.Max(0, dad.bounceClock - dt);
         if (!dad.flying) return;
         dad.flightTime += dt;
         Vector2 p = dad.pos + dad.vel * dt; bool bumped = false;
-        if (p.x < arena.xMin + DadRadius) { p.x = arena.xMin + DadRadius; dad.vel.x = Mathf.Abs(dad.vel.x) * DadBounce; bumped = true; }
-        if (p.x > arena.xMax - DadRadius) { p.x = arena.xMax - DadRadius; dad.vel.x = -Mathf.Abs(dad.vel.x) * DadBounce; bumped = true; }
+        if (p.x < arena.xMin + DadRadius) { p.x = arena.xMin + DadRadius; dad.vel.x = Mathf.Abs(dad.vel.x) * DadBounce; bumped = true; dad.bounceSide = 0; dad.bounceClock = .09f; }
+        if (p.x > arena.xMax - DadRadius) { p.x = arena.xMax - DadRadius; dad.vel.x = -Mathf.Abs(dad.vel.x) * DadBounce; bumped = true; dad.bounceSide = 1; dad.bounceClock = .09f; }
         if (p.y < arena.yMin + DadRadius) { p.y = arena.yMin + DadRadius; dad.vel.y = Mathf.Abs(dad.vel.y) * DadBounce; bumped = true; }
         if (p.y > arena.yMax - DadRadius) { p.y = arena.yMax - DadRadius; dad.vel.y = -Mathf.Abs(dad.vel.y) * DadBounce; bumped = true; }
         if (bumped)
         {
             dad.bounces = Mathf.Min(3, dad.bounces + 1);
-            events.Add(new Event { text = dad.bounces == 1 ? "쿵" : "튕김 x" + dad.bounces, pos = p, style = dad.bounces == 1 ? 0 : 1, sound = "sfx_punch_3" });
+            events.Add(new Event { text = dad.bounces == 1 ? "" : "튕김 x" + dad.bounces, pos = p, style = 1, sound = "sfx_wall_boing" });
         }
         dad.pos = p; dad.vel *= Mathf.Exp(-DadDrag * dt);
         if (dad.vel.magnitude < StopSpeed || dad.flightTime > MaxFlight) Land();
     }
     void Land()
     {
-        dad.flying = false; dad.vel = Vector2.zero; dad.landed = .2f;
+        dad.flying = false; dad.vel = Vector2.zero; dad.landed = .18f; dad.bounceClock = 0;
+        events.Add(new Event { text = "", pos = dad.pos, sound = "sfx_landing_skid" });
         if (!Over) phase = Phase.Ready;
         if (shotChain >= 3) events.Add(new Event { text = shotChain + "연쇄!!", pos = dad.pos, style = 2, sound = "sfx_chain" });
         if (shotChain >= 5 && !Over) { ragePending = true; events.Add(new Event { text = "아빠 화났다!  다음 발은 분노 발사", pos = dad.pos, style = 3, sound = "sfx_boss_enrage" }); }
@@ -236,7 +239,7 @@ public sealed class SlingshotSim
         if (f.dash > 0)
         {
             f.pos = Clamp(f.pos + f.aim * (f.Boss ? 380 : 430) * dt, f.Radius); f.dash -= dt;
-            if ((dad.pos - f.pos).magnitude < f.Radius + DadRadius) Hurt(f.Boss ? 18 : 14, f.pos);
+            if ((dad.pos - f.pos).magnitude < f.Radius + DadRadius) Hurt(f.Boss ? 15 : 14, f.pos);   // the first boss should not wall off beginners
             if (f.dash <= 0) f.cooldown = f.Boss ? (f.enraged ? 2.2f : 3f) : 2.6f;
             return;
         }
