@@ -1,0 +1,4 @@
+placement_id,trigger,prerequisite,reward,daily_success_cap,per_battle_cycle_cap,decline_path,failure_path
+result_extra_coins,전투 클리어 결과,1-8 클리어 및 누적 실제 플레이 360초,해당 판 기본 코인과 같은 양 추가 지급,4,1,기본 보상을 유지하고 다음 스테이지,기본 보상을 유지하고 다음 스테이지
+revive,전투 패배 후 정지 화면,1-8 클리어 및 누적 실제 플레이 360초,체력 50퍼센트 및 2초 안전 시간으로 같은 판 복귀,2,1,결과 보기,패배 화면에서 결과 보기 또는 이용 가능 시 재시도
+trial_gear,첫 큰아빠 경험 후 다음 출발 준비,광고 해금 및 1-10에서 승패 경험,다음 전투 1회에 고유 장비 효과 1개 체험,2,1,현재 장비로 즉시 출발,현재 장비로 즉시 출발

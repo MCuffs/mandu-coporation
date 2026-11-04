@@ -1,0 +1,57 @@
+{
+  "status": "proposal-not-runtime-config",
+  "source_commit": "71d14ab54b507b97b1741003121deee9e2ae52e2",
+  "charged_punch": {
+    "charge_max": 100,
+    "charge_per_basic_hit": 25,
+    "min_drag_seconds": 0.15,
+    "target_half_angle_degrees": 35,
+    "target_range_vs_basic": 1.2,
+    "consume_when_no_target": false,
+    "basic_damage_units": 1,
+    "charged_damage_units": 2,
+    "wall_extra_damage_units": 2,
+    "body_collision_damage_units": 1,
+    "fever_chain_threshold": 5,
+    "fever_seconds": 3
+  },
+  "progression": {
+    "first_fist_upgrade_cost": 40,
+    "first_health_upgrade_cost": 40,
+    "first_combo_upgrade_cost": 50,
+    "first_launch_upgrade_cost": 50,
+    "independent_cost_growth": 1.18,
+    "first_lunchbox_stage": 3,
+    "tutorial_lunchbox_count": 3,
+    "first_glove_launch_bonus": 0.25,
+    "base_rarity_weights_after_tutorial": [70, 25, 5],
+    "offline_cap_hours": 8,
+    "offline_coins_in_stage_clears_per_hour": 2,
+    "offline_boxes_per_hour": 1,
+    "assist_starts_after_losses": 3,
+    "assist_damage_resistance_step": 0.05,
+    "assist_damage_resistance_cap": 0.2
+  },
+  "rewarded_ads": {
+    "unlock_stage_clear": 8,
+    "unlock_active_play_seconds": 360,
+    "unlock_conditions_operator": "AND",
+    "successful_rewards_per_day_global": 8,
+    "successful_rewards_per_battle_cycle_global": 1,
+    "result_extra_coins_per_day": 4,
+    "revive_per_day": 2,
+    "trial_gear_per_day": 2,
+    "revive_health_fraction": 0.5,
+    "revive_safety_seconds": 2,
+    "reward_on": "earned-reward-callback-once-per-request-id"
+  },
+  "interstitial_experiment": {
+    "enabled_by_default": false,
+    "exclude_install_day": true,
+    "min_active_play_seconds": 600,
+    "min_clears_since_last": 3,
+    "min_seconds_since_any_ad": 180,
+    "successful_impressions_per_day_cap": 3,
+    "placement": "result-to-next-screen-transition"
+  }
+}
