@@ -124,9 +124,73 @@ public static class SlingshotChecks
         bool firstHitHeld = !big.Flying && big.heavyHits == 1;
         Run(s, 2.4f); s.dad.pos = big.pos + new Vector2(0, 200); s.Launch(new Vector2(0, -150)); for (int i = 0; i < 120 && !big.Flying; i++) s.Tick(1 / 120f);
         Expect(firstHitHeld && big.Flying, "a big-dad only staggers on the first hit and flies on a second hit within three seconds", report);
+        // ---- main game: 3 floors x 20 generated from SlingshotSim.ForMain, growth modifiers ----
+        bool allFilled = true, bigDads = true, bosses = true;
+        for (int fl = 1; fl <= 3; fl++) for (int n = 1; n <= 20; n++)
+        {
+            var ms = SlingshotSim.ForMain(fl, n, Arena);
+            if (ms.spawns.Count == 0 || ms.par <= 0 || ms.floor != fl) allFilled = false;
+            if (n == 10 && !ms.spawns.Exists(sp => sp.elite)) bigDads = false;
+            if (n == 20 && !(ms.bossEscorts && ms.spawns.Exists(sp => sp.kind == SlingshotSim.Kind.Boss))) bosses = false;
+        }
+        Expect(allFilled && bigDads && bosses, "main game: all 60 stages have dads and a par, each floor's 10th has a big-dad and its 20th the boss with escorts", report);
+        var m4 = SlingshotSim.ForMain(1, 4, Arena); var m7 = SlingshotSim.ForMain(1, 7, Arena); var m9 = SlingshotSim.ForMain(1, 9, Arena);
+        Expect(SlingshotSim.ForMain(1, 1, Arena).spawns.TrueForAll(sp => sp.kind == SlingshotSim.Kind.Gum) && m4.spawns.Exists(sp => sp.kind == SlingshotSim.Kind.Chair)
+            && m7.spawns.Exists(sp => sp.kind == SlingshotSim.Kind.Tray) && m9.spawns.Exists(sp => sp.kind == SlingshotSim.Kind.Dodge), "main game 1-1..1-10 follow the first-ten order: pull, chair at 1-4, tray at 1-7, dodgeball at 1-9", report);
+        s = Sim(); Parked(s, SlingshotSim.Kind.Tray, Arena.xMin + 40, Arena.yMin + 30); s.launchBonus = 1.2f; s.SetHealth(140); s.Launch(new Vector2(0, -150));
+        Expect(s.dad.vel.magnitude > SlingshotSim.LaunchMax * 1.19f && s.dad.maxHealth == 140 && s.dad.health == 140, "growth: 도움닫기 speeds the launch and 체력 sets dad's health", report);
+        s = Sim(); Parked(s, SlingshotSim.Kind.Tray, Arena.xMin + 40, Arena.yMin + 30); s.wallBonus = 1; var t3 = Parked(s, SlingshotSim.Kind.Tray, Arena.xMax - 70, 520); t3.vel = new Vector2(900, 0); Run(s, .25f);
+        Expect(t3.hp <= 0, "growth: 멀리 날리기 adds wall damage (a tray dad goes down in one slam)", report);
         var stages = SlingshotSim.PrototypeStages(Arena);
         Expect(stages.Length == 6 && stages[5].bossEscorts && stages.All(st => st.spawns.Count > 0), "six prototype stages, the last one a boss with escorts", report);
         return report.ToString();
+    }
+
+    // ---- main game pacing: every stage of the school, a few runs each ----------------------------------------------
+    // wallBonus 1 = the starting loadout (벽꿍형 gear, no upgrades).
+    public static string RunMainBot(int runs = 20, int wallBonus = 0)
+    {
+        var report = new StringBuilder("Main game pacing bot (beginner: 20 deg, 1.5-2.5 s aim, 50-100% pull; " + runs + " runs per stage, " + (wallBonus > 0 ? "starting gear: wall damage +" + wallBonus : "no growth") + ")\n");
+        for (int fl = 1; fl <= 3; fl++)
+        {
+            report.AppendLine();
+            for (int n = 1; n <= 20; n++)
+            {
+                int won = 0; var times = new List<float>(); var health = new List<float>();
+                for (int run = 0; run < runs; run++)
+                {
+                    var s = new SlingshotSim(SlingshotSim.ForMain(fl, n, Arena), Arena, 500 + run, DadSlingshotPrototype.DefaultScale) { wallBonus = wallBonus };
+                    Play(s, new System.Random(run * 13 + n), 20, 1.5f, 2.5f, .5f);
+                    if (s.phase == SlingshotSim.Phase.Won) { won++; times.Add(s.elapsed); health.Add(s.dad.health); }
+                }
+                times.Sort(); health.Sort();
+                report.AppendLine(fl + "-" + n + ": win " + won + "/" + runs + (won > 0 ? " | " + times[times.Count / 2].ToString("0") + "s, health " + health[health.Count / 2].ToString("0") : ""));
+            }
+        }
+        return report.ToString();
+    }
+    // One bot game: aim at the nearest dad (a groggy boss first) with error, taking a moment to aim at the aiming slow-down.
+    static void Play(SlingshotSim s, System.Random rng, float error, float aimMin, float aimMax, float weakest)
+    {
+        float t = 0;
+        while (!s.Over && t < 180)
+        {
+            if (s.phase == SlingshotSim.Phase.Ready && s.AliveCount > 0)
+            {
+                float aimTime = aimMin + (float)rng.NextDouble() * (aimMax - aimMin);
+                for (float a = 0; a < aimTime && !s.Over; a += 1 / 60f) s.Tick(1 / 60f * DadSlingshotPrototype.AimSlow);
+                if (s.Over) break;
+                SlingshotSim.Foe target = null; float best = float.MaxValue;
+                foreach (var f in s.foes) { if (f.hp <= 0) continue; float d = (f.pos - s.dad.pos).sqrMagnitude * (f.Boss && f.groggy <= 0 ? 4 : 1) * (f.Boss && f.groggy > 0 ? .1f : 1); if (d < best) { best = d; target = f; } }
+                if (target != null)
+                {
+                    Vector2 dir = (target.pos - s.dad.pos).normalized; float noise = (float)(rng.NextDouble() * 2 - 1) * error * Mathf.Deg2Rad;
+                    dir = new Vector2(dir.x * Mathf.Cos(noise) - dir.y * Mathf.Sin(noise), dir.x * Mathf.Sin(noise) + dir.y * Mathf.Cos(noise));
+                    s.Launch(dir * SlingshotSim.PullMax * (weakest + (1 - weakest) * (float)rng.NextDouble()));
+                }
+            }
+            s.Tick(1 / 60f); s.events.Clear(); t += 1 / 60f;
+        }
     }
 
     // ---- pacing bot -------------------------------------------------------------------------------------------------

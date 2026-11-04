@@ -28,6 +28,10 @@ PASS the dodgeball dad keeps his distance and hits a dad who stands still
 PASS a flying dad bats the ball back the way he is going
 PASS a returned ball knocks a dad over
 PASS a big-dad only staggers on the first hit and flies on a second hit within three seconds
+PASS main game: all 60 stages have dads and a par, each floor's 10th has a big-dad and its 20th the boss with escorts
+PASS main game 1-1..1-10 follow the first-ten order: pull, chair at 1-4, tray at 1-7, dodgeball at 1-9
+PASS growth: 도움닫기 speeds the launch and 체력 sets dad's health
+PASS growth: 멀리 날리기 adds wall damage (a tray dad goes down in one slam)
 PASS six prototype stages, the last one a boss with escorts
 PASS V13 pack: 14 images and 4 sounds resolve through Resources/DadV13
 PASS V13 import rules: opaque corridor at native 1080x2340 (cap 4096), alpha poses and effects at native size (cap 1024) without mips, 256 hand and icons

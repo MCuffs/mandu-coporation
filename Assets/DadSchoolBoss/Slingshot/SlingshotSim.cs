@@ -41,6 +41,10 @@ public sealed class SlingshotSim
         public int par;                       // shots for the third star
         public float speedScale = 1;
         public bool bossEscorts;              // the boss keeps calling more dads in while he stands
+        public int floor = 1;                 // which floor's boss art and lines (main game: 1 corridor, 2 cafeteria, 3 gym)
+        public int bossHp = 12, eliteHp = 8;  // tougher on higher floors in the main game
+        public string bossBanner = "학부모회장 아빠 등장!  단톡방 방장이다", bossEnrage = "회장님이 단톡방을 나갔습니다";
+        public string eliteBanner = "지호 큰아빠 등장!  무거워요, 두 번 들이받으세요";
         public readonly List<Spawn> spawns = new List<Spawn>();
     }
     public sealed class Event
@@ -65,6 +69,11 @@ public sealed class SlingshotSim
     public readonly List<Ball> balls = new List<Ball>();
     public Phase phase = Phase.Ready;
     public bool ragePending;   // earned by a 5-chain: the next shot is a rage shot
+    // Growth from the main game (change request C-08 draft): 들이받기 = how hard dad's hit sends a dad, 도움닫기 = launch
+    // speed, 멀리 날리기 = how far a hit dad flies and extra wall damage. Health comes in through dad.maxHealth.
+    public float knockBonus = 1, launchBonus = 1, throwBonus = 1;
+    public int wallBonus;
+    public void SetHealth(float max) { dad.maxHealth = dad.health = Mathf.Max(1, max); }
     public int shots, kills, wallSlams, shotChain, bestChain;
     public float elapsed, freeze;
     readonly System.Random rng;
@@ -94,7 +103,7 @@ public sealed class SlingshotSim
     {
         if (phase != Phase.Ready || pull.magnitude < PullDeadZone) return false;
         dad.rage = ragePending; ragePending = false; dad.bounces = 0;
-        dad.vel = LaunchVelocity(pull) * (dad.rage ? 1.15f : 1); dad.flying = true; dad.flightTime = 0;
+        dad.vel = LaunchVelocity(pull) * (dad.rage ? 1.15f : 1) * launchBonus; dad.flying = true; dad.flightTime = 0;
         shots++; shotChain = 0; phase = Phase.Flying;
         events.Add(new Event { text = dad.rage ? "분노 발사!" : "", style = 2, sound = dad.rage ? "sfx_boss_enrage" : "sfx_launch_whoosh", pos = dad.pos });
         return true;
@@ -178,12 +187,12 @@ public sealed class SlingshotSim
     public Foe Add(Kind kind, float x, float y = -1, bool elite = false)
     {
         var f = new Foe { id = nextId++, kind = kind, elite = elite, scale = scale, pos = new Vector2(x, y < 0 ? arena.yMin + 22 * scale : y) };
-        f.maxHp = f.hp = kind == Kind.Boss ? 12 : elite ? 8 : kind == Kind.Tray ? 3 : 2;
+        f.maxHp = f.hp = kind == Kind.Boss ? stage.bossHp : elite ? stage.eliteHp : kind == Kind.Tray ? 3 : 2;
         f.shield = kind == Kind.Tray;
         f.cooldown = .5f + (float)rng.NextDouble() * .5f;   // a short grace so a fresh arrival does not swing at once
         foes.Add(f);
-        if (kind == Kind.Boss) events.Add(new Event { text = "학부모회장 아빠 등장!  단톡방 방장이다", pos = f.pos, style = 3, sound = "sfx_boss_enrage" });
-        if (elite) events.Add(new Event { text = "지호 큰아빠 등장!  무거워요, 두 번 들이받으세요", pos = f.pos, style = 3, sound = "sfx_boss_enrage" });
+        if (kind == Kind.Boss) events.Add(new Event { text = stage.bossBanner, pos = f.pos, style = 3, sound = "sfx_boss_enrage" });
+        if (elite) events.Add(new Event { text = stage.eliteBanner, pos = f.pos, style = 3, sound = "sfx_boss_enrage" });
         return f;
     }
 
@@ -228,7 +237,7 @@ public sealed class SlingshotSim
         if (f.Boss && !f.enraged && f.hp <= f.maxHp / 2)
         {
             f.enraged = true; f.flash = .3f;
-            events.Add(new Event { text = "회장님이 단톡방을 나갔습니다", pos = f.pos, style = 3, sound = "sfx_boss_enrage" });
+            events.Add(new Event { text = stage.bossEnrage, pos = f.pos, style = 3, sound = "sfx_boss_enrage" });
         }
         if (f.Flying) { f.air += dt; FlyFoe(f, dt); return; }
         f.vel = Vector2.zero; f.air = 0;
@@ -304,7 +313,7 @@ public sealed class SlingshotSim
         {
             f.wallCooldown = .3f; wallSlams++; shotChain++; bestChain = Mathf.Max(bestChain, shotChain);
             bool bossSlam = f.Boss && f.groggy > 0;
-            int damage = f.Boss ? (bossSlam ? 3 : 0) : 2;
+            int damage = f.Boss ? (bossSlam ? 3 + wallBonus : 0) : 2 + wallBonus;
             if (damage > 0) Damage(f, damage);
             if (bossSlam) f.groggy = 0;
             events.Add(new Event { text = bossSlam ? "보스 벽꿍!!" : "벽꿍!", pos = f.pos, style = bossSlam ? 3 : 1, sound = "sfx_wall_" + (1 + wallSlams % 2), dentSide = hitX ? side : -1 });
@@ -370,7 +379,7 @@ public sealed class SlingshotSim
             // Bank shot: every locker bounce before the hit adds 15% (and the second one adds a point of damage).
             float bank = 1 + .15f * dad.bounces;
             Vector2 dir = (dad.vel.normalized * .55f + n * .45f).normalized;
-            f.vel = dir * Mathf.Max(380, speed * .95f) * bank * (f.elite ? .8f : 1);
+            f.vel = dir * Mathf.Max(380, speed * .95f) * bank * (f.elite ? .8f : 1) * knockBonus * throwBonus;
             f.air = 0; f.windup = 0; f.dash = 0; f.stun = .6f; f.contact = .15f; f.heavyHits = 0;
             Damage(f, 1 + (dad.bounces >= 2 ? 1 : 0) + (rage ? 1 : 0)); shotChain++; bestChain = Mathf.Max(bestChain, shotChain);
             // Dad ploughs on at 80% speed (95% in a rage): straight through a head-on hit, glancing off a side hit.
@@ -499,4 +508,81 @@ public sealed class SlingshotSim
         return new[] { s1, s2, s3, s4, s5, s6 };
     }
     static void Add(Stage s, float at, Kind kind, float x, bool elite = false) { s.spawns.Add(new Spawn { at = at, kind = kind, x = x, elite = elite }); }
+
+    // ---- main game stages (3 floors x 20) ------------------------------------------------------------------------------
+    static readonly string[] FloorTitles = { "1층 복도", "2층 급식실", "3층 체육관" };
+    static readonly string[] EliteBanners = { "지호 큰아빠 등장!  무거워요, 두 번 들이받으세요", "민준이 큰아빠 등장!  쟁반도 두 배, 두 번 들이받으세요", "서연이 큰아빠 등장!  의자도 두 개, 두 번 들이받으세요" };
+    static readonly string[] BossBanners = { "학부모회장 아빠 등장!  단톡방 방장이다", "급식 봉사 반장 등장!  세쌍둥이 아빠다", "체육 선생님 등장!  계주 10연패 아빠다" };
+    static readonly string[] BossEnrages = { "회장님이 단톡방을 나갔습니다", "반장님이 국자를 들었습니다", "체육 선생님이 호루라기를 불었습니다" };
+    // Floor 1, stages 1-10 follow the first-ten plan (dad-war-first10-v2 order, retold for the slingshot): the pull, bank shots
+    // and chains, the chair, a power stage, the tray, the dodgeball dad, the big-dad. Everything else is generated: more dads,
+    // more roles and a little more speed with every stage and floor; the 10th is the floor's big-dad, the 20th its boss.
+    public static Stage ForMain(int floor, int number, Rect arena)
+    {
+        floor = Mathf.Clamp(floor, 1, 3); number = Mathf.Clamp(number, 1, 20);
+        float c = arena.center.x; int f = floor - 1;
+        var st = new Stage { label = floor + "-" + number, title = FloorTitles[f], floor = floor, bossBanner = BossBanners[f], bossEnrage = BossEnrages[f], eliteBanner = EliteBanners[f], bossHp = 12 + 3 * f, eliteHp = 8 + 2 * f };
+        if (floor == 1 && number <= 9)
+        {
+            Stage[] proto = PrototypeStages(arena);
+            switch (number)
+            {
+                case 1: Copy(proto[0], st); break;
+                case 2: Copy(proto[1], st); break;
+                case 3: st.lesson = "한 발로 여럿! 사물함에 튕겨 줄 선 아빠들을 쓸어요"; st.par = 5; Wave(st, 0, Kind.Gum, 4, c); Wave(st, 5, Kind.Gum, 4, c); break;
+                case 4: st.lesson = "의자 아빠는 돌진 전에 먼저!"; st.par = 5; Wave(st, 0, Kind.Gum, 3, c); Add(st, 2, Kind.Chair, c); Wave(st, 7, Kind.Gum, 2, c); break;
+                case 5: st.lesson = "돌진 예고선이 보이면 그 의자 아빠부터"; st.par = 7; Wave(st, 0, Kind.Gum, 3, c); Add(st, 1.5f, Kind.Chair, c - 60); Wave(st, 6, Kind.Gum, 2, c); Add(st, 8, Kind.Chair, c + 60); break;
+                case 6: st.lesson = "몸풀기! 뭉친 아빠들을 한 번에"; st.par = 4; st.speedScale = .85f; Wave(st, 0, Kind.Gum, 5, c); Wave(st, 4, Kind.Gum, 5, c); break;
+                case 7: st.lesson = "쟁반은 정면을 막아요. 벽에 튕겨 옆이나 뒤로"; st.par = 6; Wave(st, 0, Kind.Gum, 3, c); Add(st, 1, Kind.Tray, c); Wave(st, 7, Kind.Gum, 2, c); break;
+                case 8: Copy(proto[2], st); break;
+                case 9: Copy(proto[3], st); break;
+            }
+            st.label = floor + "-" + number; st.title = FloorTitles[f];
+            return st;
+        }
+        if (floor == 1 && number == 10) { Copy(PrototypeStages(arena)[4], st); st.label = "1-10"; st.title = FloorTitles[f]; return st; }
+        float step = (number - 1) / 19f + f;   // 0 .. 3 across the whole school
+        st.speedScale = 1 + .04f * step;
+        Kind[] roles = { Kind.Chair, Kind.Tray, Kind.Dodge };
+        if (number == 20)
+        {
+            st.lesson = "아빠를 날려 보스에게 맞히면 그로기! 그때 들이받아 벽으로"; st.bossEscorts = true; st.par = 15 + 2 * f;
+            Add(st, 0, Kind.Boss, c); Add(st, .5f, Kind.Gum, c - 70); Add(st, .5f, Kind.Gum, c + 70);
+            return st;
+        }
+        if (number == 10)
+        {
+            Kind eliteKind = f == 1 ? Kind.Tray : f == 2 ? Kind.Chair : Kind.Gum;
+            st.lesson = "큰아빠는 무거워요. 3초 안에 두 번 들이받거나 분노 발사로!"; st.par = 12 + f;
+            Add(st, 0, eliteKind, c, true); Wave(st, .5f, Kind.Gum, 2, c); Add(st, 5, roles[f], c - 40); Wave(st, 5.3f, Kind.Gum, 2, c);
+            Add(st, 9, Kind.Chair, c); Add(st, 9.3f, Kind.Dodge, c - 60); Wave(st, 13, Kind.Gum, 2, c);
+            return st;
+        }
+        // Generated stage: three waves; the share of chairs, trays and dodgeball dads grows with the stage.
+        int total = 7 + number / 3 + 2 * f, made = 0, wave = 0;
+        float special = Mathf.Clamp01(.2f + .05f * number + .1f * f);
+        var rng = new System.Random(floor * 100 + number);
+        st.lesson = number % 5 == 1 ? FloorTitles[f] + "  새 판!  튕김과 연쇄로 몰아치세요" : "남은 아빠를 사물함에 박아 버려요";
+        while (made < total)
+        {
+            int n = Mathf.Min(total - made, 3 + rng.Next(2));
+            for (int i = 0; i < n; i++)
+            {
+                Kind kind = rng.NextDouble() < special ? roles[rng.Next(Mathf.Min(3, 1 + number / 7 + f))] : Kind.Gum;
+                Add(st, wave * 5.5f + i * .3f, kind, c + (i - (n - 1) / 2f) * 60);
+            }
+            made += n; wave++;
+        }
+        st.par = Mathf.CeilToInt(total * .6f) + 2;
+        return st;
+    }
+    static void Copy(Stage from, Stage to)
+    {
+        to.lesson = from.lesson; to.par = from.par; to.speedScale = from.speedScale;
+        foreach (Spawn sp in from.spawns) to.spawns.Add(sp);
+    }
+    static void Wave(Stage s, float at, Kind kind, int count, float c)
+    {
+        for (int i = 0; i < count; i++) Add(s, at + i * .25f, kind, c + (i - (count - 1) / 2f) * 60);
+    }
 }

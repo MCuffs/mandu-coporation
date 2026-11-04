@@ -31,3 +31,14 @@ PASS gum walks walk_0 > pass_0 > walk_1 > pass_1 by distance (walk0 pass0 walk1 
 PASS knockback does not advance the walk cycle
 PASS gum shows the wall pose only right after a side-wall contact (wallhit0 pass0 fly0)
 PASS a gum knocked out on the wall slumps there; one knocked out mid-floor still flies off
+PASS start opens the slingshot fight for the saved stage (1-1)
+PASS 벽꿍형 gear adds wall damage, a fresh save has base health, the fight runs on a child
+PASS a won fight commits once: coins, stars, 1-2 unlocked
+PASS the fight's own stars are saved
+PASS start moves on to 1-2 in a fresh fight
+PASS a lost fight pays the consolation share and stays on the stage
+PASS upgrades reach the fight (들이받기, 체력, 도움닫기, 멀리 날리기)
+PASS 1-20 is the floor-1 boss fight
+PASS 2-10 is floor 2's big-dad
+PASS home ends the fight
+PASS 폭주형 gear starts with a rage shot

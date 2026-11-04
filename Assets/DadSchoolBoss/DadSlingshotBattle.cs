@@ -1,0 +1,92 @@
+using UnityEngine;
+
+// The main game's battle is prototype B's slingshot fight (Design/dad-war-pm.md D-008): home, stage choice, rewards, saves
+// and the result card stay here; DadSlingshotPrototype runs the fight on a child object (its own audio sources) and hands
+// the finished simulation back. Upgrades and gear follow change request C-08 / C-10 (draft numbers, see the slingshot doc).
+public sealed partial class DadSchoolPrototype
+{
+    // Editor audits of the old auto-punch screens switch this off for their run.
+    public static bool UseSlingshot = true;
+    DadSlingshotPrototype sling;
+    public bool SlingBattle { get; private set; }
+    public SlingshotSim Sling { get { return SlingBattle && sling != null ? sling.Sim : null; } }
+    public SlingshotSim SlingResult { get; private set; }
+    public DadSlingshotPrototype SlingView { get { EnsureSling(); return sling; } }
+
+    void EnsureSling()
+    {
+        if (sling == null)
+        {
+            Transform child = transform.Find("Slingshot");
+            if (child == null) { child = new GameObject("Slingshot").transform; child.SetParent(transform, false); }
+            sling = child.GetComponent<DadSlingshotPrototype>();
+            if (sling == null) sling = child.gameObject.AddComponent<DadSlingshotPrototype>();
+        }
+        sling.Embedded = true; sling.Finished = OnSlingFinished; sling.Quit = GoHome;   // delegates do not survive a script reload
+    }
+
+    void StartSlingStage(int stage)
+    {
+        EnsureSling();
+        DadEconomy eco = Progress.Eco;
+        SlingshotSim.Stage st = SlingshotSim.ForMain(eco.Floor(stage), eco.Number(stage), DadSlingshotPrototype.Arena);
+        int[] up = Progress.Save.upgrades; float assist = Progress.StuckAssist(stage); int gear = Gear;
+        sling.StartEmbedded(st, sim => ApplyGrowth(sim, up, gear, assist));
+        SlingBattle = true; SlingResult = null; Home = false; Paused = false; Combat = null; Director = null;
+        popups.Clear(); resultReason = "";
+    }
+    // 주먹 -> 들이받기, 체력, 연타 -> 도움닫기, 날리기 -> 멀리 날리기 (+1 wall damage from Lv.10). Gear: 벽꿍형 adds wall
+    // damage, 연쇄형 sends hit dads further, 폭주형 starts with a rage shot. 엄마의 응원 (losing streak) adds health.
+    public static void ApplyGrowth(SlingshotSim sim, int[] up, int gear, float assist)
+    {
+        sim.knockBonus = Mathf.Min(1.6f, 1 + .03f * up[0]);
+        sim.SetHealth(100 * (1 + .08f * up[1]) * assist);
+        sim.launchBonus = Mathf.Min(1.3f, 1 + .015f * up[2]);
+        sim.throwBonus = Mathf.Min(1.5f, 1 + .02f * up[3]) * (gear == 1 ? 1.15f : 1);
+        sim.wallBonus = (up[3] >= 10 ? 1 : 0) + (gear == 0 ? 1 : 0);
+        if (gear == 2) sim.ragePending = true;
+    }
+
+    void OnSlingFinished(SlingshotSim sim)
+    {
+        if (!SlingBattle || SlingResult != null) return;
+        bool won = sim.phase == SlingshotSim.Phase.Won;
+        SlingResult = sim;
+        BestChain = Mathf.Max(BestChain, sim.bestChain); TotalWallHits += sim.wallSlams; if (won) Wins++;
+        PlayerPrefs.SetInt("DadV2.BestChain", BestChain); PlayerPrefs.SetInt("DadV2.Wins", Wins);
+        PlayerPrefs.SetInt("DadV2.TotalWallHits", TotalWallHits); PlayerPrefs.Save();
+        LastReward = Progress.ApplyResult(PlayingStage, won, sim.dad.health / sim.dad.maxHealth, sim.bestChain, sim.Stars);
+        PlaySfx(won ? "jingle_win" : "jingle_lose", .8f);
+        PersistNow();
+    }
+    // Editor checks: end the current fight at once with the given outcome.
+    public void FinishSlingBattleNow(bool won)
+    {
+        SlingshotSim sim = Sling; if (sim == null) return;
+        sim.phase = won ? SlingshotSim.Phase.Won : SlingshotSim.Phase.Lost;
+        if (!won) sim.dad.health = 0;
+        OnSlingFinished(sim);
+    }
+    void StopSling() { if (sling != null) sling.StopEmbedded(); SlingBattle = false; SlingResult = null; }
+
+    // The result card over the frozen fight: shots against the target, best chain and wall slams (C-12).
+    void DrawSlingResult()
+    {
+        SlingshotSim sim = SlingResult;
+        bool won = sim.phase == SlingshotSim.Phase.Won;
+        int floorIndex = Mathf.Clamp(sim.stage.floor - 1, 0, 2);
+        SlingshotSim.Foe boss = null;   // a boss or big-dad still standing
+        foreach (SlingshotSim.Foe f in sim.foes) if ((f.Boss || f.elite) && f.hp > 0) { boss = f; break; }
+        string reason = !won && boss != null ? (boss.Boss ? BossNames[floorIndex] : EliteNames[floorIndex]) + " 체력 " + Mathf.CeilToInt(100f * boss.hp / Mathf.Max(1, boss.maxHp)) + "% 남음 · 아깝다!"
+            : !won ? "다가오기 전에 벽으로! 튕겨서 여럿을 노려보세요"
+            : sim.shots > sim.stage.par ? "목표 " + sim.stage.par + "발 안에 끝내면 별 하나 더"
+            : sim.dad.health < sim.dad.maxHealth * .5f ? "체력을 반 넘게 지키면 별 하나 더" : "다음에는 더 크게 한 방!";
+        // The stage's boss or big-dad stars in the scene (flying on a win, still standing on a loss); otherwise a plain dad.
+        SlingshotSim.Spawn key = sim.stage.spawns.Find(sp => sp.kind == SlingshotSim.Kind.Boss) ?? sim.stage.spawns.Find(sp => sp.elite);
+        string foe = key == null ? "gum" : key.kind == SlingshotSim.Kind.Boss ? "boss" + (floorIndex + 1) : DadSlingshotPrototype.FoeId(key.kind);
+        float stand = key == null ? 160 : Mathf.Min(230, DadSlingshotPrototype.FoeStand(key.kind, key.elite) * 1.1f);
+        DrawReport(won, floorIndex, sim.stage.label + " · " + StagePlan.FloorNames[floorIndex],
+            new[] { "발사 / 목표", "최대 연쇄", "벽꿍" }, new[] { sim.shots + " / " + sim.stage.par, sim.bestChain.ToString(), sim.wallSlams.ToString() },
+            reason, won && Progress.Eco.IsFloorBoss(PlayingStage), () => DrawResultScene(won, foe, stand, key == null || boss != null));
+    }
+}

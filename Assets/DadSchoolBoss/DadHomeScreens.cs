@@ -197,20 +197,29 @@ public sealed partial class DadSchoolPrototype
     {
         bool won = Combat.state == RunState.Won;
         int floorIndex = Mathf.Clamp(Director.Plan.floor - 1, 0, 2);
-        Box(new Rect(0, 0, Width, Height), new Color(0, 0, 0, .8f));
+        Fighter key = Director.Key;
+        string reason = resultReason != "" ? resultReason : won ? "다음에는 더 크게 한 방!" : key != null && key.hp > 0 ? (key.boss ? BossNames[floorIndex] : EliteNames[floorIndex]) + " 체력 " + Mathf.CeilToInt(100f * key.hp / key.maxHp) + "% 남음 · 아깝다!" : "돌진 예고를 피하고 벽 쪽으로 몰아보세요";
+        DrawReport(won, floorIndex, Director.Plan.Label + " · " + Director.Plan.FloorName, new[] { "최대 연쇄", "벽꿍", "제압" },
+            new[] { Combat.bestChain.ToString(), Combat.wallHits.ToString(), Combat.kills.ToString() }, reason, won && Director.Plan.floorBoss,
+            () => DrawResultScene(won, key != null ? EnemyId(key) : "gum", key != null ? StandHeight(key) * 1.15f : 160, key == null || key.hp > 0));
+    }
+    // The report card both battles share: header, stars, the scene, three numbers, coins and lunchbox, the line and the way on.
+    void DrawReport(bool won, int floorIndex, string header, string[] labels, string[] values, string reason, bool floorCleared, System.Action scene)
+    {
+        float pad = Mathf.Max(0, (Screen.safeArea.height / ViewScale - Height) / 2);   // tall phones: dim the whole screen
+        Box(new Rect(0, -pad, Width, Height + 2 * pad), new Color(0, 0, 0, .8f));
         Panel(new Rect(20, 50, 500, 880), Paper);
         Box(new Rect(23, 53, 494, 50), Night);
-        Text(new Rect(20, 53, 500, 50), Director.Plan.Label + " · " + Director.Plan.FloorName, 22, Paper, true, TextAnchor.MiddleCenter);
+        Text(new Rect(20, 53, 500, 50), header, 22, Paper, true, TextAnchor.MiddleCenter);
         Text(new Rect(20, 110, 500, 26), won ? "아빠 출동 중 발생한 일" : "오늘은 여기까지", 16, Ink, false, TextAnchor.MiddleCenter);
         Text(new Rect(20, 132, 500, 62), won ? FloorDone[floorIndex] : "아빠도 가끔은 진다", 44, won ? Ink : Red, true, TextAnchor.MiddleCenter);
         if (won && LastReward != null) for (int s = 0; s < 3; s++) Icon(s < LastReward.stars ? "star_full" : "star_empty", new Rect(Width / 2 - 66 + s * 44, 196, 40, 40));
-        DrawResultScene(won);
-        string[] labels = { "최대 연쇄", "벽꿍", "제압" }; int[] values = { Combat.bestChain, Combat.wallHits, Combat.kills };
+        scene();
         for (int i = 0; i < 3; i++)
         {
             Rect r = new Rect(32 + i * 164, 448, 148, 82); Panel(r, Color.white);
             Text(new Rect(r.x, r.y + 6, r.width, 24), labels[i], 15, Ink, true, TextAnchor.MiddleCenter);
-            Text(new Rect(r.x, r.y + 30, r.width, 48), values[i].ToString(), 36, Red, true, TextAnchor.MiddleCenter);
+            Text(new Rect(r.x, r.y + 30, r.width, 48), values[i], values[i].Length > 4 ? 30 : 36, Red, true, TextAnchor.MiddleCenter);
         }
         if (LastReward != null)
         {
@@ -227,10 +236,8 @@ public sealed partial class DadSchoolPrototype
             }
             else Text(new Rect(32, 542, 476, 66), coins + (LastReward.boxes > 0 ? "      도시락 +" + LastReward.boxes : ""), 23, Ink, true, TextAnchor.MiddleCenter);
         }
-        Fighter key = Director.Key;
-        bool floorCleared = won && Director.Plan.floorBoss, finalCleared = floorCleared && PlayingStage == Progress.Eco.TotalStages;
-        string reason = resultReason != "" ? resultReason : floorCleared ? FloorClearLines[floorIndex] : won ? "다음에는 더 크게 한 방!" : key != null && key.hp > 0 ? (key.boss ? BossNames[floorIndex] : EliteNames[floorIndex]) + " 체력 " + Mathf.CeilToInt(100f * key.hp / key.maxHp) + "% 남음 · 아깝다!" : "돌진 예고를 피하고 벽 쪽으로 몰아보세요";
-        Text(new Rect(44, 614, 452, 52), reason, 18, Ink, false, TextAnchor.MiddleCenter);
+        bool finalCleared = floorCleared && PlayingStage == Progress.Eco.TotalStages;
+        Text(new Rect(44, 614, 452, 52), floorCleared ? FloorClearLines[floorIndex] : reason, 18, Ink, false, TextAnchor.MiddleCenter);
         if (finalCleared) Text(new Rect(36, 666, 468, 26), EndingLine, 16, Green, true, TextAnchor.MiddleCenter);
         else if (!won && Progress.StuckAssist(PlayingStage) > 1.001f)
         {
@@ -245,11 +252,8 @@ public sealed partial class DadSchoolPrototype
     }
     // Dad unbothered next to whoever just left the frame, with the red 처리 완료 stamp; on a loss, dad hurt and the one who
     // is still standing.
-    void DrawResultScene(bool won)
+    void DrawResultScene(bool won, string foe, float foeStand, bool foeStanding)
     {
-        Fighter key = Director.Key;
-        string foe = key != null ? EnemyId(key) : "gum";
-        float foeStand = key != null ? StandHeight(key) * 1.15f : 160;
         if (won)
         {
             DrawCharacter(foe, "fly", 0, new Vector2(382, 390), foeStand, false, -18);
@@ -261,7 +265,7 @@ public sealed partial class DadSchoolPrototype
         {
             Ellipse(new Vector2(182, 432), 120, 18, new Color(0, 0, 0, .2f));
             DrawCharacter("dad", "hurt", 0, new Vector2(182, 432), 176, false);
-            if (key == null || key.hp > 0) { Ellipse(new Vector2(372, 432), 110, 16, new Color(0, 0, 0, .2f)); DrawCharacter(foe, "walk", 0, new Vector2(372, 432), foeStand, false); }
+            if (foeStanding) { Ellipse(new Vector2(372, 432), 110, 16, new Color(0, 0, 0, .2f)); DrawCharacter(foe, "walk", 0, new Vector2(372, 432), foeStand, false); }
         }
     }
     void Stamp(Vector2 c, string s, float angle)

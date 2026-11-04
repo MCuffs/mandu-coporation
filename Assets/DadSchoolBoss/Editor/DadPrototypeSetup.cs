@@ -158,6 +158,36 @@ public static class DadPrototypeSetup
             PlayerPrefs.Save(); g.ReloadProgress(); SetMember(g, "Gear", gear); g.UseProgress(original); DeleteTemp(temp); g.GoHome(); Debug.Log("DAD_UI_DONE: " + dir);
         });
     }
+    // The old auto-punch battle is kept for comparison; its audits switch the slingshot fight off until their last step.
+    static void Legacy(Action queue) { DadSchoolPrototype.UseSlingshot = false; queue(); Step(1, () => DadSchoolPrototype.UseSlingshot = true); }
+    // D-008 main flow with the slingshot fight on a temporary save: home, a fight, an aim and a flight, win and loss reports,
+    // the floor bosses and big-dad, and the ending.
+    static void QueueSlingMainAudit(string dir)
+    {
+        Directory.CreateDirectory(dir);
+        var g = UnityEngine.Object.FindObjectOfType<DadSchoolPrototype>();
+        Action<string> shot = name => ScreenCapture.CaptureScreenshot(Path.Combine(dir, name + ".png"), 2);
+        string[] keys = { "DadV2.BestChain", "DadV2.Wins", "DadV2.Gear", "DadV2.TotalWallHits" };
+        var saved = new Dictionary<string, int>();
+        foreach (string k in keys) if (PlayerPrefs.HasKey(k)) saved[k] = PlayerPrefs.GetInt(k);
+        DadProgress original = g.Progress; string temp = TempSavePath("slingmain"); int gear = g.Gear;
+        Step(1, () => { var p = new DadProgress(DadEconomy.Load(), temp) { Rng = new System.Random(5) }; p.Save.coins = 320; p.Save.bestStage = 3; p.Save.currentStage = 3; p.Save.lunchboxes = 1; g.UseProgress(p); g.GoHome(); });
+        Step(10, () => shot("sm01-home"));
+        Step(1, () => g.StartRun()); Step(100, () => shot("sm02-fight-1-3"));
+        Step(1, () => g.SlingView.DebugAim(new Vector2(270, 700), new Vector2(250, 830))); Step(20, () => shot("sm03-aim"));
+        Step(1, () => g.SlingView.DebugRelease()); Step(10, () => shot("sm04-flight"));
+        Step(80, () => { g.Sling.shots = 4; g.Sling.bestChain = 6; g.Sling.wallSlams = 9; g.FinishSlingBattleNow(true); }); Step(12, () => shot("sm05-result-win"));
+        Step(1, () => g.StartRun(3)); Step(40, () => g.FinishSlingBattleNow(false)); Step(12, () => shot("sm06-result-loss"));
+        Step(1, () => { g.Progress.Save.bestStage = 60; g.StartStage(20); }); Step(160, () => shot("sm07-boss-1-20"));
+        Step(1, () => g.StartStage(30)); Step(160, () => shot("sm08-floor2-bigdad"));
+        Step(1, () => g.StartStage(60)); Step(160, () => shot("sm09-floor3-boss"));
+        Step(1, () => g.FinishSlingBattleNow(true)); Step(12, () => shot("sm10-ending"));
+        Step(5, () =>
+        {
+            foreach (string k in keys) { if (saved.ContainsKey(k)) PlayerPrefs.SetInt(k, saved[k]); else PlayerPrefs.DeleteKey(k); }
+            PlayerPrefs.Save(); g.ReloadProgress(); SetMember(g, "Gear", gear); g.UseProgress(original); DeleteTemp(temp); g.GoHome(); Debug.Log("DAD_SLINGMAIN_DONE: " + dir);
+        });
+    }
     static void Poll()
     {
         if (pump && EditorApplication.isPlaying) { EditorApplication.QueuePlayerLoopUpdate(); UnityEditorInternal.InternalEditorUtility.RepaintAllViews(); }
@@ -218,11 +248,12 @@ public static class DadPrototypeSetup
                 Tray(c, c.player + new Vector2(-60, -150), 1);
                 var charger = c.AddEnemy(c.player + new Vector2(-30, 160), 1); charger.windup = 3; charger.aim = (c.player - charger.pos).normalized; // long telegraph for the capture
             }
-            else if (command.StartsWith("screens:") && EditorApplication.isPlaying) QueueScreenAudit(command.Substring(8));
-            else if (command.StartsWith("rewards:") && EditorApplication.isPlaying) QueueRewardAudit(command.Substring(8));
-            else if (command.StartsWith("motion:") && EditorApplication.isPlaying) QueueMotionAudit(command.Substring(7));
-            else if (command.StartsWith("story:") && EditorApplication.isPlaying) QueueStoryAudit(command.Substring(6));
-            else if (command.StartsWith("ui:") && EditorApplication.isPlaying) QueueUiAudit(command.Substring(3));
+            else if (command.StartsWith("screens:") && EditorApplication.isPlaying) Legacy(() => QueueScreenAudit(command.Substring(8)));
+            else if (command.StartsWith("rewards:") && EditorApplication.isPlaying) Legacy(() => QueueRewardAudit(command.Substring(8)));
+            else if (command.StartsWith("motion:") && EditorApplication.isPlaying) Legacy(() => QueueMotionAudit(command.Substring(7)));
+            else if (command.StartsWith("story:") && EditorApplication.isPlaying) Legacy(() => QueueStoryAudit(command.Substring(6)));
+            else if (command.StartsWith("ui:") && EditorApplication.isPlaying) Legacy(() => QueueUiAudit(command.Substring(3)));
+            else if (command.StartsWith("slingmain:") && EditorApplication.isPlaying) QueueSlingMainAudit(command.Substring(10));
             else if (command == "pump" && EditorApplication.isPlaying) { pump = true; Application.runInBackground = true; }
             else if (command == "stop") { pump = false; EditorApplication.isPlaying = false; }
             Debug.Log("DAD_COMMAND_OK: " + command);
@@ -441,7 +472,8 @@ public static class DadPrototypeSetup
         int[] values = new int[keys.Length]; bool[] exists = new bool[keys.Length];
         for (int i = 0; i < keys.Length; i++) { exists[i] = PlayerPrefs.HasKey(keys[i]); values[i] = PlayerPrefs.GetInt(keys[i]); }
         int originalGear = game.Gear;
-        DadProgress original = game.Progress; string temp = TempSavePath("playcheck");
+        DadProgress original = game.Progress; string temp = TempSavePath("playcheck"), slingTemp = TempSavePath("slingcheck");
+        DadSchoolPrototype.UseSlingshot = false;
         try
         {
             game.UseProgress(new DadProgress(DadEconomy.Load(), temp));
@@ -535,10 +567,35 @@ public static class DadPrototypeSetup
             int wallBodies = 0, flying = 0; foreach (object o in corpses) { if (flag(o, "wall") && !flag(o, "right")) wallBodies++; else if (!flag(o, "wall")) flying++; }
             Expect(corpses.Count == 2 && wallBodies == 1 && flying == 1, "a gum knocked out on the wall slumps there; one knocked out mid-floor still flies off", report);
             game.GoHome();
+            // D-008: the main game's battle is the slingshot fight; home, rewards and saves stay as they were.
+            DadSchoolPrototype.UseSlingshot = true;
+            game.UseProgress(new DadProgress(DadEconomy.Load(), slingTemp)); game.SelectGear(0);
+            game.StartRun();
+            Expect(game.SlingBattle && !game.Home && game.Combat == null && game.Sling != null && game.Sling.stage.label == "1-1" && game.PlayingStage == 1, "start opens the slingshot fight for the saved stage (1-1)", report);
+            Expect(game.Sling.wallBonus == 1 && Mathf.Approximately(game.Sling.dad.maxHealth, 100) && game.SlingView.transform.parent == game.transform, "벽꿍형 gear adds wall damage, a fresh save has base health, the fight runs on a child", report);
+            int slingWins = game.Wins;
+            game.FinishSlingBattleNow(true); game.FinishSlingBattleNow(true);
+            Expect(game.Wins == slingWins + 1 && game.LastReward != null && game.LastReward.won && game.LastReward.stars >= 1 && game.Progress.Save.bestStage == 2 && game.SlingResult != null, "a won fight commits once: coins, stars, 1-2 unlocked", report);
+            Expect(game.Progress.Stars(1) == game.SlingResult.Stars, "the fight's own stars are saved", report);
+            game.StartRun();
+            Expect(game.SlingBattle && game.SlingResult == null && game.Sling.stage.label == "1-2", "start moves on to 1-2 in a fresh fight", report);
+            double slingCoins = game.Progress.Save.coins;
+            game.FinishSlingBattleNow(false);
+            Expect(!game.LastReward.won && game.Progress.Save.coins > slingCoins && game.Progress.Save.lossesAtStage == 1 && game.Progress.Save.currentStage == 2, "a lost fight pays the consolation share and stays on the stage", report);
+            game.Progress.Save.upgrades = new[] { 10, 5, 10, 10 }; game.StartRun();
+            Expect(game.Sling.knockBonus > 1.29f && game.Sling.launchBonus > 1.14f && game.Sling.dad.maxHealth > 139 && game.Sling.wallBonus == 2, "upgrades reach the fight (들이받기, 체력, 도움닫기, 멀리 날리기)", report);
+            game.StartStage(20);
+            Expect(game.Sling.stage.floor == 1 && game.Sling.stage.spawns.Exists(sp => sp.kind == SlingshotSim.Kind.Boss), "1-20 is the floor-1 boss fight", report);
+            game.StartStage(30);
+            Expect(game.Sling.stage.label == "2-10" && game.Sling.stage.floor == 2 && game.Sling.stage.spawns.Exists(sp => sp.elite), "2-10 is floor 2's big-dad", report);
+            game.GoHome();
+            Expect(game.Home && !game.SlingBattle && game.Sling == null && game.SlingView.Sim == null, "home ends the fight", report);
+            if (game.PhoneGearUnlocked) { game.SelectGear(2); game.StartRun(); Expect(game.Sling.ragePending, "폭주형 gear starts with a rage shot", report); game.GoHome(); }
         }
         finally
         {
-            game.SelectGear(originalGear); game.UseProgress(original); DeleteTemp(temp);
+            DadSchoolPrototype.UseSlingshot = true;
+            game.SelectGear(originalGear); game.UseProgress(original); DeleteTemp(temp); DeleteTemp(slingTemp);
             for (int i = 0; i < keys.Length; i++) { if (exists[i]) PlayerPrefs.SetInt(keys[i], values[i]); else PlayerPrefs.DeleteKey(keys[i]); }
             PlayerPrefs.Save(); game.ReloadProgress(); game.GoHome();
         }

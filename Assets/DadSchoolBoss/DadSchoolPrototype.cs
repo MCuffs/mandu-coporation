@@ -62,7 +62,7 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
         Application.targetFrameRate = 60; LoadResources(); ReloadProgress();
         Progress = new DadProgress(DadEconomy.Load(), DadProgress.DefaultPath);
         Progress.AccrueIdle(System.DateTime.UtcNow); Progress.Persist();
-        ShowSplash();
+        EnsureSling(); ShowSplash();
     }
     // Tests and audits swap in a throwaway save so they never touch the player's progress.
     public void UseProgress(DadProgress progress) { Progress = progress; }
@@ -193,6 +193,8 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
         stage = Mathf.Clamp(stage, 1, Progress.Eco.TotalStages);
         var plan = StagePlan.For(stage, Progress.Eco);
         PlayingStage = stage; LastReward = null; FinishOpening();
+        if (UseSlingshot) { StartSlingStage(stage); return; }
+        StopSling();
         Combat = new AlleyCombat(0); Combat.SetArena(PlayArea);
         Combat.hazardSpawnClock = 9999; // Environmental readability first; no random explosive barrels.
         Combat.player = new Vector2(270, 570);
@@ -229,7 +231,7 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
         combat.punchKnockbackMultiplier = gear == 0 ? 1.25f : 1;
         combat.phoneSpecial = gear == 2; combat.phoneHeal = gear == 2 ? 6 : 0; combat.feverDuration = 2.4f; combat.chargeGainMultiplier = .55f;
     }
-    public void GoHome() { FinishOpening(); Home = true; Tab = HomeTab.Go; Paused = false; dragging = false; stick = Vector2.zero; }
+    public void GoHome() { FinishOpening(); StopSling(); Home = true; Tab = HomeTab.Go; Paused = false; dragging = false; stick = Vector2.zero; }
     float ViewScale { get { return Mathf.Min(Screen.safeArea.width / Width, Screen.safeArea.height / Height); } }
     Vector2 Offset { get { Rect s = Screen.safeArea; return new Vector2(s.x + (s.width - Width * ViewScale) / 2, Screen.height - s.yMax + (s.height - Height * ViewScale) / 2); } }
     Vector2 Pointer(Vector2 p) { return (new Vector2(p.x, Screen.height - p.y) - Offset) / ViewScale; }
@@ -254,6 +256,12 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
         for (int i = popups.Count - 1; i >= 0; i--) { popups[i].life -= dt; popups[i].position.y -= dt * 38; if (popups[i].life <= 0) popups.RemoveAt(i); }
         if (UpdateOpening(dt)) return;
         UpdateRewards(dt);
+        if (SlingBattle)
+        {
+            EnsureSling();
+            if (Sling == null && SlingResult == null) GoHome();   // the fight did not survive a script reload in the editor
+            return;
+        }
         if (Home || Combat == null) return;
         if (Input.GetKeyDown(KeyCode.Escape)) { if (Combat.state == RunState.Fighting) Paused = !Paused; }
         if (Paused || Combat.state != RunState.Fighting) { dragging = false; stick = Vector2.zero; specialRequested = false; SaveResult(); return; }
@@ -366,6 +374,16 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
         if (ResourcesLost) LoadResources();
         Matrix4x4 previous = GUI.matrix;
         GUI.matrix = Matrix4x4.TRS(new Vector3(Offset.x, Offset.y, 0), Quaternion.identity, Vector3.one * ViewScale);
+        GUI.depth = 0;
+        if (SlingBattle)
+        {
+            // The slingshot view draws the fight underneath (GUI.depth 1); the result card, reveal and toasts go on top.
+            bool on = GUI.enabled; if (Revealing) GUI.enabled = false;
+            if (SlingResult != null) DrawSlingResult();
+            GUI.enabled = on;
+            DrawReveal(); DrawToast();
+            GUI.matrix = previous; return;
+        }
         Box(new Rect(0, 0, Width, Height), Paper);
         if (InOpening) { DrawOpening(); GUI.matrix = previous; return; }
         // The lunchbox reveal sits on top of home or the result screen; nothing under it takes taps meanwhile.

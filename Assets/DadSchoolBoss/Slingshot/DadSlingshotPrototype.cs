@@ -22,6 +22,13 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
 
     public SlingshotSim Sim { get; private set; }
     public int StageIndex { get; private set; } = -1;   // -1: the stage list
+    // Embedded in the main game: no stage list, no own result card or stars. The host starts each fight, hears the end
+    // (after the finisher) through Finished, and Quit is the top-bar way home.
+    public bool Embedded;
+    public System.Action<SlingshotSim> Finished;
+    public System.Action Quit;
+    bool finishedSent, firstLesson;
+    static readonly string[] BossShort = { "회장 아빠", "급식 반장", "체육 선생님" }, EliteShort = { "지호 큰아빠", "민준이 큰아빠", "서연이 큰아빠" };
     public bool Aiming { get { return aiming; } }
     // Character size against the art, kept per device so 72% and 80% can be compared (decision in the change request).
     public static float BodyScale { get { return PlayerPrefs.GetInt(ScaleKey, Mathf.RoundToInt(DefaultScale * 100)) / 100f; } }
@@ -92,9 +99,20 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
         StageIndex = Mathf.Clamp(i, 0, stages.Length - 1);
         stages = SlingshotSim.PrototypeStages(Arena);   // fresh spawn lists each try
         Sim = new SlingshotSim(stages[StageIndex], Arena, 7 + StageIndex, BodyScale);
-        aiming = false; finger = -1; popups.Clear(); dents.Clear(); shownChain = 0; chainChip = chainBig = endClock = 0; resultSaved = false;
+        ResetFight(); firstLesson = StageIndex == 0;
         banner = stages[StageIndex].label + "  " + stages[StageIndex].title + "  ·  상대 " + stages[StageIndex].spawns.Count + "명" + (stages[StageIndex].bossEscorts ? " +" : ""); bannerTime = 1.8f;
     }
+    // Main game: a stage built by the host (SlingshotSim.ForMain) with its growth applied in setup.
+    public void StartEmbedded(SlingshotSim.Stage stage, System.Action<SlingshotSim> setup)
+    {
+        Embedded = true; StageIndex = -1;
+        Sim = new SlingshotSim(stage, Arena, 7 + stage.floor * 100 + stage.spawns.Count, BodyScale);
+        if (setup != null) setup(Sim);
+        ResetFight(); firstLesson = stage.label == "1-1";
+        banner = stage.label + "  " + stage.title + "  ·  상대 " + stage.spawns.Count + "명" + (stage.bossEscorts ? " +" : ""); bannerTime = 1.8f;
+    }
+    public void StopEmbedded() { Sim = null; aiming = false; finger = -1; if (pullLoop != null) pullLoop.Stop(); }
+    void ResetFight() { aiming = false; finger = -1; popups.Clear(); dents.Clear(); shownChain = 0; chainChip = chainBig = endClock = 0; resultSaved = false; finishedSent = false; }
     public void ShowMenu() { Sim = null; StageIndex = -1; aiming = false; }
     // Editor audits hold an aim on screen without a finger.
     public void DebugAim(Vector2 start, Vector2 now) { aiming = true; finger = -2; aimStart = start; aimNow = now; }
@@ -119,7 +137,7 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
         if (Sim == null) return;
         if (!Sim.Over)
         {
-            if (Input.GetKeyDown(KeyCode.Escape)) { ShowMenu(); return; }
+            if (Input.GetKeyDown(KeyCode.Escape)) { if (Embedded) { if (Quit != null) Quit(); } else ShowMenu(); return; }
             ReadInput();
         }
         // Aiming is a calm moment: the walkers slow down while dad is pulled back. Once it is over, the last bodies keep
@@ -131,8 +149,10 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
         if (Sim.Over && !resultSaved)
         {
             resultSaved = true; endClock = Sim.phase == SlingshotSim.Phase.Won ? 1f : .7f;
-            if (Sim.Stars > BestStars(StageIndex)) { PlayerPrefs.SetInt(StarsKey + StageIndex, Sim.Stars); PlayerPrefs.Save(); }
+            if (!Embedded && Sim.Stars > BestStars(StageIndex)) { PlayerPrefs.SetInt(StarsKey + StageIndex, Sim.Stars); PlayerPrefs.Save(); }
         }
+        // Embedded: the host shows its own result once the finisher has played out.
+        if (Embedded && Sim != null && Sim.Over && resultSaved && endClock <= 0 && !finishedSent) { finishedSent = true; if (Finished != null) Finished(Sim); }
     }
     void ReadInput()
     {
@@ -189,7 +209,8 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
     }
     void AddDent(int side, float feetY)
     {
-        if (V("corridor_floor1_long") != null)
+        if (Floor != 1) return;   // the locker spots are measured on the floor-1 paintings
+        if (Corridor != null)
         {
             // Long corridor: dents only on the locker runs (not the windows), merged when they land close together.
             float y = feetY - 40 * S; bool locker = false;
@@ -210,7 +231,7 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
     void UpdateMusic()
     {
         if (music == null || art == null) return;
-        AudioClip want = Sim == null ? art.Clip("bgm_home") : Sim.Over ? null : art.Clip("bgm_battle");
+        AudioClip want = Sim == null ? (Embedded ? null : art.Clip("bgm_home")) : Sim.Over ? null : art.Clip("bgm_battle");   // embedded: the host plays home music
         if (music.clip == want) return;
         music.clip = want; if (want != null) music.Play(); else music.Stop();
     }
@@ -226,11 +247,13 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
     void OnGUI()
     {
         if (ResourcesLost) Load();
+        if (Embedded && Sim == null) return;   // between fights the host draws everything
+        GUI.depth = Embedded ? 1 : 0;           // under the host's result card and reveal
         Matrix4x4 previous = GUI.matrix;
         GUI.matrix = Matrix4x4.TRS(new Vector3(Offset.x, Offset.y, 0), Quaternion.identity, Vector3.one * ViewScale);
         Box(new Rect(0, -Pad, Width, Height + 2 * Pad), Paper);
         if (Sim == null) DrawMenu();
-        else { DrawFight(); if (Sim.Over && endClock <= 0) DrawResult(); }
+        else { DrawFight(); if (Sim.Over && endClock <= 0 && !Embedded) DrawResult(); }
         GUI.matrix = previous;
     }
 
@@ -275,7 +298,7 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
     void DrawFight()
     {
         float s = S;
-        Texture2D bg = art != null ? art.Background(1) : null;
+        Texture2D bg = art != null ? art.Background(Floor) : null;
         Matrix4x4 stage = GUI.matrix;
         GUI.matrix *= Matrix4x4.Translate(new Vector3(Mathf.Sin(clock * 61) * shake, Mathf.Cos(clock * 49) * shake * .5f, 0));
         // Boss finisher: about 0.25 s of zoom (x1.15) on the boss as he goes down, then back while the card waits.
@@ -285,7 +308,7 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
             float z = 1 + .15f * Mathf.Clamp01((1f - endClock) / .1f); Vector3 c = new Vector3(fallen.pos.x, fallen.pos.y - 80, 0);
             GUI.matrix *= Matrix4x4.Translate(c) * Matrix4x4.Scale(new Vector3(z, z, 1)) * Matrix4x4.Translate(-c);
         }
-        Texture2D corridor = V("corridor_floor1_long");
+        Texture2D corridor = Corridor;
         // Pixel y 210 is the top of the 9:16 frame, so the full painting runs from -105 to 1065: on a 9:19.5 phone the
         // letterbox space shows more corridor (change request, proposal 2) while the fight stays inside the frame.
         if (corridor != null) GUI.DrawTexture(new Rect(0, -105, Width, 1170), corridor, ScaleMode.StretchToFill);
@@ -294,7 +317,7 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
         foreach (SlingshotSim.Corpse c in Sim.corpses)
         {
             float k = 1 - c.life / .6f;
-            DrawCharacter(FoeId(c.kind), "fly", 0, c.pos - new Vector2(0, (30 + k * 40) * s), FoeStand(c.kind, c.elite) * s, c.facing > 0, (c.facing > 0 ? 1 : -1) * k * 70, false, null, Mathf.Clamp01(c.life / .25f));
+            DrawCharacter(c.kind == SlingshotSim.Kind.Boss ? BossArt : FoeId(c.kind), "fly", 0, c.pos - new Vector2(0, (30 + k * 40) * s), FoeStand(c.kind, c.elite) * s, c.facing > 0, (c.facing > 0 ? 1 : -1) * k * 70, false, null, Mathf.Clamp01(c.life / .25f));
         }
         // Telegraphs under the bodies: the charge line and the swing ring.
         foreach (SlingshotSim.Foe f in Sim.foes)
@@ -427,7 +450,7 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
     void DrawFoe(SlingshotSim.Foe f)
     {
         float s = S, stand = FoeStand(f.kind, f.elite) * s, lift = f.Lift;
-        string id = FoeId(f.kind);
+        string id = f.Boss ? BossArt : FoeId(f.kind);
         Ellipse(f.pos, (f.Boss ? 92 : 52) * (f.elite ? 1.4f : 1) * s, 14 * s, new Color(0, 0, 0, .22f));
         string action; int index = 0; float tilt = 0;
         bool broken = f.kind == SlingshotSim.Kind.Tray && f.trayBroken;
@@ -499,7 +522,7 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
         Vector2 dad = Sim.dad.pos; float s = S;
         float t = Mathf.Repeat(clock, 1.6f) / 1.2f; Vector2 start = dad + new Vector2(0, -230), end = dad + new Vector2(26, -110 * s);
         Vector2 p = Vector2.Lerp(start, end, Mathf.Clamp01(t)); float a = t <= 1 ? 1 : 0;
-        if (StageIndex == 0)
+        if (firstLesson)
         {
             Line(start, p, 6, new Color(Ink.r, Ink.g, Ink.b, .35f * a));
             Texture2D hand = V("drag_hand");
@@ -508,9 +531,10 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
             else { Ellipse(p, 46, 46, new Color(1, 1, 1, .55f * a)); Ellipse(p, 22, 22, new Color(Ink.r, Ink.g, Ink.b, .5f * a)); }
         }
         // Under the bar, over the back wall: the walkers enter below it, so the lesson never sits on top of them.
-        Rect pill = new Rect(24, BarHeight - Pad + 6 + (Sim.Boss != null ? 28 : 0) + (bannerTime > 0 ? 32 : 0), 492, 34);
+        bool bossBar = Sim.Boss != null || Sim.foes.Exists(x => x.elite && x.hp > 0);   // the big-dad gets the same bar
+        Rect pill = new Rect(24, BarHeight - Pad + 6 + (bossBar ? 28 : 0) + (bannerTime > 0 ? 32 : 0), 492, 34);
         Box(pill, new Color(Paper.r, Paper.g, Paper.b, .92f));
-        Text(pill, StageIndex == 0 ? "누르고 아래로 당겼다 놓으면 위로 날아가요" : Sim.stage.lesson, 16, Ink, true, TextAnchor.MiddleCenter);
+        Text(pill, firstLesson ? "누르고 아래로 당겼다 놓으면 위로 날아가요" : Sim.stage.lesson, 16, Ink, true, TextAnchor.MiddleCenter);
     }
     void DrawHud()
     {
@@ -521,13 +545,14 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
         Text(new Rect(12, y0, 196, BarHeight), st.label + "  " + st.title, 16, Paper, true);
         Bar(new Rect(210, y0 + 15, 150, 14), d.health / d.maxHealth, d.health < 30 ? Red : new Color(.45f, .75f, .45f));
         Text(new Rect(366, y0, 112, BarHeight), "발사 " + Sim.shots + " / " + st.par, 16, Sim.shots > st.par ? new Color(1, .6f, .5f) : Paper, true, TextAnchor.MiddleCenter);
-        if (Button(ListButton, "목록", Color.white, true, 15)) ShowMenu();
+        if (Button(ListButton, Embedded ? "집으로" : "목록", Color.white, true, 15)) { if (!Embedded) ShowMenu(); else if (Quit != null) Quit(); }
         float top = y0 + BarHeight;
         SlingshotSim.Foe boss = Sim.Boss ?? Sim.foes.Find(x => x.elite && x.hp > 0);
         if (boss != null)
         {
             Box(new Rect(0, top, Width, 28), new Color(Night.r, Night.g, Night.b, .85f));
-            Text(new Rect(12, top, 100, 28), boss.Boss ? "회장 아빠" : "지호 큰아빠", 15, Paper, true);
+            int fl = Mathf.Clamp(Sim.stage.floor, 1, 3) - 1;
+            Text(new Rect(12, top, 100, 28), boss.Boss ? BossShort[fl] : EliteShort[fl], 15, Paper, true);
             Bar(new Rect(104, top + 6, 424, 16), boss.hp / (float)boss.maxHp, boss.groggy > 0 ? Yellow : Red);
             if (boss.groggy > 0) Text(new Rect(104, top + 4, 424, 20), "그로기!  아빠로 들이받아요", 13, Ink, true, TextAnchor.MiddleCenter);
             else if (boss.heavyHits > 0) Text(new Rect(104, top + 4, 424, 20), "휘청!  3초 안에 한 번 더", 13, Ink, true, TextAnchor.MiddleCenter);
@@ -581,16 +606,20 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
     }
 
     // ---- helpers (mirroring DadSchoolPrototype) ----------------------------------------------------------------------
-    static string FoeId(SlingshotSim.Kind k) { return k == SlingshotSim.Kind.Boss ? "boss1" : k == SlingshotSim.Kind.Chair ? "chair" : k == SlingshotSim.Kind.Tray ? "tray" : k == SlingshotSim.Kind.Dodge ? "dodge" : "gum"; }
+    int Floor { get { return Mathf.Clamp(Sim != null ? Sim.stage.floor : 1, 1, 3); } }
+    string BossArt { get { return "boss" + Floor; } }   // each floor's boss
+    // Only floor 1 has the V13 long painting; the main game's floors 2 and 3 use their v5 painting for now.
+    Texture2D Corridor { get { return Floor == 1 ? V("corridor_floor1_long") : null; } }
+    public static string FoeId(SlingshotSim.Kind k) { return k == SlingshotSim.Kind.Boss ? "boss1" : k == SlingshotSim.Kind.Chair ? "chair" : k == SlingshotSim.Kind.Tray ? "tray" : k == SlingshotSim.Kind.Dodge ? "dodge" : "gum"; }
     // Big-dads are the regular art at 1.45x, like the main prototype's elites.
-    static float FoeStand(SlingshotSim.Kind k, bool elite = false) { return (k == SlingshotSim.Kind.Boss ? 200 : k == SlingshotSim.Kind.Chair ? 150 : 140) * (elite ? 1.45f : 1); }
+    public static float FoeStand(SlingshotSim.Kind k, bool elite = false) { return (k == SlingshotSim.Kind.Boss ? 200 : k == SlingshotSim.Kind.Chair ? 150 : 140) * (elite ? 1.45f : 1); }
     // A line of 아빠 전쟁 humour for big chains (shown with the count).
     static string ChainTitle(int chain) { return chain >= 10 ? "전설의 아빠" : chain >= 7 ? "의리 폭발" : chain >= 5 ? "단톡방 긴급 소집" : chain >= 3 ? "몸풀기 끝" : ""; }
     void DrawDent(Dent d)
     {
         Texture2D tex = art != null ? art.Reward("locker_damage_" + d.level) : null;
         if (tex == null) return;
-        if (V("corridor_floor1_long") != null)
+        if (Corridor != null)
         {
             // Long corridor: the lockers face the floor straight on, so the dent sits on the strip without a shear.
             float w2 = 40, h2 = w2 * tex.height / tex.width, cx = d.side == 0 ? Arena.xMin - 20 : Arena.xMax + 20;

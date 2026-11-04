@@ -169,7 +169,9 @@ public sealed class DadProgress
         if (!won) return 0;
         return 1 + (hpRatio >= .5f ? 1 : 0) + (bestChain >= 6 ? 1 : 0);
     }
-    public StageReward ApplyResult(int stage, bool won, float hpRatio, int bestChain)
+    public StageReward ApplyResult(int stage, bool won, float hpRatio, int bestChain) { return ApplyResult(stage, won, hpRatio, bestChain, StarsFor(won, hpRatio, bestChain)); }
+    // The slingshot fight rates itself (clear, health at least half, shots within the target).
+    public StageReward ApplyResult(int stage, bool won, float hpRatio, int bestChain, int stars)
     {
         var r = new StageReward { stage = stage, won = won, replay = stage < Save.bestStage || (stage == Eco.TotalStages && Stars(stage) > 0) };
         if (won)
@@ -177,7 +179,7 @@ public sealed class DadProgress
             r.firstClear = Stars(stage) == 0;
             r.coins = r.replay && !r.firstClear ? Eco.BaseCoins(stage) * Eco.replayCoinShare : Eco.ClearCoins(stage);
             r.boxes = Eco.boxesPerClear + (r.firstClear && Eco.IsFloorBoss(stage) ? Eco.floorBossFirstClearBoxes : 0);
-            r.stars = StarsFor(true, hpRatio, bestChain);
+            r.stars = Mathf.Clamp(stars, 1, 3);
             if (Save.stars.Length < stage) Array.Resize(ref Save.stars, stage);
             Save.stars[stage - 1] = Mathf.Max(Save.stars[stage - 1], r.stars);
             if (stage == Save.bestStage && stage < Eco.TotalStages) Save.bestStage = stage + 1;
