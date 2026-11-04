@@ -1,0 +1,88 @@
+{
+  "tool": "built-in image_gen",
+  "jobs": [
+    {
+      "id": "AB01-corridor",
+      "transparent": false,
+      "prompt": "Use case: illustration-story. Production 2D mobile slingshot game arena background. VERY TALL portrait 1080x2340, aspect 9:19.5, full art to all edges. Korean school corridor seen almost directly from above in orthographic projection, like a pinball playfield. LEFT AND RIGHT COLLISION WALL FRONT EDGES ARE PERFECTLY STRAIGHT VERTICAL PARALLEL LINES, no converging perspective, no vanishing point. A single centered closed classroom door in the top horizontal wall, completely visible in a 9:16 center crop. Narrow school-green locker fronts flush against the left and right edges, four clearly separated banks per side (eight total), divided by simple pale window or door recesses; front edges all on the same straight vertical collision line. Very broad clear central warm pale cream-grey floor from below top door to bottom edge, quiet almost uniform floor, no diagonal tile grid. The floor is 78 percent of image width, side walls 11 percent each. Dark desaturated green outlines but lower contrast and saturation than characters, restrained flat two-tone comic art, warm school green and cream palette, minimal wear. Top and bottom 210 pixels contain only continuous low-detail architecture/floor suitable for center-cropping. No people, no text, no numbers, no arrows, no UI, no posters, no debris, no glow, no vignette. Art must support accurate vertical wall bounce physics.",
+      "selected_source": "Assets/DadSchoolBoss/Art/V13Slingshot/_sources/AB01-corridor.corrected.png"
+    },
+    {
+      "id": "AB02-dad-pull",
+      "transparent": true,
+      "refs": [
+        "Assets/DadSchoolBoss/Resources/DadV5/chars/dad/dad_idle_0.png"
+      ],
+      "prompt": "Original game character sprite, identity reference is the supplied existing dad. Preserve EXACT SAME middle-aged adult dad face with receding hairline, short curly black side hair, heavy tired eyelids, round prominent nose, stubble, protruding belly, open olive sleeveless zip vest, cream undershirt, dark charcoal trousers and black-white striped slide sandals. Same thick slightly irregular black ink, simple cel shaded flat colors, one shadow step. Full character isolated on genuine transparent background, no floor, no cast shadow, no words, no particles, no background. Full body and hands and sandals intact, with generous transparent margins. Facing RIGHT. Do not beautify, make younger, muscular or change clothes. Pose: preparing to be launched by an invisible slingshot to the right. Both knees deeply bent, hips low, belly leaning BACK toward left, shoulders pulled back, fists tucked near chest, both sandals planted and toes point right. Unimpressed deadpan face, only the forehead furrows slightly. NOT throwing a punch yet. Compact crouch, same head size and body proportions as reference. Square canvas.",
+      "selected_source": "Assets/DadSchoolBoss/Art/V13Slingshot/_sources/AB02-dad-pull.png"
+    },
+    {
+      "id": "AB03-dad-flight-a",
+      "transparent": true,
+      "refs": [
+        "Assets/DadSchoolBoss/Resources/DadV5/chars/dad/dad_idle_0.png"
+      ],
+      "prompt": "Original game character sprite, identity reference is the supplied existing dad. Preserve EXACT SAME middle-aged adult dad face with receding hairline, short curly black side hair, heavy tired eyelids, round prominent nose, stubble, protruding belly, open olive sleeveless zip vest, cream undershirt, dark charcoal trousers and black-white striped slide sandals. Same thick slightly irregular black ink, simple cel shaded flat colors, one shadow step. Full character isolated on genuine transparent background, no floor, no cast shadow, no words, no particles, no background. Full body and hands and sandals intact, with generous transparent margins. Facing RIGHT. Do not beautify, make younger, muscular or change clothes. Pose: the DAD HIMSELF is a flying projectile moving right. Body almost fully HORIZONTAL, right fist extended far forward to the right, head just behind fist, belly following, both legs stretched behind toward left, sandals still on. Funny calm determined deadpan face. No cape, no superhero muscles. Whole horizontal figure fits centered on square canvas with at least 12 percent margin all sides. It will rotate during gameplay.",
+      "selected_source": "Assets/DadSchoolBoss/Art/V13Slingshot/_sources/AB03-dad-flight-a.png"
+    },
+    {
+      "id": "AB03-dad-flight-b",
+      "transparent": true,
+      "refs": [
+        "Assets/DadSchoolBoss/Resources/DadV5/chars/dad/dad_idle_0.png"
+      ],
+      "prompt": "Original game character sprite, identity reference is the supplied existing dad. Preserve EXACT SAME middle-aged adult dad face with receding hairline, short curly black side hair, heavy tired eyelids, round prominent nose, stubble, protruding belly, open olive sleeveless zip vest, cream undershirt, dark charcoal trousers and black-white striped slide sandals. Same thick slightly irregular black ink, simple cel shaded flat colors, one shadow step. Full character isolated on genuine transparent background, no floor, no cast shadow, no words, no particles, no background. Full body and hands and sandals intact, with generous transparent margins. Facing RIGHT. Do not beautify, make younger, muscular or change clothes. Pose: flying projectile to the RIGHT, whole body horizontal, one fist forward, belly following, one leg bent slightly behind and the striped slide sandal on that foot half slipping off but still touching the toes. Other sandal stays worn. Small comic wardrobe motion, no floating detached props. Same deadpan tired face. A second flight pose that preserves head and body size of reference. Whole horizontal figure fits centered square canvas with wide margin. No motion lines.",
+      "selected_source": "Assets/DadSchoolBoss/Art/V13Slingshot/_sources/AB03-dad-flight-b.corrected.png"
+    },
+    {
+      "id": "AB04-dad-wall-bounce",
+      "transparent": true,
+      "refs": [
+        "Assets/DadSchoolBoss/Resources/DadV5/chars/dad/dad_idle_0.png"
+      ],
+      "prompt": "Original game character sprite, identity reference is the supplied existing dad. Preserve EXACT SAME middle-aged adult dad face with receding hairline, short curly black side hair, heavy tired eyelids, round prominent nose, stubble, protruding belly, open olive sleeveless zip vest, cream undershirt, dark charcoal trousers and black-white striped slide sandals. Same thick slightly irregular black ink, simple cel shaded flat colors, one shadow step. Full character isolated on genuine transparent background, no floor, no cast shadow, no words, no particles, no background. Full body and hands and sandals intact, with generous transparent margins. Facing RIGHT. Do not beautify, make younger, muscular or change clothes. Pose: instant of bouncing off a vertical wall behind his BACK at the LEFT, moving away to the RIGHT. Back and left shoulder visibly compressed into an imaginary straight vertical surface, elbows and knees tucked forward, belly squashes slightly, sandals forward, head recoils with annoyed tired expression. No wall drawn, no impact star, no dust, no injury. Complete full body, isolated, square canvas.",
+      "selected_source": "Assets/DadSchoolBoss/Art/V13Slingshot/_sources/AB04-dad-wall-bounce.png"
+    },
+    {
+      "id": "AB05-dad-land",
+      "transparent": true,
+      "refs": [
+        "Assets/DadSchoolBoss/Resources/DadV5/chars/dad/dad_idle_0.png"
+      ],
+      "prompt": "Original game character sprite, identity reference is the supplied existing dad. Preserve EXACT SAME middle-aged adult dad face with receding hairline, short curly black side hair, heavy tired eyelids, round prominent nose, stubble, protruding belly, open olive sleeveless zip vest, cream undershirt, dark charcoal trousers and black-white striped slide sandals. Same thick slightly irregular black ink, simple cel shaded flat colors, one shadow step. Full character isolated on genuine transparent background, no floor, no cast shadow, no words, no particles, no background. Full body and hands and sandals intact, with generous transparent margins. Facing RIGHT. Do not beautify, make younger, muscular or change clothes. Pose: landing and braking after a low horizontal flight to the right. Knees bent low, weight over forward right sandal, rear foot trailing slightly, one hand low near the floor but not touching it, other arm loosely back, belly settles forward. Tired deadpan expression has returned. Grounded compact pose, both feet clear, no dust or floor or motion lines, square canvas.",
+      "selected_source": "Assets/DadSchoolBoss/Art/V13Slingshot/_sources/AB05-dad-land.png"
+    },
+    {
+      "id": "AB06-07-flight-fx",
+      "transparent": true,
+      "prompt": "Production sprite effects atlas for a hand-inked Korean comic slingshot game. Genuine transparent background, no glow or haze. Exact 2 columns and 2 rows, four isolated effects with generous transparent cell gutters and margins. Top left: three pale cream and desaturated teal tapered horizontal wind streaks travelling RIGHT, dark ink sparse outlines. Top right: curved short cream-white speed swoosh travelling RIGHT, bold clean outline. Bottom left: EMPTY CENTER oval angry launch aura frame made of compact orange-red cartoon flame shapes, center MUST be fully transparent to place a character inside, no actual person, no face, no letters. Bottom right: second animation state of the same empty-center flame oval frame with flames shifted, same dimensions, no person. Flat simple shapes with one shadow step matching warm cream yellow orange impact comic effects, no texture, no typography, no gradient, no blurred shadow, no lens flare. This is an actual transparent game FX atlas, not an illustration on black.",
+      "selected_source": "Assets/DadSchoolBoss/Art/V13Slingshot/_sources/AB06-07-flight-fx.png"
+    },
+    {
+      "id": "AB08-drag-hand",
+      "transparent": true,
+      "prompt": "One isolated mobile game tutorial hand sprite, actual transparent background. A simple friendly adult hand with index finger extended downward and the fingertip gently pressing an invisible screen, other fingers curled. Three quarter front angle. Bold dark green-black ink outline, warm cream skin fill, one simple shadow. Wrist cut cleanly but with wide transparent margin. No phone, no background, no text, no arrows, no motion lines, no circles, no UI. This will be moved backward along a code-drawn drag arrow. Highly readable when small.",
+      "selected_source": "Assets/DadSchoolBoss/Art/V13Slingshot/_sources/AB08-drag-hand.png"
+    },
+    {
+      "id": "AB09-special-icons",
+      "transparent": true,
+      "prompt": "One game icon sprite atlas, exact 3 equal columns in a single row, actual transparent background, large empty gutters. Three separate icons centered in each cell, no enclosing cards or circles. Match thick dark ink outlines, flat cream yellow orange and muted school green cel-shaded mobile comic game art. Left icon: a cartoon adult fist bouncing off a small green metal locker edge, bent yellow arrow accelerates away, representing wall-bounce acceleration. Center icon: three simple orange comic impact silhouettes of ADULT men connected by a short yellow impact path, representing body-chain knockback, simplified and readable, no faces necessary. Right icon: an angry adult dad eyebrow motif inside a compact red-orange flame burst, representing rage launch. No text, no numbers, no logos, no gradients, no glow, no background. Equal visual weight, each entire icon stays within its own cell.",
+      "selected_source": "Assets/DadSchoolBoss/Art/V13Slingshot/_sources/AB09-special-icons.png"
+    }
+  ],
+  "corrections": [
+    {
+      "id": "AB01-corridor",
+      "path": "C:\\Users\\user\\.codex\\generated_images\\01a19c76-6425-7b31-9240-58081cc834b2\\exec-44b9c2d6-a395-4019-8e7b-438f71de04d0.png",
+      "transparent": false,
+      "prompt": "Edit this exact corridor background preserving its orthographic straight vertical side wall edges, quiet floor, colors and eight locker banks. Critical framing correction: deepen the TOP horizontal wall area so it occupies the top 21 percent of the very tall canvas. Move the complete centered door DOWN so its top is at 11 percent and its bottom is at 21 percent of image height. The top 9 percent must be plain cream wall with NO important objects. The entire door must remain visible when the top and bottom 9 percent are cropped away for a shorter phone. The usable empty floor starts directly below the door at 21 percent. Keep the left and right collision front edges perfectly vertical and in exactly the same x locations. Redistribute four locker banks per side below the top wall, with clear window gaps. Keep the bottom 9 percent low-detail floor/sidewall, no important objects. No people text UI arrows numbers. Preserve tall 9:19.5 proportion and clean flat comic style."
+    },
+    {
+      "id": "AB03-dad-flight-b",
+      "path": "C:\\Users\\user\\.codex\\generated_images\\01a19c76-6425-7b31-9240-58081cc834b2\\exec-8444b33a-8f6a-48ce-90e5-12cc494bbef1.png",
+      "transparent": true,
+      "prompt": "Edit only the REAR sandal at the far LEFT of this flying adult dad: make the striped slide visibly half slipping off, held only by the tips of his toes, with his heel clearly outside the sandal. Keep sandal still touching toes, no detached flying object. Preserve exactly face, belly, vest, shirt, horizontal flight pose, forward right fist, all other clothing, style and transparent background. Full body remains inside canvas. No motion lines or text."
+    }
+  ]
+}
