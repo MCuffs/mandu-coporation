@@ -46,6 +46,8 @@ PNG는 내장 image_gen으로 생성했다. 프롬프트·참조·수정 요청�
 
 ## 검수·상태
 
+**11/5 런타임 연결:** 준비본 18개를 `Assets/DadSchoolBoss/Resources/DadV13/`(같은 상대 경로, 새 GUID)로 복사해 시제품 B(`Assets/DadSlingshot.unity`)에 연결했다. 연결 위치·수용 기준 대응·검수 결과는 [Design/dad-war-slingshot-v1.md](../../../../Design/dad-war-slingshot-v1.md) 4-1절. Android 실기기 검수는 아직이다.
+
 Design/dad-b-v13-preview.html에서 크롭·배치·회전 중심·모든 준비본과 소리를 볼 수 있다. PNG 미리보기도 함께 제공한다. 자동 검사는 Design/dad-b-v13-checks.json을 참고한다. 실제 Unity 임포트·런타임 연결·Android 성능 검수는 후속 단계다.
 
 P2 A-B10·11·12·14(큰아빠 표시, 카트·매트, 2·3층, 1-1 진입 전환)는 G1 뒤 본제작 묶음으로 남겼다.

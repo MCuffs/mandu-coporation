@@ -2,7 +2,7 @@
   "version": 13,
   "scope": "P0 and P1 B slingshot assets; P2 is deferred to G1 decision",
   "reference_character": "Resources/DadV5/chars/dad/dad_idle_0.png",
-  "runtime_connected": false,
+  "runtime_connected": true,
   "generated_art": "built-in image_gen",
   "mechanical_preparation": "prepare_dad_b_assets.py",
   "entries": [
@@ -14,7 +14,7 @@
         2340
       ],
       "mode": "RGB",
-      "runtime_connected": false,
+      "runtime_connected": true,
       "sha256": "45e6ac691f890e3c205b9d5c957fb07fcfe677ff7ed04de9fe0beb9f3cc98f22",
       "source": "AB01-corridor.corrected.png",
       "center_crop_9_16_pixels": [
@@ -33,7 +33,7 @@
         768
       ],
       "mode": "RGBA",
-      "runtime_connected": false,
+      "runtime_connected": true,
       "sha256": "d5e57b65a37a52c9004efdac43d90b07c8daedabb92c8b9eb9442a9d1491f3b8",
       "visible_bounds": [
         197,
@@ -80,7 +80,7 @@
         768
       ],
       "mode": "RGBA",
-      "runtime_connected": false,
+      "runtime_connected": true,
       "sha256": "f99124b201d84099878419fe7a60680204f2cd47848af56aa27cd7ea4a4c1227",
       "visible_bounds": [
         32,
@@ -127,7 +127,7 @@
         768
       ],
       "mode": "RGBA",
-      "runtime_connected": false,
+      "runtime_connected": true,
       "sha256": "aea92d1c09a9950e99a9da86e43981a823e6a84915d6cce92944e38790652743",
       "visible_bounds": [
         46,
@@ -174,7 +174,7 @@
         768
       ],
       "mode": "RGBA",
-      "runtime_connected": false,
+      "runtime_connected": true,
       "sha256": "2c4edb86ddcbb0a56508241f53a666063bc251d70b1536c8ae937ca907ebbd27",
       "visible_bounds": [
         205,
@@ -225,7 +225,7 @@
         768
       ],
       "mode": "RGBA",
-      "runtime_connected": false,
+      "runtime_connected": true,
       "sha256": "7d148a7c8bb45f0cb56c92fe8b49949b282f39937008e47341d55f72da040963",
       "visible_bounds": [
         158,
@@ -272,7 +272,7 @@
         512
       ],
       "mode": "RGBA",
-      "runtime_connected": false,
+      "runtime_connected": true,
       "sha256": "a4bf23518ea8b892dd60fcb42d7da7cc6ff56eeaa4abdf81d824aa8cd99ed23f",
       "visible_bounds": [
         16,
@@ -303,7 +303,7 @@
         512
       ],
       "mode": "RGBA",
-      "runtime_connected": false,
+      "runtime_connected": true,
       "sha256": "e4298ea08e782ac9639bf9e24b8a3992b7ee61bb66a38c4cfdd43e3167864f5e",
       "visible_bounds": [
         16,
@@ -334,7 +334,7 @@
         512
       ],
       "mode": "RGBA",
-      "runtime_connected": false,
+      "runtime_connected": true,
       "sha256": "90b50ccf5588567e34f107e4942ac28141e61b4d95828040f44f2608752163f6",
       "visible_bounds": [
         16,
@@ -365,7 +365,7 @@
         512
       ],
       "mode": "RGBA",
-      "runtime_connected": false,
+      "runtime_connected": true,
       "sha256": "8490140d3e94c4342f99515301aa83ab023fbddd40b16d8918eabf13e23544e8",
       "visible_bounds": [
         16,
@@ -396,7 +396,7 @@
         256
       ],
       "mode": "RGBA",
-      "runtime_connected": false,
+      "runtime_connected": true,
       "sha256": "06933629afd09601a057fd5f9db1fb8cd83b1a99012c6060343db743dcb0d762",
       "visible_bounds": [
         33,
@@ -417,7 +417,7 @@
         256
       ],
       "mode": "RGBA",
-      "runtime_connected": false,
+      "runtime_connected": true,
       "sha256": "c37da8dc2d8fc797f5b0f0504b1e620c4a341fe2146fd3ff0d12919808a0eefa",
       "visible_bounds": [
         16,
@@ -444,7 +444,7 @@
         256
       ],
       "mode": "RGBA",
-      "runtime_connected": false,
+      "runtime_connected": true,
       "sha256": "44bf840361622786650af874858bfdc1d900896337accc11e57c46f509e663b6",
       "visible_bounds": [
         16,
@@ -471,7 +471,7 @@
         256
       ],
       "mode": "RGBA",
-      "runtime_connected": false,
+      "runtime_connected": true,
       "sha256": "d15094d578e4a59841d92873136598847de5b1830ce9393dfa2ab3a068a8f604",
       "visible_bounds": [
         16,
@@ -494,25 +494,25 @@
       "file": "audio/sfx_landing_skid.wav",
       "request_id": "A-B13",
       "sha256": "a5294a47f9398c50eaa600a4bf12191b0d7c95edba97b68a5fc74b9e8c6b0f05",
-      "runtime_connected": false
+      "runtime_connected": true
     },
     {
       "file": "audio/sfx_launch_whoosh.wav",
       "request_id": "A-B13",
       "sha256": "d56a6e53adad196679981252cf402e075837312b8963ca5d9efdcb9a7d6042df",
-      "runtime_connected": false
+      "runtime_connected": true
     },
     {
       "file": "audio/sfx_pull_tension.wav",
       "request_id": "A-B13",
       "sha256": "f2596ff5066f1ab321799246cb5d0ab451b4246a278a4ca8676a69738743f5f5",
-      "runtime_connected": false
+      "runtime_connected": true
     },
     {
       "file": "audio/sfx_wall_boing.wav",
       "request_id": "A-B13",
       "sha256": "e551af45ebc45c2b477f9a7f8a10b69c9b83a9f70f2ba74ff8bfd02c3631fb3b",
-      "runtime_connected": false
+      "runtime_connected": true
     }
   ]
 }
