@@ -30,7 +30,7 @@ public sealed partial class DadSchoolPrototype
     {
         get
         {
-            if (!ChainGearUnlocked) return "다음 준비물: 튼튼한 도시락\n최고 " + BestChain + " / 3연쇄 또는 첫 배달 성공";
+            if (!ChainGearUnlocked) return "다음 준비물: 튼튼한 도시락\n최고 " + BestChain + " / 3연쇄 또는 첫 승리";
             if (!PhoneGearUnlocked) return "다음 준비물: 폴더폰\n누적 벽꿍 " + TotalWallHits + " / " + PhoneWallGoal + "회  (" + (PhoneWallGoal - TotalWallHits) + "회 남음)";
             return "준비물 3종 해금 완료!\n다른 장비로 최고 " + BestChain + "연쇄에 도전하세요";
         }
@@ -183,7 +183,8 @@ public sealed partial class DadSchoolPrototype
     {
         if (music == null || art == null) return;
         bool fighting = Combat != null && (Combat.state == RunState.Fighting || Combat.state == RunState.Choosing);
-        AudioClip want = Home ? art.Clip("bgm_home") : fighting ? art.Clip("bgm_battle") : null;   // results stay quiet for the jingle
+        // Results stay quiet for the jingle; the opening is silent on the company splash, then home music under title and story.
+        AudioClip want = InOpening ? (Opening == OpeningStep.Splash ? null : art.Clip("bgm_home")) : Home ? art.Clip("bgm_home") : fighting ? art.Clip("bgm_battle") : null;
         if (music.clip == want) return;
         music.clip = want;
         if (want != null) music.Play(); else music.Stop();

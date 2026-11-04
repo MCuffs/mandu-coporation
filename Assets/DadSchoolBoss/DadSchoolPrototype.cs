@@ -43,7 +43,7 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
     Font body, title;
     AudioSource audioSource;
     AudioClip hitClip, wallClip;
-    bool dragging, specialRequested, resultSaved, gearPanel;
+    bool dragging, specialRequested, resultSaved;
     int finger = -1;
     Vector2 dragOrigin, stick;
     float clock, shake, bannerTime;
@@ -62,6 +62,7 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
         Application.targetFrameRate = 60; LoadResources(); ReloadProgress();
         Progress = new DadProgress(DadEconomy.Load(), DadProgress.DefaultPath);
         Progress.AccrueIdle(System.DateTime.UtcNow); Progress.Persist();
+        ShowSplash();
     }
     // Tests and audits swap in a throwaway save so they never touch the player's progress.
     public void UseProgress(DadProgress progress) { Progress = progress; }
@@ -191,7 +192,7 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
     {
         stage = Mathf.Clamp(stage, 1, Progress.Eco.TotalStages);
         var plan = StagePlan.For(stage, Progress.Eco);
-        PlayingStage = stage; LastReward = null;
+        PlayingStage = stage; LastReward = null; FinishOpening();
         Combat = new AlleyCombat(0); Combat.SetArena(PlayArea);
         Combat.hazardSpawnClock = 9999; // Environmental readability first; no random explosive barrels.
         Combat.player = new Vector2(270, 570);
@@ -228,7 +229,7 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
         combat.punchKnockbackMultiplier = gear == 0 ? 1.25f : 1;
         combat.phoneSpecial = gear == 2; combat.phoneHeal = gear == 2 ? 6 : 0; combat.feverDuration = 2.4f; combat.chargeGainMultiplier = .55f;
     }
-    public void GoHome() { Home = true; Paused = false; dragging = false; stick = Vector2.zero; }
+    public void GoHome() { FinishOpening(); Home = true; Tab = HomeTab.Go; Paused = false; dragging = false; stick = Vector2.zero; }
     float ViewScale { get { return Mathf.Min(Screen.safeArea.width / Width, Screen.safeArea.height / Height); } }
     Vector2 Offset { get { Rect s = Screen.safeArea; return new Vector2(s.x + (s.width - Width * ViewScale) / 2, Screen.height - s.yMax + (s.height - Height * ViewScale) / 2); } }
     Vector2 Pointer(Vector2 p) { return (new Vector2(p.x, Screen.height - p.y) - Offset) / ViewScale; }
@@ -251,6 +252,7 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
         float dt = Mathf.Min(Time.unscaledDeltaTime, .1f); clock += dt;
         shake = Mathf.Max(0, shake - dt * 25); bannerTime = Mathf.Max(0, bannerTime - dt);
         for (int i = popups.Count - 1; i >= 0; i--) { popups[i].life -= dt; popups[i].position.y -= dt * 38; if (popups[i].life <= 0) popups.RemoveAt(i); }
+        if (UpdateOpening(dt)) return;
         UpdateRewards(dt);
         if (Home || Combat == null) return;
         if (Input.GetKeyDown(KeyCode.Escape)) { if (Combat.state == RunState.Fighting) Paused = !Paused; }
@@ -365,6 +367,7 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
         Matrix4x4 previous = GUI.matrix;
         GUI.matrix = Matrix4x4.TRS(new Vector3(Offset.x, Offset.y, 0), Quaternion.identity, Vector3.one * ViewScale);
         Box(new Rect(0, 0, Width, Height), Paper);
+        if (InOpening) { DrawOpening(); GUI.matrix = previous; return; }
         // The lunchbox reveal sits on top of home or the result screen; nothing under it takes taps meanwhile.
         bool enabled = GUI.enabled; if (Revealing) GUI.enabled = false;
         if (Home) DrawHome(); else if (Combat != null) DrawBattle();
@@ -382,49 +385,6 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
         else Box(new Rect(0, 140, Width, 660), new Color(.68f, .69f, .58f));
     }
     bool HasBackground { get { return art != null && art.backgrounds.Count > 0; } }
-    void DrawHome()
-    {
-        Backdrop(); Box(new Rect(0, 0, Width, 350), Paper);
-        Text(new Rect(24, 18, 492, 35), "아들: \"지호가 자기 아빠 데려왔대…\"   아빠: \"어디야.\"", 18, Green);
-        Text(new Rect(23, 60, 500, 240), "아빠\n전쟁", 96, Ink, true);
-        Ellipse(new Vector2(265, 702), 220, 38, new Color(0, 0, 0, .2f));
-        if (NewArt) DrawCharacter("dad", "idle", Mathf.FloorToInt(clock / .6f), new Vector2(267, 700), 330, false);
-        else Sprite(hero, heroFrames, 0, new Vector2(267, 700), 375, false);
-        DadSave save = Progress.Save; int stage = save.currentStage;
-        float power = Progress.EffectivePower(stage), required = Progress.Eco.RequiredPower(stage);
-        Icon("icon_coin", new Rect(22, 300, 32, 32)); Text(new Rect(58, 300, 140, 34), Mathf.FloorToInt((float)save.coins).ToString("N0"), 20, Ink, true);
-        Icon("icon_lunchbox", new Rect(196, 300, 32, 32)); Text(new Rect(232, 300, 80, 34), save.lunchboxes.ToString(), 20, Ink, true);
-        Text(new Rect(312, 300, 204, 34), "전투력 " + Mathf.RoundToInt(power).ToString("N0"), 20, Ink, true, TextAnchor.MiddleRight);
-        if (Progress.HasIdleReward && Button(new Rect(318, 362, 198, 74), "방치 보상 받기\n코인 " + Mathf.FloorToInt((float)save.pendingIdleCoins).ToString("N0") + " · 도시락 " + save.pendingIdleBoxes, Green, true, 17)) { Progress.ClaimIdle(); PersistNow(); PlaySfx("sfx_coin", .7f); }
-        Panel(new Rect(25, 718, 490, 57), Paper);
-        Text(new Rect(37, 720, 466, 50), Progress.Eco.Label(stage) + "  " + StagePlan.FloorNames[Mathf.Clamp(Progress.Eco.Floor(stage) - 1, 0, 2)] + "   ·   권장 " + Mathf.RoundToInt(required).ToString("N0") + (power < required ? "  (부족!)" : ""), 20, power < required ? Red : Ink, true, TextAnchor.MiddleCenter);
-        if (Button(new Rect(25, 795, 490, 66), Progress.Eco.Label(stage) + " 출발!", Yellow, true, 29)) StartRun();
-        if (Button(new Rect(25, 882, 490, 48), "아빠 장비 · 강화  ·  " + GearName, Paper, true, 20)) gearPanel = true;
-        if (gearPanel)
-        {
-            Box(new Rect(0, 0, Width, Height), new Color(0, 0, 0, .72f)); Panel(new Rect(25, 120, 490, 760), Paper);
-            Text(new Rect(45, 132, 450, 50), "아빠의 준비물", 30, Ink, true);
-            if (Button(new Rect(45, 186, 450, 74), "고무 슬리퍼\n날리는 힘 +25% · 벽 피해 +1", Gear == 0 ? Yellow : Color.white, true, 19)) SelectGear(0);
-            if (Button(new Rect(45, 272, 450, 74), ChainGearUnlocked ? "튼튼한 도시락\n처음부터 충돌 전달 강화" : "튼튼한 도시락  [잠김]\n3연쇄 또는 첫 배달 성공", Gear == 1 ? Yellow : Color.white, ChainGearUnlocked, 19)) SelectGear(1);
-            if (Button(new Rect(45, 358, 450, 92), PhoneGearUnlocked ? "폴더폰\n필살기가 공포 파동으로 변경 · 체력 +6\n넓게 밀기·돌진 취소·보스 겁먹음 / 폭주 없음" : "폴더폰  [잠김]\n누적 벽꿍 " + TotalWallHits + " / " + PhoneWallGoal + "회", Gear == 2 ? Yellow : Color.white, PhoneGearUnlocked, 18)) SelectGear(2);
-            // Temporary upgrade panel until the real upgrade screen (plan v5, step 5).
-            Text(new Rect(45, 466, 450, 36), "강화  ·  코인 " + Mathf.FloorToInt((float)Progress.Save.coins).ToString("N0") + "  ·  다음 " + Mathf.CeilToInt((float)Progress.NextUpgradeCost).ToString("N0"), 20, Ink, true);
-            for (int i = 0; i < DadProgress.StatCount; i++)
-            {
-                Rect r = new Rect(45 + (i % 2) * 230, 508 + (i / 2) * 76, 220, 64);
-                bool upgraded = Button(r, "     " + DadProgress.StatNames[i] + "  Lv." + Progress.Save.upgrades[i], Progress.Save.coins >= Progress.NextUpgradeCost ? Yellow : Color.white, Progress.Save.coins >= Progress.NextUpgradeCost, 20);
-                Icon(UpgradeIcons[i], new Rect(r.x + 10, r.y + 8, 48, 48));
-                if (upgraded && Progress.TryUpgrade(i)) PersistNow();
-            }
-            Text(new Rect(45, 652, 450, 32), "엄마 도시락 장비  ·  전투력 +" + Mathf.RoundToInt((Progress.GearMultiplier - 1) * 100) + "%", 19, Ink, true);
-            DrawGearRow(new Rect(45, 686, 450, 56));
-            bool canOpen = Progress.Save.lunchboxes > 0 || Progress.HasPendingGear;
-            if (Button(new Rect(45, 750, 290, 48), Progress.HasPendingGear ? "열어 둔 도시락 보기" : "도시락 열기 (" + Progress.Save.lunchboxes + ")", canOpen ? Yellow : Color.white, canOpen, 19)) BeginReveal();
-            if (Button(new Rect(345, 750, 150, 48), "모두 열기", Color.white, Progress.Save.lunchboxes > 1, 18)) OpenAllBoxes();
-            if (Button(new Rect(45, 810, 450, 56), "준비 완료", Green)) gearPanel = false;
-        }
-    }
-
     void DrawBattle()
     {
         Backdrop();
@@ -546,7 +506,13 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
         Panel(new Rect(0, 797, Width, 163), Paper);
         Text(new Rect(20, 810, 340, 36), "최고 " + Combat.bestChain + "연쇄  /  Lv." + Combat.level, 24, Ink, true);
         Text(new Rect(20, 854, 335, 80), "드래그 이동 · 가까우면 자동 펀치\nPC: 방향키 / WASD · 스페이스", 16);
-        if (Button(SpecialRect, Combat.charge >= 100 ? (Gear == 2 ? "엄마한테\n전화한다!" : "아빠 화났다!\n필살기") : "충전 " + Mathf.FloorToInt(Combat.charge) + "%", Yellow, Combat.charge >= 100 && !Paused && Combat.state == RunState.Fighting, 23)) specialRequested = true;
+        // v9: the special shows the prop that fires it, dad's angry face or mom's phone (folder phone loadout).
+        bool charged = Combat.charge >= 100;
+        if (Button(SpecialRect, "", Yellow, charged && !Paused && Combat.state == RunState.Fighting)) specialRequested = true;
+        GUI.color = charged ? Color.white : new Color(1, 1, 1, .5f);
+        Icon(Gear == 2 ? "mom_call" : "btn_awaken", new Rect(SpecialRect.center.x - 31, SpecialRect.y + 5, 62, 62));
+        GUI.color = Color.white;
+        Text(new Rect(SpecialRect.x, SpecialRect.y + 66, SpecialRect.width, 36), charged ? (Gear == 2 ? "엄마한테 전화!" : "아빠 화났다!") : "충전 " + Mathf.FloorToInt(Combat.charge) + "%", charged ? 18 : 20, Ink, true, TextAnchor.MiddleCenter);
         if (dragging) { Ellipse(dragOrigin, 88, 88, new Color(.12f, .13f, .12f, .2f)); Ellipse(dragOrigin + stick * 34, 32, 32, new Color(.12f, .13f, .12f, .55f)); }
         if (Combat.state == RunState.Choosing) DrawChoices();
         else if (Combat.state == RunState.Won || Combat.state == RunState.Lost) DrawResult();
@@ -567,43 +533,7 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
     {
         Box(new Rect(0, 0, Width, Height), new Color(0, 0, 0, .75f)); Panel(new Rect(35, 315, 470, 345), Paper);
         Text(new Rect(55, 335, 430, 80), "아빠 잠깐 숨 좀", 33, Ink, true, TextAnchor.MiddleCenter);
-        if (Button(new Rect(65, 440, 410, 65), "계속 배달하기", Yellow)) Paused = false;
+        if (Button(new Rect(65, 440, 410, 65), "계속 싸우기", Yellow)) Paused = false;
         if (Button(new Rect(65, 550, 410, 65), "집으로 돌아가기", Color.white)) GoHome();
-    }
-    void DrawResult()
-    {
-        bool won = Combat.state == RunState.Won;
-        Box(new Rect(0, 0, Width, Height), new Color(0, 0, 0, .8f)); Panel(new Rect(25, 185, 490, 635), Paper);
-        Text(new Rect(45, 200, 450, 60), won ? Director.Plan.Label + " 클리어!" : "아빠도 가끔은 진다", 34, won ? Green : Red, true, TextAnchor.MiddleCenter);
-        if (won && LastReward != null)
-        {
-            if (art != null && art.Icon("star_full") != null) for (int s = 0; s < 3; s++) Icon(s < LastReward.stars ? "star_full" : "star_empty", new Rect(Width / 2 - 66 + s * 44, 258, 40, 40));
-            else Text(new Rect(45, 258, 450, 40), new string('★', LastReward.stars) + new string('☆', 3 - LastReward.stars), 30, Yellow, true, TextAnchor.MiddleCenter);
-        }
-        Text(new Rect(50, 300, 440, 70), "최대 " + Combat.bestChain + "연쇄  ·  벽꿍 " + Combat.wallHits + "회  ·  제압 " + Combat.kills + "명", 21, Ink, true, TextAnchor.MiddleCenter);
-        if (LastReward != null)
-        {
-            string coins = "코인 +" + Mathf.RoundToInt((float)LastReward.coins) + (LastReward.replay && !LastReward.firstClear && won ? "  (다시 하기)" : "");
-            if (Progress.Save.lunchboxes > 0 || Progress.HasPendingGear)
-            {
-                // The lunchbox reward is the button: tap it to open (v6 README, connection step 1).
-                Text(new Rect(50, 368, 232, 56), coins, 24, Ink, true, TextAnchor.MiddleCenter);
-                Rect box = new Rect(286, 362, 204, 68);
-                if (Button(box, "", Yellow, true, 18)) BeginReveal();
-                DrawLunchbox(new Vector2(box.x + 40, box.yMax - 9), 66 * (1 + .05f * Mathf.Sin(clock * 6)), 0);
-                Text(new Rect(box.x + 76, box.y, 126, box.height), (LastReward.boxes > 0 ? "도시락 +" + LastReward.boxes + "\n" : "") + "열기 (" + Mathf.Max(1, Progress.Save.lunchboxes) + ")", 18, Ink, true, TextAnchor.MiddleCenter);
-            }
-            else Text(new Rect(50, 368, 440, 56), coins, 24, Ink, true, TextAnchor.MiddleCenter);
-        }
-        Fighter key = Director.Key;
-        bool floorCleared = won && Director.Plan.floorBoss, finalCleared = floorCleared && PlayingStage == Progress.Eco.TotalStages;
-        string reason = resultReason != "" ? resultReason : floorCleared ? FloorClearLines[Mathf.Clamp(Director.Plan.floor - 1, 0, 2)] : won ? "다음에는 더 크게 한 방!" : key != null && key.hp > 0 ? (key.boss ? BossNames[Mathf.Clamp(Director.Plan.floor - 1, 0, 2)] : EliteNames[Mathf.Clamp(Director.Plan.floor - 1, 0, 2)]) + " 체력 " + Mathf.CeilToInt(100f * key.hp / key.maxHp) + "% 남음 · 아깝다!" : "돌진 예고를 피하고 벽 쪽으로 몰아보세요";
-        Text(new Rect(55, 428, 430, 70), reason, 21, Ink, false, TextAnchor.MiddleCenter);
-        if (finalCleared) Text(new Rect(45, 492, 450, 30), EndingLine, 17, Green, true, TextAnchor.MiddleCenter);
-        if (!won && Progress.StuckAssist(PlayingStage) > 1.001f) Text(new Rect(55, 492, 430, 30), "엄마의 응원 +" + Mathf.RoundToInt((Progress.StuckAssist(PlayingStage) - 1) * 100) + "% 적용 중", 18, Green, true, TextAnchor.MiddleCenter);
-        Text(new Rect(55, 524, 430, 80), NextGoal, 17, Green, false, TextAnchor.MiddleCenter);
-        int next = Progress.Save.currentStage;
-        if (Button(new Rect(50, 615, 440, 68), won ? "다음: " + Progress.Eco.Label(next) + " 출발!" : "다시 도전", Yellow, true, 29)) StartRun(won ? next : PlayingStage);
-        if (Button(new Rect(50, 715, 440, 58), "집으로 · 강화하기", Color.white)) GoHome();
     }
 }

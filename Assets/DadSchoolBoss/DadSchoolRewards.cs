@@ -135,19 +135,15 @@ public sealed partial class DadSchoolPrototype
         Box(r, new Color(Ink.r, Ink.g, Ink.b, a)); Box(new Rect(r.x + 3, r.y + 3, r.width - 6, r.height - 6), new Color(Yellow.r, Yellow.g, Yellow.b, a));
         Text(r, toast, 19, new Color(Ink.r, Ink.g, Ink.b, a), true, TextAnchor.MiddleCenter);
     }
-    void DrawGearRow(Rect area)
+    // One equipped slot: rarity frame, the item icon, or the slot name while it is empty.
+    void DrawGearSlot(Rect r, int i)
     {
-        float w = (area.width - 5 * 6) / DadProgress.SlotCount;
-        for (int i = 0; i < DadProgress.SlotCount; i++)
-        {
-            Rect r = new Rect(area.x + i * (w + 6), area.y, w, area.height);
-            bool has = Progress.HasGear(i); int rarity = Progress.Save.gearRarity[i];
-            Box(r, Ink); Box(new Rect(r.x + 3, r.y + 3, r.width - 6, r.height - 6), has ? RarityColors[rarity] : new Color(.75f, .74f, .7f));
-            Box(new Rect(r.x + 6, r.y + 6, r.width - 12, r.height - 12), Paper);
-            Texture2D icon = has && art != null ? art.Gear(DadProgress.ItemIcon(i, rarity)) : null;
-            if (icon != null) GUI.DrawTexture(new Rect(r.x + 8, r.y + 7, r.width - 16, r.height - 14), icon, ScaleMode.ScaleToFit);
-            else Text(r, DadProgress.SlotNames[i], 14, new Color(.45f, .44f, .4f), false, TextAnchor.MiddleCenter);
-        }
+        bool has = Progress.HasGear(i); int rarity = Progress.Save.gearRarity[i];
+        Box(r, Ink); Box(new Rect(r.x + 3, r.y + 3, r.width - 6, r.height - 6), has ? RarityColors[rarity] : new Color(.75f, .74f, .7f));
+        Box(new Rect(r.x + 6, r.y + 6, r.width - 12, r.height - 12), Paper);
+        Texture2D icon = has && art != null ? art.Gear(DadProgress.ItemIcon(i, rarity)) : null;
+        if (icon != null) GUI.DrawTexture(new Rect(r.x + 8, r.y + 7, r.width - 16, r.height - 14), icon, ScaleMode.ScaleToFit);
+        else Text(r, DadProgress.SlotNames[i], 14, new Color(.45f, .44f, .4f), false, TextAnchor.MiddleCenter);
     }
 
     // ---- locker dents ---------------------------------------------------------------------------
@@ -187,18 +183,18 @@ public sealed partial class DadSchoolPrototype
     {
         if (art == null || dents.Count == 0) return;
         WallFace face = CurrentWall;
-        foreach (WallDent d in dents)
-        {
-            Texture2D tex = art.Reward("locker_damage_" + d.level + (face.steel ? "_steel" : ""));
-            if (tex == null) continue;
-            float w = face.width, h = w * tex.height / tex.width, pop = 1 + d.pop * 1.6f;
-            Vector2 c = new Vector2(d.side == 0 ? face.leftX : face.rightX, face.spots[d.spot]);
-            // Shear so the decal lies on the slanted locker face: outward is lower, so y grows toward the outer edge.
-            Matrix4x4 shear = Matrix4x4.identity; shear.m10 = d.side == 0 ? -face.shear : face.shear;
-            Matrix4x4 old = GUI.matrix;
-            GUI.matrix = old * Matrix4x4.Translate(new Vector3(c.x, c.y, 0)) * shear * Matrix4x4.Scale(new Vector3((d.flip ? -1 : 1) * pop, pop, 1));
-            GUI.DrawTexture(new Rect(-w / 2, -h / 2, w, h), tex);
-            GUI.matrix = old;
-        }
+        foreach (WallDent d in dents) DrawDent(face, new Vector2(d.side == 0 ? face.leftX : face.rightX, face.spots[d.spot]), d.side, d.level, d.flip, 1 + d.pop * 1.6f);
+    }
+    void DrawDent(WallFace face, Vector2 c, int side, int level, bool flip, float pop)
+    {
+        Texture2D tex = art != null ? art.Reward("locker_damage_" + level + (face.steel ? "_steel" : "")) : null;
+        if (tex == null) return;
+        float w = face.width, h = w * tex.height / tex.width;
+        // Shear so the decal lies on the slanted locker face: outward is lower, so y grows toward the outer edge.
+        Matrix4x4 shear = Matrix4x4.identity; shear.m10 = side == 0 ? -face.shear : face.shear;
+        Matrix4x4 old = GUI.matrix;
+        GUI.matrix = old * Matrix4x4.Translate(new Vector3(c.x, c.y, 0)) * shear * Matrix4x4.Scale(new Vector3((flip ? -1 : 1) * pop, pop, 1));
+        GUI.DrawTexture(new Rect(-w / 2, -h / 2, w, h), tex);
+        GUI.matrix = old;
     }
 }

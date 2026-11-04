@@ -38,7 +38,7 @@ public static class DadPrototypeSetup
         DadProgress original = g.Progress; string temp = TempSavePath("audit");
         Step(1, () => g.UseProgress(new DadProgress(DadEconomy.Load(), temp)));
         Step(2, () => g.GoHome()); Step(20, () => shot("01-home"));
-        Step(1, () => SetMember(g, "gearPanel", true)); Step(8, () => shot("02-gear")); Step(1, () => SetMember(g, "gearPanel", false));
+        Step(1, () => g.Tab = DadSchoolPrototype.HomeTab.Upgrade); Step(8, () => shot("02-gear")); Step(1, () => g.Tab = DadSchoolPrototype.HomeTab.Go);
         Step(1, () => g.StartRun()); Step(80, () => shot("03-battle-start"));
         Step(1, () => SetMember(g, "stick", new Vector2(.75f, -.35f)));
         for (int i = 0; i < 8; i++) { int n = i; Step(5, () => shot("04-motion-" + n)); }
@@ -60,7 +60,7 @@ public static class DadPrototypeSetup
         var g = UnityEngine.Object.FindObjectOfType<DadSchoolPrototype>();
         Action<string> shot = name => ScreenCapture.CaptureScreenshot(Path.Combine(dir, name + ".png"), 2);
         DadProgress original = g.Progress; string temp = TempSavePath("rewards");
-        Step(1, () => { var p = new DadProgress(DadEconomy.Load(), temp) { Rng = new System.Random(3) }; p.Save.lunchboxes = 12; p.Save.bestStage = 41; p.Save.coins = 500; g.UseProgress(p); g.GoHome(); SetMember(g, "gearPanel", true); });
+        Step(1, () => { var p = new DadProgress(DadEconomy.Load(), temp) { Rng = new System.Random(3) }; p.Save.lunchboxes = 12; p.Save.bestStage = 41; p.Save.coins = 500; g.UseProgress(p); g.GoHome(); g.Tab = DadSchoolPrototype.HomeTab.Lunchbox; });
         Step(10, () => shot("r01-gear-empty"));
         Step(1, () => g.BeginReveal());
         foreach (float t in new[] { .1f, .28f, .45f, .62f, 1.2f }) { float at = t; Step(1, () => SetMember(g, "revealClock", at)); Step(1, () => shot("r02-reveal-" + Mathf.RoundToInt(at * 100))); }
@@ -68,7 +68,7 @@ public static class DadPrototypeSetup
         Step(1, () => { g.Progress.Save.lunchboxes = 1; g.BeginReveal(); g.SkipRevealToCard(); }); Step(1, () => SetMember(g, "revealClock", 1.2f)); Step(2, () => shot("r04-card-compare"));
         Step(1, () => g.DecideReveal(false));
         Step(1, () => { g.Progress.Save.lunchboxes = 30; SetMember(g, "toastTime", 0f); }); Step(1, () => g.SendMessage("OpenAllBoxes")); Step(4, () => shot("r05-open-all"));
-        Step(1, () => { SetMember(g, "gearPanel", false); g.Progress.Save.lunchboxes = 1; g.StartRun(1); g.Combat.state = RunState.Won; });
+        Step(1, () => { g.Tab = DadSchoolPrototype.HomeTab.Go; g.Progress.Save.lunchboxes = 1; g.StartRun(1); g.Combat.state = RunState.Won; });
         Step(10, () => shot("r06-result-lunchbox"));
         foreach (int stage in new[] { 1, 21, 41 })
         {
@@ -122,6 +122,41 @@ public static class DadPrototypeSetup
         Step(1, () => { g.GoHome(); g.Progress.Save.lunchboxes = 1; g.BeginReveal(); }); Step(1, () => SetMember(g, "revealClock", .1f)); Step(1, () => shot("s-lunchbox"));
         Step(1, () => g.DecideReveal(true));
         Step(2, () => { g.UseProgress(original); DeleteTemp(temp); g.GoHome(); Debug.Log("DAD_STORY_DONE: " + dir); });
+    }
+    // v11 opening and v9 screens on a temporary save: splash, title, the six cuts, the three home tabs, the special with
+    // its prop (dad's face, then mom's phone), and the win / loss / mid-boss reports.
+    static void QueueUiAudit(string dir)
+    {
+        Directory.CreateDirectory(dir);
+        var g = UnityEngine.Object.FindObjectOfType<DadSchoolPrototype>();
+        Action<string> shot = name => ScreenCapture.CaptureScreenshot(Path.Combine(dir, name + ".png"), 4);   // small text needs the extra resolution
+        string[] keys = { "DadV2.BestChain", "DadV2.Wins", "DadV2.Gear", "DadV2.TotalWallHits", DadSchoolPrototype.StorySeenKey };
+        var saved = new Dictionary<string, int>();
+        foreach (string k in keys) if (PlayerPrefs.HasKey(k)) saved[k] = PlayerPrefs.GetInt(k);
+        DadProgress original = g.Progress; string temp = TempSavePath("ui"); int gear = g.Gear;
+        Step(1, () =>
+        {
+            var p = new DadProgress(DadEconomy.Load(), temp) { Rng = new System.Random(5) };
+            p.Save.coins = 646; p.Save.lunchboxes = 12; p.Save.bestStage = 8; p.Save.currentStage = 8; p.Save.pendingIdleCoins = 77; p.Save.pendingIdleBoxes = 1;
+            for (int i = 0; i < 4; i++) { p.OpenLunchbox(); p.EquipPending(); }
+            p.Save.upgrades = new[] { 3, 2, 4, 1 }; g.UseProgress(p); g.ShowSplash(); SetMember(g, "openingClock", .8f);
+        });
+        Step(3, () => shot("u01-splash"));
+        Step(1, () => g.ShowTitle()); Step(4, () => shot("u02-title"));
+        for (int c = 0; c < 6; c++) { int n = c; Step(1, () => { g.PlayStory(true); SetMember(g, "cut", n); SetMember(g, "openingClock", .9f); }); Step(2, () => shot("u03-story-" + (n + 1))); }
+        Step(1, () => g.GoHome()); Step(6, () => shot("u04-home-go"));
+        Step(1, () => g.Tab = DadSchoolPrototype.HomeTab.Lunchbox); Step(4, () => shot("u05-home-lunchbox"));
+        Step(1, () => g.Tab = DadSchoolPrototype.HomeTab.Upgrade); Step(4, () => shot("u06-home-upgrade"));
+        Step(1, () => { g.StartRun(8); g.Combat.charge = 100; }); Step(20, () => shot("u07-battle-special"));
+        Step(1, () => SetMember(g, "Gear", 2)); Step(3, () => shot("u08-battle-phone")); Step(1, () => SetMember(g, "Gear", gear));
+        Step(1, () => { g.Combat.bestChain = 7; g.Combat.wallHits = 12; g.Combat.kills = 18; g.Combat.state = RunState.Won; }); Step(10, () => shot("u09-result-win"));
+        Step(1, () => { g.StartRun(8); g.Progress.Save.lossStage = 8; g.Progress.Save.lossesAtStage = 4; g.Combat.health = 0; g.Combat.state = RunState.Lost; }); Step(10, () => shot("u10-result-loss"));
+        Step(1, () => { g.StartStage(10); g.Combat.bestChain = 5; g.Combat.wallHits = 9; g.Combat.kills = 14; g.Combat.state = RunState.Won; }); Step(10, () => shot("u11-result-midboss"));
+        Step(5, () =>
+        {
+            foreach (string k in keys) { if (saved.ContainsKey(k)) PlayerPrefs.SetInt(k, saved[k]); else PlayerPrefs.DeleteKey(k); }
+            PlayerPrefs.Save(); g.ReloadProgress(); SetMember(g, "Gear", gear); g.UseProgress(original); DeleteTemp(temp); g.GoHome(); Debug.Log("DAD_UI_DONE: " + dir);
+        });
     }
     static void Poll()
     {
@@ -187,6 +222,7 @@ public static class DadPrototypeSetup
             else if (command.StartsWith("rewards:") && EditorApplication.isPlaying) QueueRewardAudit(command.Substring(8));
             else if (command.StartsWith("motion:") && EditorApplication.isPlaying) QueueMotionAudit(command.Substring(7));
             else if (command.StartsWith("story:") && EditorApplication.isPlaying) QueueStoryAudit(command.Substring(6));
+            else if (command.StartsWith("ui:") && EditorApplication.isPlaying) QueueUiAudit(command.Substring(3));
             else if (command == "pump" && EditorApplication.isPlaying) { pump = true; Application.runInBackground = true; }
             else if (command == "stop") { pump = false; EditorApplication.isPlaying = false; }
             Debug.Log("DAD_COMMAND_OK: " + command);
@@ -319,6 +355,17 @@ public static class DadPrototypeSetup
             && gumArt.Count("pass") == 2 && gumArt.Count("wallhit") == 1 && gumArt.Count("crumple") == 1 && gumArt.Count("walk") == 2, "v7 motion: dad start/stop, gum passing x2, wall hit, crumple (v5 walk untouched)", report);
         var motionPose = (TextureImporter)AssetImporter.GetAtPath("Assets/DadSchoolBoss/Resources/DadV7/gum_pass_0.png");
         Expect(motionPose != null && motionPose.maxTextureSize == 512 && motionPose.alphaIsTransparency && !motionPose.mipmapEnabled, "v7 import rules match the v5 character frames", report);
+        // v11 opening stills (Design/dad-war-opening-assets-v11.md), copied from Art/V11Opening into Resources/DadV11
+        bool stills = true;
+        foreach (string n in new[] { "title_keyart", "story_01_home", "story_02_prank", "story_03_where", "story_04_dash", "story_05_panic", "story_06_school" })
+            if (Resources.Load<Texture2D>("DadV11/" + n) == null) stills = false;
+        Expect(stills, "v11 opening: title key art and six story cuts resolve through Resources", report);
+        var still = (TextureImporter)AssetImporter.GetAtPath("Assets/DadSchoolBoss/Resources/DadV11/story_01_home.png");
+        Expect(still != null && still.maxTextureSize == 2048 && !still.mipmapEnabled && !still.alphaIsTransparency && still.npotScale == TextureImporterNPOTScale.None,
+            "v11 import rules: 2048 opaque stills, no mips, no NPOT rescale", report);
+        bool screenIcons = true;
+        foreach (string n in new[] { "tab_lunchbox", "tab_go", "tab_upgrade", "btn_idle_chest", "mom_cheer", "mom_call", "btn_awaken" }) if (art.Icon(n) == null) screenIcons = false;
+        Expect(screenIcons, "v9 screens: three tab icons, mom's stash, cheer, phone and dad's angry face", report);
     }
     static MethodInfo ProtoMethod(string name) { return typeof(DadSchoolPrototype).GetMethod(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance); }
     static FieldInfo ProtoField(string name) { return typeof(DadSchoolPrototype).GetField(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance); }
@@ -390,7 +437,7 @@ public static class DadPrototypeSetup
         if (!EditorApplication.isPlaying) throw new Exception("Play Mode is required");
         var game = UnityEngine.Object.FindObjectOfType<DadSchoolPrototype>();
         var report = new StringBuilder("Dad School Boss Play Mode integration checks\n");
-        string[] keys = { "DadV2.BestChain", "DadV2.Wins", "DadV2.Gear", "DadV2.TotalWallHits" };
+        string[] keys = { "DadV2.BestChain", "DadV2.Wins", "DadV2.Gear", "DadV2.TotalWallHits", DadSchoolPrototype.StorySeenKey };
         int[] values = new int[keys.Length]; bool[] exists = new bool[keys.Length];
         for (int i = 0; i < keys.Length; i++) { exists[i] = PlayerPrefs.HasKey(keys[i]); values[i] = PlayerPrefs.GetInt(keys[i]); }
         int originalGear = game.Gear;
@@ -398,6 +445,16 @@ public static class DadPrototypeSetup
         try
         {
             game.UseProgress(new DadProgress(DadEconomy.Load(), temp));
+            // v11 opening: splash -> title -> (new save) six-cut story -> 1-1; once the story is seen, game start goes home.
+            PlayerPrefs.DeleteKey(DadSchoolPrototype.StorySeenKey);
+            game.ShowSplash(); SetMember(game, "openingClock", 5f); game.SendMessage("Update");
+            Expect(game.Opening == DadSchoolPrototype.OpeningStep.Title, "the company splash hands over to the title", report);
+            game.StartGame();
+            Expect(game.Opening == DadSchoolPrototype.OpeningStep.Story && game.StoryCut == 0, "game start on a new save plays the story", report);
+            for (int i = 0; i < 6; i++) game.NextCut();
+            Expect(!game.InOpening && !game.Home && game.PlayingStage == 1 && game.StorySeen, "the last cut leads straight into 1-1 and the story is remembered", report);
+            game.ShowTitle(); game.StartGame();
+            Expect(game.Home && !game.InOpening && game.Tab == DadSchoolPrototype.HomeTab.Go, "once the story is seen, game start goes home", report);
             game.SelectGear(0);   // the player's own loadout (e.g. the phone, which has no fever) is restored in finally
             game.StartRun();
             Expect(!game.Home && game.Combat.state == RunState.Fighting && game.PlayingStage == 1 && game.Director.Plan.lesson == 1, "start plays the saved stage (1-1 on a fresh save)", report);

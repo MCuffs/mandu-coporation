@@ -1,8 +1,61 @@
-# 팔룡체육관 — 다시, 한 방 (Eight Dragons Gym)
+# 아빠 전쟁
+
+아들이 장난으로 건 "아빠 의리 테스트"에 아빠가 진심으로 반응해 학교로 뛰어가고, 다른 집 아빠들과 맞붙는 세로형 캐주얼 액션 + 아빠 키우기 게임입니다. Android 우선(Unity), 보상형 광고 중심으로 기획하고 있습니다. 현재는 출시 전 시제품입니다.
+
+## 프로젝트 열기
+
+1. 이 저장소를 클론하고 Unity Hub에서 루트 폴더를 추가합니다.
+2. **Unity 2021.3.2f1**로 엽니다. 엔진 업그레이드 계획은 [PM 문서](Design/dad-war-pm.md) 4절에 있습니다.
+3. 메뉴 `Dad School Boss > Open Prototype`(`Assets/DadSchoolBoss.unity`)을 열고 Play를 누릅니다.
+4. `Mandu Corporation` 화면 → 타이틀 → 「게임 시작」을 누릅니다. 처음이면 6컷 시나리오 뒤 1-1로, 저장이 있으면 홈으로 갑니다.
+
+## 조작
+
+| 입력 | 동작 |
+| --- | --- |
+| 드래그 / WASD·방향키 | 이동. 가까운 상대는 자동 펀치 |
+| 필살기 버튼 / Space | 충전된 필살기(아빠 화났다! / 폴더폰이면 엄마한테 전화) |
+| 시나리오에서 탭 / Space·Enter | 다음 컷. 「건너뛰기」·Escape는 바로 전투로 |
+| 정지 버튼 / Escape | 일시정지 |
+
+## 현재 구현
+
+- 오프닝: 회사 스플래시, 키아트 타이틀, 의리 테스트 6컷 시나리오(자막·건너뛰기·다시 보기)
+- 홈 하단 3탭: 출발(아빠와 사물함에 박힌 지호 아빠, 엄마 방치 보상, 스테이지 카드) · 도시락(6부위 장비, 개봉, 등급 확률 표시) · 강화(4종 강화, 출동 준비물)
+- 전투: 자동 펀치, 벽꿍·연쇄, 사물함 찌그러짐, 접근·의자 돌진·쟁반 방어 상대, 큰아빠와 층 보스의 그로기
+- 3층 × 20스테이지, 결과 「복도 정리 끝!」, 별 3개, 3패 이후 엄마의 응원 보정, 최대 8시간 방치 보상, 로컬 저장
+
+광고 SDK·결제·서버 저장은 아직 연결하지 않았습니다. 모바일 실기기 검수 전입니다.
+
+## 검사
+
+메뉴 `Dad School Boss` 또는 에디터 명령 파일 `Library/DadPrototypeCommand.txt`로 실행합니다.
+
+| 명령 | 내용 | 기록 |
+| --- | --- | --- |
+| Run Prototype Checks (`checks`) | 에셋·import 규칙·전투 기본 | [dad-prototype-checks.txt](Design/dad-prototype-checks.txt) |
+| Run Play Mode Checks (`playchecks`, Play 중) | 오프닝 흐름, 전투·보상·저장, 사물함, 모션 | [dad-prototype-playchecks.txt](Design/dad-prototype-playchecks.txt) |
+| Run Polish Checks (`polishchecks`) | 경제·스테이지·쟁반·장비 | [dad-polish-checks.txt](Design/dad-polish-checks.txt) |
+| `ui:<폴더>` (Play 중) | 오프닝·홈 3탭·전투 버튼·결과 화면 16장 캡처 | — |
+
+## 기획 문서
+
+| 문서 | 맡는 내용 |
+| --- | --- |
+| [dad-war-pm.md](Design/dad-war-pm.md) | 결정 기록, 2주 계획과 관문, 위험, 열린 질문 |
+| [dad-war-plan.md](Design/dad-war-plan.md) | 제목·시나리오·인물·표현 규칙 |
+| [dad-war-product-v2.md](Design/dad-war-product-v2.md) | 조작·경제·광고·검증 지표 |
+| [dad-war-design-roadmap-v1.md](Design/dad-war-design-roadmap-v1.md) | UI·아트·모션 개선 로드맵 |
+
+---
+
+## 보관된 시제품: 다시, 한 방 (Second Fist)
+
+아래는 「아빠 전쟁」 이전의 골목 액션 시제품 기록입니다(릴리스 v0.7.0·v1.0.0). `Assets/Alley`의 전투 시뮬레이션(`AlleyCombat`)은 아빠 전쟁도 함께 씁니다.
 
 하이브리드 캐주얼(골목 핀볼 액션 + 체육관 아케이드 타이쿤 + 권갑 연성) 게임입니다. [최신 배포판](https://github.com/MCuffs/mandu-coporation/releases)에서 Windows ZIP을 내려받고 압축을 전부 푼 뒤 실행하세요. Unity 설치는 필요하지 않습니다.
 
-## 프로젝트 열기
+### 프로젝트 열기
 
 1. 이 저장소를 클론합니다.
 2. Unity Hub에서 저장소 루트 폴더를 추가합니다.
@@ -10,7 +63,7 @@
 4. `Assets/Alley/AlleyFight.unity`를 열고 Play를 누릅니다.
 5. 시작 화면에서 게임 시작 또는 스테이지 선택을 누릅니다. 긴 프롤로그와 합성 음성은 현재 빌드에서 제외했습니다.
 
-## 조작
+### 조작
 
 | 입력 | 동작 |
 | --- | --- |
@@ -21,7 +74,7 @@
 | 기술 카드 클릭 | 이번 판의 기술 강화 |
 | Escape / 우측 위 일시정지 버튼 | 일시정지 |
 
-## 현재 구현
+### 현재 구현
 
 - 이동 가속·감속, 자동 근접 공격, 넉백, 벽 충돌, 적 사이의 연쇄 충돌
 - 복서, 긴 리치의 킥복서, 예고 후 돌진하는 중량급, 각 스테이지의 보스
@@ -35,7 +88,7 @@
 
 현재는 상업 서비스 전 단계의 데모입니다. 광고·결제·온라인 순위·서버 저장은 연결하지 않았습니다. 모션은 좌우 기준의 2D 프레임 방식이며, 모바일 터치는 실기기에서 아직 검증하지 않았습니다.
 
-## 검증과 Windows 빌드
+### 검증과 Windows 빌드
 
 Unity 메뉴에서 다음 명령을 실행할 수 있습니다.
 
@@ -49,7 +102,7 @@ Unity 메뉴에서 다음 명령을 실행할 수 있습니다.
 
 Unity 캐시·로컬 설정·로그·실행 파일은 Git에 포함하지 않습니다. 소스, 아트, 글꼴, 씬 및 프로젝트 설정은 포함합니다.
 
-## 기획과 아트
+### 기획과 아트
 
 - [v7 배경·적 자산과 생성 프롬프트](Design/street-assets-v7-prompts.json) — 내장 image_gen 사용, 자산은 Assets/Alley/Resources/StageArenas.png와 StreetRoster.png에 저장
 - [반복 플레이·수익화 기획](Design/arcade-v6.md)
@@ -62,11 +115,11 @@ Unity 캐시·로컬 설정·로그·실행 파일은 Git에 포함하지 않습
 
 아트는 내장 이미지 생성 도구로 제작했습니다. 글꼴 라이선스 원문은 [Design/Licenses](Design/Licenses)에 있으며 Windows 빌드에도 복사됩니다.
 
-## 이전 시제품
+### 이전 시제품
 
 `Assets/Scenes/FirstFight.unity`는 최초 좌우 타이밍 전투입니다. 현재 장면과 분리해 보관합니다.
 
-## 프롤로그와 전체 화면 v4
+### 프롤로그와 전체 화면 v4
 
 팔룡회 보스 정민수의 배신과 죽음, 아들의 몸에서 눈뜨는 순간, 엄마의 절규와 분노, 정체 선언에서 첫 전투로 이어집니다.
 
@@ -78,7 +131,7 @@ Unity 캐시·로컬 설정·로그·실행 파일은 Git에 포함하지 않습
 
 [프롤로그 연출·음성 기록](Design/prologue-v4.md)
 
-## 자연스러운 전투 움직임 v5
+### 자연스러운 전투 움직임 v5
 
 피격 크기 변화와 위치 튐을 보정하고, 가속·감속·공격 준비·넉백·착지·회복을 연결했습니다.
 뒤로 피할 때 자동 공격이 이동을 방해하지 않으며, 적의 체격별 간격과 공격 순서를 조정했습니다.

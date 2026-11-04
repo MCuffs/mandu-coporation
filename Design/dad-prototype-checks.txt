@@ -19,6 +19,9 @@ PASS v6 import rules: lunchbox 1024, cards and dents 512, alpha, no mips, clamp
 PASS every gear slot x rarity has its v5 icon
 PASS v7 motion: dad start/stop, gum passing x2, wall hit, crumple (v5 walk untouched)
 PASS v7 import rules match the v5 character frames
+PASS v11 opening: title key art and six story cuts resolve through Resources
+PASS v11 import rules: 2048 opaque stills, no mips, no NPOT rescale
+PASS v9 screens: three tab icons, mom's stash, cheer, phone and dad's angry face
 PASS equipped slipper increases wall damage inside school arena
 PASS level up opens skill selection
 PASS choice applies and resumes battle

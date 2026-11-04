@@ -1,4 +1,8 @@
 Dad School Boss Play Mode integration checks
+PASS the company splash hands over to the title
+PASS game start on a new save plays the story
+PASS the last cut leads straight into 1-1 and the story is remembered
+PASS once the story is seen, game start goes home
 PASS start plays the saved stage (1-1 on a fresh save)
 PASS rendering and simulation use the same arena
 PASS movement input changes the live player position
