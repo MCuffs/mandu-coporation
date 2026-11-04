@@ -24,6 +24,7 @@ namespace SecondFistGame {
         public Vector2 pos,velocity,aim,locomotion;
         public float attack,windup,stun,flash,contact,dash,wallCooldown,recovery,reaction;
         public float airElapsed,airDuration,airPeak;
+        public float groggy;
         public bool boss { get { return kind==2; } }
         public bool enraged;
         public float lift { get { if(airDuration<=0)return 0;float t=Mathf.Clamp01(airElapsed/airDuration);return airPeak*4*t*(1-t); } }
@@ -48,10 +49,17 @@ namespace SecondFistGame {
         public float feverClock,feverDuration=5.5f,hazardSpawnClock=3.5f;
         public bool isFever { get { return feverClock>0; } }
         public int baseDamage=1,collectedCoins,comboStep,revivesUsed;
+        // Opt-in equipment rules used by the school prototype; legacy combat retains defaults.
+        public float punchKnockbackMultiplier=1;
+        public float chargeGainMultiplier=1;
+        public bool phoneSpecial;
+        // School rules: longer run, fewer level-ups, and a boss that only opens up after a body collision.
+        public int killTargetOverride,xpCurveScale=1;
+        public bool groggyBoss;
         public int kills,hits,wallHits,chainHits,level=1,xp,nextXp=3,stage,bestChain;
         public int wallSkill,chainSkill,stunSkill,fistSkill,vampSkill,magnetSkill;
         public readonly int[] currentChoices={0,1,2};
-        public int targetKills { get { return StageCatalog.Get(stage).target; } }
+        public int targetKills { get { return killTargetOverride>0?killTargetOverride:StageCatalog.Get(stage).target; } }
         public bool bossSpawned,spawning=true;
         public float spawnClock=.25f,comboClock;
         public int chain;
@@ -232,7 +240,7 @@ namespace SecondFistGame {
                     state=RunState.Won;events.Add(new CombatEvent("BOSS DOWN",e.pos,3));
                 }
             }
-            if(state==RunState.Fighting&&xp>=nextXp&&level<7){xp-=nextXp;level++;nextXp=level+2;pendingChoices++;RollChoices();state=RunState.Choosing;}
+            if(state==RunState.Fighting&&xp>=nextXp&&level<7){xp-=nextXp;level++;nextXp=(level+2)*xpCurveScale;pendingChoices++;RollChoices();state=RunState.Choosing;}
             if(health<=0)state=RunState.Lost;
         }
         void SimulatePartner(float dt){
@@ -287,7 +295,7 @@ namespace SecondFistGame {
                     c.pos+=c.velocity*dt;
                     if(dist<28){
                         collectedCoins+=c.value;
-                        charge=Mathf.Min(100,charge+1.5f+magnetSkill*.8f);
+                        charge=Mathf.Min(100,charge+(1.5f+magnetSkill*.8f)*chargeGainMultiplier);
                         events.Add(new CombatEvent("+"+c.value,player+new Vector2(0,-22),0));
                         coins.RemoveAt(i);continue;
                     }
@@ -326,7 +334,7 @@ namespace SecondFistGame {
             AddEnemy(new Vector2(x,y),kills>3&&UnityEngine.Random.value<StageCatalog.Get(stage).heavyChance?1:0);spawnClock=Mathf.Max(.65f,1.25f-kills*.025f);
         }
         void MoveEnemy(Fighter e,float dt){
-            e.flash=Mathf.Max(0,e.flash-dt);e.stun-=dt;e.contact-=dt;e.wallCooldown-=dt;e.attack-=dt;e.recovery=Mathf.Max(0,e.recovery-dt);e.reaction=Mathf.Max(0,e.reaction-dt);
+            e.flash=Mathf.Max(0,e.flash-dt);e.stun-=dt;e.contact-=dt;e.wallCooldown-=dt;e.attack-=dt;e.recovery=Mathf.Max(0,e.recovery-dt);e.reaction=Mathf.Max(0,e.reaction-dt);e.groggy=Mathf.Max(0,e.groggy-dt);
             if(e.boss&&!e.enraged&&e.hp<=e.maxHp/2){
                 e.enraged=true;e.flash=.3f;
                 AddShockwave(e.pos,180,new Color(1,.25f,.15f));
@@ -339,7 +347,9 @@ namespace SecondFistGame {
                 Vector2 desired=e.pos+e.velocity*dt;bool hitX=desired.x<arena.xMin||desired.x>arena.xMax,hitY=desired.y<arena.yMin||desired.y>arena.yMax;
                 e.pos=ClampEnemy(desired);
                 if((hitX||hitY)&&e.wallCooldown<=0){
-                    e.wallCooldown=.30f;wallHits++;CountChain();Damage(e,1+wallSkill,wallSkill>=3?"폭파벽!!":"벽꿍!",1);
+                    bool bossSlam=groggyBoss&&e.boss&&e.groggy>0; // the payoff for opening the boss up; it also ends the opening
+                    e.wallCooldown=.30f;wallHits++;CountChain();
+                    if(bossSlam){e.groggy=0;Damage(e,2+wallSkill,"짱 벽꿍!!",3);}else Damage(e,1+wallSkill,wallSkill>=3?"폭파벽!!":"벽꿍!",1);
                     AddShockwave(e.pos,75+wallSkill*18,wallSkill>=3?new Color(1,.32f,.12f):new Color(1,.65f,.22f),.24f);
                     if(wallSkill>0)SpawnCoins(e.pos,wallSkill>=3?2:1,1);
                     if(wallSkill>=3){
@@ -351,12 +361,12 @@ namespace SecondFistGame {
                         }
                     }
                     if(hitX)e.velocity.x*=-.16f;if(hitY)e.velocity.y*=-.16f;
-                    e.stun=Mathf.Max(e.stun,.26f+stunSkill*.25f);e.reaction=Mathf.Max(e.reaction,.22f);freeze=Mathf.Max(freeze,.014f);
+                    e.stun=Mathf.Max(e.stun,bossSlam?.7f:.26f+stunSkill*.25f);e.reaction=Mathf.Max(e.reaction,.22f);freeze=Mathf.Max(freeze,bossSlam?.05f:.014f);
                 }
                 float drag=e.airElapsed<e.airDuration?3.6f:8.5f;e.velocity*=Mathf.Exp(-drag*dt);return;
             }
             e.velocity=Vector2.zero;
-            if(e.stun>0||e.reaction>.10f){e.locomotion=Vector2.MoveTowards(e.locomotion,Vector2.zero,600*dt);return;}
+            if(e.stun>0||e.groggy>0||e.reaction>.10f){e.locomotion=Vector2.MoveTowards(e.locomotion,Vector2.zero,600*dt);return;}
             Vector2 delta=player-e.pos;float distance=delta.magnitude;
             if(e.dash>0){
                 float started=.38f-e.dash;float ramp=Mathf.Min(Mathf.Clamp01(started/.055f),Mathf.Clamp01(e.dash/.10f));
@@ -412,9 +422,11 @@ namespace SecondFistGame {
                 Fighter source=a.velocity.sqrMagnitude>b.velocity.sqrMagnitude?a:b;Fighter target=source==a?b:a;
                 if(source.velocity.sqrMagnitude>180*180&&source.contact<=0&&target.contact<=0){
                     source.contact=.14f;target.contact=.30f;chainHits++;CountChain();
-                    Vector2 impulse=source.velocity.normalized*(420+chainSkill*110);Launch(target,impulse,.27f,9);target.contact=.30f;target.stun=.34f+stunSkill*.45f;
+                    bool bossBreak=groggyBoss&&target.boss;
+                    Vector2 impulse=source.velocity.normalized*(420+chainSkill*110)*(bossBreak?.55f:1);Launch(target,impulse,.27f,9);target.contact=.30f;target.stun=.34f+stunSkill*.45f;
                     source.velocity*=chainSkill>=3?.88f:.64f;
-                    Damage(target,1+chainSkill,chainSkill>=3?"핀볼 폭격!":"연쇄!",2);
+                    if(bossBreak){target.groggy=1.8f+stunSkill*.3f;target.stun=Mathf.Max(target.stun,target.groggy);Damage(target,2+chainSkill,"그로기!!",3);}
+                    else Damage(target,1+chainSkill,chainSkill>=3?"핀볼 폭격!":"연쇄!",2);
                     AddShockwave(target.pos,65+chainSkill*18,new Color(.32f,.85f,.66f),.22f);
                 }else{
                     float settle=(required-distance)*.5f*(1-Mathf.Exp(-20*dt));
@@ -437,15 +449,18 @@ namespace SecondFistGame {
             bool dragonFist=finisher&&fistSkill>=3;
             float reach=110+fistSkill*12+(finisher?24:0)+(dragonFist?28:0)+(isFever?20:0);
             int dmg=baseDamage+(finisher&&fistSkill>0?1:0)+(dragonFist?1:0)+(isFever?1:0);
-            float knockback=650+fistSkill*55+(finisher?190:0)+(isFever?160:0);
+            float knockback=(650+fistSkill*55+(finisher?190:0)+(isFever?160:0))*punchKnockbackMultiplier;
             if(finisher){
                 AddShockwave(player+aim*52,88+fistSkill*16,isFever||dragonFist?new Color(1,.76f,.22f):new Color(1,.42f,.18f),.22f);
                 if(dragonFist)AddShockwave(player+aim*108,118,new Color(1,.32f,.12f),.26f);
             }
             foreach(Fighter e in enemies){
                 Vector2 delta=e.pos-player;if(e.hp<=0||delta.magnitude>=reach||Vector2.Dot(aim,delta.normalized)<=(finisher?.05f:.25f))continue;
-                Damage(e,dmg,dragonFist?"팔룡 핵주먹!":finisher?"강타!":"",finisher?1:0);
-                if(e.kind==0||(e.kind==1&&(e.windup<=0&&e.dash<=0||finisher))||(e.boss&&(finisher&&(isFever||dragonFist))))Launch(e,aim*knockback,finisher?.36f:.30f,finisher?18:12);
+                int hitDamage=dmg;if(groggyBoss&&e.boss)hitDamage=e.groggy>0?dmg+1:finisher?1:0; // a fresh school boss only takes chip damage
+                Damage(e,hitDamage,dragonFist?"팔룡 핵주먹!":finisher?"강타!":"",finisher?1:0);
+                bool bossOpen=e.boss&&(groggyBoss?e.groggy>0:finisher&&(isFever||dragonFist));
+                if(e.kind==0||(e.kind==1&&(e.windup<=0&&e.dash<=0||finisher))||bossOpen)Launch(e,aim*knockback*(e.boss&&groggyBoss?.75f:1),finisher?.36f:.30f,finisher?18:12);
+                else if(e.boss&&groggyBoss)e.pos=ClampEnemy(e.pos+aim*(finisher?22:12)); // only a short shove until a collision opens it up
             }
             for(int i=hazards.Count-1;i>=0;i--){
                 AlleyHazard h=hazards[i];
@@ -453,18 +468,30 @@ namespace SecondFistGame {
                     TriggerHazard(h);
                 }
             }
-            charge=Mathf.Min(100,charge+9+vampSkill*2);freeze=Mathf.Max(freeze,finisher?.018f:.009f);
+            charge=Mathf.Min(100,charge+(9+vampSkill*2)*chargeGainMultiplier);freeze=Mathf.Max(freeze,finisher?.018f:.009f);
             events.Add(new CombatEvent(finisher?"크리티컬!":"퍽!",player+aim*60,1));
         }
         public bool Special(){
             if(state!=RunState.Fighting||charge<100)return false;
+            if(phoneSpecial){
+                charge=0;attackLead=0;pendingTarget=null;invulnerable=.8f;
+                AddShockwave(player,290,new Color(.45f,.85f,.65f),.5f);
+                foreach(Fighter e in enemies){
+                    Vector2 delta=e.pos-player;if(e.hp<=0||delta.magnitude>280)continue;
+                    Vector2 away=delta.sqrMagnitude>.01f?delta.normalized:Vector2.right;
+                    Launch(e,away*(e.boss?250:720),.38f,e.boss?5:18);
+                    e.stun=Mathf.Max(e.stun,e.boss?.65f:1.6f);
+                    if(groggyBoss&&e.boss){e.groggy=Mathf.Max(e.groggy,1.4f);e.stun=Mathf.Max(e.stun,e.groggy);events.Add(new CombatEvent("짱 겁먹음!",e.pos,3));}
+                }
+                freeze=Mathf.Max(freeze,.035f);events.Add(new CombatEvent("엄마한테 전화한다!",player,3));return true;
+            }
             charge=0;attackLead=0;pendingTarget=null;attackCooldown=Mathf.Max(attackCooldown,.36f);punch=.25f;attackAnimation=.32f;invulnerable=1.2f;
             feverClock=feverDuration+vampSkill*.8f;
             AddShockwave(player,210,new Color(1,.78f,.24f),.38f);
             foreach(Fighter e in enemies){Vector2 delta=e.pos-player;if(e.hp<=0||delta.magnitude>195)continue;Vector2 aim=delta.sqrMagnitude>.01f?delta.normalized:Vector2.up;Damage(e,2+baseDamage,"",0);Launch(e,aim*(e.boss?320:880),e.boss?.26f:.44f,e.boss?8:26);}
             freeze=Mathf.Max(freeze,.065f);events.Add(new CombatEvent("전성기의 한 방",player,3));return true;
         }
-        void Damage(Fighter e,int amount,string label,int style){if(e.hp<=0)return;e.hp-=amount;e.flash=.10f;charge=Mathf.Min(100,charge+3+vampSkill);events.Add(new CombatEvent(label.Length>0?label:"−"+amount,e.pos,style));}
+        void Damage(Fighter e,int amount,string label,int style){if(e.hp<=0)return;e.hp-=amount;e.flash=.10f;charge=Mathf.Min(100,charge+(3+vampSkill)*chargeGainMultiplier);events.Add(new CombatEvent(label.Length>0?label:"−"+amount,e.pos,style));}
         void Hurt(int amount,Vector2 origin){
             if(invulnerable>0||isFever)return;health=Mathf.Max(0,health-amount);invulnerable=.7f;playerReaction=.18f;
             playerImpulse=(player-origin).normalized*185;attackLead=0;pendingTarget=null;attackAnimation=Mathf.Min(attackAnimation,.12f);attackCooldown=Mathf.Max(attackCooldown,.20f);

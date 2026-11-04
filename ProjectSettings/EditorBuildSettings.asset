@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/DadSchoolBoss.unity
+    guid: 9748043f1dbf64494997c5f9a39277b7
+  - enabled: 0
     path: Assets/Alley/AlleyFight.unity
     guid: ab812c588ec0168408592ba8c1ceb733
   - enabled: 0

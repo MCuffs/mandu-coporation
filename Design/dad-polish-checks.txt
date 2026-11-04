@@ -1,0 +1,22 @@
+School first-minute and equipment checks
+PASS first encounter isolates one basic target
+PASS landing a punch advances to wall lesson
+PASS wall contact advances to chain lesson
+PASS real collision completes the chain lesson
+PASS early chain wave uses two aligned basic targets
+PASS charge enemy is introduced after the teaching beats
+PASS school run uses its own kill target and slower level curve
+PASS boss waits for the kill target after the floor time
+PASS boss appears by the fallback deadline with school HP
+PASS boss arrives with two escorts to throw
+PASS boss is never spawned twice
+PASS escorts keep arriving during the boss fight
+PASS plain punch only shoves a fresh boss, even in fever
+PASS a thrown body makes the boss groggy
+PASS groggy boss can be launched toward a wall
+PASS wall slam is the big payoff and ends the opening
+PASS slipper changes actual punch trajectory strength
+PASS phone interrupts and scatters beyond normal special reach
+PASS phone trades damage and fever for crowd control
+PASS phone cannot be spammed without charge
+PASS phone call scares the school boss into a groggy opening

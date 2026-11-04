@@ -13,6 +13,7 @@ public static class AlleySetup {
     static AlleySetup(){EditorApplication.delayCall+=Prepare;}
     static void Prepare(){
         if(EditorApplication.isCompiling||EditorApplication.isUpdating||EditorApplication.isPlayingOrWillChangePlaymode){EditorApplication.delayCall+=Prepare;return;}
+        if(EditorSceneManager.GetActiveScene().path=="Assets/DadSchoolBoss.unity")return;
         if(!File.Exists("Assets/Alley/Resources/AlleyBackground.png")){EditorApplication.delayCall+=Prepare;return;}
         if(!SessionState.GetBool("AlleyChecksV2",false)){RunChecks();SessionState.SetBool("AlleyChecksV2",true);}
         if(File.Exists(ScenePath)){

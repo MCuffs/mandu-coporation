@@ -1,0 +1,11 @@
+Dad School Boss prototype checks
+PASS Hero asset resolves through Resources
+PASS Hero has real transparent background and visible pixels
+PASS Enemies asset resolves through Resources
+PASS Enemies has real transparent background and visible pixels
+PASS Arena asset resolves through Resources
+PASS equipped slipper increases wall damage inside school arena
+PASS level up opens skill selection
+PASS choice applies and resumes battle
+PASS school boss defeat reaches victory
+PASS zero health reaches defeat
