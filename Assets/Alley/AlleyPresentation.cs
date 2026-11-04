@@ -30,14 +30,15 @@ public partial class AlleyGame {
         Panel(x,y,w,h,edge);Panel(x+1.5f,y+1.5f,w-3,h-3,fill);
         Box(x+10,y+2,w-20,1,new Color(1,1,1,.15f));
     }
-    bool Button(string value,float x,float y,float w,float h,Color color){
+    bool Button(string value,float x,float y,float w,float h,Color color,int fontSize=0){
         Rect rect=new Rect(x,y,w,h);bool hover=rect.Contains(Pointer(Input.mousePosition));bool down=hover&&Input.GetMouseButton(0);
         bool clicked=GUI.Button(rect,GUIContent.none,GUIStyle.none);float offset=down?3:0;
         Panel(x,y+5,w,h,new Color(.025f,.04f,.06f,.5f));
         Color fill=hover?Color.Lerp(color,Color.white,.09f):color;
         Surface(x,y+offset,w,h,fill,color==Cream?new Color(.78f,.74f,.66f):Color.Lerp(color,Color.white,.24f),false);
         Box(x+14,y+offset+3,w-28,2,new Color(1,1,1,.17f));
-        Title(value,x,y+offset+2,w,h,22,color==Cream||color==Gold?Ink:Cream,TextAnchor.MiddleCenter);
+        int autoSize=fontSize>0?fontSize:Mathf.Clamp(Mathf.Min(Mathf.FloorToInt(h*.42f),Mathf.FloorToInt((w-14f)/Mathf.Max(4f,value.Length*.82f))),12,22);
+        Title(value,x+4,y+offset+1,w-8,h-2,autoSize,color==Cream||color==Gold?Ink:Cream,TextAnchor.MiddleCenter);
         if(clicked){choiceFlash=.045f;source.PlayOneShot(hitSound,.18f);}return clicked;
     }
     void AbilityIcon(Rect rect,int index,float alpha=1){
@@ -129,7 +130,9 @@ public partial class AlleyGame {
             Title(AllSkillNames[skillId],rect.x+122,rect.y+34,295,36,25,Ink);
             Text(AllSkillDescs[skillId],rect.x+124,rect.y+78,350,32,14,new Color(.33f,.35f,.33f),TextAnchor.UpperLeft,false);
             int rank=combat.GetSkillRank(skillId);
-            Surface(rect.x+398,rect.y+15,78,26,Ink,Ink,false);Text("LV. "+(rank+1),rect.x+398,rect.y+15,78,26,12,Gold,TextAnchor.MiddleCenter,true);
+            bool evolves=(rank+1)>=3&&skillId<=3;
+            Surface(rect.x+378,rect.y+14,98,26,evolves?Coral:Ink,evolves?Gold:Ink,false);
+            Text(evolves?"★ 초월 각성":"LV. "+(rank+1),rect.x+378,rect.y+14,98,26,12,evolves?Cream:Gold,TextAnchor.MiddleCenter,true);
             if(hover){Line(new Vector2(rect.x+458,rect.y+58),new Vector2(rect.x+465,rect.y+65),3,accent);Line(new Vector2(rect.x+465,rect.y+65),new Vector2(rect.x+458,rect.y+72),3,accent);}
             if(modalAge>.15f&&GUI.Button(rect,GUIContent.none,GUIStyle.none)){combat.Choose(i);dragging=false;stick=Vector2.zero;source.PlayOneShot(specialSound,.35f);}
         }

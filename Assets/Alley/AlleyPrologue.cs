@@ -30,14 +30,14 @@ public partial class AlleyGame {
         heroRendered=heroLast=combat.player;actorMotion.Clear();
     }
     void ToggleFullscreen(){
-        if(Screen.fullScreen){int h=Mathf.Min(960,Display.main.systemHeight-100);Screen.SetResolution(Mathf.RoundToInt(h*.5625f),h,FullScreenMode.Windowed);}
+        if(Screen.fullScreen){int h=Mathf.Min(1080,Display.main.systemHeight-80);Screen.SetResolution(Mathf.RoundToInt(h*540f/960f),h,FullScreenMode.Windowed);}
         else Screen.SetResolution(Display.main.systemWidth,Display.main.systemHeight,FullScreenMode.FullScreenWindow);
     }
     void UpdateArenaViewport(bool reset){
-        if(!reset&&viewportWidth==Screen.width&&viewportHeight==Screen.height)return;
+        if(!reset&&viewportWidth==Screen.width&&viewportHeight==Screen.height&&Mathf.Abs(combat.arena.yMin-315f)<1f)return;
         viewportWidth=Screen.width;viewportHeight=Screen.height;
-        combat.SetArena(new Rect(54,126,ViewWidth-108,ViewHeight-226));
-        if(reset)combat.player=new Vector2(combat.arena.center.x,combat.arena.center.y+42);
+        combat.SetArena(new Rect(62,315,416,465));
+        if(reset)combat.player=new Vector2(combat.arena.center.x,combat.arena.center.y+35);
     }
     void UpdatePrologue(float dt){
         if(prologue==null)return;

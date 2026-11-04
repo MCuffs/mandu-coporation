@@ -56,3 +56,7 @@ PASS  walking over cash desk collects all stacked trainee fees
 PASS  completing sparring ring unlocks partner fighter for combat
 PASS  partner fighter automatically engages nearby enemies in combat
 PASS  fame rank title updates based on gym and combat growth
+PASS  standing on unlocked station pad upgrades it to level 2
+PASS  forging gear levels up and promotes glove tier at threshold
+PASS  knocked enemy detonates alley hazard barrel for AoE damage and coins
+PASS  awakened level 3 wall skill blasts nearby enemies on wall impact

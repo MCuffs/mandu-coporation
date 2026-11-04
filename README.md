@@ -1,6 +1,6 @@
-# 다시, 한 방 — Second Fist
+# 팔룡체육관 — 다시, 한 방 (Eight Dragons Gym)
 
-2D 캐주얼 골목 액션 게임의 Windows 플레이어블 데모입니다. [최신 배포판](https://github.com/MCuffs/mandu-coporation/releases)에서 Windows ZIP을 내려받고 압축을 전부 푼 뒤 SecondFist.exe를 실행하세요. Unity 설치는 필요하지 않습니다.
+하이브리드 캐주얼(골목 핀볼 액션 + 체육관 아케이드 타이쿤 + 권갑 연성) 게임입니다. [최신 배포판](https://github.com/MCuffs/mandu-coporation/releases)에서 Windows ZIP을 내려받고 압축을 전부 푼 뒤 실행하세요. Unity 설치는 필요하지 않습니다.
 
 ## 프로젝트 열기
 

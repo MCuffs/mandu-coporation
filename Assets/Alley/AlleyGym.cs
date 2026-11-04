@@ -5,15 +5,25 @@ using SecondFistGame;
 
 namespace SecondFistGame {
     public sealed class GymStation {
+        public const int MaxLevel=5;
         public readonly int id,unlockStage,cost,incomePerCycle;
         public readonly string name,subtitle,benefit;
         public readonly Vector2 offset; // offset relative to arena center
-        public int invested;
+        public int invested,level;
         public bool unlocked;
-        public float workTimer,popScale;
+        public float workTimer,popScale,upgradeCooldown;
         public GymStation(int id,string name,string subtitle,string benefit,int unlockStage,int cost,int income,Vector2 offset){
             this.id=id;this.name=name;this.subtitle=subtitle;this.benefit=benefit;
             this.unlockStage=unlockStage;this.cost=cost;this.incomePerCycle=income;this.offset=offset;
+        }
+        public int CurrentCost {
+            get { return !unlocked?cost:Mathf.RoundToInt(cost*(1f+level*0.75f)); }
+        }
+        public int CurrentIncome {
+            get { return unlocked?incomePerCycle+Mathf.Max(0,level-1)*Mathf.Max(3,incomePerCycle/2):0; }
+        }
+        public bool IsMaxed {
+            get { return unlocked&&level>=MaxLevel; }
         }
     }
 
@@ -29,15 +39,15 @@ namespace SecondFistGame {
         public readonly List<GymTrainee> trainees=new List<GymTrainee>();
         public int cashDeskPile,maxDeskPile=180;
         public float drainClock,deskFlipClock;
-        public Vector2 cashDeskOffset=new Vector2(0,95);
-        public Vector2 turfGateOffset=new Vector2(0,-195);
+        public Vector2 cashDeskOffset=new Vector2(0,185);
+        public Vector2 turfGateOffset=new Vector2(0,-205);
 
         public GymWorld(){
-            stations.Add(new GymStation(0,"헤비 샌드백","펀치력 +1 · 수련생 모집","주먹 파괴력 증가",0,30,6,new Vector2(-128,-55)));
-            stations.Add(new GymStation(1,"스텝 훈련 매트","공격속도 +20% · 수련생 모집","연타 속도 증가",0,55,10,new Vector2(128,-55)));
-            stations.Add(new GymStation(2,"챔피언 스파링 링","든든한 동료 파이터 합류!","전투 시 동료 동행",0,90,16,new Vector2(-128,45)));
-            stations.Add(new GymStation(3,"파워 벤치프레스","최대 체력 +40 · 벽꿍 강화","체력 및 벽꿍 증가",1,140,24,new Vector2(128,45)));
-            stations.Add(new GymStation(4,"팔룡 비전 제단","필살기 폭주 & 코인 자석 강화","폭주 시간·자석 증가",2,210,36,new Vector2(0,-5)));
+            stations.Add(new GymStation(0,"헤비 샌드백","펀치력 +1 · 수련생 모집","주먹 파괴력 증가",0,30,6,new Vector2(-118,-72)));
+            stations.Add(new GymStation(1,"스텝 훈련 매트","공격속도 +20% · 수련생 모집","연타 속도 증가",0,55,10,new Vector2(118,-72)));
+            stations.Add(new GymStation(2,"챔피언 스파링 링","든든한 동료 파이터 합류!","전투 시 동료 동행",0,90,16,new Vector2(-118,78)));
+            stations.Add(new GymStation(3,"파워 벤치프레스","최대 체력 +40 · 벽꿍 강화","체력 및 벽꿍 증가",1,140,24,new Vector2(118,78)));
+            stations.Add(new GymStation(4,"팔룡 비전 제단","필살기 폭주 & 코인 자석 강화","폭주 시간·자석 증가",2,210,36,new Vector2(0,2)));
         }
 
         public Vector2 StationPos(Rect arena,GymStation s){
@@ -58,7 +68,9 @@ namespace SecondFistGame {
         public void SyncFromProfile(ArcadeProfile profile){
             for(int i=0;i<stations.Count;i++){
                 stations[i].unlocked=profile.IsStationUnlocked(i);
-                stations[i].invested=stations[i].unlocked?stations[i].cost:profile.GetStationInvested(i);
+                stations[i].level=profile.GetStationLevel(i);
+                stations[i].invested=profile.GetStationInvested(i);
+                stations[i].upgradeCooldown=0f;
             }
             cashDeskPile=Mathf.Clamp(profile.gymSafeCoins,0,maxDeskPile);
             RebuildTrainees();
@@ -66,7 +78,7 @@ namespace SecondFistGame {
 
         public void SyncToProfile(ArcadeProfile profile){
             for(int i=0;i<stations.Count;i++){
-                profile.SetStationState(i,stations[i].unlocked,stations[i].invested);
+                profile.SetStationState(i,stations[i].unlocked,stations[i].invested,stations[i].level);
             }
             profile.gymSafeCoins=cashDeskPile;
         }
@@ -75,7 +87,7 @@ namespace SecondFistGame {
             trainees.Clear();
             for(int i=0;i<stations.Count;i++){
                 if(!stations[i].unlocked)continue;
-                int count=i==2?2:1;
+                int count=Mathf.Min(3,(i==2?2:1)+Mathf.Max(0,stations[i].level-1));
                 for(int k=0;k<count;k++){
                     trainees.Add(new GymTrainee{
                         stationId=i,
@@ -93,35 +105,45 @@ namespace SecondFistGame {
             for(int i=0;i<stations.Count;i++){
                 GymStation s=stations[i];
                 s.popScale=Mathf.Max(0,s.popScale-dt*3.2f);
+                s.upgradeCooldown=Mathf.Max(0,s.upgradeCooldown-dt);
                 if(s.unlocked){
                     s.workTimer+=dt;
                     if(s.workTimer>=2.4f){
                         s.workTimer-=2.4f;
                         if(cashDeskPile<maxDeskPile){
-                            cashDeskPile=Mathf.Min(maxDeskPile,cashDeskPile+s.incomePerCycle);
+                            cashDeskPile=Mathf.Min(maxDeskPile,cashDeskPile+s.CurrentIncome);
                             dirty=true;
                         }
                     }
-                    continue;
                 }
-                if(profile.highestStage<s.unlockStage)continue;
+                if(profile.highestStage<s.unlockStage||s.IsMaxed||s.upgradeCooldown>0)continue;
                 Vector2 pos=StationPos(arena,s);
                 if((playerPos-pos).magnitude<56f&&profile.coins>0){
                     drainClock+=dt;
                     float stepInterval=.045f;
-                    while(drainClock>=stepInterval&&profile.coins>0&&!s.unlocked){
+                    int targetCost=s.CurrentCost;
+                    while(drainClock>=stepInterval&&profile.coins>0&&!s.IsMaxed&&s.upgradeCooldown<=0){
                         drainClock-=stepInterval;
-                        int stepAmount=Mathf.Min(profile.coins,Mathf.Max(1,Mathf.CeilToInt(s.cost/18f)));
-                        int needed=s.cost-s.invested;
+                        int stepAmount=Mathf.Min(profile.coins,Mathf.Max(1,Mathf.CeilToInt(targetCost/18f)));
+                        int needed=targetCost-s.invested;
                         int pay=Mathf.Min(stepAmount,needed);
                         profile.coins-=pay;
                         s.invested+=pay;
                         s.popScale=.35f;
                         dirty=true;
-                        if(s.invested>=s.cost){
-                            s.unlocked=true;s.popScale=1f;builtAny=true;
+                        if(s.invested>=targetCost){
+                            s.invested=0;
+                            if(!s.unlocked){
+                                s.unlocked=true;
+                                s.level=1;
+                                events.Add(new CombatEvent(s.name+" 완성!!",pos,3));
+                            }else{
+                                s.level=Mathf.Min(GymStation.MaxLevel,s.level+1);
+                                events.Add(new CombatEvent(s.name+" LV."+s.level+" 승급!!",pos,3));
+                            }
+                            s.popScale=1f;s.upgradeCooldown=1.6f;builtAny=true;
                             RebuildTrainees();
-                            events.Add(new CombatEvent(s.name+" 완성!!",pos,3));
+                            break;
                         }
                     }
                 }

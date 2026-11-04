@@ -15,7 +15,14 @@ public static class AlleySetup {
         if(EditorApplication.isCompiling||EditorApplication.isUpdating||EditorApplication.isPlayingOrWillChangePlaymode){EditorApplication.delayCall+=Prepare;return;}
         if(!File.Exists("Assets/Alley/Resources/AlleyBackground.png")){EditorApplication.delayCall+=Prepare;return;}
         if(!SessionState.GetBool("AlleyChecksV2",false)){RunChecks();SessionState.SetBool("AlleyChecksV2",true);}
-        if(File.Exists(ScenePath))return;
+        if(File.Exists(ScenePath)){
+            if(EditorSceneManager.GetActiveScene().path!=ScenePath)EditorSceneManager.OpenScene(ScenePath);
+            if(!SessionState.GetBool("AlleyAutoPlayed",false)&&!Application.isBatchMode){
+                SessionState.SetBool("AlleyAutoPlayed",true);
+                EditorApplication.isPlaying=true;
+            }
+            return;
+        }
         ConfigureTexture("Assets/Alley/Resources/FighterAtlas.png",true);
         ConfigureTexture("Assets/Alley/Resources/AlleyBackground.png",false);
         var scene=EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Single);
@@ -23,7 +30,7 @@ public static class AlleySetup {
         new GameObject("Alley Game").AddComponent<AlleyGame>();
         EditorSceneManager.SaveScene(scene,ScenePath);
         EditorBuildSettings.scenes=new[]{new EditorBuildSettingsScene(ScenePath,true),new EditorBuildSettingsScene("Assets/Scenes/FirstFight.unity",false)};
-        PlayerSettings.productName="Second Fist - Alley";PlayerSettings.defaultScreenWidth=540;PlayerSettings.defaultScreenHeight=960;PlayerSettings.resizableWindow=true;PlayerSettings.defaultIsNativeResolution=false;PlayerSettings.fullScreenMode=FullScreenMode.Windowed;PlayerSettings.defaultInterfaceOrientation=UIOrientation.Portrait;
+        PlayerSettings.productName="팔룡체육관";PlayerSettings.defaultScreenWidth=540;PlayerSettings.defaultScreenHeight=960;PlayerSettings.resizableWindow=true;PlayerSettings.defaultIsNativeResolution=false;PlayerSettings.fullScreenMode=FullScreenMode.Windowed;PlayerSettings.defaultInterfaceOrientation=UIOrientation.Portrait;
         AssetDatabase.SaveAssets();Debug.Log("ALLEY_READY: new playable scene and assets saved");
     }
     static void ConfigureTexture(string path,bool alpha){
@@ -32,6 +39,11 @@ public static class AlleySetup {
     }
     [MenuItem("Second Fist/Open Alley Fight")]
     static void Open(){EditorSceneManager.OpenScene(ScenePath);}
+    [MenuItem("Second Fist/Open And Play")]
+    public static void OpenAndPlay(){
+        if(File.Exists(ScenePath))EditorSceneManager.OpenScene(ScenePath);
+        EditorApplication.isPlaying=true;
+    }
     static void Expect(bool condition,string label,StringBuilder report){if(!condition)throw new Exception("ALLEY CHECK FAILED: "+label);report.AppendLine("PASS  "+label);}
     static AlleyCombat Empty(){var c=new AlleyCombat();c.spawning=false;c.Start();return c;}
     [MenuItem("Second Fist/Run Gameplay Checks")]
@@ -113,6 +125,21 @@ public static class AlleySetup {
         for(int i=0;i<45;i++)c.Tick(.02f,Vector2.zero,false);
         Expect(enemy.hp<3,"partner fighter automatically engages nearby enemies in combat",report);
         Expect(!string.IsNullOrEmpty(prof.FameTitle)&&prof.BuiltStationCount>=2,"fame rank title updates based on gym and combat growth",report);
+        // Multi-level station upgrade check
+        prof.coins=200;
+        for(int i=0;i<60;i++)gym.Tick(.05f,pad0,arena,prof,events,out built,out cash);
+        Expect(gym.stations[0].level==2&&prof.GetStationLevel(0)==2,"standing on unlocked station pad upgrades it to level 2",report);
+        // Gear forging gacha check
+        bool tierUp1,tierUp2;
+        Expect(prof.RollGear(out tierUp1)&&!tierUp1&&prof.RollGear(out tierUp2)&&tierUp2&&prof.gearTier==1,"forging gear levels up and promotes glove tier at threshold",report);
+        // Explosive hazard barrel check
+        c=Empty();var h=c.AddHazard(new Vector2(260,450),0);var victim=c.AddEnemy(new Vector2(230,450));victim.velocity=new Vector2(500,0);
+        c.Tick(.05f,Vector2.zero,false);
+        Expect(h.hp<=0&&victim.hp<3&&c.coins.Count>=3,"knocked enemy detonates alley hazard barrel for AoE damage and coins",report);
+        // Awakened Lv.3 Wall Blast check
+        c=Empty();c.wallSkill=3;var wPrimary=c.AddEnemy(new Vector2(473,400));var wBystander=c.AddEnemy(new Vector2(420,400));wPrimary.velocity=new Vector2(600,0);
+        c.Tick(.02f,Vector2.zero,false);
+        Expect(wPrimary.hp<=0&&wBystander.hp<3,"awakened level 3 wall skill blasts nearby enemies on wall impact",report);
     }
 
     static void CheckNaturalMotion(StringBuilder report){

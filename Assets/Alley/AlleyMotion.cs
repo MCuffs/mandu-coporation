@@ -116,31 +116,68 @@ public partial class AlleyGame {
         if(t<.025f)return 8;if(t<.058f)return 9;if(t<.083f)return 10;if(t<.103f)return 11;
         if(t<.16f)return 12;if(t<.235f)return 13;if(t<.33f)return 14;return 15;
     }
+    void Partner(){
+        if(!combat.hasPartner&&!gym.HasPartner)return;
+        Vector2 feet=combat.partnerPos;
+        float speed=combat.partnerVelocity.magnitude;
+        bool moving=speed>12f;
+        float bob=moving?Mathf.Sin(motionClock*11f)*1.4f:Mathf.Sin(motionClock*3.2f)*.5f;
+        Ellipse(feet+new Vector2(0,2),44,12,new Color(0,0,0,.22f));
+        Ellipse(feet+new Vector2(0,1),48,14,new Color(.20f,.85f,.95f,.22f));
+        bool left=combat.partnerDirection.x<-.1f;
+        int pose=combat.partnerPunch>0?2:moving?(Mathf.FloorToInt(motionClock*6f)&1):0;
+        if(rosterAtlas!=null&&rosterPivots!=null){
+            MotionSprite(rosterAtlas,rosterPivots,feet-new Vector2(0,bob),pose,left,124f,Color.white,0f,Vector2.one);
+        }
+        if(combat.partnerPunch>0){
+            float progress=Mathf.Clamp01(1-combat.partnerPunch/.18f);
+            float a=Mathf.Atan2(combat.partnerDirection.y,combat.partnerDirection.x);
+            Vector2 center=feet-new Vector2(0,42);
+            for(int i=0;i<10;i++){
+                float p=i/9f;float angle=a-.8f+p*1.6f;float next=angle+.16f;
+                Vector2 p1=center+new Vector2(Mathf.Cos(angle),Mathf.Sin(angle))*(48+progress*18);
+                Vector2 p2=center+new Vector2(Mathf.Cos(next),Mathf.Sin(next))*(48+progress*18);
+                Line(p1,p2,8f*Mathf.Sin(p*Mathf.PI)*(1-progress),new Color(.25f,.92f,1f,1-progress));
+            }
+        }
+    }
     void Hero(){
         Vector2 feet=heroRendered;bool moving=heroSpeed>14;
-        float bob=moving?Mathf.Sin(heroPhase*2)*1.05f:Mathf.Sin(motionClock*2.8f)*.4f;
-        Ellipse(feet+new Vector2(0,2),moving?49:51,13,new Color(0,0,0,.22f));
+        float bob=moving?Mathf.Sin(heroPhase*2)*1.35f:Mathf.Sin(motionClock*3.1f)*.55f;
+        Ellipse(feet+new Vector2(0,2),moving?48:52,13,new Color(0,0,0,.26f));
+        int gearTier=CurrentGearTier;
         if(combat.isFever){
-            float aura=58+Mathf.Sin(pulse*18)*6;
-            Ellipse(feet+new Vector2(0,1),aura,18,new Color(1,.76f,.18f,.34f));
+            float aura=62+Mathf.Sin(pulse*18)*6;
+            Ellipse(feet+new Vector2(0,1),aura,19,new Color(1,.76f,.18f,.38f));
             CircleAt(feet-new Vector2(0,55),46+Mathf.Sin(pulse*22)*4,new Color(1,.58f,.12f,.16f));
+        }else if(gearTier>=2){
+            Color gearAura=gearTier>=5?new Color(1f,.82f,.18f,.26f):gearTier>=4?new Color(.20f,.88f,1f,.22f):new Color(1f,.35f,.18f,.18f);
+            Ellipse(feet+new Vector2(0,1),52+Mathf.Sin(pulse*8)*3,14,gearAura);
         }else{
-            Ellipse(feet+new Vector2(0,1),48,12,new Color(.57f,.84f,.70f,.07f));
+            Ellipse(feet+new Vector2(0,1),48,12,new Color(.57f,.84f,.70f,.09f));
         }
         int frame=combat.attackAnimation>0?AttackFrame():moving?(Mathf.FloorToInt(heroPhase/(Mathf.PI*2)*8)%8):8;
-        float attackT=.44f-combat.attackAnimation;float thrust=combat.attackAnimation>0?Mathf.Sin(Mathf.Clamp01((attackT-.06f)/.22f)*Mathf.PI)*(combat.comboStep==0?7:4):0;
+        float attackT=.44f-combat.attackAnimation;
+        float thrust=combat.attackAnimation>0?Mathf.Sin(Mathf.Clamp01((attackT-.05f)/.21f)*Mathf.PI)*(combat.comboStep==0?11:6):0;
         feet+=combat.direction*thrust-new Vector2(0,bob);
         Color tint=combat.playerReaction>0?new Color(1,.72f,.62f):combat.isFever?new Color(1,.96f,.78f):new Color(1,1,1,combat.invulnerable>0?.82f+.18f*Mathf.Cos(motionClock*18):1);
-        Vector2 stretch=moving?new Vector2(1+Mathf.Sin(heroPhase*2)*.012f,1-Mathf.Sin(heroPhase*2)*.018f):new Vector2(1,1+Mathf.Sin(motionClock*2.8f)*.004f);
-        if(combat.attackLead>0)stretch=new Vector2(1.03f,.97f);
+        Vector2 stretch=moving?new Vector2(1+Mathf.Sin(heroPhase*2)*.022f,1-Mathf.Sin(heroPhase*2)*.026f):new Vector2(1,1+Mathf.Sin(motionClock*3.1f)*.008f);
+        if(combat.attackLead>0)stretch=new Vector2(1.05f,.95f);
+        else if(combat.punch>.10f)stretch=new Vector2(1.06f,.96f);
         stretch.x*=TurnWidth(heroTurn);
         float height=combat.isFever?144:138;
+        // Speed / Finisher Afterimage Trail
+        if(combat.isFever||(combat.attackAnimation>0&&combat.comboStep==0)||heroSpeed>135f){
+            Vector2 trailDir=combat.attackAnimation>0?combat.direction:(combat.moveVelocity.sqrMagnitude>1f?combat.moveVelocity.normalized:combat.direction);
+            Color ghostCol=combat.isFever?new Color(1f,.78f,.22f,.24f):new Color(.32f,.85f,.95f,.20f);
+            MotionSprite(heroMotionAtlas,heroPivots,feet-trailDir*14f,frame,heroLeft,height,ghostCol,heroTilt,stretch);
+        }
         MotionSprite(heroMotionAtlas,heroPivots,feet,frame,heroLeft,height,tint,heroTilt,stretch);
         if(combat.punch>0){
             bool heavy=combat.comboStep==0||combat.isFever;
             float progress=Mathf.Clamp01(1-combat.punch/.19f);float a=Mathf.Atan2(combat.direction.y,combat.direction.x);
-            float radius=(heavy?74:60)+progress*(heavy?32:23);Vector2 center=heroRendered-new Vector2(0,43);
-            Color arcColor=heavy?new Color(1,.74f,.18f,(1-progress)*.95f):new Color(1,.36f,.12f,(1-progress)*.9f);
+            float radius=(heavy?76:62)+progress*(heavy?34:24);Vector2 center=heroRendered-new Vector2(0,43);
+            Color arcColor=heavy?new Color(1,.74f,.18f,(1-progress)*.95f):gearTier>=4?new Color(.22f,.88f,1f,(1-progress)*.9f):new Color(1,.36f,.12f,(1-progress)*.9f);
             for(int i=0;i<17;i++){float p=i/16f;float angle=a-1.05f+p*2.1f;float next=angle+.13f;
                 Vector2 p1=center+new Vector2(Mathf.Cos(angle),Mathf.Sin(angle))*radius;
                 Vector2 p2=center+new Vector2(Mathf.Cos(next),Mathf.Sin(next))*radius;
@@ -211,13 +248,12 @@ public partial class AlleyGame {
     void DrawCombatText(){
         int index=0;
         foreach(Pop p in pops){
-            if(p.text=="제압"||p.text=="골목 대장 등장"||p.text=="전성기의 한 방"||p.text.Length==0)continue;
-            float t=1-p.life;float a=Mathf.Clamp01(p.life*4);int size=p.style==4?22:p.style==0?17:p.text=="크리티컬!"?29:25;
+            if(p.text=="제압"||p.text=="퍽!"||p.text=="−1"||p.text=="+1"||p.text=="골목 대장 등장"||p.text=="전성기의 한 방"||p.text.Length==0)continue;
+            float t=1-p.life;float a=Mathf.Clamp01(p.life*4);int size=p.style==4?20:p.style==0?15:p.text=="크리티컬!"?24:21;
             Color c=p.style==4?Coral:p.style==2?Mint:p.style==0?Cream:p.text=="크리티컬!"?new Color(1,.55f,.15f):new Color(1,.83f,.36f);c.a=a;
-            Vector2 baseGui=ProjectPoint(p.pos,1.5f);
-            Vector2 pos=baseGui+new Vector2((index++%3-1)*9,-28-(1-p.life)*28);
-            float scale=1+Mathf.Sin(Mathf.Clamp01(t*4)*Mathf.PI)*.14f;
-            Matrix4x4 old=GUI.matrix;GUI.matrix=old*Matrix4x4.TRS(new Vector3(pos.x,pos.y,0),Quaternion.Euler(0,0,p.style==0?0:-6),new Vector3(scale,scale,1));
+            Vector2 pos=p.pos+new Vector2((index++%3-1)*7,-54-(1-p.life)*24);
+            float scale=1+Mathf.Sin(Mathf.Clamp01(t*4)*Mathf.PI)*.12f;
+            Matrix4x4 old=GUI.matrix;GUI.matrix=old*Matrix4x4.TRS(new Vector3(pos.x,pos.y,0),Quaternion.Euler(0,0,p.style==0?0:-4),new Vector3(scale,scale,1));
             Outlined(p.text,-110,-24,220,48,size,c,TextAnchor.MiddleCenter,p.style!=0);GUI.matrix=old;
         }
     }

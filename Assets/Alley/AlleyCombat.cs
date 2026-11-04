@@ -15,6 +15,10 @@ namespace SecondFistGame {
         public float radius,maxRadius,life,maxLife;
         public Color color;
     }
+    public sealed class AlleyHazard {
+        public int id,kind,hp=1;
+        public Vector2 pos;
+    }
     public sealed class Fighter {
         public int id,kind,hp,maxHp,appearance,facing=1,burstQueue;
         public Vector2 pos,velocity,aim,locomotion;
@@ -33,13 +37,15 @@ namespace SecondFistGame {
         public readonly List<Fighter> enemies=new List<Fighter>();
         public readonly List<CoinDrop> coins=new List<CoinDrop>();
         public readonly List<Shockwave> shockwaves=new List<Shockwave>();
+        public readonly List<AlleyHazard> hazards=new List<AlleyHazard>();
         public readonly List<CombatEvent> events=new List<CombatEvent>();
         public Vector2 player=new Vector2(270,535),direction=Vector2.right,moveVelocity,playerImpulse;
         public bool hasPartner;
+        public int partnerDamage=1;
         public Vector2 partnerPos=new Vector2(225,555),partnerVelocity,partnerDirection=Vector2.right;
         public float partnerCooldown,partnerPunch;
         public float health=100,maxHealth=100,charge=100,elapsed,attackCooldown,invulnerable,punch,freeze,attackLead,attackAnimation,playerReaction;
-        public float feverClock,feverDuration=5.5f;
+        public float feverClock,feverDuration=5.5f,hazardSpawnClock=3.5f;
         public bool isFever { get { return feverClock>0; } }
         public int baseDamage=1,collectedCoins,comboStep,revivesUsed;
         public int kills,hits,wallHits,chainHits,level=1,xp,nextXp=3,stage,bestChain;
@@ -62,6 +68,7 @@ namespace SecondFistGame {
             partnerPos=Remap(partnerPos,previous,next);
             foreach(Fighter e in enemies)e.pos=Remap(e.pos,previous,next);
             foreach(CoinDrop c in coins)c.pos=Remap(c.pos,previous,next);
+            foreach(AlleyHazard h in hazards)h.pos=Remap(h.pos,previous,next);
             arena=next;ConstrainPlayer();
         }
         static Vector2 Remap(Vector2 p,Rect from,Rect to){return new Vector2(to.xMin+(p.x-from.xMin)/from.width*to.width,to.yMin+(p.y-from.yMin)/from.height*to.height);}
@@ -69,6 +76,36 @@ namespace SecondFistGame {
         public Fighter AddEnemy(Vector2 pos,int kind=0){
             int hp=kind==2?18+stage*4:kind==1?5+stage/2:3;
             Fighter e=new Fighter{id=++nextId,kind=kind,hp=hp,maxHp=hp,appearance=kind==2?(stage==0?1:stage==1?0:stage==2?2:3):kind==1?1:stage==0?2:stage==1?0:(nextId%2==0?0:2),pos=pos,attack=.6f+(nextId%4)*.12f};enemies.Add(e);return e;
+        }
+        public AlleyHazard AddHazard(Vector2 pos,int kind=0){
+            AlleyHazard h=new AlleyHazard{id=++nextId,kind=kind,hp=1,pos=ClampEnemy(pos)};
+            hazards.Add(h);
+            return h;
+        }
+        public void TriggerHazard(AlleyHazard h){
+            if(h==null||h.hp<=0)return;
+            h.hp=0;
+            if(h.kind==0){
+                AddShockwave(h.pos,155f,new Color(1f,.38f,.12f),.32f);
+                SpawnCoins(h.pos,3,1+magnetSkill);
+                events.Add(new CombatEvent("드럼통 폭발!!",h.pos,3));
+                freeze=Mathf.Max(freeze,.025f);
+                foreach(Fighter e in enemies){
+                    if(e.hp<=0)continue;
+                    Vector2 delta=e.pos-h.pos;
+                    if(delta.magnitude<=148f){
+                        Vector2 dir=delta.sqrMagnitude>.01f?delta.normalized:Vector2.up;
+                        Damage(e,2+wallSkill,"폭발!",2);
+                        if(!e.boss||isFever)Launch(e,dir*660f,.34f,16f);
+                    }
+                }
+            }else{
+                AddShockwave(h.pos,125f,new Color(1f,.82f,.22f),.28f);
+                SpawnCoins(h.pos,5,1+magnetSkill);
+                health=Mathf.Min(maxHealth,health+12);
+                charge=Mathf.Min(100,charge+20);
+                events.Add(new CombatEvent("보급품 대박!!",h.pos,2));
+            }
         }
         public int GetSkillRank(int skillId){
             switch(skillId){
@@ -107,10 +144,10 @@ namespace SecondFistGame {
             events.Add(new CombatEvent("전부 각성!!",player,3));
         }
         void ApplySkill(int skill){
-            if(skill==0){wallSkill++;events.Add(new CombatEvent("벽꿍 강화!",player,2));}
-            else if(skill==1){chainSkill++;events.Add(new CombatEvent("충돌 전파!",player,2));}
-            else if(skill==2){stunSkill++;events.Add(new CombatEvent("연쇄 기절!",player,2));}
-            else if(skill==3){fistSkill++;events.Add(new CombatEvent("폭풍 권법!",player,2));}
+            if(skill==0){wallSkill++;events.Add(new CombatEvent(wallSkill>=3?"초월: 팔룡 폭파벽!":"벽꿍 강화!",player,wallSkill>=3?3:2));}
+            else if(skill==1){chainSkill++;events.Add(new CombatEvent(chainSkill>=3?"초월: 인간 핀볼!":"충돌 전파!",player,chainSkill>=3?3:2));}
+            else if(skill==2){stunSkill++;events.Add(new CombatEvent(stunSkill>=3?"초월: 절대 기절!":"연쇄 기절!",player,stunSkill>=3?3:2));}
+            else if(skill==3){fistSkill++;events.Add(new CombatEvent(fistSkill>=3?"초월: 팔룡 핵주먹!":"폭풍 권법!",player,fistSkill>=3?3:2));}
             else if(skill==4){vampSkill++;health=Mathf.Min(maxHealth,health+15);events.Add(new CombatEvent("혈기 흡수!",player,2));}
             else{magnetSkill++;events.Add(new CombatEvent("황금 손!",player,2));}
         }
@@ -184,6 +221,7 @@ namespace SecondFistGame {
             Spawn(dt);
             foreach(Fighter e in enemies)if(e.hp>0)MoveEnemy(e,dt);
             ResolveContacts(dt);
+            ResolveHazards();
             for(int i=enemies.Count-1;i>=0;i--)if(enemies[i].hp<=0){
                 Fighter e=enemies[i];enemies.RemoveAt(i);kills++;xp+=1+(magnetSkill>0&&kills%3==0?1:0);
                 if(vampSkill>0)health=Mathf.Min(maxHealth,health+vampSkill*2.5f);
@@ -215,8 +253,22 @@ namespace SecondFistGame {
                 partnerCooldown=.78f;partnerPunch=.18f;
                 Vector2 aim=(nearest.pos-partnerPos).normalized;if(aim.sqrMagnitude<.01f)aim=Vector2.right;
                 partnerDirection=aim;
-                Damage(nearest,1,"동료 지원!",1);
+                Damage(nearest,partnerDamage,"동료 지원!",1);
                 if(!nearest.boss)Launch(nearest,aim*540f,.26f,10f);
+            }
+        }
+        void ResolveHazards(){
+            for(int i=hazards.Count-1;i>=0;i--){
+                AlleyHazard h=hazards[i];
+                if(h.hp<=0){hazards.RemoveAt(i);continue;}
+                foreach(Fighter e in enemies){
+                    if(e.hp<=0||e.velocity.sqrMagnitude<130*130)continue;
+                    if((e.pos-h.pos).magnitude<46f){
+                        TriggerHazard(h);
+                        break;
+                    }
+                }
+                if(h.hp<=0)hazards.RemoveAt(i);
             }
         }
         void UpdateCoins(float dt){
@@ -255,6 +307,17 @@ namespace SecondFistGame {
             return best;
         }
         void Spawn(float dt){
+            if(spawning&&hazards.Count<2){
+                hazardSpawnClock-=dt;
+                if(hazardSpawnClock<=0){
+                    hazardSpawnClock=6.5f;
+                    float hx=UnityEngine.Random.Range(arena.xMin+48f,arena.xMax-48f);
+                    float hy=UnityEngine.Random.Range(arena.yMin+55f,arena.yMax-55f);
+                    if((new Vector2(hx,hy)-player).magnitude>85f){
+                        AddHazard(new Vector2(hx,hy),UnityEngine.Random.value<.35f?1:0);
+                    }
+                }
+            }
             spawnClock-=dt;if(!spawning||spawnClock>0||bossSpawned||enemies.Count>=9)return;
             if(kills>=targetKills){AddEnemy(new Vector2(arena.center.x,arena.yMin+35),2);bossSpawned=true;events.Add(new CombatEvent("골목 대장 등장",new Vector2(arena.center.x,arena.yMin+105),3));return;}
             float side=UnityEngine.Random.value<.5f?-1:1;
@@ -276,9 +339,17 @@ namespace SecondFistGame {
                 Vector2 desired=e.pos+e.velocity*dt;bool hitX=desired.x<arena.xMin||desired.x>arena.xMax,hitY=desired.y<arena.yMin||desired.y>arena.yMax;
                 e.pos=ClampEnemy(desired);
                 if((hitX||hitY)&&e.wallCooldown<=0){
-                    e.wallCooldown=.30f;wallHits++;CountChain();Damage(e,1+wallSkill,"벽꿍!",1);
-                    AddShockwave(e.pos,75+wallSkill*15,new Color(1,.65f,.22f),.22f);
-                    if(wallSkill>0)SpawnCoins(e.pos,1,1);
+                    e.wallCooldown=.30f;wallHits++;CountChain();Damage(e,1+wallSkill,wallSkill>=3?"폭파벽!!":"벽꿍!",1);
+                    AddShockwave(e.pos,75+wallSkill*18,wallSkill>=3?new Color(1,.32f,.12f):new Color(1,.65f,.22f),.24f);
+                    if(wallSkill>0)SpawnCoins(e.pos,wallSkill>=3?2:1,1);
+                    if(wallSkill>=3){
+                        foreach(Fighter other in enemies){
+                            if(other!=e&&other.hp>0&&(other.pos-e.pos).magnitude<115f){
+                                Damage(other,1+wallSkill/2,"폭발 파편!",2);
+                                other.stun=Mathf.Max(other.stun,.35f);
+                            }
+                        }
+                    }
                     if(hitX)e.velocity.x*=-.16f;if(hitY)e.velocity.y*=-.16f;
                     e.stun=Mathf.Max(e.stun,.26f+stunSkill*.25f);e.reaction=Mathf.Max(e.reaction,.22f);freeze=Mathf.Max(freeze,.014f);
                 }
@@ -341,9 +412,10 @@ namespace SecondFistGame {
                 Fighter source=a.velocity.sqrMagnitude>b.velocity.sqrMagnitude?a:b;Fighter target=source==a?b:a;
                 if(source.velocity.sqrMagnitude>180*180&&source.contact<=0&&target.contact<=0){
                     source.contact=.14f;target.contact=.30f;chainHits++;CountChain();
-                    Vector2 impulse=source.velocity.normalized*(420+chainSkill*100);Launch(target,impulse,.27f,9);target.contact=.30f;target.stun=.34f+stunSkill*.45f;source.velocity*=.64f;
-                    Damage(target,1+chainSkill,"연쇄!",2);
-                    AddShockwave(target.pos,65+chainSkill*14,new Color(.32f,.85f,.66f),.20f);
+                    Vector2 impulse=source.velocity.normalized*(420+chainSkill*110);Launch(target,impulse,.27f,9);target.contact=.30f;target.stun=.34f+stunSkill*.45f;
+                    source.velocity*=chainSkill>=3?.88f:.64f;
+                    Damage(target,1+chainSkill,chainSkill>=3?"핀볼 폭격!":"연쇄!",2);
+                    AddShockwave(target.pos,65+chainSkill*18,new Color(.32f,.85f,.66f),.22f);
                 }else{
                     float settle=(required-distance)*.5f*(1-Mathf.Exp(-20*dt));
                     if(a.velocity.sqrMagnitude<900&&a.dash<=0)a.pos=ClampEnemy(a.pos-normal*settle);
@@ -362,14 +434,24 @@ namespace SecondFistGame {
             attackCooldown=.43f*haste;hits++;comboStep=(comboStep+1)%3;
             bool finisher=comboStep==0||(isFever&&hits%2==0);
             if(attackAnimation<=0)attackAnimation=.34f*haste;
-            float reach=110+fistSkill*12+(finisher?24:0)+(isFever?20:0);
-            int dmg=baseDamage+(finisher&&fistSkill>0?1:0)+(isFever?1:0);
+            bool dragonFist=finisher&&fistSkill>=3;
+            float reach=110+fistSkill*12+(finisher?24:0)+(dragonFist?28:0)+(isFever?20:0);
+            int dmg=baseDamage+(finisher&&fistSkill>0?1:0)+(dragonFist?1:0)+(isFever?1:0);
             float knockback=650+fistSkill*55+(finisher?190:0)+(isFever?160:0);
-            if(finisher)AddShockwave(player+aim*52,88+fistSkill*16,isFever?new Color(1,.76f,.22f):new Color(1,.42f,.18f),.22f);
+            if(finisher){
+                AddShockwave(player+aim*52,88+fistSkill*16,isFever||dragonFist?new Color(1,.76f,.22f):new Color(1,.42f,.18f),.22f);
+                if(dragonFist)AddShockwave(player+aim*108,118,new Color(1,.32f,.12f),.26f);
+            }
             foreach(Fighter e in enemies){
                 Vector2 delta=e.pos-player;if(e.hp<=0||delta.magnitude>=reach||Vector2.Dot(aim,delta.normalized)<=(finisher?.05f:.25f))continue;
-                Damage(e,dmg,finisher?"강타!":"",finisher?1:0);
-                if(e.kind==0||(e.kind==1&&(e.windup<=0&&e.dash<=0||finisher))||(e.boss&&(finisher&&isFever)))Launch(e,aim*knockback,finisher?.36f:.30f,finisher?18:12);
+                Damage(e,dmg,dragonFist?"팔룡 핵주먹!":finisher?"강타!":"",finisher?1:0);
+                if(e.kind==0||(e.kind==1&&(e.windup<=0&&e.dash<=0||finisher))||(e.boss&&(finisher&&(isFever||dragonFist))))Launch(e,aim*knockback,finisher?.36f:.30f,finisher?18:12);
+            }
+            for(int i=hazards.Count-1;i>=0;i--){
+                AlleyHazard h=hazards[i];
+                if(h.hp>0&&(h.pos-player).magnitude<reach&&Vector2.Dot(aim,(h.pos-player).normalized)>0f){
+                    TriggerHazard(h);
+                }
             }
             charge=Mathf.Min(100,charge+9+vampSkill*2);freeze=Mathf.Max(freeze,finisher?.018f:.009f);
             events.Add(new CombatEvent(finisher?"크리티컬!":"퍽!",player+aim*60,1));

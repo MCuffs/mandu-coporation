@@ -13,18 +13,25 @@ public partial class AlleyGame : MonoBehaviour {
     Vector2 stickOrigin,stick; bool dragging,requestSpecial;int dragFinger=-1;
     float shake,pulse,ring,walk; int stage;bool map;
     float Scale { get { return Mathf.Min(Screen.width/540f,Screen.height/960f); } }
-    float ViewWidth { get { return Screen.width/Scale; } }
-    float ViewHeight { get { return Screen.height/Scale; } }
-    Vector2 SpecialPosition { get { return new Vector2(ViewWidth-76,ViewHeight-82); } }
-    Vector2 Pointer(Vector2 screen) { return new Vector2(screen.x/Scale,(Screen.height-screen.y)/Scale); }
+    float ViewWidth { get { return 540f; } }
+    float ViewHeight { get { return 960f; } }
+    Vector2 ViewportOffset { get { float s=Scale;return new Vector2((Screen.width-540f*s)*.5f,(Screen.height-960f*s)*.5f); } }
+    Vector2 SpecialPosition { get { return new Vector2(ViewWidth-72,ViewHeight-84); } }
+    Vector2 Pointer(Vector2 screen) {
+        float s=Scale;Vector2 off=ViewportOffset;
+        return new Vector2((screen.x-off.x)/s,(Screen.height-screen.y-off.y)/s);
+    }
     public bool IsStoryActive() { return storyActive; }
     public bool IsInGym() { return inGym; }
     public bool IsHome() { return home; }
+    public int CurrentStage { get { return stage; } }
 
     void Awake() {
         Application.targetFrameRate=60;
 #if !UNITY_EDITOR
-        Screen.SetResolution(Display.main.systemWidth,Display.main.systemHeight,FullScreenMode.FullScreenWindow);
+        int targetH=Mathf.Min(1080,Display.main.systemHeight-80);
+        int targetW=Mathf.RoundToInt(targetH*540f/960f);
+        Screen.SetResolution(targetW,targetH,FullScreenMode.Windowed);
 #endif
         font=Resources.Load<Font>("Fonts/GothicA1-Regular");
         fontBold=Resources.Load<Font>("Fonts/GothicA1-Bold");fontDisplay=Resources.Load<Font>("Fonts/BlackHanSans-Regular");
@@ -34,8 +41,11 @@ public partial class AlleyGame : MonoBehaviour {
         white=Texture2D.whiteTexture;disc=Circle();round=Rounded();panelStyle=new GUIStyle{border=new RectOffset(8,8,8,8),normal={background=round}};
         source=gameObject.AddComponent<AudioSource>();hitSound=Sound(155,.055f);wallSound=Sound(80,.10f);specialSound=Sound(67,.20f);
         LoadPresentation();LoadArcade();LoadStages();LoadPrologue();
-        world3D=gameObject.AddComponent<Alley3DWorld>();
-        world3D.Initialize(Camera.main);
+        world3D=null;
+        if(Camera.main!=null){
+            Camera.main.orthographic=true;
+            Camera.main.backgroundColor=new Color(.04f,.05f,.08f);
+        }
         NewRun();EnterGymHub();
     }
     void NewRun() {
@@ -45,10 +55,31 @@ public partial class AlleyGame : MonoBehaviour {
         float cx=combat.arena.center.x,cy=combat.player.y;
         combat.AddEnemy(new Vector2(cx-94,cy-38));combat.AddEnemy(new Vector2(cx-158,cy-42));
         combat.AddEnemy(new Vector2(cx+151,cy-121));combat.AddEnemy(new Vector2(cx+137,cy+113),1);
+        combat.AddHazard(new Vector2(cx-118,cy+84),0);
+        combat.AddHazard(new Vector2(cx+116,cy-82),1);
         StartBattle();
     }
     void OnApplicationFocus(bool focused) { if(!focused){dragging=false;stick=Vector2.zero;} }
+    void EnsureLoaded() {
+        if(world3D!=null){Destroy(world3D);world3D=null;}
+        Transform old3D=transform.Find("World3D");
+        if(old3D!=null)Destroy(old3D.gameObject);
+        if(white!=null&&font!=null&&heroMotionAtlas!=null&&profile!=null)return;
+        font=Resources.Load<Font>("Fonts/GothicA1-Regular");
+        fontBold=Resources.Load<Font>("Fonts/GothicA1-Bold");fontDisplay=Resources.Load<Font>("Fonts/BlackHanSans-Regular");
+        if(font==null)font=Font.CreateDynamicFontFromOSFont(new[]{"Malgun Gothic","Arial"},24);
+        if(fontBold==null)fontBold=font;if(fontDisplay==null)fontDisplay=fontBold;
+        atlas=Resources.Load<Texture2D>("FighterAtlas");background=Resources.Load<Texture2D>("AlleyBackground");
+        white=Texture2D.whiteTexture;if(disc==null)disc=Circle();if(round==null)round=Rounded();
+        panelStyle=new GUIStyle{border=new RectOffset(8,8,8,8),normal={background=round}};
+        if(source==null)source=GetComponent<AudioSource>()??gameObject.AddComponent<AudioSource>();
+        if(hitSound==null)hitSound=Sound(155,.055f);if(wallSound==null)wallSound=Sound(80,.10f);if(specialSound==null)specialSound=Sound(67,.20f);
+        LoadPresentation();LoadArcade();LoadStages();LoadPrologue();
+        if(combat==null){NewRun();EnterGymHub();}
+        else UpdateArenaViewport(true);
+    }
     void Update() {
+        EnsureLoaded();
         float dt=Time.unscaledDeltaTime;pulse+=dt;walk+=dt;shake=Mathf.Max(0,shake-dt*22);ring=Mathf.Max(0,ring-dt*2);
         for(int i=pops.Count-1;i>=0;i--){pops[i].life-=dt;pops[i].pos.y-=dt*29;if(pops[i].life<=0)pops.RemoveAt(i);}
         if(Input.GetKeyDown(KeyCode.Escape)&&!home&&(inGym||combat.state==RunState.Fighting)&&!map)paused=!paused;
@@ -131,55 +162,94 @@ public partial class AlleyGame : MonoBehaviour {
         else if(background!=null){GUI.color=Color.white;GUI.DrawTexture(new Rect(0,0,ViewWidth,ViewHeight),background,ScaleMode.ScaleAndCrop);}
         else Box(0,0,ViewWidth,ViewHeight,new Color(.72f,.67f,.55f));
     }
+    void DrawHazard2D(AlleyHazard h){
+        Vector2 p=h.pos;
+        float pulseScale=1f+Mathf.Sin(pulse*8f+h.id)*.04f;
+        Ellipse(p+new Vector2(0,4),44,14,new Color(0,0,0,.28f));
+        if(h.kind==0){
+            // Explosive Red Drum Barrel
+            float w=34*pulseScale,ht=44*pulseScale;
+            Panel(p.x-w*.5f-2,p.y-ht-2,w+4,ht+4,Ink);
+            Panel(p.x-w*.5f,p.y-ht,w,ht,new Color(.88f,.20f,.16f));
+            Box(p.x-w*.5f,p.y-ht*.68f,w,7,Gold);
+            Box(p.x-w*.5f,p.y-ht*.32f,w,5,new Color(.18f,.20f,.24f));
+            Outlined("💥",p.x-18,p.y-ht-16,36,24,14,Gold,TextAnchor.MiddleCenter,true);
+        }else{
+            // Golden Supply Crate
+            float w=38*pulseScale,ht=36*pulseScale;
+            Panel(p.x-w*.5f-2,p.y-ht-2,w+4,ht+4,Ink);
+            Panel(p.x-w*.5f,p.y-ht,w,ht,Gold);
+            Box(p.x-w*.5f+4,p.y-ht*.55f,w-8,6,Coral);
+            Box(p.x-3,p.y-ht+4,6,ht-8,Coral);
+            Outlined("🎁",p.x-18,p.y-ht-16,36,24,14,Cream,TextAnchor.MiddleCenter,true);
+        }
+    }
     void World(){
         Matrix4x4 old=GUI.matrix;Vector2 jitter=shake>0?new Vector2(Mathf.PerlinNoise(pulse*34,0)-.5f,Mathf.PerlinNoise(0,pulse*34)-.5f)*shake:Vector2.zero;
         GUI.matrix=old*Matrix4x4.Translate(jitter);
-        if(world3D==null){
-            Floor();DrawFallenActors();
-        }
+        Floor();
+        DrawFallenActors();
         foreach(Fighter e in combat.enemies) {
-            Vector2 ePos=ProjectPoint(e.pos,0.1f);
-            Vector2 headPos=ProjectPoint(e.pos,e.boss?2.3f:1.75f);
             if(e.windup>0) {
-                Color warning=new Color(1,.23f,.12f,.24f+Mathf.Sin(pulse*20)*.10f);
+                Color warning=new Color(1,.23f,.12f,.22f+Mathf.Sin(pulse*20)*.08f);
                 if(e.kind>=1){
-                    Vector2 aimEnd=ProjectPoint(e.pos+e.aim*220,0.1f);
-                    Line(ePos,aimEnd,38,warning);Line(ePos,aimEnd,2.5f,Coral);
-                }else CircleAt(ePos,e.appearance==0?68:54,warning);
-                CircleAt(headPos+new Vector2(0,-14),12,Coral);
-                Text("!",headPos.x-16,headPos.y-30,32,32,19,Cream,TextAnchor.MiddleCenter,true);
+                    Vector2 aimEnd=e.pos+e.aim*210;
+                    Line(e.pos,aimEnd,34,warning);Line(e.pos,aimEnd,2.5f,Coral);
+                }else Ellipse(e.pos,e.appearance==0?96:78,34,warning);
             }
-            if(e.hp<e.maxHp||e.boss){
-                float w=e.boss?86:42;
-                Panel(headPos.x-w*.5f-1,headPos.y-1,w+2,8,Ink);
-                Panel(headPos.x-w*.5f,headPos.y,w*Mathf.Clamp01(e.hp/(float)e.maxHp),6,e.boss?Coral:Mint);
-            }
-            if(e.stun>0&&e.velocity.sqrMagnitude<1000)Text("✦",headPos.x-30,headPos.y-24,60,30,24,new Color(1,.79f,.18f),TextAnchor.MiddleCenter);
+            if(e.stun>0&&e.velocity.sqrMagnitude<1000)Text("✦",e.pos.x-30,e.pos.y-155,60,30,22,new Color(1,.79f,.18f),TextAnchor.MiddleCenter);
         }
-        Vector2 pGui=ProjectPoint(combat.player,0.6f);
-        if(ring>0){Ring(pGui,185*(1-ring)+15,9*ring,new Color(1,.53f,.18f,ring));Ring(pGui,125*(1-ring)+30,3,new Color(1,.95f,.76f,ring));}
-        if(world3D==null){
-            drawOrder.Clear();drawOrder.AddRange(combat.enemies);drawOrder.Sort((a,b)=>a.pos.y.CompareTo(b.pos.y));
-            bool heroDrawn=false;
-            foreach(Fighter e in drawOrder){if(!heroDrawn&&e.pos.y>combat.player.y){Hero();heroDrawn=true;}Enemy(e);}
-            if(!heroDrawn)Hero();
+        foreach(AlleyHazard h in combat.hazards){
+            if(h.hp>0)DrawHazard2D(h);
         }
+        if(ring>0){Ring(combat.player-new Vector2(0,36),185*(1-ring)+15,9*ring,new Color(1,.53f,.18f,ring));Ring(combat.player-new Vector2(0,36),125*(1-ring)+30,3,new Color(1,.95f,.76f,ring));}
+        drawOrder.Clear();drawOrder.AddRange(combat.enemies);drawOrder.Sort((a,b)=>a.pos.y.CompareTo(b.pos.y));
+        bool heroDrawn=false,partnerDrawn=!combat.hasPartner;
+        foreach(Fighter e in drawOrder){
+            if(!partnerDrawn&&e.pos.y>combat.partnerPos.y){Partner();partnerDrawn=true;}
+            if(!heroDrawn&&e.pos.y>combat.player.y){Hero();heroDrawn=true;}
+            Enemy(e);
+        }
+        if(!partnerDrawn)Partner();
+        if(!heroDrawn)Hero();
         DrawAfterimagesAndDust();
         DrawCombatText();
         GUI.matrix=old;
     }
 
-    void Centered(System.Action draw){Matrix4x4 old=GUI.matrix;GUI.matrix=old*Matrix4x4.Translate(new Vector3((ViewWidth-540)*.5f,(ViewHeight-960)*.5f,0));draw();GUI.matrix=old;}
+    void Centered(System.Action draw){draw();}
+    void DrawPillarbox(Vector2 off){
+        Matrix4x4 prev=GUI.matrix;
+        GUI.matrix=Matrix4x4.identity;
+        if(off.x>1f){
+            GUI.color=new Color(.03f,.04f,.06f);
+            GUI.DrawTexture(new Rect(0,0,off.x+2,Screen.height),white);
+            GUI.DrawTexture(new Rect(Screen.width-off.x-2,0,off.x+2,Screen.height),white);
+            GUI.color=new Color(1f,.76f,.30f,.22f);
+            GUI.DrawTexture(new Rect(off.x-1.5f,0,1.5f,Screen.height),white);
+            GUI.DrawTexture(new Rect(Screen.width-off.x,0,1.5f,Screen.height),white);
+        }
+        if(off.y>1f){
+            GUI.color=new Color(.03f,.04f,.06f);
+            GUI.DrawTexture(new Rect(0,0,Screen.width,off.y+2),white);
+            GUI.DrawTexture(new Rect(0,Screen.height-off.y-2,Screen.width,off.y+2),white);
+        }
+        GUI.color=Color.white;
+        GUI.matrix=prev;
+    }
     void OnGUI(){
-        float scale=Scale;GUI.matrix=Matrix4x4.Scale(new Vector3(scale,scale,1));
-        if(home){HomeScreen();GUI.color=Color.white;return;}
-        if(storyActive){DrawPrologue();GUI.color=Color.white;return;}
+        EnsureLoaded();
+        float scale=Scale;
+        Vector2 off=ViewportOffset;
+        GUI.matrix=Matrix4x4.TRS(new Vector3(off.x,off.y,0),Quaternion.identity,new Vector3(scale,scale,1));
+        if(home){HomeScreen();GUI.color=Color.white;DrawPillarbox(off);return;}
+        if(storyActive){DrawPrologue();GUI.color=Color.white;DrawPillarbox(off);return;}
         if(inGym){
             DrawGymWorld();
             if(stageSelect){Box(0,0,ViewWidth,ViewHeight,new Color(.02f,.03f,.05f,.92f));Centered(DrawStageSelect);}
             else if(styleMenu){Box(0,0,ViewWidth,ViewHeight,new Color(.02f,.03f,.05f,.92f));Centered(StylePanel);}
             else if(paused)Centered(PausePanel);
-            GUI.color=Color.white;DrawScreenTransition();return;
+            GUI.color=Color.white;DrawScreenTransition();DrawPillarbox(off);return;
         }
         Floor();
         if(!map){
@@ -187,6 +257,7 @@ public partial class AlleyGame : MonoBehaviour {
             if(paused)Centered(PausePanel);else if(combat.state==RunState.Choosing)Centered(Skills);else if(combat.state==RunState.Won||combat.state==RunState.Lost)Centered(ArcadeResult);
         }else Centered(ArcadeResult);
         DrawBattleReveal();GUI.color=Color.white;DrawScreenTransition();
+        DrawPillarbox(off);
     }
     void OnDestroy(){Destroy(disc);Destroy(round);Destroy(hitSound);Destroy(wallSound);Destroy(specialSound);DestroyPrologue();}
 }

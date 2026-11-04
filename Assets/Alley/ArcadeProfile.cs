@@ -8,30 +8,76 @@ public sealed class ArcadeProfile {
     public int fistLevel,bodyLevel,greedLevel;
     public int gymStationsMask,gymSafeCoins;
     public int totalKills,totalWallHits,questClaimedMask;
+    public int gearTier,gearLevel,gearRolls;
     public int[] stationInvested=new int[5];
+    public int[] stationLevels=new int[5];
     public string lastRun="";
     public const int StyleCost=120;
+    public const int GearRollCost=25;
+    public static readonly string[] GearNames={
+        "입문용 압박 붕대",
+        "강철 너클 글러브",
+        "맹호 스파링 권갑",
+        "적염 챔피언 글러브",
+        "뇌신 번개 권갑",
+        "팔룡 신화 천상권갑"
+    };
     public bool Owns(int style){return style>=0&&style<=3&&(unlocked&(1<<style))!=0;}
     public bool Equip(int style){if(!Owns(style))return false;selectedStyle=style;return true;}
     public bool Unlock(int style){if(style<1||style>3||Owns(style)||coins<StyleCost)return false;coins-=StyleCost;unlocked|=1<<style;return Equip(style);}
     public bool IsStationUnlocked(int id){return id>=0&&id<5&&(gymStationsMask&(1<<id))!=0;}
+    public int GetStationLevel(int id){
+        if(!IsStationUnlocked(id))return 0;
+        if(stationLevels==null||id<0||id>=stationLevels.Length)return 1;
+        return Mathf.Clamp(stationLevels[id]<=0?1:stationLevels[id],1,5);
+    }
     public int GetStationInvested(int id){if(stationInvested==null||id<0||id>=stationInvested.Length)return 0;return stationInvested[id];}
-    public void SetStationState(int id,bool isUnlocked,int invested){
+    public void SetStationState(int id,bool isUnlocked,int invested,int level=1){
         if(stationInvested==null||stationInvested.Length<5)Array.Resize(ref stationInvested,5);
+        if(stationLevels==null||stationLevels.Length<5)Array.Resize(ref stationLevels,5);
         if(id<0||id>=5)return;
-        if(isUnlocked)gymStationsMask|=1<<id;
+        if(isUnlocked){
+            gymStationsMask|=1<<id;
+            stationLevels[id]=Mathf.Clamp(level,1,5);
+        }else{
+            stationLevels[id]=0;
+        }
         stationInvested[id]=Mathf.Max(0,invested);
     }
     public int BuiltStationCount {
         get { int c=0;for(int i=0;i<5;i++)if(IsStationUnlocked(i))c++;return c; }
     }
+    public int TotalStationLevels {
+        get { int c=0;for(int i=0;i<5;i++)c+=GetStationLevel(i);return c; }
+    }
+    public string GearDisplayName {
+        get {
+            int t=Mathf.Clamp(gearTier,0,GearNames.Length-1);
+            return GearNames[t]+(gearLevel>0?" +"+gearLevel:"");
+        }
+    }
+    public bool RollGear(out bool tierUp){
+        tierUp=false;
+        if(coins<GearRollCost)return false;
+        coins-=GearRollCost;
+        gearRolls++;
+        gearLevel++;
+        int threshold=2+gearTier*2;
+        if(gearTier<5&&gearLevel>=threshold){
+            gearTier++;
+            gearLevel=0;
+            tierUp=true;
+        }
+        return true;
+    }
     public string FameTitle {
         get {
-            int score=BuiltStationCount*2+highestStage*2+(fistLevel+bodyLevel+greedLevel)/3;
+            int score=TotalStationLevels+highestStage*2+(fistLevel+bodyLevel+greedLevel)/2+gearTier*2;
+            if(score>=18)return "🐉 팔룡체육관 신화 총관장";
             if(score>=12)return "👑 전국구 전설 챔피언";
             if(score>=8)return "🔥 팔룡회 지배자";
             if(score>=5)return "⚡ 거리 챔피언";
-            if(score>=2)return "🥊 골목 관장";
+            if(score>=2)return "🥊 팔룡체육관 관장";
             return "🌱 신입 관장";
         }
     }
@@ -51,9 +97,14 @@ public sealed class ArcadeProfile {
     public void Normalize(){
         highestStage=Mathf.Clamp(highestStage,0,3);coins=Mathf.Max(0,coins);bestScore=Mathf.Max(0,bestScore);
         fistLevel=Mathf.Clamp(fistLevel,0,10);bodyLevel=Mathf.Clamp(bodyLevel,0,10);greedLevel=Mathf.Clamp(greedLevel,0,10);
+        gearTier=Mathf.Clamp(gearTier,0,5);gearLevel=Mathf.Clamp(gearLevel,0,20);gearRolls=Mathf.Max(0,gearRolls);
         gymSafeCoins=Mathf.Clamp(gymSafeCoins,0,500);
         totalKills=Mathf.Max(0,totalKills);totalWallHits=Mathf.Max(0,totalWallHits);
         if(stationInvested==null||stationInvested.Length<5)Array.Resize(ref stationInvested,5);
+        if(stationLevels==null||stationLevels.Length<5)Array.Resize(ref stationLevels,5);
+        for(int i=0;i<5;i++){
+            if(IsStationUnlocked(i)&&stationLevels[i]<=0)stationLevels[i]=1;
+        }
         unlocked=(unlocked&15)|1;if(!Owns(selectedStyle))selectedStyle=0;
     }
 }
@@ -75,14 +126,34 @@ public partial class AlleyGame {
         if(profile.selectedStyle==1)combat.wallSkill=1;
         if(profile.selectedStyle==2)combat.chainSkill=1;
         if(profile.selectedStyle==3)combat.stunSkill=1;
-        combat.baseDamage=1+profile.fistLevel/2+(profile.IsStationUnlocked(0)?1:0);
-        combat.fistSkill+=profile.fistLevel%2+(profile.IsStationUnlocked(1)?1:0);
-        combat.hasPartner=profile.IsStationUnlocked(2);
-        combat.maxHealth=100+profile.bodyLevel*20+(profile.IsStationUnlocked(3)?40:0);
-        if(profile.IsStationUnlocked(3))combat.wallSkill+=1;
-        if(profile.IsStationUnlocked(4)){combat.vampSkill+=1;combat.magnetSkill+=1;}
+        int s0=profile.GetStationLevel(0),s1=profile.GetStationLevel(1),s2=profile.GetStationLevel(2),s3=profile.GetStationLevel(3),s4=profile.GetStationLevel(4);
+        combat.baseDamage=1+profile.fistLevel/2+s0+profile.gearTier+(profile.gearLevel>=2?1:0);
+        combat.fistSkill+=profile.fistLevel%2+s1+(profile.gearTier>=2?1:0);
+        combat.hasPartner=s2>0;
+        combat.partnerDamage=Mathf.Max(1,s2);
+        combat.maxHealth=100+profile.bodyLevel*20+s3*40+profile.gearTier*15;
+        if(s3>0)combat.wallSkill+=Mathf.Min(3,s3);
+        if(s4>0){
+            combat.vampSkill+=Mathf.Min(3,s4);
+            combat.magnetSkill+=Mathf.Min(3,s4);
+            combat.feverDuration=5.5f+(s4-1)*0.8f;
+        }
         combat.health=combat.maxHealth;
         combat.magnetSkill+=profile.greedLevel/2;
+    }
+    public int CurrentGearTier { get { return profile!=null?profile.gearTier:0; } }
+    public void TriggerGearForge(){
+        bool tierUp;
+        if(!profile.RollGear(out tierUp))return;
+        SaveArcade();
+        PrepareArcade();
+        choiceFlash=.24f;
+        shake=tierUp?6.5f:3.5f;
+        source.PlayOneShot(tierUp?specialSound:wallSound,tierUp?.9f:.6f);
+        if(combat!=null){
+            combat.AddShockwave(combat.player,tierUp?190:110,tierUp?Gold:Mint,.30f);
+            pops.Add(new Pop{text=tierUp?("★ 권갑 승급! "+profile.GearDisplayName):("권갑 단련! "+profile.GearDisplayName),pos=combat.player+new Vector2(0,-28),style=tierUp?3:2});
+        }
     }
     public static int ArcadeScore(AlleyCombat c){return c.kills*100+c.wallHits*45+c.chainHits*65+c.bestChain*100+(c.state==RunState.Won?500+Mathf.Max(0,Mathf.CeilToInt(60-c.elapsed))*10:0);}
     public static int ArcadeReward(AlleyCombat c){return Mathf.Min(160,c.kills*3+c.wallHits*2+c.chainHits*3+(c.state==RunState.Won?35:0));}
@@ -102,14 +173,16 @@ public partial class AlleyGame {
     public bool CheckQuestProgress(out string questText,out int reward,out bool claimable,out int questIndex){
         string[] titles={
             "첫 체육관 시설 [헤비 샌드백] 건설하기",
+            "황금 샌드백 [권갑 연성] 1회 단련하기 ("+Mathf.Min(1,profile.gearRolls)+"/1)",
             "골목 일진 누적 10명 제압하기 ("+Mathf.Min(10,profile.totalKills)+"/10)",
             "[챔피언 스파링 링] 짓고 동료 파이터 영입하기",
             "벽꿍 누적 10회 달성하기 ("+Mathf.Min(10,profile.totalWallHits)+"/10)",
             "체육관 5대 모든 시설 완성하기 ("+profile.BuiltStationCount+"/5)"
         };
-        int[] rewards={40,55,80,100,180};
+        int[] rewards={40,45,55,80,100,180};
         bool[] done={
             profile.IsStationUnlocked(0),
+            profile.gearRolls>=1,
             profile.totalKills>=10,
             profile.IsStationUnlocked(2),
             profile.totalWallHits>=10,
@@ -120,7 +193,7 @@ public partial class AlleyGame {
                 questText=titles[i];reward=rewards[i];claimable=done[i];questIndex=i;return true;
             }
         }
-        questText="모든 체육관 마스터 업적 달성 완료!";reward=0;claimable=false;questIndex=-1;return false;
+        questText="팔룡체육관 모든 마스터 업적 달성 완료!";reward=0;claimable=false;questIndex=-1;return false;
     }
     public void ClaimQuest(int index,int reward){
         if(index<0||index>=10||(profile.questClaimedMask&(1<<index))!=0)return;
@@ -203,35 +276,48 @@ public partial class AlleyGame {
         }
     }
     void StylePanel(){
-        Title("도장 · 영구 단련 & 비기",24,120,492,54,34,Cream,TextAnchor.MiddleCenter);
-        Text("보유 자금 $"+profile.coins+"  ·  단련할수록 매 판 더 강해집니다",24,178,492,28,15,Gold,TextAnchor.MiddleCenter,true);
+        Title("팔룡체육관 · 권갑 연성 & 단련",24,86,492,50,32,Cream,TextAnchor.MiddleCenter);
+        Text("보유 자금 $"+profile.coins+"  ·  권갑 연성과 단련으로 전투력이 폭증합니다",24,136,492,24,14,Gold,TextAnchor.MiddleCenter,true);
+        // Gear Forge Box (Nobody's Adventure / Legend of Mushroom 1-tap dopamine loop)
+        Surface(24,168,492,92,new Color(.18f,.14f,.08f,.96f),Gold,true);
+        Text("🥊 장착 권갑: ["+profile.GearDisplayName+"]",40,176,300,26,16,Gold,TextAnchor.MiddleLeft,true);
+        Text("펀치력 +"+(profile.gearTier+(profile.gearLevel>=2?1:0))+" · 체력 +"+(profile.gearTier*15)+" · 공속 보너스 (누적 "+profile.gearRolls+"회 연성)",40,204,310,22,12,Cream,TextAnchor.MiddleLeft);
+        int threshold=2+profile.gearTier*2;
+        Text(profile.gearTier>=5?"★ 신화 등급 도달 ★":("승급 게이지: "+profile.gearLevel+" / "+threshold),40,228,300,20,12,Mint,TextAnchor.MiddleLeft,true);
+        bool canRollGear=profile.coins>=ArcadeProfile.GearRollCost;
+        GUI.enabled=canRollGear;
+        if(Button("🔨 권갑 연성 ($"+ArcadeProfile.GearRollCost+")",344,186,156,56,canRollGear?Gold:Muted)){
+            TriggerGearForge();
+        }
+        GUI.enabled=true;
+
         string[] statNames={"강철 주먹","금강불괴","황금 손"};
         string[] statDescs={
-            "기본 공격력 및 공속 강화 (LV."+profile.fistLevel+")",
-            "최대 체력 +"+(profile.bodyLevel*20)+" 증가 (LV."+profile.bodyLevel+")",
-            "정산금 +"+(profile.greedLevel*12)+"% & 자석 (LV."+profile.greedLevel+")"
+            "공격력·공속 강화 (LV."+profile.fistLevel+")",
+            "최대 체력 +"+(profile.bodyLevel*20)+" (LV."+profile.bodyLevel+")",
+            "정산 +"+(profile.greedLevel*12)+"%·자석 (LV."+profile.greedLevel+")"
         };
         int[] statLevels={profile.fistLevel,profile.bodyLevel,profile.greedLevel};
         for(int i=0;i<3;i++){
             float x=24+i*166;int cost=profile.UpgradeCost(i);bool maxed=statLevels[i]>=10;bool canBuy=!maxed&&profile.coins>=cost;
-            Surface(x,218,160,152,Slate,canBuy?Gold:Muted);
-            Text(statNames[i],x+8,228,144,26,17,Gold,TextAnchor.MiddleCenter,true);
-            Text(statDescs[i],x+8,258,144,44,12,Cream,TextAnchor.MiddleCenter);
+            Surface(x,272,160,136,Slate,canBuy?Gold:Muted);
+            Text(statNames[i],x+8,280,144,24,16,Gold,TextAnchor.MiddleCenter,true);
+            Text(statDescs[i],x+8,306,144,38,12,Cream,TextAnchor.MiddleCenter);
             GUI.enabled=canBuy;
-            if(Button(maxed?"MAX":"$"+cost,x+12,312,136,44,canBuy?Coral:Muted)){
+            if(Button(maxed?"MAX":"$"+cost,x+12,352,136,42,canBuy?Coral:Muted)){
                 if(profile.UpgradeStat(i)){SaveArcade();source.PlayOneShot(specialSound,.45f);}
             }
             GUI.enabled=true;
         }
-        Text("시작 기술 장착 (한 가지 선택)",24,388,492,26,15,Gold,TextAnchor.MiddleCenter,true);
+        Text("시작 비기 장착 (한 가지 선택)",24,418,492,24,14,Gold,TextAnchor.MiddleCenter,true);
         string[] names={"기본 권법","벽꿍 +1","충돌 전파 +1","연쇄 기절 +1"};
         for(int i=0;i<4;i++){
-            float y=422+i*96;Surface(24,y,492,84,Slate,profile.selectedStyle==i?Gold:Muted);
-            if(i>0)AbilityIcon(new Rect(34,y+6,72,72),i-1);
-            Text(names[i],i>0?118:44,y+12,220,30,21,Cream,TextAnchor.MiddleLeft,true);
-            Text(profile.selectedStyle==i?"현재 장착 중":"시작 시 즉시 LV.1 적용",i>0?118:44,y+46,220,24,13,Muted);
+            float y=448+i*90;Surface(24,y,492,80,Slate,profile.selectedStyle==i?Gold:Muted);
+            if(i>0)AbilityIcon(new Rect(34,y+4,70,70),i-1);
+            Text(names[i],i>0?118:44,y+10,220,28,20,Cream,TextAnchor.MiddleLeft,true);
+            Text(profile.selectedStyle==i?"현재 장착 중":"시작 시 즉시 LV.1 적용",i>0?118:44,y+42,220,22,13,Muted);
             bool own=profile.Owns(i);bool affordable=own||profile.coins>=ArcadeProfile.StyleCost;GUI.enabled=affordable&&profile.selectedStyle!=i;
-            if(Button(profile.selectedStyle==i?"장착 중":own?"장착":"$"+ArcadeProfile.StyleCost,367,y+16,132,50,affordable?Gold:Muted)){
+            if(Button(profile.selectedStyle==i?"장착 중":own?"장착":"$"+ArcadeProfile.StyleCost,367,y+15,132,48,affordable?Gold:Muted)){
                 if(own)profile.Equip(i);else profile.Unlock(i);SaveArcade();
             }
             GUI.enabled=true;

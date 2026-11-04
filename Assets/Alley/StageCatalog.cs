@@ -58,11 +58,24 @@ public partial class AlleyGame {
         BeginPrologue();
     }
     void StageBackdrop(int index,Rect rect){
-        if(stageBackgrounds==null){GUI.DrawTexture(rect,background,ScaleMode.ScaleAndCrop);return;}
+        if(index==0&&background!=null&&rect.height>400f){
+            GUI.DrawTexture(rect,background,ScaleMode.ScaleAndCrop);
+            return;
+        }
+        if(stageBackgrounds==null){
+            if(background!=null)GUI.DrawTexture(rect,background,ScaleMode.ScaleAndCrop);
+            return;
+        }
         float cellHeight=index<2?478f/1024f:546f/1024f;
         float cellAspect=(stageBackgrounds.width*.5f)/(stageBackgrounds.height*cellHeight),targetAspect=rect.width/rect.height;
-        float w=.5f,h=cellHeight;if(targetAspect>cellAspect)h*=cellAspect/targetAspect;else w*=targetAspect/cellAspect;
-        float u=(index%2)*.5f+(.5f-w)*.5f,v=(index<2?546f/1024f:0)+(cellHeight-h)*.5f;
+        float w=.5f,h=cellHeight;
+        if(targetAspect>cellAspect)h*=cellAspect/targetAspect;
+        else w=Mathf.Max(.36f,w*(targetAspect/cellAspect));
+        float pan=.5f;
+        if(combat!=null&&rect.height>400f){
+            pan=Mathf.Clamp01((combat.player.x-combat.arena.xMin)/Mathf.Max(1f,combat.arena.width));
+        }
+        float u=(index%2)*.5f+(.5f-w)*pan,v=(index<2?546f/1024f:0)+(cellHeight-h)*.5f;
         GUI.DrawTextureWithTexCoords(rect,stageBackgrounds,new Rect(u,v,w,h));
     }
     void DrawEquipmentIcon(Rect rect,int index,Color tint){
@@ -80,10 +93,10 @@ public partial class AlleyGame {
         if(styleMenu){StylePanel();return;}
         if(stageSelect){DrawStageSelect();return;}
         Surface(130,78,280,32,new Color(.14f,.19f,.28f),Gold,false);
-        Text("★ 액션 타이쿤 & 스트리트 격투 ★",130,80,280,28,13,Gold,TextAnchor.MiddleCenter,true);
-        Outlined("다시, 한 방",24,118,492,82,62,Cream,TextAnchor.MiddleCenter,true);
-        Outlined("정민수의 골목 체육관",24,196,492,40,24,Gold,TextAnchor.MiddleCenter,true);
-        Text("골목을 되찾고 · 시설을 짓고 · 수련생과 함께 제패하라!",24,242,492,28,15,Cream,TextAnchor.MiddleCenter);
+        Text("★ 액션 타이쿤 & 스트리트 핀볼 격투 ★",130,80,280,28,13,Gold,TextAnchor.MiddleCenter,true);
+        Outlined("팔룡체육관",24,118,492,82,62,Cream,TextAnchor.MiddleCenter,true);
+        Outlined("전설의 보스 정민수 · 다시, 한 방",24,196,492,40,23,Gold,TextAnchor.MiddleCenter,true);
+        Text("골목을 평정하고 · 도장을 증축하고 · 신화 권갑을 연성하라!",24,242,492,28,15,Cream,TextAnchor.MiddleCenter);
         // Hero & Gym Equipment showcase
         if(gymEquipmentAtlas!=null){
             DrawEquipmentIcon(new Rect(64,340,135,135),0,new Color(1,1,1,.92f));
@@ -91,15 +104,15 @@ public partial class AlleyGame {
         }
         MotionSprite(heroMotionAtlas,heroPivots,new Vector2(268,518),8,false,238,Color.white,-3,Vector2.one);
         Surface(24,536,492,104,Slate,Gold);
-        Title("보유 자금  $"+profile.coins+"     ·     체육관 시설  "+gym.BuiltCount+" / 5",34,548,472,34,21,Gold,TextAnchor.MiddleCenter);
-        Text("해방 구역 "+(profile.highestStage+1)+"/4   ·   최고 점수 "+profile.bestScore.ToString("N0")+"   ·   "+(gym.HasPartner?"동료 파이터 합류 완료!":"스파링 링 건설 시 동료 합류"),34,592,472,28,14,Cream,TextAnchor.MiddleCenter);
-        if(Button("🏋 내 체육관 입장 & 골목 출격",24,658,492,72,Mint)){stage=Mathf.Min(profile.highestStage,3);EnterGymHub();}
+        Title("보유 자금  $"+profile.coins+"   ·   도장 시설  "+gym.BuiltCount+"/5 (LV."+profile.TotalStationLevels+")",34,548,472,34,20,Gold,TextAnchor.MiddleCenter);
+        Text("해방 구역 "+(profile.highestStage+1)+"/4   ·   장착 권갑 ["+profile.GearDisplayName+"]",34,592,472,28,14,Cream,TextAnchor.MiddleCenter);
+        if(Button("🏋 팔룡체육관 입장 & 골목 출격",24,658,492,72,Mint)){stage=Mathf.Min(profile.highestStage,3);EnterGymHub();}
         if(Button("⚡ 즉시 골목 전투 (STAGE "+(Mathf.Min(profile.highestStage,3)+1)+")",24,742,237,54,Coral))StartStage(Mathf.Min(profile.highestStage,3));
         if(Button("구획 · 스테이지 선택",279,742,237,54,Gold))stageSelect=true;
-        if(Button("도장 영구 단련",24,808,237,48,Cream))styleMenu=true;
+        if(Button("권갑 연성 & 단련",24,808,237,48,Cream))styleMenu=true;
         if(Button("프롤로그 웹툰 보기",279,808,237,48,Cream))StartPrologueMode();
-        Text("한 손 드래그로 체육관 건설 · 수련비 수거 · 골목 출격까지 한 번에!",24,876,492,24,13,Cream,TextAnchor.MiddleCenter);
-        Text("v0.9  ·  Supercent Commercial Edition",24,908,492,19,12,Muted,TextAnchor.MiddleCenter);
+        Text("원핸드 드래그로 도장 증축 · 권갑 연성 · 골목 초토화까지 한 번에!",24,876,492,24,13,Cream,TextAnchor.MiddleCenter);
+        Text("팔룡체육관 v1.0  ·  Hybrid-Casual Commercial Edition",24,908,492,19,12,Muted,TextAnchor.MiddleCenter);
     }
     void DrawStageSelect(){
         Title("탈환할 골목 구역 선택",24,96,492,58,36,Cream,TextAnchor.MiddleCenter);

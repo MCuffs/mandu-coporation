@@ -20,7 +20,8 @@ public sealed class Alley3DWorld : MonoBehaviour {
         public int index;
     }
 
-    Transform worldRoot,envRoot,actorsRoot,propsRoot,coinsRoot,cashStackRoot,gateRoot;
+    Transform worldRoot,envRoot,actorsRoot,propsRoot,coinsRoot,cashStackRoot,gateRoot,hazardsRoot,plankGroup;
+    Renderer floorMainRenderer,wallLeftRenderer,wallRightRenderer,neonLeftRenderer,neonRightRenderer;
     Light mainLight,fillLight;
     Material matSkin,matHair,matDark,matWhite,matGold,matCash,matWoodFloor,matRubberFloor,matAsphalt,matBrick,matNeonCyan,matNeonRed,matShadow;
     readonly Dictionary<Color,Material> colorMaterials=new Dictionary<Color,Material>();
@@ -30,7 +31,9 @@ public sealed class Alley3DWorld : MonoBehaviour {
     readonly List<Station3D> stationModels=new List<Station3D>();
     readonly List<GameObject> coinModels=new List<GameObject>();
     readonly List<GameObject> billModels=new List<GameObject>();
+    readonly List<GameObject> hazardModels=new List<GameObject>();
     readonly List<GameObject> shockwaveRings=new List<GameObject>();
+    int lastThemeKey=-99,lastGearTier=-1;
     Camera cam;
     Vector3 camCurrentPos=new Vector3(0,13.5f,-9.2f);
     Shader baseShader;
@@ -62,6 +65,7 @@ public sealed class Alley3DWorld : MonoBehaviour {
         propsRoot=new GameObject("GymProps").transform;propsRoot.SetParent(worldRoot,false);
         actorsRoot=new GameObject("Actors").transform;actorsRoot.SetParent(worldRoot,false);
         coinsRoot=new GameObject("Coins").transform;coinsRoot.SetParent(worldRoot,false);
+        hazardsRoot=new GameObject("Hazards").transform;hazardsRoot.SetParent(worldRoot,false);
         cashStackRoot=new GameObject("CashStack").transform;cashStackRoot.SetParent(worldRoot,false);
 
         SetupLights();
@@ -151,11 +155,12 @@ public sealed class Alley3DWorld : MonoBehaviour {
 
     void BuildEnvironment(){
         // Main Gym & Alley Floor slabs
-        Part(PrimitiveType.Cube,envRoot,new Vector3(0,-.25f,-0.8f),new Vector3(11.6f,0.5f,11.2f),matWoodFloor,Vector3.zero,false);
+        floorMainRenderer=Part(PrimitiveType.Cube,envRoot,new Vector3(0,-.25f,-0.8f),new Vector3(11.6f,0.5f,11.2f),matWoodFloor,Vector3.zero,false).GetComponent<Renderer>();
         // Wood floor plank stripes
+        plankGroup=new GameObject("WoodPlanks").transform;plankGroup.SetParent(envRoot,false);
         Material darkPlank=Mat(new Color(.73f,.48f,.26f),.4f);
         for(int i=-4;i<=4;i++){
-            Part(PrimitiveType.Cube,envRoot,new Vector3(i*1.15f,0.005f,-0.8f),new Vector3(0.05f,0.01f,11.0f),darkPlank,Vector3.zero,false);
+            Part(PrimitiveType.Cube,plankGroup,new Vector3(i*1.15f,0.005f,-0.8f),new Vector3(0.05f,0.01f,11.0f),darkPlank,Vector3.zero,false);
         }
         // Top Entrance Rubber Mat & Street Asphalt outside
         Part(PrimitiveType.Cube,envRoot,new Vector3(0,-.22f,5.6f),new Vector3(12.2f,0.5f,4.5f),matRubberFloor,Vector3.zero,false);
@@ -167,10 +172,10 @@ public sealed class Alley3DWorld : MonoBehaviour {
         }
 
         // Left & Right Brick Walls with Neon Bars
-        Part(PrimitiveType.Cube,envRoot,new Vector3(-6.1f,1.8f,0.5f),new Vector3(0.7f,4.2f,15.5f),matBrick);
-        Part(PrimitiveType.Cube,envRoot,new Vector3(6.1f,1.8f,0.5f),new Vector3(0.7f,4.2f,15.5f),matBrick);
-        Part(PrimitiveType.Cube,envRoot,new Vector3(-5.7f,2.4f,0.2f),new Vector3(0.12f,0.22f,5.2f),matNeonCyan);
-        Part(PrimitiveType.Cube,envRoot,new Vector3(5.7f,2.4f,0.2f),new Vector3(0.12f,0.22f,5.2f),matNeonRed);
+        wallLeftRenderer=Part(PrimitiveType.Cube,envRoot,new Vector3(-6.1f,1.8f,0.5f),new Vector3(0.7f,4.2f,15.5f),matBrick).GetComponent<Renderer>();
+        wallRightRenderer=Part(PrimitiveType.Cube,envRoot,new Vector3(6.1f,1.8f,0.5f),new Vector3(0.7f,4.2f,15.5f),matBrick).GetComponent<Renderer>();
+        neonLeftRenderer=Part(PrimitiveType.Cube,envRoot,new Vector3(-5.7f,2.4f,0.2f),new Vector3(0.12f,0.22f,5.2f),matNeonCyan).GetComponent<Renderer>();
+        neonRightRenderer=Part(PrimitiveType.Cube,envRoot,new Vector3(5.7f,2.4f,0.2f),new Vector3(0.12f,0.22f,5.2f),matNeonRed).GetComponent<Renderer>();
 
         // Top Turf Gate Archway
         gateRoot=new GameObject("TurfGate").transform;gateRoot.SetParent(envRoot,false);
@@ -387,6 +392,10 @@ public sealed class Alley3DWorld : MonoBehaviour {
         propsRoot.gameObject.SetActive(inGym||game.IsHome());
         cashStackRoot.gameObject.SetActive(inGym||game.IsHome());
         gateRoot.gameObject.SetActive(inGym||game.IsHome());
+        hazardsRoot.gameObject.SetActive(!inGym&&!game.IsHome());
+
+        SyncEnvironmentTheme(inGym||game.IsHome(),game.CurrentStage);
+        SyncHeroGearVisuals(game.CurrentGearTier);
 
         // Smooth 2.5D Isometric Follow Camera (Supercent style)
         Vector3 hero3D=MapTo3D(c.player,arena);
@@ -421,9 +430,95 @@ public sealed class Alley3DWorld : MonoBehaviour {
         }else{
             for(int i=0;i<traineePuppets.Count;i++)if(traineePuppets[i].root!=null)traineePuppets[i].root.SetActive(false);
             SyncCombatEnemies3D(c,arena,dt);
+            SyncHazards3D(c,arena);
         }
 
         SyncCoins3D(c,arena,dt);
+    }
+
+    void SyncEnvironmentTheme(bool showGym,int stageIndex){
+        int key=showGym?-1:Mathf.Clamp(stageIndex,0,3);
+        if(key==lastThemeKey)return;
+        lastThemeKey=key;
+        if(plankGroup!=null)plankGroup.gameObject.SetActive(showGym);
+        if(showGym){
+            if(floorMainRenderer!=null)floorMainRenderer.sharedMaterial=matWoodFloor;
+            if(wallLeftRenderer!=null)wallLeftRenderer.sharedMaterial=matBrick;
+            if(wallRightRenderer!=null)wallRightRenderer.sharedMaterial=matBrick;
+            if(neonLeftRenderer!=null)neonLeftRenderer.sharedMaterial=matNeonCyan;
+            if(neonRightRenderer!=null)neonRightRenderer.sharedMaterial=matNeonRed;
+            if(mainLight!=null)mainLight.color=new Color(1f,.96f,.88f);
+            return;
+        }
+        if(key==0){
+            // Stage 0: School Back Alley
+            if(floorMainRenderer!=null)floorMainRenderer.sharedMaterial=Mat(new Color(.25f,.27f,.32f),.20f);
+            if(wallLeftRenderer!=null)wallLeftRenderer.sharedMaterial=Mat(new Color(.48f,.23f,.20f),.15f);
+            if(wallRightRenderer!=null)wallRightRenderer.sharedMaterial=Mat(new Color(.48f,.23f,.20f),.15f);
+            if(neonLeftRenderer!=null)neonLeftRenderer.sharedMaterial=matNeonCyan;
+            if(neonRightRenderer!=null)neonRightRenderer.sharedMaterial=matGold;
+            if(mainLight!=null)mainLight.color=new Color(.95f,.93f,.90f);
+        }else if(key==1){
+            // Stage 1: Neon Night Market
+            if(floorMainRenderer!=null)floorMainRenderer.sharedMaterial=Mat(new Color(.17f,.15f,.26f),.35f);
+            if(wallLeftRenderer!=null)wallLeftRenderer.sharedMaterial=Mat(new Color(.22f,.17f,.34f),.25f);
+            if(wallRightRenderer!=null)wallRightRenderer.sharedMaterial=Mat(new Color(.22f,.17f,.34f),.25f);
+            if(neonLeftRenderer!=null)neonLeftRenderer.sharedMaterial=Mat(new Color(1f,.20f,.75f),.85f,.1f,true);
+            if(neonRightRenderer!=null)neonRightRenderer.sharedMaterial=matNeonCyan;
+            if(mainLight!=null)mainLight.color=new Color(.88f,.82f,1f);
+        }else if(key==2){
+            // Stage 2: Sunset Rooftop
+            if(floorMainRenderer!=null)floorMainRenderer.sharedMaterial=Mat(new Color(.38f,.34f,.32f),.25f);
+            if(wallLeftRenderer!=null)wallLeftRenderer.sharedMaterial=Mat(new Color(.30f,.27f,.26f),.20f);
+            if(wallRightRenderer!=null)wallRightRenderer.sharedMaterial=Mat(new Color(.30f,.27f,.26f),.20f);
+            if(neonLeftRenderer!=null)neonLeftRenderer.sharedMaterial=matGold;
+            if(neonRightRenderer!=null)neonRightRenderer.sharedMaterial=matNeonRed;
+            if(mainLight!=null)mainLight.color=new Color(1f,.78f,.58f);
+        }else{
+            // Stage 3: Harbor Logistics Warehouse
+            if(floorMainRenderer!=null)floorMainRenderer.sharedMaterial=Mat(new Color(.18f,.22f,.27f),.42f,.25f);
+            if(wallLeftRenderer!=null)wallLeftRenderer.sharedMaterial=Mat(new Color(.15f,.29f,.44f),.35f,.2f);
+            if(wallRightRenderer!=null)wallRightRenderer.sharedMaterial=Mat(new Color(.42f,.20f,.16f),.35f,.2f);
+            if(neonLeftRenderer!=null)neonLeftRenderer.sharedMaterial=matNeonRed;
+            if(neonRightRenderer!=null)neonRightRenderer.sharedMaterial=matGold;
+            if(mainLight!=null)mainLight.color=new Color(.92f,.95f,1f);
+        }
+    }
+
+    void SyncHeroGearVisuals(int gearTier){
+        if(heroPuppet==null||gearTier==lastGearTier)return;
+        lastGearTier=gearTier;
+        Color[] gloveColors={
+            new Color(1f,.26f,.16f),
+            new Color(.75f,.82f,.92f),
+            new Color(1f,.58f,.12f),
+            new Color(1f,.18f,.24f),
+            new Color(.20f,.88f,1f),
+            new Color(1f,.82f,.18f)
+        };
+        int t=Mathf.Clamp(gearTier,0,gloveColors.Length-1);
+        Material gm=Mat(gloveColors[t],.75f,t>=1?.35f:.05f,t>=3);
+        if(heroPuppet.gloveLRenderer!=null)heroPuppet.gloveLRenderer.sharedMaterial=gm;
+        if(heroPuppet.gloveRRenderer!=null)heroPuppet.gloveRRenderer.sharedMaterial=gm;
+    }
+
+    void SyncHazards3D(AlleyCombat c,Rect arena){
+        while(hazardModels.Count<c.hazards.Count){
+            GameObject root=new GameObject("Hazard_"+hazardModels.Count);
+            root.transform.SetParent(hazardsRoot,false);
+            Part(PrimitiveType.Cylinder,root.transform,new Vector3(0,0.42f,0),new Vector3(0.68f,0.42f,0.68f),matNeonRed);
+            Part(PrimitiveType.Cylinder,root.transform,new Vector3(0,0.42f,0),new Vector3(0.72f,0.10f,0.72f),matGold);
+            hazardModels.Add(root);
+        }
+        for(int i=0;i<hazardModels.Count;i++){
+            bool active=i<c.hazards.Count&&c.hazards[i].hp>0;
+            if(hazardModels[i].activeSelf!=active)hazardModels[i].SetActive(active);
+            if(!active)continue;
+            AlleyHazard h=c.hazards[i];
+            Vector3 pos=MapTo3D(h.pos,arena);
+            hazardModels[i].transform.position=pos;
+            hazardModels[i].transform.localEulerAngles=new Vector3(0,h.kind==1?Time.time*65f:0f,0);
+        }
     }
 
     void SyncGym3D(AlleyGame game,Rect arena,float dt){
