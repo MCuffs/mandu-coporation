@@ -23,6 +23,31 @@ public static class SlingshotChecks
     public static string RunChecks()
     {
         var report = new StringBuilder("Prototype B (slingshot dad) rule checks\n");
+        // Compare predictions with actual empty-arena flight, including growth and corner bounces.
+        foreach (float size in new[] { .72f, 1f })
+        foreach (float bonus in new[] { 1f, 1.35f })
+        foreach (float retention in new[] { .88f, .979f })
+        foreach (bool rage in new[] { false, true })
+        foreach (Vector2 pull in new[] { new Vector2(24, 0), new Vector2(150, -40), new Vector2(-100, -150) })
+        {
+            var stage = new SlingshotSim.Stage();
+            stage.spawns.Add(new SlingshotSim.Spawn { at = 100, kind = SlingshotSim.Kind.Gum });
+            var flight = new SlingshotSim(stage, Arena, 1, size);
+            flight.launchBonus = bonus; flight.bounceRetention = retention; flight.ragePending = rage;
+            var predicted = SlingshotSim.Predict(flight.dad.pos, pull, Arena, flight.DadRadius, null,
+                bonus * (rage ? 1.15f : 1), retention, float.PositiveInfinity);
+            Expect(flight.Launch(pull), "prediction fixture launches", report);
+            for (int step = 0; step < 400 && flight.dad.flying; step++) flight.Tick(1 / 120f);
+            Expect(Vector2.Distance(predicted[predicted.Count - 1], flight.dad.pos) < .1f,
+                "predicted landing matches flight size=" + size + " boost=" + bonus + " retention=" + retention + " rage=" + rage + " pull=" + pull, report);
+        }
+        var preview = Sim(); preview.launchBonus = 1.35f; preview.ragePending = true;
+        var buffer = new System.Collections.Generic.List<Vector2>();
+        var guide = preview.PredictShot(new Vector2(150, -40), buffer);
+        Expect(object.ReferenceEquals(guide, buffer) && preview.ragePending && preview.shots == 0,
+            "aim prediction reuses buffer without consuming rage or launching", report);
+        Expect(preview.PredictShot(new Vector2(0, 10), buffer).Count == 1,
+            "dead-zone preview has no flight segment", report);
         var s = Sim(); Parked(s, SlingshotSim.Kind.Tray, Arena.xMin + 40, Arena.yMin + 30);   // keeps each check from ending in a win
         Expect(!s.Launch(new Vector2(0, -10)) && s.phase == SlingshotSim.Phase.Ready, "a pull inside the dead zone does not launch", report);
         Expect(s.Launch(new Vector2(0, -150)) && s.dad.flying && Mathf.Abs(s.dad.vel.y + SlingshotSim.LaunchMax) < 1 && s.shots == 1, "letting go flies dad along the pull at full speed for a full pull", report);

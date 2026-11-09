@@ -535,7 +535,7 @@ public sealed partial class DadSlingshotPrototype : MonoBehaviour
         Vector2 chest = d.pos - new Vector2(0, 60 * s);
         Line(chest, chest - pull.normalized * Mathf.Min(pull.magnitude, SlingshotSim.PullMax) * .7f, 7 * s, new Color(Ink.r, Ink.g, Ink.b, .55f));
         if (!live) return;
-        List<Vector2> path = SlingshotSim.Predict(d.pos, pull, Arena, Sim.DadRadius,aimPath);
+        List<Vector2> path = Sim.PredictShot(pull, aimPath);
         for (int i = 0; i + 1 < path.Count; i++)
         {
             Vector2 a = path[i], b = path[i + 1]; float len = (b - a).magnitude;

@@ -115,26 +115,37 @@ public sealed class SlingshotSim
     }
     // The aiming guide: straight to the first wall, then a short stretch after the bounce. Bodies are not shown; reading
     // the crowd is the player's job.
-    public static List<Vector2> Predict(Vector2 from, Vector2 pull, Rect arena, float dadRadius, List<Vector2> reuse = null)
+    public List<Vector2> PredictShot(Vector2 pull, List<Vector2> reuse = null)
     {
-        var points = reuse ?? new List<Vector2>(4);points.Clear();points.Add(from);
+        return Predict(dad.pos, pull, arena, DadRadius, reuse,
+            launchBonus * (ragePending ? 1.15f : 1), bounceRetention);
+    }
+    public static List<Vector2> Predict(Vector2 from, Vector2 pull, Rect arena, float dadRadius,
+        List<Vector2> reuse = null, float launchScale = 1, float retention = DadBounce,
+        float afterBounceDistance = 110)
+    {
+        var points = reuse ?? new List<Vector2>(4); points.Clear(); points.Add(from);
         if (pull.magnitude < PullDeadZone) return points;
-        Vector2 v = LaunchVelocity(pull), dir = v.normalized, p = from;
-        float budget = v.magnitude / DadDrag * .9f, after = -1;
-        Rect inner = new Rect(arena.xMin + dadRadius, arena.yMin + dadRadius, arena.width - 2 * dadRadius, arena.height - 2 * dadRadius);
-        for (float travelled = 0; travelled < budget; travelled += 6)
+        Vector2 v = LaunchVelocity(pull) * launchScale, p = from;
+        float time = 0, after = -1;
+        const float dt = 1 / 120f; // Same integration order and maximum step as UpdateDad.
+        while (time <= MaxFlight)
         {
-            p += dir * 6;
-            bool hitX = p.x < inner.xMin || p.x > inner.xMax, hitY = p.y < inner.yMin || p.y > inner.yMax;
-            if (hitX || hitY)
+            Vector2 previous = p;
+            p += v * dt; bool bumped = false;
+            if (p.x < arena.xMin + dadRadius) { p.x = arena.xMin + dadRadius; v.x = Mathf.Abs(v.x) * retention; bumped = true; }
+            if (p.x > arena.xMax - dadRadius) { p.x = arena.xMax - dadRadius; v.x = -Mathf.Abs(v.x) * retention; bumped = true; }
+            if (p.y < arena.yMin + dadRadius) { p.y = arena.yMin + dadRadius; v.y = Mathf.Abs(v.y) * retention; bumped = true; }
+            if (p.y > arena.yMax - dadRadius) { p.y = arena.yMax - dadRadius; v.y = -Mathf.Abs(v.y) * retention; bumped = true; }
+            time += dt; v *= Mathf.Exp(-DadDrag * dt);
+            if (bumped)
             {
-                p = new Vector2(Mathf.Clamp(p.x, inner.xMin, inner.xMax), Mathf.Clamp(p.y, inner.yMin, inner.yMax));
                 points.Add(p);
-                if (after >= 0) break;
-                if (hitX) dir.x = -dir.x; if (hitY) dir.y = -dir.y;
+                if (after >= 0 && !float.IsPositiveInfinity(afterBounceDistance)) break;
                 after = 0;
             }
-            if (after >= 0 && (after += 6) > 110) break;
+            else if (after >= 0) after += Vector2.Distance(previous, p);
+            if (after >= afterBounceDistance || v.magnitude < StopSpeed || time > MaxFlight) break;
         }
         points.Add(p);
         return points;
