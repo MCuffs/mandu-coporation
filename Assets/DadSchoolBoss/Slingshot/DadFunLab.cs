@@ -5,7 +5,11 @@ public sealed class DadFunLab : MonoBehaviour
 {
     DadFunLabModel model;
     DadArt art;
-    Texture2D background, pullPose, flightPose;
+    Texture2D background, pullPose, flightPose, cartSprite, padSprite;
+    public System.Action Exit;
+    bool recorded;
+    float dashFlash;
+    int bestShots;
     AudioSource sound;
     bool aiming, paused;
     int finger = -1;
@@ -27,10 +31,17 @@ public sealed class DadFunLab : MonoBehaviour
         background = Resources.Load<Texture2D>("DadV13/bg/corridor_floor1_long");
         pullPose = Resources.Load<Texture2D>("DadV13/chars/dad_pull_0");
         flightPose = Resources.Load<Texture2D>("DadV13/chars/dad_flight_0");
+        cartSprite = Resources.Load<Texture2D>("DadContentV2/lunch_cart");
+        padSprite = Resources.Load<Texture2D>("DadContentV2/rebound_mat");
         sound = gameObject.AddComponent<AudioSource>();
-        StartLevel(0);
+        StartLevel(DadFunLabModel.PlayOrder[0]);
     }
-    void StartLevel(int level) { model = new DadFunLabModel(level); aiming = paused = false; finger = -1; feedback = ""; feedbackTime = 0; }
+    void StartLevel(int level)
+    {
+        model = new DadFunLabModel(level); aiming = paused = recorded = false; finger = -1;
+        feedback = ""; feedbackTime = dashFlash = 0;
+        bestShots = PlayerPrefs.GetInt("DadContentV2.Best." + model.level, 0);
+    }
     void OnApplicationFocus(bool focused) { if (!focused) { paused = true; aiming = false; finger = -1; } }
     void OnApplicationPause(bool pause) { if (pause) OnApplicationFocus(false); }
     void Layout()
@@ -44,7 +55,18 @@ public sealed class DadFunLab : MonoBehaviour
         Layout();
         if (Input.GetKeyDown(KeyCode.Escape)) { paused = !paused; aiming = false; finger = -1; }
         if (paused) return;
-        if (model.sim.Over) { model.sim.Tick(Mathf.Min(Time.unscaledDeltaTime, .1f)); return; }
+        if (model.sim.Over)
+        {
+            model.sim.Tick(Mathf.Min(Time.unscaledDeltaTime, .1f));
+            if (!recorded && model.sim.phase == SlingshotSim.Phase.Won)
+            {
+                recorded = true;
+                if (bestShots == 0 || model.sim.shots < bestShots)
+                { bestShots = model.sim.shots; PlayerPrefs.SetInt("DadContentV2.Best." + model.level, bestShots); PlayerPrefs.Save(); }
+            }
+            return;
+        }
+        dashFlash = Mathf.Max(0, dashFlash - Time.unscaledDeltaTime);
         feedbackTime = Mathf.Max(0, feedbackTime - Time.unscaledDeltaTime);
         Vector2 p; bool down, held, up, cancel = false; int id;
         if (Input.touchCount > 0)
@@ -66,13 +88,13 @@ public sealed class DadFunLab : MonoBehaviour
         {
             if (down && p.y > 175 && p.y < 870)
             {
-                if (model.sim.dad.flying) model.Boost(p - model.sim.dad.pos);
-                else if (model.sim.shots == 0) { aiming = true; finger = id; start = now = p; }
+                if (model.sim.dad.flying) { if (model.Boost(p - model.sim.dad.pos)) dashFlash = .28f; }
+                else if (model.CanLaunch) { aiming = true; finger = id; start = now = p; }
             }
             if (aiming && (held || up)) now = p;
             if (aiming && up) { model.Launch(start - now); aiming = false; finger = -1; }
         }
-        model.Tick(Mathf.Min(Time.unscaledDeltaTime, .1f));
+        model.Tick(Mathf.Min(Time.unscaledDeltaTime, .1f) * (model.focusTime > 0 && !model.boostUsed ? .35f : aiming ? .5f : 1));
         foreach (var e in model.sim.events)
         {
             if (!string.IsNullOrEmpty(e.text) && e.text != "제압") { feedback = e.text; feedbackTime = .65f; }
@@ -107,11 +129,24 @@ public sealed class DadFunLab : MonoBehaviour
         Box(new Rect(0, 0, 540, 960), new Color(.93f, .9f, .78f));
         if (background != null) GUI.DrawTextureWithTexCoords(new Rect(0, 0, 540, 960), background, new Rect(0, 210f / 2340, 1, 1920f / 2340));
         Box(new Rect(0, 0, 540, 175), new Color(.12f, .23f, .17f)); text.normal.textColor = Color.white;
-        Label(new Rect(10, 8, 520, 30), "재미 실험실 · 성장/보상 없음", 20);
-        for (int i = 0; i < 3; i++) if (Button(new Rect(12 + i * 176, 48, 164, 34), (i + 1) + "번 실험")) StartLevel(i);
+        Label(new Rect(10, 8, 425, 30), "아빠 대소동 · 8개 도전", 23);
+        if (Exit != null && Button(new Rect(448, 6, 80, 34), "집으로")) { Exit(); GUI.matrix = Matrix4x4.identity; return; }
+        for (int i = 0; i < DadFunLabModel.Titles.Length; i++)
+        {
+            int index = DadFunLabModel.PlayOrder[i];
+            GUI.backgroundColor = index == model.level ? new Color(1, .8f, .2f) : Color.white;
+            bool clear = PlayerPrefs.GetInt("DadContentV2.Best." + index, 0) > 0;
+            if (Button(new Rect(10 + i * 65, 48, 60, 34), (i + 1) + (clear ? "★" : ""))) StartLevel(index);
+        }
+        GUI.backgroundColor = Color.white;
         Label(new Rect(8, 88, 524, 36), DadFunLabModel.Titles[model.level], 24);
-        Label(new Rect(10, 126, 520, 40), model.level == 2 ? "뒤로 당겨 발사 → 비행 중 원하는 곳을 탭" : model.level == 1 ? "카트를 맞혀 밀어보세요 · 발사는 한 번" : "쟁반 정면을 피해 벽에 튕겨보세요 · 한 발", 17);
+        Label(new Rect(10, 126, 520, 40), DadFunLabModel.Hints[model.level], 17);
         text.normal.textColor = Color.black;
+        if (model.padEnabled)
+        {
+            if (padSprite != null) GUI.DrawTexture(new Rect(model.pad.x - 48, model.pad.y - 48, 96, 96), padSprite, ScaleMode.ScaleToFit);
+            else Box(new Rect(model.pad.x - 32, model.pad.y - 32, 64, 64), Color.yellow);
+        }
         foreach (var f in model.sim.foes) if (f.hp > 0)
         {
             DadArt.Character c; if (art.characters.TryGetValue(f.kind == SlingshotSim.Kind.Tray ? "tray" : "gum", out c)) Character(c.Frame(f.Flying ? "hurt" : "idle", 0), f.pos);
@@ -127,15 +162,22 @@ public sealed class DadFunLab : MonoBehaviour
         }
         if (model.cartEnabled)
         {
-            Vector2 c = model.cart; Box(new Rect(c.x - 35, c.y - 40, 70, 35), new Color(.45f, .6f, .65f));
-            Box(new Rect(c.x - 30, c.y - 5, 12, 12), Color.black); Box(new Rect(c.x + 18, c.y - 5, 12, 12), Color.black);
-            Label(new Rect(c.x - 40, c.y - 38, 80, 30), "급식", 16);
+            Vector2 c = model.cart;
+            if (cartSprite != null) GUI.DrawTexture(new Rect(c.x - 58, c.y - 80, 116, 116), cartSprite, ScaleMode.ScaleToFit);
+            else Box(new Rect(c.x - 35, c.y - 40, 70, 35), new Color(.45f, .6f, .65f));
         }
         var dad = model.sim.dad;
         DadArt.Character dadArt; Texture2D idle = art.characters.TryGetValue("dad", out dadArt) ? dadArt.Frame("idle", 0) : null;
         Character(dad.flying ? flightPose : aiming ? pullPose : idle, dad.pos, dad.flying, dad.flying ? Mathf.Atan2(dad.vel.y, dad.vel.x) * Mathf.Rad2Deg : 0);
-        if (model.level == 2 && dad.flying && !model.boostUsed)
-            Label(new Rect(65, 790, 410, 54), "지금 원하는 방향을 탭 → 추가 돌진", 22);
+        if (dad.flying && (dashFlash > 0 || (model.CanBoost && !model.boostUsed)))
+        {
+            Color ring = dashFlash > 0 ? new Color(1, .75f, .1f) : new Color(.15f, .65f, .65f, .65f);
+            float radius = dashFlash > 0 ? 35 + (.28f - dashFlash) * 100 : 36;
+            for (int i = 0; i < 24; i++)
+            { float a = i * Mathf.PI / 12, b = (i + 1) * Mathf.PI / 12; Line(dad.pos + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * radius, dad.pos + new Vector2(Mathf.Cos(b), Mathf.Sin(b)) * radius, ring, 3); }
+        }
+        if (model.CanBoost && dad.flying && !model.boostUsed)
+            Label(new Rect(65, 790, 410, 54), model.focusTime > 0 ? "지금! 다음 상대를 탭" : "원하는 방향을 탭 → 추가 돌진", 22);
         if (feedbackTime > 0) Label(new Rect(80, 210, 380, 45), feedback, 25);
         if (aiming)
         {
@@ -143,15 +185,21 @@ public sealed class DadFunLab : MonoBehaviour
             for (int i = 1; i < path.Count; i++) Line(path[i - 1], path[i], Color.white);
         }
         Box(new Rect(0, 875, 540, 85), new Color(.95f, .9f, .72f));
-        Label(new Rect(8, 878, 524, 28), "남은 상대 " + model.sim.AliveCount + " · 연쇄 " + model.sim.bestChain + (model.level == 2 ? (model.boostUsed ? " · 추가 돌진 사용" : " · 추가 돌진 1회") : ""));
+        Label(new Rect(8, 878, 524, 28), "남은 " + model.sim.AliveCount + "명 · 발사 " + model.sim.shots + "/" + model.ShotBudget + " · 연쇄 " + model.sim.bestChain + (bestShots > 0 ? " · 최고 " + bestShots + "발" : ""));
         if (Button(new Rect(12, 914, 250, 34), "다시")) StartLevel(model.level);
         if (Button(new Rect(278, 914, 250, 34), paused ? "계속" : "정지")) { paused = !paused; aiming = false; finger = -1; }
         if (model.sim.Over || paused)
         {
             Box(new Rect(45, 360, 450, 200), new Color(.98f, .94f, .8f));
-            Label(new Rect(55, 380, 430, 62), paused ? "잠깐 쉬기" : model.sim.phase == SlingshotSim.Phase.Won ? "한 발 성공!" : model.sim.lossReason, 28);
-            Label(new Rect(60, 445, 420, 40), "다른 각도로 다시 해보고 싶은가요?", 20);
-            if (Button(new Rect(100, 500, 340, 42), paused ? "계속하기" : "같은 판 바로 다시")) { if (paused) paused = false; else StartLevel(model.level); }
+            bool won = model.sim.phase == SlingshotSim.Phase.Won;
+            Label(new Rect(55, 380, 430, 62), paused ? "잠깐 쉬기" : won ? "대소동 해결! · " + model.sim.shots + "발" : model.sim.lossReason, 28);
+            Label(new Rect(60, 445, 420, 40), paused ? "준비되면 계속하세요" : won ? "최대 연쇄 " + model.sim.bestChain + " · 카트 " + model.cartHits + "명" : DadFunLabModel.Hints[model.level], 19);
+            if (Button(new Rect(60, 500, 205, 42), paused ? "계속하기" : "바로 다시")) { if (paused) paused = false; else StartLevel(model.level); }
+            if (!paused && won && Button(new Rect(275, 500, 205, 42), model.level == 7 ? "처음부터" : "다음 도전 →"))
+            {
+                int order = System.Array.IndexOf(DadFunLabModel.PlayOrder, model.level);
+                StartLevel(DadFunLabModel.PlayOrder[(order + 1) % DadFunLabModel.PlayOrder.Length]);
+            }
         }
         GUI.matrix = Matrix4x4.identity;
     }

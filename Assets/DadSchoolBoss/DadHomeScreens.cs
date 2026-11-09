@@ -74,6 +74,7 @@ public sealed partial class DadSchoolPrototype
         Text(new Rect(418, 106, 100, 56), stars.ToString(), 36, Ink, true, TextAnchor.MiddleRight);
         Text(new Rect(24,164,492,26),Progress.Eco.Label(stage)+"  ·  "+StagePlan.FloorNames[Mathf.Clamp(floor-1,0,2)]+" 출동 준비",17,Green);
         DrawHomeScene(floor);
+        if (Button(new Rect(310, 216, 210, 44), "대소동 도전 · 8판", Yellow, true, 19)) OpenContentChallenge();
 
         // Mom's stash (idle reward): always on its own row so it never covers dad's face (v9).
         bool idle = Progress.HasIdleReward;

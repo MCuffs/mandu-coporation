@@ -1,0 +1,32 @@
+[
+  {
+    "file": "lunch_cart.png",
+    "size": [
+      1254,
+      1254
+    ],
+    "mode": "RGBA",
+    "alpha_bounds": [
+      69,
+      9,
+      1230,
+      1220
+    ],
+    "sha256": "83f2da3151d38ac224ef550de4e5563c715b684b717f61e4c8beaac648fcd6c8"
+  },
+  {
+    "file": "rebound_mat.png",
+    "size": [
+      1254,
+      1254
+    ],
+    "mode": "RGBA",
+    "alpha_bounds": [
+      0,
+      41,
+      1234,
+      1254
+    ],
+    "sha256": "cf209172f8d8805a837de248deefdb88d22816cbf5630dbc0ef993e561aeaea1"
+  }
+]
