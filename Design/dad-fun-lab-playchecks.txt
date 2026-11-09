@@ -1,174 +1,345 @@
 Programmatic strategy play, not human fun or rendering validation.
 Compilation succeeded - 3 warning(s)
+
 C:\Users\user\DadWarLatest\Assets\Alley\Alley3DWorld.cs(35,31): warning CS0414: The private field `Alley3DWorld.shockwaveRings' is assigned but its value is never used
+
 C:\Users\user\DadWarLatest\Assets\Alley\Alley3DWorld.cs(26,38): warning CS0414: The private field `Alley3DWorld.matWhite' is assigned but its value is never used
+
 C:\Users\user\DadWarLatest\Assets\Alley\ArcadeProfile.cs(114,108): warning CS0414: The private field `AlleyGame.runStars' is assigned but its value is never used
+
 Prototype B (slingshot dad) rule checks
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=0.72 boost=1 retention=0.88 rage=False pull=(24.00, 0.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=0.72 boost=1 retention=0.88 rage=False pull=(150.00, -40.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=0.72 boost=1 retention=0.88 rage=False pull=(-100.00, -150.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=0.72 boost=1 retention=0.88 rage=True pull=(24.00, 0.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=0.72 boost=1 retention=0.88 rage=True pull=(150.00, -40.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=0.72 boost=1 retention=0.88 rage=True pull=(-100.00, -150.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=0.72 boost=1 retention=0.979 rage=False pull=(24.00, 0.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=0.72 boost=1 retention=0.979 rage=False pull=(150.00, -40.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=0.72 boost=1 retention=0.979 rage=False pull=(-100.00, -150.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=0.72 boost=1 retention=0.979 rage=True pull=(24.00, 0.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=0.72 boost=1 retention=0.979 rage=True pull=(150.00, -40.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=0.72 boost=1 retention=0.979 rage=True pull=(-100.00, -150.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=0.72 boost=1.35 retention=0.88 rage=False pull=(24.00, 0.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=0.72 boost=1.35 retention=0.88 rage=False pull=(150.00, -40.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=0.72 boost=1.35 retention=0.88 rage=False pull=(-100.00, -150.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=0.72 boost=1.35 retention=0.88 rage=True pull=(24.00, 0.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=0.72 boost=1.35 retention=0.88 rage=True pull=(150.00, -40.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=0.72 boost=1.35 retention=0.88 rage=True pull=(-100.00, -150.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=0.72 boost=1.35 retention=0.979 rage=False pull=(24.00, 0.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=0.72 boost=1.35 retention=0.979 rage=False pull=(150.00, -40.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=0.72 boost=1.35 retention=0.979 rage=False pull=(-100.00, -150.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=0.72 boost=1.35 retention=0.979 rage=True pull=(24.00, 0.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=0.72 boost=1.35 retention=0.979 rage=True pull=(150.00, -40.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=0.72 boost=1.35 retention=0.979 rage=True pull=(-100.00, -150.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=1 boost=1 retention=0.88 rage=False pull=(24.00, 0.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=1 boost=1 retention=0.88 rage=False pull=(150.00, -40.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=1 boost=1 retention=0.88 rage=False pull=(-100.00, -150.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=1 boost=1 retention=0.88 rage=True pull=(24.00, 0.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=1 boost=1 retention=0.88 rage=True pull=(150.00, -40.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=1 boost=1 retention=0.88 rage=True pull=(-100.00, -150.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=1 boost=1 retention=0.979 rage=False pull=(24.00, 0.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=1 boost=1 retention=0.979 rage=False pull=(150.00, -40.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=1 boost=1 retention=0.979 rage=False pull=(-100.00, -150.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=1 boost=1 retention=0.979 rage=True pull=(24.00, 0.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=1 boost=1 retention=0.979 rage=True pull=(150.00, -40.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=1 boost=1 retention=0.979 rage=True pull=(-100.00, -150.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=1 boost=1.35 retention=0.88 rage=False pull=(24.00, 0.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=1 boost=1.35 retention=0.88 rage=False pull=(150.00, -40.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=1 boost=1.35 retention=0.88 rage=False pull=(-100.00, -150.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=1 boost=1.35 retention=0.88 rage=True pull=(24.00, 0.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=1 boost=1.35 retention=0.88 rage=True pull=(150.00, -40.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=1 boost=1.35 retention=0.88 rage=True pull=(-100.00, -150.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=1 boost=1.35 retention=0.979 rage=False pull=(24.00, 0.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=1 boost=1.35 retention=0.979 rage=False pull=(150.00, -40.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=1 boost=1.35 retention=0.979 rage=False pull=(-100.00, -150.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=1 boost=1.35 retention=0.979 rage=True pull=(24.00, 0.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=1 boost=1.35 retention=0.979 rage=True pull=(150.00, -40.00)
+
 PASS prediction fixture launches
+
 PASS predicted landing matches flight size=1 boost=1.35 retention=0.979 rage=True pull=(-100.00, -150.00)
+
 PASS aim prediction reuses buffer without consuming rage or launching
+
 PASS dead-zone preview has no flight segment
+
 PASS a pull inside the dead zone does not launch
+
 PASS letting go flies dad along the pull at full speed for a full pull
+
 PASS a half pull flies slower than a full one
+
 PASS dad bounces off the side lockers and keeps flying
+
 PASS dad comes to rest on his own and the next shot is ready
+
 PASS flying dad knocks a dad away and ploughs on
+
 PASS a knocked dad slams the lockers for two damage (a gum dad goes down)
+
 PASS a side-wall slam reports which locker side to dent
+
 PASS a knocked dad bowls over the next one (chain)
+
 PASS a straight shot into the tray bounces dad back without damage
+
 PASS coming in from the side gets past the tray and knocks it out of his hands
+
 PASS a fresh boss bounces dad off for a chip of damage
+
 PASS a dad thrown into the boss makes him groggy
+
 PASS while groggy, dad sends the boss into the wall for a big hit
+
 PASS a dad who reaches grounded dad swings and hurts him
+
 PASS clearing every dad wins, three stars with full health and few shots
+
 PASS too many shots drops the third star
+
 PASS losing all health loses
+
 PASS the aiming guide bends at the first wall
+
 PASS wide view: bodies shrink with the art and dad starts at the bottom of the corridor
+
 PASS dad touches the painted floor edge before bouncing
+
 PASS a bank shot off two lockers hits harder and for more damage
+
 PASS a five-chain shot earns the next shot as a rage shot
+
 PASS the rage shot flies faster and is used up
+
 PASS a rage shot goes straight through a tray's front
+
 PASS the dodgeball dad keeps his distance and hits a dad who stands still
+
 PASS a flying dad bats the ball back the way he is going
+
 PASS a returned ball knocks a dad over
+
 PASS a big-dad only staggers on the first hit and flies on a second hit within three seconds
+
 PASS main game: all 60 stages have dads and a par, each floor's 10th has a big-dad and its 20th the boss with escorts
+
 PASS main game 1-1..1-10 follow the first-ten order: pull, chair at 1-4, tray at 1-7, dodgeball at 1-9
+
 PASS growth: 도움닫기 speeds the launch and 체력 sets dad's health
+
 PASS growth: 멀리 날리기 adds wall damage (a tray dad goes down in one slam)
+
 PASS six prototype stages, the last one a boss with escorts
+
 Difficulty, rematch and one-time reward checks
 PASS tutorial stays unrestricted; campaign budget begins at 1-10
+
 PASS campaign losing-streak assist also adds up to five shots
+
 PASS rematch shot cap is fixed rather than silently eased
+
 PASS all 60 stages have escalating rematches without inflated HP
+
 PASS tutorial rematches never introduce unlearned roles
+
 PASS last allowed shot launches
+
 PASS budget does not end a flight or permit an extra shot
+
 PASS survivors after final settling produce explicit shot-budget loss
+
 PASS budget waits for a returned dodgeball to finish its chain
+
 PASS clearing on final budget shot wins before the budget loss check
+
 PASS landing cannot be skipped by rapid release
+
 PASS launch is available after landing recovery
+
 PASS uncleared campaign stage locks rematch
+
 PASS only the next uncompleted rank unlocks
+
 PASS rematch failure pays nothing and loses no inventory
+
 PASS first rematch win pays and unlocks next rank
+
 PASS repeat rank win cannot duplicate first-win rewards
+
 PASS cannot skip a rank through result processing
+
 PASS rematch never overwrites campaign stars or onward progress
+
 PASS first three-star clear adds explicit mastery bonus
+
 PASS three-star mastery bonus cannot repeat
+
 PASS all three ranks complete; final rank stays replayable
+
 PLAY level=0 noBoost wins=7/540 bestRemaining=0 first=angle=108 power=150 cartHits=0
+
 PLAY level=1 noBoost wins=27/540 bestRemaining=0 first=angle=88 power=60 cartHits=4
+
 PLAY level=2 noBoost wins=0/540 bestRemaining=1 first=none
+
 PLAY cart-exclusive solutions=4 example=angle=274 cartHits=4
+
 PLAY boost-exclusive solutions=24 first=launch=220 at=0.4 turn=330
+
 PLAY tap-nearest-target boost wins=14/96
+
 PASS cart changes a failing shot into a win
+
 PASS manual redirect changes a failing shot into a win
+
 PASS cannot boost before flight
+
 PASS short pull does not consume shot
+
 PASS one launch only
+
 PASS redirect is usable once
+
 PASS retry resets all experiment state
+

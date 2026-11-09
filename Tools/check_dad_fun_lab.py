@@ -16,7 +16,7 @@ def run(args, env=None):
     err = result.stderr.decode('utf-8-sig', errors='replace')
     if result.returncode:
         raise RuntimeError(out + err)
-    return out + err
+    return (out + err).replace('\r\n', '\n').replace('\r', '\n')
 
 with tempfile.TemporaryDirectory(prefix='dad-fun-lab-') as folder:
     temp = Path(folder)
