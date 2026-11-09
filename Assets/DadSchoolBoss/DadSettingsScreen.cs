@@ -7,7 +7,7 @@ public sealed partial class DadSchoolPrototype
     Vector2 privacyScroll;
     string privacyText;
     GUIStyle privacyMeasure;
-    public const string PrivacyPolicyUrl = "https://github.com/MCuffs/mandu-coporation/blob/codex/dad-war-release-fixes/PrivacyPolicy.md";
+    public const string PrivacyPolicyUrl = "https://github.com/MCuffs/mandu-coporation/blob/codex/dad-war-admob-test/PrivacyPolicy.md";
     public void OpenSettings(){settingsOpen=true;privacyOpen=false;}
     void DrawSettings()
     {
@@ -26,7 +26,8 @@ public sealed partial class DadSchoolPrototype
             {bool value=!values[i];if(i==0)DadPreferences.Music=value;else if(i==1)DadPreferences.Effects=value;else if(i==2)DadPreferences.Haptics=value;else DadPreferences.ReducedMotion=value;}
         }
         if(Button(new Rect(54,620,430,42),"개인정보 처리방침",Color.white,true,19)) { privacyOpen=true;privacyScroll=Vector2.zero; }
-        if(Button(new Rect(54,690,430,58),"확인",Yellow,true,25))settingsOpen=false;
+        if(DadAdPrivacy.Available && Button(new Rect(54,666,430,36),"광고 개인정보 선택 변경",Color.white,true,17)) DadAdPrivacy.Show();
+        if(Button(new Rect(54,710,430,44),"확인",Yellow,true,25))settingsOpen=false;
     }
     void DrawPrivacyPolicy()
     {

@@ -29,7 +29,7 @@
 
 보상은 provider의 earned-reward 콜백에만 연결한다. 닫힘·취소·로드 실패에는 지급하지 않는다. 중복 콜백·중복 요청·이미 소비된 영수증을 거절하고, 완료 후30초 대기·세션5회 상한을 둔다. 재시작 후 이미 소비한 영수증이 다시 지급되지 않도록 저장한다. 서버 검증은 아직 없다.
 
-**현재 실제 광고 SDK는 미연결이다.** 일반 실행에서는 provider가 없어 광고 제안을 숨긴다. Windows Development 빌드의 `--dad-ad-demo`는 ‘실제 광고 아님’을 표시하는 수동 흐름 테스트이며 광고 노출·수익·SDK 검증을 뜻하지 않는다. 실제 AdMob 앱/광고 단위, SDK와 동의 처리, 테스트 광고, 수익 설정, 정책/Data safety 갱신이 필요하다. [Google 보상형 광고 가이드](https://developers.google.com/admob/unity/rewarded)
+**Windows v0.3 배포본에는 실제 광고가 없다.** 이후 `codex/dad-war-admob-test` 브랜치에서 Google Mobile Ads·UMP와 Android 공식 테스트 ID를 연결하고 실제 SDK에 대한 Android 스크립트 컴파일을 확인했다. Android 빌드·실기기 광고/동의 검증·AdMob 계정과 상용 ID·수익 설정·Data safety 제출은 미완료다. Windows의 `--dad-ad-demo`는 ‘실제 광고 아님’을 표시하는 수동 흐름 테스트다. [현재 광고 연결 상태](dad-admob-test-integration.md), [Google 보상형 광고 가이드](https://developers.google.com/admob/unity/rewarded)
 
 ## 내일 확인할 승인표
 
@@ -39,7 +39,7 @@
 | Android 엔진/서명 AAB | 미완료 | 실제 업로드 키 서명 산출물·ARM64/API36/16KB 검사 |
 | 실기기 안정성 | 미검증 | 설치·터치·복귀·저장·연속 플레이 로그 |
 | 신규 사용자 재미/D1 | 미검증 | 유효 코호트·재방문·실패 원인과 재도전 관찰 |
-| 실제 보상 광고 | 미연결 | 테스트 광고의 보상/취소/실패·중복 콜백 검증 |
+| 실제 보상 광고 | 테스트 SDK 연결, 실기기 미검증 | Android 테스트 광고의 보상/취소/실패·동의 검증과 상용 계정 설정 |
 | 스토어 고지/등급 | 일부 준비 | 실제 SDK와 일치하는 신고·처리방침·스토어 자산 |
 
 현재 상태라면 내일의 합리적인 판정은 테스트 배포 준비 점검이며 정식 출시 승인은 아니다. 모든 차단 항목이 해소된 실제 자료로 재판정한다.

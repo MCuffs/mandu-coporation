@@ -36,7 +36,7 @@ public static class DadRewardedAds
 {
     public static DadRewardedGate Gate { get; private set; }
     public static bool Ready { get { return Gate!=null&&Gate.Available; } }
-    public static bool Busy { get { return Gate!=null&&Gate.Busy; } }
+    public static bool Busy { get { return DadAdPrivacy.Busy || (Gate!=null&&Gate.Busy); } }
     public static void Bind(IDadRewardedProvider provider) { Gate=new DadRewardedGate(provider,()=>Time.realtimeSinceStartup); }
     public static bool Show(Action reward) { return Gate!=null&&Gate.Show(reward); }
 }
