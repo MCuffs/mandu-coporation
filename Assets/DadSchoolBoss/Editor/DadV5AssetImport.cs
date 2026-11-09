@@ -5,6 +5,8 @@ using UnityEngine;
 // under Resources/DadV5, so replacements keep mobile-friendly sizes without hand-editing every importer.
 public sealed class DadV5AssetImport : AssetPostprocessor
 {
+    const string OutfitV17Root = "Assets/DadSchoolBoss/Resources/DadV17/";
+    const string OutfitRoot = "Assets/DadSchoolBoss/Resources/DadV14/";
     const string Root = "Assets/DadSchoolBoss/Resources/DadV5/";
     const string RewardRoot = "Assets/DadSchoolBoss/Resources/DadV6/";   // v6 reward art (Design/dad-reward-assets-v6.md)
     const string MotionRoot = "Assets/DadSchoolBoss/Resources/DadV7/";   // v7 motion poses on the v5 character canvas
@@ -13,7 +15,7 @@ public sealed class DadV5AssetImport : AssetPostprocessor
 
     void OnPreprocessTexture()
     {
-        if (!assetPath.StartsWith(Root) && !assetPath.StartsWith(RewardRoot) && !assetPath.StartsWith(MotionRoot) && !assetPath.StartsWith(OpeningRoot) && !assetPath.StartsWith(SlingRoot) && assetPath != "Assets/DadSchoolBoss/Art/V5/app_icon.png") return;
+        if (!assetPath.StartsWith(OutfitV17Root) && !assetPath.StartsWith(OutfitRoot) && !assetPath.StartsWith(Root) && !assetPath.StartsWith(RewardRoot) && !assetPath.StartsWith(MotionRoot) && !assetPath.StartsWith(OpeningRoot) && !assetPath.StartsWith(SlingRoot) && assetPath != "Assets/DadSchoolBoss/Art/V5/app_icon.png") return;
         var t = (TextureImporter)assetImporter;
         if (assetPath.StartsWith(SlingRoot))
         {
@@ -42,6 +44,12 @@ public sealed class DadV5AssetImport : AssetPostprocessor
             t.maxTextureSize = System.IO.Path.GetFileName(assetPath).StartsWith("lunchbox_") ? 1024 : 512;
             t.textureCompression = TextureImporterCompression.CompressedHQ;
             return;
+        }
+        if(assetPath.StartsWith(OutfitRoot)||assetPath.StartsWith(OutfitV17Root))
+        {
+            t.textureType=TextureImporterType.Default;t.alphaIsTransparency=true;t.mipmapEnabled=false;
+            t.npotScale=TextureImporterNPOTScale.None;t.wrapMode=TextureWrapMode.Clamp;t.filterMode=FilterMode.Bilinear;
+            t.maxTextureSize=assetPath.StartsWith(OutfitV17Root)?1024:2048;t.textureCompression=TextureImporterCompression.Uncompressed;t.isReadable=false;return;
         }
         bool background = assetPath.Contains("/bg/") || assetPath.Contains("/story/");
         t.textureType = TextureImporterType.Default;

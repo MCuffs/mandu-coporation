@@ -1,0 +1,30 @@
+{
+  "as_of": "2026-11-09",
+  "status": "BLOCKED",
+  "checks": [
+    {
+      "name": "Engine includes known 16 KB support",
+      "passed": false,
+      "value": "2021.3.2f1"
+    },
+    {
+      "name": "Android build module installed",
+      "passed": false
+    },
+    {
+      "name": "ARM64 build architecture enabled",
+      "passed": false,
+      "value": 1
+    },
+    {
+      "name": "Explicit target SDK 36 or later",
+      "passed": false,
+      "value": "Automatic; installed SDK and final AAB must be inspected"
+    }
+  ],
+  "limits": "Configuration checks only. Android build, native library alignment, signing, device performance and Play Console validation are still required.",
+  "sources": [
+    "https://developer.android.com/google/play/requirements/target-sdk",
+    "https://discussions.unity.com/t/android-unity-engine-support-for-16-kb-memory-page-sizes-android-15/1589588"
+  ]
+}

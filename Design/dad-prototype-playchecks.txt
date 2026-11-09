@@ -42,5 +42,10 @@ PASS upgrade caps the 강화 tab shows: 들이받기 stops at +60%, 체력 has n
 PASS the 출발 card flags only the first chair (1-4), tray (1-7) and dodgeball dad (1-9) (1-1..1-10: -1,-1,-1,1,-1,-1,2,-1,4,-1)
 PASS 1-20 is the floor-1 boss fight
 PASS 2-10 is floor 2's big-dad
+PASS main game starts an unlocked rematch with its shot limit
+PASS rematch finish commits rank and preserves onward stage
+PASS duplicate finish callback does not repay rematch
+PASS main entry rejects a locked rematch rank
+PASS normal replay after rematch has no leftover challenge restrictions
 PASS home ends the fight
 PASS 폭주형 gear starts with a rage shot

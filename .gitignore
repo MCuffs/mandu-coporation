@@ -44,3 +44,7 @@ Thumbs.db
 *.p12
 *.keystore
 *.jks
+
+# Python-generated cache
+__pycache__/
+*.py[cod]

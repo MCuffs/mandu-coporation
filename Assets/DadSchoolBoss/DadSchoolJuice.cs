@@ -53,12 +53,14 @@ public sealed partial class DadSchoolPrototype
         if (art == null || !art.characters.TryGetValue(id, out c)) return;
         Texture2D tex = c.Frame(action, index);
         if (tex == null) return;
+        Texture2D source=tex; if(id=="dad"&&outfit!=null)tex=outfit.Body(source,Progress);
         float scale = standHeight / c.standHeight, size = DadArt.Canvas * scale;
         Matrix4x4 old = GUI.matrix; Vector2 shape = stretch ?? Vector2.one;
         GUI.matrix = old * Matrix4x4.TRS(new Vector3(feet.x, feet.y, 0), Quaternion.Euler(0, 0, tilt), new Vector3((flip ? -1 : 1) * shape.x, shape.y, 1));
         // Hit flash: a light warm tint (the old orange multiply turned the whole body into a red silhouette, v4 M4).
         GUI.color = flash ? new Color(1, .86f, .74f, opacity) : new Color(1, 1, 1, opacity);
         GUI.DrawTexture(new Rect(-DadArt.PivotX * scale, -DadArt.PivotY * scale, size, size), tex);
+        if(id=="dad"&&outfit!=null)outfit.Layers(source.name,new Rect(-DadArt.PivotX*scale,-DadArt.PivotY*scale,size,size),Progress);
         GUI.color = Color.white; GUI.matrix = old;
     }
     string DadAction(out int index)
@@ -163,7 +165,7 @@ public sealed partial class DadSchoolPrototype
     void PlaySfx(string name, float volume = .7f, float pitch = 1)
     {
         AudioClip clip = art != null ? art.Clip(name) : null;
-        if (clip == null || audioSource == null) return;
+        if (!DadPreferences.Effects || clip == null || audioSource == null) return;
         audioSource.pitch = pitch; audioSource.PlayOneShot(clip, volume);
     }
     void PlayEventSound(CombatEvent e, bool wall, bool clang)
@@ -184,6 +186,7 @@ public sealed partial class DadSchoolPrototype
     void UpdateMusic()
     {
         if (music == null || art == null) return;
+        music.mute=!DadPreferences.Music;
         bool fighting = Combat != null && (Combat.state == RunState.Fighting || Combat.state == RunState.Choosing);
         // Results stay quiet for the jingle; the opening is silent on the company splash, then home music under title and story.
         AudioClip want = InOpening ? (Opening == OpeningStep.Splash ? null : art.Clip("bgm_home")) : Home ? art.Clip("bgm_home") : fighting ? art.Clip("bgm_battle") : null;

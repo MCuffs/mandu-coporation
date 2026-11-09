@@ -1,0 +1,7 @@
+{
+  "tool": "built-in image_gen",
+  "reference": "Assets/DadSchoolBoss/Resources/DadV5/chars/dad/dad_idle_0.png",
+  "prompt": "One isolated low-profile shabby beige hiking bucket hat, matching dad 3/4 right-facing perspective, shallow brim, short crown, flat black-ink Korean comic style, transparent background; no head or person.",
+  "source": "/Users/jeongminsu/.codex/generated_images/01a1a442-9056-7f12-9556-572b0f41018e/exec-f773c1fa-fa97-4929-a6ba-4cee618b0998.png",
+  "runtime": "Assets/DadSchoolBoss/Resources/DadV17/hat.png"
+}

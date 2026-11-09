@@ -13,6 +13,8 @@ public sealed class DadSave
     public int[] upgrades = new int[DadProgress.StatCount];   // fist, hp, combo, launch
     public int bestStage = 1;                                  // highest unlocked stage, 1-based
     public int currentStage = 1;                               // stage the start button plays
+    public int[] rematchRanks = new int[0];                 // highest completed rematch rank for each stage
+    public int[] bestShots = new int[0];                      // 0 = no recorded slingshot clear; old saves remain valid
     public int[] stars = new int[0];                           // best stars per stage (index = stage - 1)
     public int lossStage, lossesAtStage;                       // consecutive losses on one stage, for the stuck assist
     public long lastSeenUnix;
@@ -20,7 +22,7 @@ public sealed class DadSave
     public int pendingIdleBoxes;
     public float pendingIdleHours;
     public int[] gearRarity = { -1, -1, -1, -1, -1, -1 };    // per slot (DadProgress.SlotIds), -1 = empty
-    public float[] gearValue = new float[DadProgress.SlotCount]; // power share each equipped item adds (0.05 = +5%)
+    public float[] gearValue = new float[DadProgress.SlotCount]; // legacy quality value, now mapped to a monotonic passive per slot
     public int pendingSlot = -1, pendingRarity;                 // a lunchbox roll waiting for equip / dismantle
     public float pendingValue;
 }
@@ -31,26 +33,44 @@ public sealed class StageReward
     public bool won, firstClear, replay;
     public double coins;
     public int boxes;
+    public int challengeLevel;
+    public string bonusLine = "";
 }
 
-public sealed class DadProgress
+public sealed partial class DadProgress
 {
     public const int StatCount = 4;
     public static readonly string[] StatNames = { "들이받기", "체력", "도움닫기", "멀리 날리기" };   // slingshot names (C-08); was 주먹·체력·연타·날리기
     public readonly DadEconomy Eco;
     public DadSave Save { get; private set; }
     readonly string path;
+    bool recoveredSave;
 
-    public static string DefaultPath { get { return Path.Combine(Application.persistentDataPath, "dad-save.json"); } }
+    public static string DefaultPath
+    {
+        get
+        {
+#if DEVELOPMENT_BUILD && !UNITY_EDITOR
+            string[] args=Environment.GetCommandLineArgs();for(int i=0;i+1<args.Length;i++)if(args[i]=="--dad-smoke-root")return Path.Combine(args[i+1],"dad-save.json");
+#endif
+            return Path.Combine(Application.persistentDataPath,"dad-save.json");
+        }
+    }
     public DadProgress(DadEconomy eco, string savePath) { Eco = eco; path = savePath; Load(); }
 
     public void Load()
     {
         Save = null;
-        try { if (File.Exists(path)) Save = JsonUtility.FromJson<DadSave>(File.ReadAllText(path)); }
-        catch (Exception e) { Debug.LogWarning("Save unreadable, starting fresh: " + e.Message); }
+        foreach(string candidate in new[]{path,path+".bak",path+".tmp"})
+        {
+            try{if(File.Exists(candidate))Save=JsonUtility.FromJson<DadSave>(File.ReadAllText(candidate));}
+            catch(Exception e){Debug.LogWarning("Save copy unreadable: "+candidate+" / "+e.Message);}
+            if(Save!=null){if(candidate!=path){recoveredSave=true;Debug.LogWarning("Recovered dad save from "+candidate);}break;}
+        }
         if (Save == null) Save = new DadSave();
         if (Save.upgrades == null || Save.upgrades.Length != StatCount) Array.Resize(ref Save.upgrades, StatCount);
+        if (Save.rematchRanks == null) Save.rematchRanks = new int[0];
+        if (Save.bestShots == null) Save.bestShots = new int[0];
         if (Save.stars == null) Save.stars = new int[0];
         Save.bestStage = Mathf.Clamp(Save.bestStage, 1, Eco.TotalStages);
         Save.currentStage = Mathf.Clamp(Save.currentStage, 1, Save.bestStage);
@@ -72,11 +92,19 @@ public sealed class DadProgress
     }
     public void Persist()
     {
-        // Write-then-rename so a crash mid-write never leaves a half file behind.
-        string tmp = path + ".tmp";
-        File.WriteAllText(tmp, JsonUtility.ToJson(Save));
-        if (File.Exists(path)) File.Delete(path);
-        File.Move(tmp, path);
+        string directory=Path.GetDirectoryName(path);if(!string.IsNullOrEmpty(directory))Directory.CreateDirectory(directory);
+        string tmp=path+".tmp",backup=path+".bak";
+        byte[] bytes=System.Text.Encoding.UTF8.GetBytes(JsonUtility.ToJson(Save));
+        using(var stream=new FileStream(tmp,FileMode.Create,FileAccess.Write,FileShare.None)){stream.Write(bytes,0,bytes.Length);stream.Flush(true);}
+        if(!File.Exists(path)){File.Move(tmp,path);recoveredSave=false;return;}
+        try{File.Replace(tmp,path,recoveredSave?null:backup);recoveredSave=false;}
+        catch(PlatformNotSupportedException){ReplaceWithBackup(tmp,backup);}
+        catch(IOException){ReplaceWithBackup(tmp,backup);}
+    }
+    void ReplaceWithBackup(string tmp,string backup)
+    {
+        // On platforms without atomic replace, keep a known-good copy before overwriting the primary.
+        if(!recoveredSave)File.Copy(path,backup,true);File.Copy(tmp,path,true);File.Delete(tmp);recoveredSave=false;
     }
 
     // ---- power ----------------------------------------------------------------------------------
@@ -91,11 +119,11 @@ public sealed class DadProgress
     }
     public float EffectivePower(int stage) { return Power * StuckAssist(stage); }
 
-    // ---- upgrades (one shared cost track: any stat costs the same and adds the same power) -------
+    // ---- upgrades (shared cost track; capped stats refuse purchase) -------
     public double NextUpgradeCost { get { return Eco.UpgradeCost(TotalLevels); } }
     public bool TryUpgrade(int stat)
     {
-        if (stat < 0 || stat >= StatCount || Save.coins < NextUpgradeCost) return false;
+        if (stat < 0 || stat >= StatCount || DadSchoolPrototype.GrowthCapped(stat, Save.upgrades[stat]) || Save.coins < NextUpgradeCost) return false;
         Save.coins -= NextUpgradeCost; Save.upgrades[stat]++;
         return true;
     }
@@ -130,7 +158,7 @@ public sealed class DadProgress
         int rarity = Save.boxesOpened == 1 ? Mathf.Clamp(Eco.gearFirstRarity, 0, RarityCount - 1) : Mathf.Min(Eco.RollRarity(Rng), RarityCount - 1);
         var empty = new List<int>();
         for (int i = 0; i < SlotCount; i++) if (!HasGear(i)) empty.Add(i);
-        int slot = empty.Count > 0 ? empty[Rng.Next(empty.Count)] : Rng.Next(SlotCount);
+        int slot = Save.boxesOpened == 1 && empty.Contains(1) ? 1 : Save.boxesOpened == 2 && empty.Contains(0) ? 0 : empty.Count > 0 ? empty[Rng.Next(empty.Count)] : Rng.Next(SlotCount);
         float jitter = 1 + Eco.gearJitter * (float)(Rng.NextDouble() * 2 - 1);
         Save.pendingSlot = slot; Save.pendingRarity = rarity;
         Save.pendingValue = GearValueAt(Save.boxesOpened) * Eco.gearRarityFactor[rarity] * jitter;
@@ -163,6 +191,26 @@ public sealed class DadProgress
     }
 
     // ---- stage results --------------------------------------------------------------------------
+    public int BestShots(int stage) { return stage >= 1 && stage <= Save.bestShots.Length ? Save.bestShots[stage - 1] : 0; }
+    public void RecordShots(int stage, int shots, bool won)
+    {
+        if (!won || shots <= 0 || stage < 1 || stage > Eco.TotalStages) return;
+        if (Save.bestShots.Length < stage) Array.Resize(ref Save.bestShots, stage);
+        if (BestShots(stage) == 0 || shots < BestShots(stage)) Save.bestShots[stage - 1] = shots;
+    }
+    // All qualities of a given slot share one passive: higher saved value is always better, so bulk opening stays safe.
+    static readonly float[] GearCaps = { .10f, .50f, .40f, .15f, .30f, .40f };
+    public static float GearBonus(int slot, float value)
+    {
+        return slot < 0 || slot >= SlotCount || value <= 0 ? 0 : GearCaps[slot] * value / (value + .01f);
+    }
+    public float GearBonus(int slot) { return GearBonus(slot, EquippedValue(slot)); }
+    public static readonly string[] GearEffects = { "튕김 속도 보존", "충돌 전달력", "최대 체력", "조준 여유", "피격 후 보호", "상대 비거리" };
+    public static string GearEffect(int slot, float value)
+    {
+        float b = GearBonus(slot, value);
+        return GearEffects[slot] + " +" + (b * (slot == 4 ? 1 : 100)).ToString("0.##") + (slot == 4 ? "초" : slot == 0 || slot == 3 ? "%p" : "%");
+    }
     public int Stars(int stage) { return stage >= 1 && stage <= Save.stars.Length ? Save.stars[stage - 1] : 0; }
     public static int StarsFor(bool won, float hpRatio, int bestChain)
     {
@@ -173,6 +221,7 @@ public sealed class DadProgress
     // The slingshot fight rates itself (clear, health at least half, shots within the target).
     public StageReward ApplyResult(int stage, bool won, float hpRatio, int bestChain, int stars)
     {
+        int selected = Save.currentStage;
         var r = new StageReward { stage = stage, won = won, replay = stage < Save.bestStage || (stage == Eco.TotalStages && Stars(stage) > 0) };
         if (won)
         {
@@ -180,6 +229,11 @@ public sealed class DadProgress
             r.coins = r.replay && !r.firstClear ? Eco.BaseCoins(stage) * Eco.replayCoinShare : Eco.ClearCoins(stage);
             r.boxes = Eco.boxesPerClear + (r.firstClear && Eco.IsFloorBoss(stage) ? Eco.floorBossFirstClearBoxes : 0);
             r.stars = Mathf.Clamp(stars, 1, 3);
+            if (r.stars == 3 && Stars(stage) < 3)
+            {
+                r.coins += Eco.BaseCoins(stage) * .5; r.boxes++;
+                r.bonusLine = "첫 별 3개! · 도시락 +1과 추가 코인 포함";
+            }
             if (Save.stars.Length < stage) Array.Resize(ref Save.stars, stage);
             Save.stars[stage - 1] = Mathf.Max(Save.stars[stage - 1], r.stars);
             if (stage == Save.bestStage && stage < Eco.TotalStages) Save.bestStage = stage + 1;
@@ -193,6 +247,7 @@ public sealed class DadProgress
             Save.lossesAtStage++;
             Save.currentStage = stage;
         }
+        if (r.replay) Save.currentStage = selected;   // replay never changes the onward destination
         Save.coins += r.coins; Save.lunchboxes += r.boxes;
         return r;
     }

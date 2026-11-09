@@ -1,0 +1,7 @@
+{
+  "pose": "dad_idle_0",
+  "rarity": 1,
+  "hint": "Generated images are saved to /Users/jeongminsu/.codex/generated_images/01a1a442-9056-7f12-9556-572b0f41018e as /Users/jeongminsu/.codex/generated_images/01a1a442-9056-7f12-9556-572b0f41018e/exec-674fe82a-1083-4317-a287-311b9d2bbe68.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+  "prompt": "Change only olive outer vest into pale worn sleeveless tank top; preserve exact original face, pose, hands, pants, slippers and square canvas positions. Transparent production sprite, flat Korean comic ink style.",
+  "reference": "Assets/DadSchoolBoss/Resources/DadV5/chars/dad/dad_idle_0.png"
+}

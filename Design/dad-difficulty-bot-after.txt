@@ -1,0 +1,19 @@
+Difficulty policy comparison: no upgrades or lunchbox passives, wall damage +1, 12 seeds per row
+1-1 rank 0 rapid noisy: 12/12, HP 97, stars 2.0
+1-1 rank 0 novice: 12/12, HP 97, stars 2.3
+1-1 rank 0 precise: 12/12, HP 98, stars 2.8
+1-5 rank 0 rapid noisy: 12/12, HP 98, stars 2.2
+1-5 rank 0 novice: 12/12, HP 87, stars 2.8
+1-5 rank 0 precise: 12/12, HP 96, stars 2.8
+1-8 rank 0 rapid noisy: 12/12, HP 89, stars 2.0
+1-8 rank 0 novice: 12/12, HP 73, stars 2.3
+1-8 rank 0 precise: 12/12, HP 91, stars 2.1
+1-10 rank 0 rapid noisy: 6/12, HP 87, stars 2.0
+1-10 rank 0 novice: 12/12, HP 65, stars 2.3
+1-10 rank 0 precise: 12/12, HP 85, stars 2.8
+1-15 rank 0 rapid noisy: 6/12, HP 98, stars 2.2
+1-15 rank 0 novice: 12/12, HP 66, stars 2.4
+1-15 rank 0 precise: 12/12, HP 97, stars 2.5
+1-20 rank 0 rapid noisy: 2/12, HP 96, stars 2.0
+1-20 rank 0 novice: 8/12, HP 58, stars 2.3
+1-20 rank 0 precise: 11/12, HP 84, stars 2.5

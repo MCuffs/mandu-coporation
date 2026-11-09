@@ -1,0 +1,8 @@
+Native macOS player smoke
+PASS main scene loads the game
+PASS save is isolated from the player's progress
+PASS Korean font resources exist in the player
+PASS battle and pull input initialize in the standalone player
+PASS pause freezes simulation in the real player
+PASS resuming and releasing fires exactly one shot
+PASS native player rendered home and pause captures

@@ -1,0 +1,15 @@
+V18 presentation and save recovery checks
+PASS atomic replacement retains the newest primary save
+PASS a previous save copy is retained
+PASS corrupt primary recovers coins from backup
+PASS recovered progress can be saved again
+PASS missing primary recovers the known-good backup
+PASS interrupted initial write recovers the completed temporary save
+PASS pause cancels an active pull
+PASS paused updates do not move the battle or fire a shot
+PASS resume does not release the canceled shot
+PASS focus loss pauses and returning requires an explicit resume
+PASS a new battle clears the previous pause
+PASS new opponent counter lesson freezes the encounter until acknowledged
+PASS acknowledging a counter lesson persists its seen flag and releases play
+PASS finished battles cannot be trapped behind the pause dialog

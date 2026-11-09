@@ -1,0 +1,48 @@
+{
+  "capture" : "\/var\/folders\/gz\/l8gh9rxx3fg3cw50pql658sh0000gn\/T\/codex-clipboard-6d136afd-2b7b-498e-9300-1a7c58a2503f.png",
+  "checks" : {
+    "full_title" : false,
+    "replay_button" : false,
+    "start_button" : false
+  },
+  "limit" : "Offline OCR of this returning-player capture. Not a device rendering or gesture test.",
+  "passed" : false,
+  "recognized" : [
+    {
+      "confidence" : 1,
+      "text" : "Dad War Phone QA (1080~",
+      "x" : 0.16440678180790957,
+      "y" : 0.93256578955592095
+    },
+    {
+      "confidence" : 1,
+      "text" : "Scale",
+      "x" : 0.33813559266101695,
+      "y" : 0.93174342097039475
+    },
+    {
+      "confidence" : 0.5,
+      "text" : "아빠. 장신",
+      "x" : 0.51525423734325482,
+      "y" : 0.82319078893030129
+    },
+    {
+      "confidence" : 0.5,
+      "text" : "아빠",
+      "x" : 0.46949152537076266,
+      "y" : 0.7672697366108141
+    },
+    {
+      "confidence" : 1,
+      "text" : "0.51X",
+      "x" : 0.66610169437288125,
+      "y" : 0.93174342097039475
+    },
+    {
+      "confidence" : 1,
+      "text" : "Play Focuse",
+      "x" : 0.9406779659299912,
+      "y" : 0.93174342126477872
+    }
+  ]
+}

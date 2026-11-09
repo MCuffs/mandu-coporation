@@ -1,0 +1,28 @@
+{
+  "status": "connected; editor visual QA complete; Android pending",
+  "atlas": "wear_parts.png",
+  "size": [
+    1254,
+    1254
+  ],
+  "mode": "RGBA",
+  "alpha_corner": 0,
+  "sha256": "59dbc4bf7f427c401039eb84fe151da197b26e83c1265f7a6a9371da36a9d007",
+  "cells": [
+    "relaxed_work_glove",
+    "relaxed_rubber_glove",
+    "relaxed_boxing_glove",
+    "fist_work_glove",
+    "fist_rubber_glove",
+    "fist_boxing_glove",
+    "black_slipper",
+    "striped_slipper",
+    "hiking_boot"
+  ],
+  "notes": [
+    "UV metadata samples exact alpha bounds; original image unchanged",
+    "head and handheld items reuse DadV5 gear art",
+    "tops use runtime cloth recolor on existing silhouette",
+    "opening/title illustration remains fixed"
+  ]
+}

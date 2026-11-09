@@ -1,0 +1,36 @@
+{
+  "capture" : "\/Users\/jeongminsu\/.gemini\/antigravity\/scratch\/mandu-coporation\/Design\/dad-commercial-ui-v18\/00-title.png",
+  "checks" : {
+    "full_title" : true,
+    "replay_button" : true,
+    "start_button" : true
+  },
+  "limit" : "Offline OCR of this returning-player capture. Not a device rendering or gesture test.",
+  "passed" : true,
+  "recognized" : [
+    {
+      "confidence" : 1,
+      "text" : "아빠, 장난이라니까!",
+      "x" : 0.49999999814276486,
+      "y" : 0.88671875036134051
+    },
+    {
+      "confidence" : 0.5,
+      "text" : "아빠 전쟁",
+      "x" : 0.49741601906115418,
+      "y" : 0.81752664728575353
+    },
+    {
+      "confidence" : 1,
+      "text" : "게임 시작",
+      "x" : 0.49629629838767597,
+      "y" : 0.11875000019983151
+    },
+    {
+      "confidence" : 1,
+      "text" : "이야기 다시 보기",
+      "x" : 0.49870800914728686,
+      "y" : 0.03779069749999997
+    }
+  ]
+}

@@ -27,6 +27,71 @@ public static class DadPrototypeSetup
         if (field != null) { field.SetValue(target, value); return; }
         target.GetType().GetProperty(name, flags).GetSetMethod(true).Invoke(target, new[] { value });
     }
+    static void QueueCommercialAudit(string dir)
+    {
+        Directory.CreateDirectory(dir);var g=UnityEngine.Object.FindObjectOfType<DadSchoolPrototype>();var original=g.Progress;string temp=TempSavePath("commercial-v18");
+        string[] keys={"DadV2.BestChain","DadV2.Wins","DadV2.TotalWallHits"};var saved=new Dictionary<string,int>();foreach(string key in keys)if(PlayerPrefs.HasKey(key))saved[key]=PlayerPrefs.GetInt(key);
+        Action<string> shot=name=>ScreenCapture.CaptureScreenshot(Path.Combine(dir,name+".png"));
+        Step(1,()=>{var p=new DadProgress(DadEconomy.Load(),temp);p.Save.coins=12450;p.Save.lunchboxes=3;p.Save.bestStage=12;p.Save.currentStage=8;p.Save.stars=new[]{3,3,2,3,1,2,1,2,2,1,1};p.Save.bestShots=new[]{3,3,4,4,6,6,8,8,8,9,10};for(int j=0;j<6;j++){p.Save.gearRarity[j]=j%3;p.Save.gearValue[j]=.04f;}g.UseProgress(p);g.GoHome();});Step(10,()=>shot("01-home"));
+        Step(1,()=>g.ShowTitle());Step(6,()=>shot("00-title"));Step(1,()=>g.PlayStory(true));Step(6,()=>shot("00b-story"));Step(1,()=>g.GoHome());
+        Step(1,()=>SetMember(g,"stagePicker",true));Step(6,()=>shot("01b-school-map"));Step(1,()=>SetMember(g,"stagePicker",false));
+        Step(1,()=>g.OpenSettings());Step(6,()=>shot("02-settings"));Step(1,()=>SetMember(g,"settingsOpen",false));
+        Step(1,()=>g.Tab=DadSchoolPrototype.HomeTab.Lunchbox);Step(6,()=>shot("03-equipment"));
+        Step(1,()=>g.Tab=DadSchoolPrototype.HomeTab.Upgrade);Step(6,()=>shot("04-growth"));
+        Step(1,()=>{g.StartRun(8);g.SlingView.DebugAim(new Vector2(270,660),new Vector2(190,778));});Step(10,()=>shot("05-aim"));
+        Step(1,()=>g.SlingView.DebugRelease());Step(8,()=>shot("06-flight"));
+        Step(1,()=>g.SlingView.SetPaused(true));Step(6,()=>shot("07-pause"));
+        Step(1,()=>SetMember(g.SlingView,"pauseOptions",true));Step(6,()=>shot("08-battle-settings"));
+        Step(1,()=>{g.SlingView.SetPaused(false);g.Sling.shots=3;g.FinishSlingBattleNow(true);});Step(8,()=>shot("09-result"));
+        Step(1,()=>{g.StartRun(8);g.Sling.lossReason="발사 소진 · 2명 남음";g.FinishSlingBattleNow(false);});Step(8,()=>shot("10-retry"));
+        Step(1,()=>{g.StartRun(15);SetMember(g.SlingView,"lessonKind",2);});Step(8,()=>shot("11-counter-lesson"));
+        Step(1,()=>{SetMember(g,"settingsOpen",false);g.UseProgress(original);g.GoHome();foreach(string key in keys){if(saved.ContainsKey(key))PlayerPrefs.SetInt(key,saved[key]);else PlayerPrefs.DeleteKey(key);}PlayerPrefs.Save();g.ReloadProgress();DeleteTemp(temp);Debug.Log("DAD_COMMERCIAL_UI_DONE: "+dir);});
+    }
+    static void QueueOutfitMatrix(string dir)
+    {
+        Directory.CreateDirectory(dir);var game=UnityEngine.Object.FindObjectOfType<DadSchoolPrototype>();var view=game.SlingView;bool gameEnabled=game.enabled,viewEnabled=view!=null&&view.enabled;game.enabled=false;if(view!=null)view.enabled=false;var audit=new GameObject("Outfit visual audit").AddComponent<DadOutfitAuditView>();
+        for(int i=0;i<7;i++){int page=i;Step(1,()=>audit.page=page);Step(6,()=>ScreenCapture.CaptureScreenshot(Path.Combine(dir,"matrix-"+page+".png"),2));}
+        Step(2,()=>{UnityEngine.Object.Destroy(audit.gameObject);game.enabled=gameEnabled;if(view!=null)view.enabled=viewEnabled;Debug.Log("DAD_OUTFIT_MATRIX_DONE: "+dir);});
+    }
+    static void QueueOutfitAudit(string dir)
+    {
+        Directory.CreateDirectory(dir);var g=UnityEngine.Object.FindObjectOfType<DadSchoolPrototype>();
+        DadProgress original=g.Progress;string temp=TempSavePath("outfit-audit");
+        Action<string> shot=name=>ScreenCapture.CaptureScreenshot(Path.Combine(dir,name+".png"),2);
+        Step(1,()=>{var p=new DadProgress(DadEconomy.Load(),temp);g.UseProgress(p);g.GoHome();g.Tab=DadSchoolPrototype.HomeTab.Lunchbox;SetMember(g,"toastTime",0f);});
+        Step(8,()=>shot("00-unequipped"));
+        Step(1,()=>{g.Progress.Save.gearRarity[3]=0;SetMember(g,"clock",0f);});Step(3,()=>shot("00-reading-idle0"));
+        Step(1,()=>SetMember(g,"clock",.65f));Step(3,()=>shot("00-reading-idle1"));
+        Step(1,()=>g.Progress.Save.gearRarity[3]=1);Step(3,()=>shot("00-sunglasses"));
+        for(int rarity=0;rarity<3;rarity++)
+        {
+            int r=rarity;
+            Step(1,()=>{for(int i=0;i<6;i++){g.Progress.Save.gearRarity[i]=r;g.Progress.Save.gearValue[i]=.04f;}g.Tab=DadSchoolPrototype.HomeTab.Lunchbox;});
+            Step(10,()=>shot("01-outfit-"+r));
+        }
+        Step(1,()=>{for(int i=0;i<6;i++){g.Progress.Save.gearRarity[i]=i%3;}g.Tab=DadSchoolPrototype.HomeTab.Go;});Step(8,()=>shot("02-mixed-home"));
+        Step(1,()=>{g.StartRun(1);g.Sling.foes.Clear();g.Sling.stage.spawns.Clear();g.Sling.Add(SlingshotSim.Kind.Tray,80,185).cooldown=999;});
+        Step(8,()=>shot("03-battle-idle"));
+        Step(1,()=>g.SlingView.DebugAim(new Vector2(270,620),new Vector2(170,700)));Step(8,()=>shot("04-pull"));
+        Step(1,()=>g.SlingView.DebugRelease());Step(8,()=>shot("05-flight"));
+        Step(1,()=>{g.UseProgress(original);DeleteTemp(temp);g.GoHome();Debug.Log("DAD_OUTFIT_SCREENS_DONE: "+dir);});
+    }
+    static void QueueDifficultyAudit(string dir)
+    {
+        Directory.CreateDirectory(dir);
+        var g=UnityEngine.Object.FindObjectOfType<DadSchoolPrototype>();
+        DadProgress original=g.Progress; string temp=TempSavePath("difficulty-audit");
+        string[] keys={"DadV2.BestChain","DadV2.Wins","DadV2.TotalWallHits"};
+        var saved=new Dictionary<string,int>(); foreach(string key in keys)if(PlayerPrefs.HasKey(key))saved[key]=PlayerPrefs.GetInt(key);
+        Action<string> shot=name=>ScreenCapture.CaptureScreenshot(Path.Combine(dir,name+".png"),2);
+        Step(1,()=>{var p=new DadProgress(DadEconomy.Load(),temp);p.Save.bestStage=11;p.Save.currentStage=8;p.Save.stars=new[]{3,3,2,2,2,3,2,2,1,1};g.UseProgress(p);g.GoHome();SetMember(g,"toastTime",0f);SetMember(g,"stagePicker",true);});
+        Step(12,()=>shot("01-rematch-list"));
+        Step(1,()=>{SetMember(g,"stagePicker",false);g.StartRematch(8,1);});Step(25,()=>shot("02-rematch-start"));
+        Step(1,()=>g.SlingView.DebugAim(new Vector2(270,620),new Vector2(360,730)));Step(8,()=>shot("03-rematch-aim"));
+        Step(1,()=>{g.Sling.shots=8;g.FinishSlingBattleNow(true);});Step(8,()=>shot("04-rematch-win"));
+        Step(1,()=>{g.StartRematch(8,2);g.Sling.shots=g.Sling.stage.shotLimit;g.Sling.lossReason="발사 소진 · 3명 남음";g.FinishSlingBattleNow(false);});Step(8,()=>shot("05-rematch-loss"));
+        Step(1,()=>{foreach(string key in keys){if(saved.ContainsKey(key))PlayerPrefs.SetInt(key,saved[key]);else PlayerPrefs.DeleteKey(key);}PlayerPrefs.Save();g.ReloadProgress();g.UseProgress(original);DeleteTemp(temp);SetMember(g,"stagePicker",false);g.GoHome();Debug.Log("DAD_DIFFICULTY_SCREENS_DONE: "+dir);});
+    }
     static void QueueScreenAudit(string dir)
     {
         Directory.CreateDirectory(dir);
@@ -212,6 +277,12 @@ public static class DadPrototypeSetup
             if (command == "setup") Setup();
             else if (command == "play") { if (!EditorApplication.isPlaying) { Open(); EditorApplication.isPlaying = true; } }
             else if (command == "checks") RunChecks();
+            else if (command == "previewbuild") DadPreviewBuild.Queue();
+            else if (command == "commercialchecks") DadCommercialChecks.Run();
+            else if (command == "phonepreview") DadCommercialChecks.PhonePreview();
+            else if (command == "outfitchecks") DadOutfitChecks.Run();
+            else if (command == "difficultybot") DadDifficultySetup.Bot();
+            else if (command == "difficultychecks") DadDifficultySetup.Run();
             else if (command == "playchecks") RunPlayChecks();
             else if (command == "polishchecks") RunPolishChecks();
             else if (command == "bake") BakeArt();
@@ -258,6 +329,10 @@ public static class DadPrototypeSetup
             else if (command.StartsWith("motion:") && EditorApplication.isPlaying) Legacy(() => QueueMotionAudit(command.Substring(7)));
             else if (command.StartsWith("story:") && EditorApplication.isPlaying) Legacy(() => QueueStoryAudit(command.Substring(6)));
             else if (command.StartsWith("ui:") && EditorApplication.isPlaying) Legacy(() => QueueUiAudit(command.Substring(3)));
+            else if (command.StartsWith("commercialui:") && EditorApplication.isPlaying) QueueCommercialAudit(command.Substring(13));
+            else if (command.StartsWith("outfitmatrix:") && EditorApplication.isPlaying) QueueOutfitMatrix(command.Substring(13));
+            else if (command.StartsWith("outfitui:") && EditorApplication.isPlaying) QueueOutfitAudit(command.Substring(9));
+            else if (command.StartsWith("difficultyui:") && EditorApplication.isPlaying) QueueDifficultyAudit(command.Substring(13));
             else if (command.StartsWith("slingmain:") && EditorApplication.isPlaying) QueueSlingMainAudit(command.Substring(10));
             else if (command == "pump" && EditorApplication.isPlaying) { pump = true; Application.runInBackground = true; }
             else if (command == "stop") { pump = false; EditorApplication.isPlaying = false; }
@@ -315,7 +390,7 @@ public static class DadPrototypeSetup
         Debug.Log("DAD_ART_BAKED: 8 frames; runtime flood fill no longer required");
     }
     static string TempSavePath(string tag) { return Path.Combine(Path.GetTempPath(), "dad-" + tag + "-" + Guid.NewGuid().ToString("N") + ".json"); }
-    static void DeleteTemp(string path) { if (File.Exists(path)) File.Delete(path); if (File.Exists(path + ".tmp")) File.Delete(path + ".tmp"); }
+    static void DeleteTemp(string path) { if (File.Exists(path)) File.Delete(path); if (File.Exists(path + ".tmp")) File.Delete(path + ".tmp"); if (File.Exists(path + ".bak")) File.Delete(path + ".bak"); }
     static AlleyCombat NewStageCombat() { var c = new AlleyCombat(0); c.SetArena(new Rect(64, 240, 412, 520)); c.player = new Vector2(270, 570); c.Start(); return c; }
     static void Expect(bool condition, string message, StringBuilder report)
     { if (!condition) throw new Exception("DAD_CHECK_FAILED: " + message); report.AppendLine("PASS " + message); }
@@ -588,7 +663,7 @@ public static class DadPrototypeSetup
             game.FinishSlingBattleNow(false);
             Expect(!game.LastReward.won && game.Progress.Save.coins > slingCoins && game.Progress.Save.lossesAtStage == 1 && game.Progress.Save.currentStage == 2, "a lost fight pays the consolation share and stays on the stage", report);
             game.Progress.Save.upgrades = new[] { 10, 5, 10, 10 }; game.StartRun();
-            Expect(game.Sling.knockBonus > 1.29f && game.Sling.launchBonus > 1.14f && game.Sling.dad.maxHealth > 139 && game.Sling.wallBonus == 2, "upgrades reach the fight (들이받기, 체력, 도움닫기, 멀리 날리기)", report);
+            Expect(game.Sling.impactBonus > .29f && Mathf.Approximately(game.Sling.knockBonus, 1) && game.Sling.launchBonus > 1.14f && game.Sling.dad.maxHealth > 139 && game.Sling.wallBonus == 2, "upgrades reach the fight (들이받기, 체력, 도움닫기, 멀리 날리기)", report);
             Expect(Mathf.Approximately(DadSchoolPrototype.GrowthBonus(0, 30), .6f) && DadSchoolPrototype.GrowthCapped(0, 20) && !DadSchoolPrototype.GrowthCapped(1, 500), "upgrade caps the 강화 tab shows: 들이받기 stops at +60%, 체력 has none", report);
             DadEconomy cardEco = game.Progress.Eco;
             int[] firsts = new int[10]; for (int s = 1; s <= 10; s++) firsts[s - 1] = DadSchoolPrototype.NewKind(cardEco, s);
@@ -598,6 +673,16 @@ public static class DadPrototypeSetup
             Expect(game.Sling.stage.floor == 1 && game.Sling.stage.spawns.Exists(sp => sp.kind == SlingshotSim.Kind.Boss), "1-20 is the floor-1 boss fight", report);
             game.StartStage(30);
             Expect(game.Sling.stage.label == "2-10" && game.Sling.stage.floor == 2 && game.Sling.stage.spawns.Exists(sp => sp.elite), "2-10 is floor 2's big-dad", report);
+            game.Progress.Save.bestStage=2; game.Progress.Save.currentStage=2; game.Progress.Save.stars=new[]{3};
+            Expect(game.StartRematch(1,1) && game.Sling.stage.challengeLevel==1 && game.Sling.stage.shotLimit>0,"main game starts an unlocked rematch with its shot limit",report);
+            game.FinishSlingBattleNow(true);
+            Expect(game.LastReward.challengeLevel==1 && game.Progress.RematchRank(1)==1 && game.Progress.Save.currentStage==2,"rematch finish commits rank and preserves onward stage",report);
+            double rematchCoins=game.Progress.Save.coins;
+            game.FinishSlingBattleNow(true);
+            Expect(game.Progress.Save.coins==rematchCoins,"duplicate finish callback does not repay rematch",report);
+            Expect(!game.StartRematch(1,3),"main entry rejects a locked rematch rank",report);
+            game.StartRun(1);
+            Expect(game.Sling.stage.challengeLevel==0 && game.Sling.stage.shotLimit==0,"normal replay after rematch has no leftover challenge restrictions",report);
             game.GoHome();
             Expect(game.Home && !game.SlingBattle && game.Sling == null && game.SlingView.Sim == null, "home ends the fight", report);
             if (game.PhoneGearUnlocked) { game.SelectGear(2); game.StartRun(); Expect(game.Sling.ragePending, "폭주형 gear starts with a rage shot", report); game.GoHome(); }
@@ -709,7 +794,7 @@ public static class DadPrototypeSetup
             var p = new DadProgress(eco, temp);
             Expect(p.Save.bestStage == 1 && p.Save.currentStage == 1 && Mathf.Abs(p.Power - eco.basePower) < .01f, "fresh save starts at 1-1 with base power", report);
             var win = p.ApplyResult(1, true, 1f, 7);
-            Expect(win.firstClear && win.stars == 3 && p.Save.bestStage == 2 && p.Save.currentStage == 2 && Math.Abs(p.Save.coins - eco.ClearCoins(1)) < .01 && p.Save.lunchboxes == eco.boxesPerClear, "first clear pays full coins, a lunchbox, 3 stars and unlocks the next stage", report);
+            Expect(win.firstClear && win.stars == 3 && p.Save.bestStage == 2 && p.Save.currentStage == 2 && Math.Abs(p.Save.coins - eco.ClearCoins(1) - eco.BaseCoins(1)*.5) < .01 && p.Save.lunchboxes == eco.boxesPerClear+1, "first three-star clear pays base and mastery rewards once and unlocks the next stage", report);
             var replay = p.ApplyResult(1, true, .2f, 0);
             Expect(replay.replay && !replay.firstClear && Math.Abs(replay.coins - eco.BaseCoins(1) * eco.replayCoinShare) < .01 && p.Stars(1) == 3 && p.Save.bestStage == 2, "replaying a cleared stage pays the replay share and keeps the best stars", report);
             double before = p.Save.coins; p.ApplyResult(2, false, 0, 0);

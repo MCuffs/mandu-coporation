@@ -1,0 +1,18 @@
+1-1 rapid noisy: 12/12, stars 2.0, HP 100
+1-1 novice: 12/12, stars 2.3, HP 97
+1-1 precise: 12/12, stars 2.8, HP 99
+1-5 rapid noisy: 12/12, stars 2.3, HP 100
+1-5 novice: 12/12, stars 2.8, HP 86
+1-5 precise: 12/12, stars 2.9, HP 99
+1-8 rapid noisy: 12/12, stars 2.1, HP 100
+1-8 novice: 12/12, stars 1.8, HP 76
+1-8 precise: 12/12, stars 2.3, HP 95
+1-10 rapid noisy: 12/12, stars 2.1, HP 100
+1-10 novice: 12/12, stars 2.3, HP 65
+1-10 precise: 12/12, stars 2.5, HP 98
+1-15 rapid noisy: 12/12, stars 2.0, HP 100
+1-15 novice: 12/12, stars 2.4, HP 71
+1-15 precise: 12/12, stars 2.4, HP 95
+1-20 rapid noisy: 12/12, stars 2.0, HP 98
+1-20 novice: 9/12, stars 1.8, HP 52
+1-20 precise: 12/12, stars 2.4, HP 96

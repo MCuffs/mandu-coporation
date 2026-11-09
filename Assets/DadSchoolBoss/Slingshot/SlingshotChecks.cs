@@ -169,6 +169,26 @@ public static class SlingshotChecks
         }
         return report.ToString();
     }
+    // Repeatable policy comparison, not a human difficulty or retention estimate. Same seeds and starting wall loadout.
+    public static string RunDifficultyBot(bool rematches, int runs=12)
+    {
+        var report=new StringBuilder("Difficulty policy comparison: no upgrades or lunchbox passives, wall damage +1, "+runs+" seeds per row\n");
+        foreach(int n in new[]{1,5,8,10,15,20})
+        for(int rank=rematches?1:0;rank<=(rematches?3:0);rank++)
+        for(int policy=0;policy<3;policy++)
+        {
+            int wins=0;float hp=0,stars=0;
+            for(int seed=0;seed<runs;seed++)
+            {
+                var st=rank==0?SlingshotSim.ForMain(1,n,Arena):SlingshotSim.Rematch(1,n,rank,Arena);
+                var sim=new SlingshotSim(st,Arena,seed,DadSlingshotPrototype.DefaultScale){wallBonus=1};
+                Play(sim,new System.Random(seed*137),policy==0?60:policy==1?20:5,policy==0?.05f:policy==1?1.5f:.6f,policy==0?.1f:policy==1?2.5f:1,policy==0?.3f:.5f);
+                if(sim.phase==SlingshotSim.Phase.Won){wins++;hp+=sim.dad.health;stars+=sim.Stars;}
+            }
+            report.AppendLine("1-"+n+" rank "+rank+" "+(policy==0?"rapid noisy":policy==1?"novice":"precise")+": "+wins+"/"+runs+(wins>0?", HP "+(hp/wins).ToString("F0")+", stars "+(stars/wins).ToString("F1"):""));
+        }
+        return report.ToString();
+    }
     // One bot game: aim at the nearest dad (a groggy boss first) with error, taking a moment to aim at the aiming slow-down.
     static void Play(SlingshotSim s, System.Random rng, float error, float aimMin, float aimMax, float weakest)
     {

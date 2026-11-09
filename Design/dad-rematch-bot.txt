@@ -1,0 +1,55 @@
+Difficulty policy comparison: no upgrades or lunchbox passives, wall damage +1, 12 seeds per row
+1-1 rank 1 rapid noisy: 6/12, HP 97, stars 2.0
+1-1 rank 1 novice: 11/12, HP 93, stars 2.1
+1-1 rank 1 precise: 12/12, HP 97, stars 2.3
+1-1 rank 2 rapid noisy: 5/12, HP 97, stars 2.0
+1-1 rank 2 novice: 10/12, HP 90, stars 2.2
+1-1 rank 2 precise: 12/12, HP 95, stars 2.2
+1-1 rank 3 rapid noisy: 2/12, HP 96, stars 2.0
+1-1 rank 3 novice: 4/12, HP 92, stars 2.0
+1-1 rank 3 precise: 6/12, HP 97, stars 2.0
+1-5 rank 1 rapid noisy: 8/12, HP 97, stars 2.1
+1-5 rank 1 novice: 12/12, HP 79, stars 2.5
+1-5 rank 1 precise: 12/12, HP 96, stars 2.8
+1-5 rank 2 rapid noisy: 6/12, HP 97, stars 2.3
+1-5 rank 2 novice: 11/12, HP 69, stars 2.6
+1-5 rank 2 precise: 12/12, HP 95, stars 2.9
+1-5 rank 3 rapid noisy: 2/12, HP 100, stars 2.0
+1-5 rank 3 novice: 12/12, HP 73, stars 2.7
+1-5 rank 3 precise: 10/12, HP 93, stars 2.6
+1-8 rank 1 rapid noisy: 3/12, HP 91, stars 2.0
+1-8 rank 1 novice: 8/12, HP 64, stars 2.0
+1-8 rank 1 precise: 7/12, HP 81, stars 2.1
+1-8 rank 2 rapid noisy: 1/12, HP 82, stars 2.0
+1-8 rank 2 novice: 6/12, HP 63, stars 2.2
+1-8 rank 2 precise: 7/12, HP 78, stars 2.1
+1-8 rank 3 rapid noisy: 1/12, HP 92, stars 2.0
+1-8 rank 3 novice: 3/12, HP 63, stars 2.3
+1-8 rank 3 precise: 3/12, HP 81, stars 2.3
+1-10 rank 1 rapid noisy: 1/12, HP 100, stars 2.0
+1-10 rank 1 novice: 9/12, HP 70, stars 2.6
+1-10 rank 1 precise: 12/12, HP 89, stars 2.8
+1-10 rank 2 rapid noisy: 1/12, HP 84, stars 3.0
+1-10 rank 2 novice: 11/12, HP 63, stars 2.1
+1-10 rank 2 precise: 11/12, HP 84, stars 2.5
+1-10 rank 3 rapid noisy: 0/12
+1-10 rank 3 novice: 10/12, HP 68, stars 2.4
+1-10 rank 3 precise: 10/12, HP 91, stars 2.6
+1-15 rank 1 rapid noisy: 5/12, HP 96, stars 2.2
+1-15 rank 1 novice: 11/12, HP 74, stars 2.5
+1-15 rank 1 precise: 12/12, HP 96, stars 2.5
+1-15 rank 2 rapid noisy: 0/12
+1-15 rank 2 novice: 11/12, HP 63, stars 2.3
+1-15 rank 2 precise: 10/12, HP 95, stars 2.4
+1-15 rank 3 rapid noisy: 1/12, HP 100, stars 2.0
+1-15 rank 3 novice: 8/12, HP 62, stars 2.5
+1-15 rank 3 precise: 9/12, HP 99, stars 2.4
+1-20 rank 1 rapid noisy: 0/12
+1-20 rank 1 novice: 7/12, HP 52, stars 2.1
+1-20 rank 1 precise: 10/12, HP 78, stars 2.6
+1-20 rank 2 rapid noisy: 3/12, HP 87, stars 2.0
+1-20 rank 2 novice: 6/12, HP 38, stars 1.8
+1-20 rank 2 precise: 9/12, HP 88, stars 2.8
+1-20 rank 3 rapid noisy: 0/12
+1-20 rank 3 novice: 6/12, HP 52, stars 2.3
+1-20 rank 3 precise: 9/12, HP 87, stars 3.0

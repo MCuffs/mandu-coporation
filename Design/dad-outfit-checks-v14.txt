@@ -1,0 +1,12 @@
+Equipment appearance and persistence checks
+PASS wear atlas and all nine UV entries load
+PASS empty wardrobe keeps original body without cosmetic allocation
+PASS equipped cream top builds a bounded appearance texture
+PASS same pose and equipment reuse the texture instead of allocating every frame
+PASS changing top invalidates old textures and changes appearance
+PASS unequipping restores the original look
+PASS olive garment pixels are eligible for recolor
+PASS skin, pants and black outlines are excluded from garment recolor
+PASS all eight current dad poses have anchors and foes do not
+PASS mixed equipment appearance selection survives Unity save reload
+PASS new shoes use body masking instead of stacking over the baked slippers

@@ -82,12 +82,10 @@ public sealed partial class DadSchoolPrototype
 
     void DrawOpening()
     {
-        GUI.BeginGroup(new Rect(0, 0, Width, Height));   // pushed-in stills must not spill past the 9:16 frame
         Box(new Rect(0, 0, Width, Height), Color.black);
         if (Opening == OpeningStep.Splash) DrawSplash();
         else if (Opening == OpeningStep.Title) DrawTitle();
         else DrawStory();
-        GUI.EndGroup();
     }
     void DrawSplash()
     {
@@ -119,8 +117,11 @@ public sealed partial class DadSchoolPrototype
         else if (cut == 4) { zoom = 1.03f; if (t < .18f) dx = Mathf.Sin(t * 110) * 7; }
         else { zoom = 1.08f; dx = Mathf.Lerp(18, -18, k); }
         Texture2D still = CutArt(cut);
-        float w = Width * zoom, h = Height * zoom;
-        if (still != null) GUI.DrawTexture(new Rect((Width - w) / 2 + dx, (Height - h) / 2, w, h), still);
+        if(DadPreferences.ReducedMotion){zoom=1;dx=0;}
+        float w=Width*zoom,visible=1/zoom;
+        // Crop only the still's UVs, keeping all text in the normal screen coordinate space.
+        // A GUI group would clip the high-density glyph rectangles before their inverse scale is applied.
+        if(still!=null)GUI.DrawTextureWithTexCoords(new Rect(0,0,Width,Height),still,new Rect((1-visible)/2-dx/w,(1-visible)/2,visible,visible));
         float fade = 1 - Mathf.Clamp01(t / CutFade);
         if (fade > 0) Box(new Rect(0, 0, Width, Height), new Color(0, 0, 0, fade));
         // Subtitles sit on their own band at the bottom (lines are never part of the art).

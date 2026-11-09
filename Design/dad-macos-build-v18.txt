@@ -1,0 +1,8 @@
+macOS playtest build
+Result: Succeeded
+Errors: 0
+Warnings: 0
+Size: 512288958 bytes
+Duration: 00:00:03.1735396
+App: /Users/jeongminsu/.gemini/antigravity/scratch/mandu-coporation/Builds/DadWarPlaytest/DadWarPlaytest.app
+Android: not built; Android module is not installed.

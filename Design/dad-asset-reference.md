@@ -25,3 +25,11 @@
 - [병맛 UI 방향 v9](dad-ui-direction-v9.md): 기획 v4/v5와 현재 콘텐츠를 바탕으로 한 디자인 기준. [3면 정적 시안](dad-ui-concept-v9.html). 일반 복도 로비안보다 이 방향을 우선한다.
 
 - [아빠 전쟁 시작 에셋 v11](dad-war-opening-assets-v11.md): 회사 스플래시 규격, 타이틀 1장, 시나리오 6컷. [동작 미리보기](dad-war-opening-preview-v11.html). 원본은 `Assets/DadSchoolBoss/Art/V11Opening/`.
+
+- [장착 장비 외형 v14](dad-outfit-appearance-v14.md): 투명 장갑/신발 파츠, 기존 안경·모자·소품 재사용, 상의 색상 변형. 현재 장착 데이터와 메인 캐릭터에 연결됨. [비교 미리보기](dad-outfit-preview-v14.html).
+
+- [V15 착용 안경 보정](dad-eyewear-fit-v15.md): 투명 렌즈 테두리, 자세별 눈 앵커, Unity 캡처.
+
+- [V16 전체 장비 외형 검수](dad-equipment-visual-audit-v16.md): 현재 합성 방식 불합격, 슬롯별 결함·재제작 우선순위.
+
+- [V17 장비 외형 수정](dad-equipment-appearance-v17.md): 상의 16포즈·착용 모자, 손발 교체 및 그립 수정, Unity 검수 화면.

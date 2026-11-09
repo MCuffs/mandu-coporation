@@ -18,6 +18,7 @@ public sealed partial class DadSchoolPrototype
 
     void DrawHome()
     {
+        if (stagePicker) { DrawStagePicker(); return; }
         Backdrop();
         if (Tab == HomeTab.Go) DrawGoTab();
         else
@@ -32,8 +33,9 @@ public sealed partial class DadSchoolPrototype
         Box(new Rect(0, 0, Width, BarHeight), Night);
         Icon("icon_coin", new Rect(20, 12, 36, 36));
         Text(new Rect(64, 10, 220, 40), Mathf.FloorToInt((float)Progress.Save.coins).ToString("N0"), 24, Paper, true);
-        Icon("icon_lunchbox", new Rect(388, 10, 40, 40));
-        Text(new Rect(434, 10, 90, 40), Progress.Save.lunchboxes.ToString(), 24, Paper, true);
+        Icon("icon_lunchbox", new Rect(300, 10, 36, 36));
+        Text(new Rect(342, 10, 96, 40), Progress.Save.lunchboxes.ToString(), 24, Paper, true);
+        if(Button(new Rect(470,8,52,44),"···",new Color(.28f,.37f,.30f),true,24))OpenSettings();
     }
     void DrawTabBar()
     {
@@ -48,7 +50,7 @@ public sealed partial class DadSchoolPrototype
             // Badges point at the next thing to do: boxes waiting, or an upgrade that is affordable now.
             int boxes = Progress.Save.lunchboxes + (Progress.HasPendingGear ? 1 : 0);
             if (i == 0 && boxes > 0) Badge(new Vector2(r.center.x + 26, r.y + 14), boxes.ToString());
-            if (i == 2 && Progress.Save.coins >= Progress.NextUpgradeCost) Badge(new Vector2(r.center.x + 26, r.y + 14), "!");
+            if (i == 2 && Progress.Save.coins >= Progress.NextUpgradeCost && HasUpgradeableStat()) Badge(new Vector2(r.center.x + 26, r.y + 14), "!");
             if (GUI.Button(r, GUIContent.none, GUIStyle.none) && !active) { Tab = (HomeTab)i; PlaySfx("sfx_button", .45f); }
         }
     }
@@ -62,14 +64,15 @@ public sealed partial class DadSchoolPrototype
     void DrawGoTab()
     {
         DadSave save = Progress.Save; int stage = save.currentStage, floor = Progress.Eco.Floor(stage);
-        Box(new Rect(0, BarHeight, Width, 146), Paper); Box(new Rect(0, BarHeight + 146, Width, 3), Ink);
+        Box(new Rect(0, BarHeight, Width, 146), Paper); Box(new Rect(22,196,496,1),new Color(.3f,.35f,.27f,.25f));
         Text(new Rect(22, 70, 340, 26), "아들: \"지호가 자기 아빠 데려왔대…\"", 17, Red, true);
-        Text(new Rect(18, 94, 330, 104), Title, 64, Ink, true);
+        Text(new Rect(22, 94, 330, 76), Title, 54, Ink, true);
         // Stars collected over the school (C-13: the power number moved out; the fight runs on upgrades, not power).
         int stars = 0; foreach (int s in save.stars) stars += s;
-        Text(new Rect(330, 82, 188, 26), "모은 별 / " + 3 * Progress.Eco.TotalStages, 17, Ink, true, TextAnchor.MiddleRight);
+        Text(new Rect(330, 82, 188, 26), "학교 정리 기록", 17, Ink, true, TextAnchor.MiddleRight);
         Icon("star_full", new Rect(376, 112, 42, 42));
-        Text(new Rect(418, 106, 100, 56), stars.ToString(), 42, Ink, true, TextAnchor.MiddleRight);
+        Text(new Rect(418, 106, 100, 56), stars.ToString(), 36, Ink, true, TextAnchor.MiddleRight);
+        Text(new Rect(24,164,492,26),Progress.Eco.Label(stage)+"  ·  "+StagePlan.FloorNames[Mathf.Clamp(floor-1,0,2)]+" 출동 준비",17,Green);
         DrawHomeScene(floor);
 
         // Mom's stash (idle reward): always on its own row so it never covers dad's face (v9).
@@ -86,12 +89,12 @@ public sealed partial class DadSchoolPrototype
         Text(new Rect(34, 686, 330, 34), Progress.Eco.Label(stage) + " · " + StagePlan.FloorNames[Mathf.Clamp(floor - 1, 0, 2)], 24, Ink, true);
         SlingshotSim.Stage next = CardStage(stage); int best = Progress.Stars(stage);
         for (int s = 0; s < 3; s++) Icon(s < best ? "star_full" : "star_empty", new Rect(32 + s * 24, 720, 24, 24));
-        Text(new Rect(112, 716, 270, 30), "목표 " + next.par + "발 · 상대 " + next.spawns.Count + "명" + (next.bossEscorts ? "+" : ""), 17, Green, true);
+        Text(new Rect(112, 716, 270, 30), next.shotLimit>0 ? "별 " + next.par + "발 · 한도 " + (next.shotLimit+AssistShots(Progress.StuckAssist(stage))) + "발" : "목표 " + next.par + "발 · 상대 " + next.spawns.Count + "명" + (next.bossEscorts ? "+" : ""), 17, Green, true);
         float assist = Progress.StuckAssist(stage);
         if (assist > 1.001f)
         {
             Icon("mom_cheer", new Rect(392, 690, 52, 52));
-            Text(new Rect(442, 688, 76, 60), "엄마 응원\n체력+" + Mathf.RoundToInt((assist - 1) * 100) + "%", 15, Green, true);
+            Text(new Rect(442, 688, 76, 60), "엄마 응원\n체력+" + Mathf.RoundToInt((assist - 1) * 100) + "%\n발사+" + AssistShots(assist), 15, Green, true);
         }
         else if (cardFoe != null)
         {
@@ -99,7 +102,8 @@ public sealed partial class DadSchoolPrototype
             Text(new Rect(440, 688, 78, 22), cardTag, 15, Red, true);
             Text(new Rect(440, 708, 78, 40), cardName, 14, Ink, true, TextAnchor.UpperLeft);
         }
-        if (Button(new Rect(20, 764, 500, 84), Progress.Eco.Label(stage) + " 출발!", Yellow, true, 38)) StartRun();
+        if (Button(new Rect(366, 764, 154, 84), "지난 판\n별 도전", Color.white, true, 21)) stagePicker = true;
+        if (Button(new Rect(20, 764, 330, 84), Progress.Eco.Label(stage) + " 출발!", Yellow, true, 38)) StartRun();
     }
     // v9 home: dad stands there unbothered while the last 지호 아빠 is still slumped on a dented locker. Existing v5/v6/v7
     // art arranged as decoration, not a new system and not a new background.
@@ -145,7 +149,7 @@ public sealed partial class DadSchoolPrototype
         Text(new Rect(150, 522, 360, 50), Progress.HasPendingGear ? "열어 둔 도시락 보기" : "도시락 열기 · " + save.lunchboxes, 30, Ink, true);
         Text(new Rect(150, 570, 360, 40), canOpen ? "더 좋은 장비는 장착, 남는 건 분해" : "스테이지를 깨면 도시락이 와요", 16, Ink);
         Panel(new Rect(20, 636, 500, 58), Paper);
-        Text(new Rect(34, 638, 330, 54), "장비 전투력 +" + Mathf.RoundToInt((Progress.GearMultiplier - 1) * 100) + "%  ·  장착 " + equipped + "/" + DadProgress.SlotCount, 19, Ink, true);
+        Text(new Rect(34, 638, 330, 54), "발사 장비 장착 " + equipped + "/" + DadProgress.SlotCount + " · 슬롯을 눌러 효과 확인", 19, Ink, true);
         if (Button(new Rect(372, 642, 138, 44), "모두 열기", Color.white, save.lunchboxes > 1, 18)) OpenAllBoxes();
         // Odds come from the same economy data the rolls use (v2 6.2: publish the rates and the first-box rule together).
         float[] w = Progress.Eco.gearRarityWeights; float total = 0; foreach (float x in w) total += x;
@@ -153,10 +157,15 @@ public sealed partial class DadSchoolPrototype
         for (int i = 0; i < DadProgress.RarityCount && i < w.Length; i++) odds += (i > 0 ? " · " : "") + DadProgress.RarityNames[i] + " " + Mathf.RoundToInt(100 * w[i] / total) + "%";
         Box(new Rect(20, 708, 6, 66), Green);
         Text(new Rect(36, 708, 484, 30), "등급 확률  " + odds, 17, Ink, true);
-        Text(new Rect(36, 738, 484, 36), "첫 도시락은 " + DadProgress.RarityNames[Mathf.Clamp(Progress.Eco.gearFirstRarity, 0, DadProgress.RarityCount - 1)] + " 확정 · 빈 부위부터 채워요", 15, Muted);
+        Text(new Rect(36, 738, 484, 36), "첫 장비는 희귀 손 장비 · 두 번째는 신발 · 이후 빈 부위부터", 15, Muted);
         Text(new Rect(24, 790, 492, 60), "\"밥 먹으려고 열었는데 효자손이 나왔다.\"", 18, Green, true, TextAnchor.MiddleCenter);
     }
 
+    bool HasUpgradeableStat()
+    {
+        for (int i = 0; i < DadProgress.StatCount; i++) if (!GrowthCapped(i, Progress.Save.upgrades[i])) return true;
+        return false;
+    }
     // ---- 강화: four rows with what each level does in the fight, then the special launch that changes how it plays ---------
     void DrawUpgradeTab()
     {
@@ -171,7 +180,7 @@ public sealed partial class DadSchoolPrototype
             Text(new Rect(296, row.y + 8, 90, 26), UpgradeNow(i), 14, Green, true, TextAnchor.MiddleRight);
             Text(new Rect(108, row.y + 36, 280, 24), UpgradeEffect(i), 15, Ink);
             Text(new Rect(108, row.y + 59, 280, 24), UpgradeQuips[i], 14, Green);
-            if (Button(new Rect(394, row.y + 16, 114, 56), "강화\n" + Mathf.CeilToInt((float)cost).ToString("N0"), afford ? Yellow : Color.white, afford, 19) && Progress.TryUpgrade(i))
+            if (Button(new Rect(394, row.y + 16, 114, 56), (GrowthCapped(i, Progress.Save.upgrades[i]) ? "최대" : "강화\n" + Mathf.CeilToInt((float)cost).ToString("N0")), afford && !GrowthCapped(i, Progress.Save.upgrades[i]) ? Yellow : Color.white, afford && !GrowthCapped(i, Progress.Save.upgrades[i]), 19) && Progress.TryUpgrade(i))
             { PersistNow(); PlaySfx("sfx_skill_pick", .6f); }
         }
         Text(new Rect(24, 552, 492, 34), "특수 발사  ·  하나를 골라 출동합니다", 21, Ink, true);
@@ -193,13 +202,13 @@ public sealed partial class DadSchoolPrototype
     Texture2D[] launchIcons;
     Texture2D LaunchIcon(int i)
     {
-        if (launchIcons == null) launchIcons = new[] { Resources.Load<Texture2D>("DadV13/ui/wall_launch"), Resources.Load<Texture2D>("DadV13/ui/chain_launch"), Resources.Load<Texture2D>("DadV13/ui/rage_launch") };
+        if (launchIcons == null || launchIcons.Length != 3) launchIcons = new[] { Resources.Load<Texture2D>("DadV13/ui/wall_launch"), Resources.Load<Texture2D>("DadV13/ui/chain_launch"), Resources.Load<Texture2D>("DadV13/ui/rage_launch") };
         return launchIcons[i];
     }
     // What one level does in the fight, from the numbers ApplyGrowth uses.
     static string UpgradeEffect(int stat)
     {
-        string per = "레벨당 " + (stat == 0 ? "미는 힘" : stat == 1 ? "체력" : stat == 2 ? "발사 속도" : "비거리") + " +" + (GrowthStep[stat] * 100).ToString("0.#") + "%";
+        string per = "레벨당 " + (stat == 0 ? "직접 피해(누적)" : stat == 1 ? "체력" : stat == 2 ? "발사 속도" : "비거리") + " +" + (GrowthStep[stat] * 100).ToString("0.#") + "%";
         return stat == 3 ? per + " · Lv." + FarThrowWallLevel + " 벽꿍 +1" : per;
     }
     // The bonus reached so far; "최대" once the cap is hit (health has none).
@@ -229,8 +238,9 @@ public sealed partial class DadSchoolPrototype
         Box(new Rect(23, 53, 494, 50), Night);
         Text(new Rect(20, 53, 500, 50), header, 22, Paper, true, TextAnchor.MiddleCenter);
         Text(new Rect(20, 110, 500, 26), won ? "아빠 출동 중 발생한 일" : "오늘은 여기까지", 16, Ink, false, TextAnchor.MiddleCenter);
-        Text(new Rect(20, 132, 500, 62), won ? FloorDone[floorIndex] : "아빠도 가끔은 진다", 44, won ? Ink : Red, true, TextAnchor.MiddleCenter);
-        if (won && LastReward != null) for (int s = 0; s < 3; s++) Icon(s < LastReward.stars ? "star_full" : "star_empty", new Rect(Width / 2 - 66 + s * 44, 196, 40, 40));
+        Text(new Rect(20, 132, 500, 62), won ? (LastReward != null && LastReward.challengeLevel > 0 ? "재대결 승리!" : floorCleared?FloorDone[floorIndex]:NewShotRecord?"최소 발사 신기록!":"아빠가 또 해냈다!") : "아빠도 가끔은 진다", 44, won ? Ink : Red, true, TextAnchor.MiddleCenter);
+        if (won && LastReward != null && LastReward.challengeLevel > 0) Text(new Rect(20,196,500,40),"재대결 " + LastReward.challengeLevel + "단계 격파",24,Green,true,TextAnchor.MiddleCenter);
+        else if (won && LastReward != null) for (int s = 0; s < 3; s++) Icon(s < LastReward.stars ? "star_full" : "star_empty", new Rect(Width / 2 - 66 + s * 44, 196, 40, 40));
         scene();
         for (int i = 0; i < 3; i++)
         {
@@ -241,7 +251,7 @@ public sealed partial class DadSchoolPrototype
         if (LastReward != null)
         {
             Panel(new Rect(32, 542, 476, 66), new Color(.9f, .76f, .38f));
-            string coins = "코인 +" + Mathf.RoundToInt((float)LastReward.coins) + (LastReward.replay && !LastReward.firstClear && won ? "  (다시 하기)" : "");
+            string coins = "코인 +" + Mathf.RoundToInt((float)LastReward.coins) + (LastReward.challengeLevel > 0 ? "  (재대결)" : LastReward.replay && !LastReward.firstClear && won ? "  (다시 하기)" : "");
             if (Progress.Save.lunchboxes > 0 || Progress.HasPendingGear)
             {
                 // The lunchbox reward is the button: tap it to open (v6 README, connection step 1).
@@ -256,16 +266,24 @@ public sealed partial class DadSchoolPrototype
         bool finalCleared = floorCleared && PlayingStage == Progress.Eco.TotalStages;
         Text(new Rect(44, 614, 452, 52), floorCleared ? FloorClearLines[floorIndex] : reason, 18, Ink, false, TextAnchor.MiddleCenter);
         if (finalCleared) Text(new Rect(36, 666, 468, 26), EndingLine, 16, Green, true, TextAnchor.MiddleCenter);
-        else if (!won && Progress.StuckAssist(PlayingStage) > 1.001f)
+        else if (!won && (LastReward == null || LastReward.challengeLevel == 0) && Progress.StuckAssist(PlayingStage) > 1.001f)
         {
             Icon("mom_cheer", new Rect(120, 664, 30, 30));
-            Text(new Rect(154, 666, 300, 26), "엄마의 응원 " + (UseSlingshot ? "체력 +" : "+") + Mathf.RoundToInt((Progress.StuckAssist(PlayingStage) - 1) * 100) + "% 적용 중", 17, Green, true);
+            Text(new Rect(154, 666, 300, 26), "엄마의 응원 " + (UseSlingshot ? "체력 +" : "+") + Mathf.RoundToInt((Progress.StuckAssist(PlayingStage) - 1) * 100) + "% · 발사 +" + AssistShots(Progress.StuckAssist(PlayingStage)) + " 적용 중", 17, Green, true);
         }
-        Text(new Rect(44, 694, 452, 46), NextGoal, 15, Green, false, TextAnchor.MiddleCenter);
-        int next = Progress.Save.currentStage;
-        if (won) Text(new Rect(20, 742, 500, 24), "다음: " + Progress.Eco.Label(next) + " · " + StagePlan.FloorNames[Mathf.Clamp(Progress.Eco.Floor(next) - 1, 0, 2)], 16, Ink, true, TextAnchor.MiddleCenter);
-        if (Button(new Rect(40, 772, 460, 74), won ? "다음 상대 보러 가기" : "다시 도전", Yellow, true, 30)) StartRun(won ? next : PlayingStage);
-        if (Button(new Rect(40, 860, 460, 54), "집으로 · 강화하기", Color.white, true, 21)) { GoHome(); Tab = HomeTab.Upgrade; }
+        Text(new Rect(44, 694, 452, 46), LastReward != null && LastReward.bonusLine != "" ? LastReward.bonusLine : NextGoal, 15, Green, false, TextAnchor.MiddleCenter);
+        int next = Mathf.Min(PlayingStage+1,Progress.Save.bestStage,Progress.Eco.TotalStages);
+        if (won && (LastReward == null || LastReward.challengeLevel == 0)) Text(new Rect(20, 742, 500, 24), "다음: " + Progress.Eco.Label(next) + " · " + StagePlan.FloorNames[Mathf.Clamp(Progress.Eco.Floor(next) - 1, 0, 2)], 16, Ink, true, TextAnchor.MiddleCenter);
+        int rank = SlingResult != null ? SlingResult.stage.challengeLevel : 0;
+        if (rank > 0)
+        {
+            bool nextRank = won && rank < 3;
+            if (Button(new Rect(40, 772, 460, 74), nextRank ? "재대결 " + (rank+1) + "단계 도전" : "같은 재대결 다시", Yellow, true, 28)) StartRematch(PlayingStage, nextRank ? rank+1 : rank);
+        }
+        else if (Button(new Rect(40, 772, 460, 74), won ? (finalCleared?"마지막 판 다시 출동":"다음 상대 보러 가기") : "다시 도전", Yellow, true, 30)) StartRun(won ? next : PlayingStage);
+        if (won && Button(new Rect(40, 850, 220, 54), rank == 0 ? "재대결 도전" : "판 선택", Color.white, true, 20))
+        { if (rank == 0) StartRematch(PlayingStage, Mathf.Min(3, Progress.RematchRank(PlayingStage)+1)); else { GoHome(); stagePicker=true; } }
+        if (Button(new Rect(won ? 276 : 40, 850, won ? 224 : 460, 54), "집으로 · 강화", Color.white, true, 20)) { GoHome(); Tab = HomeTab.Upgrade; }
     }
     // Dad unbothered next to whoever just left the frame, with the red 처리 완료 stamp; on a loss, dad hurt and the one who
     // is still standing.

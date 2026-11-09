@@ -30,7 +30,7 @@ public sealed partial class DadSchoolPrototype
         if (!Revealing || !Progress.HasPendingGear) { revealClock = -1; return; }
         int slot = Progress.Save.pendingSlot, rarity = Progress.Save.pendingRarity; float value = Progress.Save.pendingValue;
         double coins = equip ? Progress.EquipPending() : Progress.DismantlePending();
-        toast = equip ? DadProgress.ItemName(slot, rarity) + " 장착!  전투력 +" + GearPoints(value) + (coins > 0 ? "  ·  헌 장비 코인 +" + Mathf.RoundToInt((float)coins) : "")
+        toast = equip ? DadProgress.ItemName(slot, rarity) + " 장착!  " + DadProgress.GearEffect(slot, value) + (coins > 0 ? "  ·  헌 장비 코인 +" + Mathf.RoundToInt((float)coins) : "")
                       : "분해!  코인 +" + Mathf.RoundToInt((float)coins);
         toastTime = 2f; revealClock = -1; PersistNow(); PlaySfx(equip ? "sfx_skill_pick" : "sfx_coin", .7f);
     }
@@ -49,8 +49,6 @@ public sealed partial class DadSchoolPrototype
         float before = revealClock; revealClock += dt;
         if (before < RevealOpenTime && revealClock >= RevealOpenTime) RevealSound();
     }
-    // Power points an item adds right now (the card shows points; the percent is the real multiplier share).
-    int GearPoints(float value) { return Mathf.Max(1, Mathf.RoundToInt(Progress.Power / Progress.GearMultiplier * value)); }
 
     void DrawLunchbox(Vector2 floor, float width, float t)
     {
@@ -93,7 +91,7 @@ public sealed partial class DadSchoolPrototype
         float iconSize = Mathf.Min(w * .66f, body * .64f);
         if (icon != null) GUI.DrawTexture(new Rect(-iconSize / 2, top + body * .07f, iconSize, iconSize), icon, ScaleMode.ScaleToFit);
         Text(new Rect(r.x + 14, top + body * .76f, w - 28, body * .22f), DadProgress.ItemName(slot, rarity), 25, Ink, true, TextAnchor.MiddleCenter);
-        Text(new Rect(r.x, footer - 18, w, 36), "전투력 +" + GearPoints(value) + "  (+" + (value * 100).ToString("F1") + "%)", 19, Green, true, TextAnchor.MiddleCenter);
+        Text(new Rect(r.x, footer - 18, w, 36), DadProgress.GearEffect(slot, value), 19, Green, true, TextAnchor.MiddleCenter);
         GUI.matrix = old;
     }
 
@@ -120,10 +118,11 @@ public sealed partial class DadSchoolPrototype
         DrawGearCard(center, new Vector2(272, 390), .35f + .65f * pop, slot, rarity, save.pendingValue);
         if (k < 1) return;
         bool upgrade = Progress.PendingIsUpgrade, has = Progress.HasGear(slot);
-        int now = has ? GearPoints(save.gearValue[slot]) : 0, next = GearPoints(save.pendingValue);
+        string now = DadProgress.GearEffect(slot, Progress.EquippedValue(slot));
+        string next = DadProgress.GearEffect(slot, save.pendingValue);
         Panel(new Rect(45, 590, 450, 78), Paper);
-        Text(new Rect(60, 594, 420, 34), has ? "지금: " + DadProgress.ItemName(slot, save.gearRarity[slot]) + " (" + DadProgress.RarityNames[save.gearRarity[slot]] + ")  전투력 +" + now : DadProgress.SlotNames[slot] + " 부위가 비어 있어요", 18, Ink, false, TextAnchor.MiddleCenter);
-        Text(new Rect(60, 628, 420, 36), !has ? "바로 장착하면 전투력 +" + next : upgrade ? "▲ 전투력 +" + (next - now) + " 오름" : "▼ 지금 장비가 " + (now - next) + " 더 셉니다", 22, upgrade ? Green : Red, true, TextAnchor.MiddleCenter);
+        Text(new Rect(60, 594, 420, 34), has ? "지금: " + DadProgress.ItemName(slot, save.gearRarity[slot]) + " (" + DadProgress.RarityNames[save.gearRarity[slot]] + ")" : DadProgress.SlotNames[slot] + " 부위가 비어 있어요", 18, Ink, false, TextAnchor.MiddleCenter);
+        Text(new Rect(60, 628, 420, 36), has ? now + " → " + next.Replace(DadProgress.GearEffects[slot] + " ", "") : next, 22, upgrade ? Green : Red, true, TextAnchor.MiddleCenter);
         if (Button(new Rect(45, 692, 205, 72), "분해\n코인 +" + Mathf.RoundToInt((float)Progress.DismantleCoins(rarity)), upgrade ? Color.white : Yellow, true, 20)) DecideReveal(false);
         if (Button(new Rect(262, 692, 233, 72), "장착!", upgrade ? Yellow : Color.white, true, 28)) DecideReveal(true);
         Text(new Rect(30, 784, 480, 30), "바꾼 헌 장비는 자동으로 분해되어 코인이 됩니다", 16, Paper, false, TextAnchor.MiddleCenter);
@@ -138,6 +137,7 @@ public sealed partial class DadSchoolPrototype
     // One equipped slot: rarity frame, the item icon, or the slot name while it is empty.
     void DrawGearSlot(Rect r, int i)
     {
+        if (GUI.Button(r, GUIContent.none, GUIStyle.none)) { toast = Progress.HasGear(i) ? DadProgress.ItemName(i, Progress.Save.gearRarity[i]) + " · " + DadProgress.GearEffect(i, Progress.EquippedValue(i)) : DadProgress.SlotNames[i] + " · 비어 있음"; toastTime = 3; }
         bool has = Progress.HasGear(i); int rarity = Progress.Save.gearRarity[i];
         Box(r, Ink); Box(new Rect(r.x + 3, r.y + 3, r.width - 6, r.height - 6), has ? RarityColors[rarity] : new Color(.75f, .74f, .7f));
         Box(new Rect(r.x + 6, r.y + 6, r.width - 12, r.height - 12), Paper);

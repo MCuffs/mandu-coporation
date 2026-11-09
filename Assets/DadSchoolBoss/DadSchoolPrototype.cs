@@ -7,7 +7,13 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
 {
     public const float Width = 540, Height = 960;
     public AlleyCombat Combat { get; private set; }
-    public DadProgress Progress { get; private set; }
+    DadProgress progress;
+    // Managed progress objects are lost on an editor script reload; reattach the saved data before drawing or testing.
+    public DadProgress Progress
+    {
+        get { if (progress == null) { progress = new DadProgress(DadEconomy.Load(), DadProgress.DefaultPath); ReloadProgress(); } return progress; }
+        private set { progress = value; }
+    }
     public StageReward LastReward { get; private set; }
     public int PlayingStage { get; private set; }
     public float TimeLimit { get { return Director != null ? Director.Plan.timeLimit : 60; } }
@@ -70,6 +76,7 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
     // Runtime-built frames and clips do not survive a script reload while playing in the editor; rebuild them if lost.
     bool ResourcesLost { get { return art == null || heroFrames == null || enemyFrames == null || hitClip == null || wallClip == null || disc == null || audioSource == null || music == null; } }
     DadArt art;
+    DadOutfitRenderer outfit;
     AudioSource music;
     float walkPhase, specialPose, coinSoundClock;
     readonly HashSet<int> dashing = new HashSet<int>();
@@ -79,7 +86,7 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
         hero = LoadArt("Hero", out heroFrames);
         enemies = LoadArt("Enemies", out enemyFrames);
         arena = Resources.Load<Texture2D>("DadV2/Arena");
-        body = Resources.Load<Font>("Fonts/GothicA1-Bold");
+        body = Resources.Load<Font>("Fonts/GothicA1-Regular");
         title = Resources.Load<Font>("Fonts/BlackHanSans-Regular");
         if (body == null) body = Font.CreateDynamicFontFromOSFont("Arial", 20);
         if (title == null) title = body;
@@ -91,6 +98,7 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
         audioSource = GetComponent<AudioSource>(); if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
         hitClip = MakeSound(150, .065f); wallClip = MakeSound(75, .13f);
         art = DadArt.Load();
+        if(outfit!=null)outfit.Dispose();outfit=new DadOutfitRenderer(art);
         AudioSource[] sources = GetComponents<AudioSource>();
         music = sources.Length > 1 ? sources[1] : gameObject.AddComponent<AudioSource>();
         music.loop = true; music.volume = .32f; music.playOnAwake = false;
@@ -262,7 +270,8 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
             if (Sling == null && SlingResult == null) GoHome();   // the fight did not survive a script reload in the editor
             return;
         }
-        if (Home || Combat == null) return;
+        if(settingsOpen&&Input.GetKeyDown(KeyCode.Escape)){settingsOpen=false;return;}
+        if (Home || Combat == null || settingsOpen) return;
         if (Input.GetKeyDown(KeyCode.Escape)) { if (Combat.state == RunState.Fighting) Paused = !Paused; }
         if (Paused || Combat.state != RunState.Fighting) { dragging = false; stick = Vector2.zero; specialRequested = false; SaveResult(); return; }
         if (Input.touchCount > 0)
@@ -323,6 +332,7 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
     void OnApplicationQuit() { PersistNow(); }
     void OnDestroy()
     {
+        if(outfit!=null)outfit.Dispose();
         if (disc != null) Destroy(disc); if (hitClip != null) Destroy(hitClip); if (wallClip != null) Destroy(wallClip);
         if (heroFrames != null) foreach (Frame f in heroFrames) if (f.owned && f.texture != null) Destroy(f.texture);
         if (enemyFrames != null) foreach (Frame f in enemyFrames) if (f.owned && f.texture != null) Destroy(f.texture);
@@ -335,15 +345,17 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
     }
 
     void Box(Rect r, Color c) { GUI.color = c; GUI.DrawTexture(r, Texture2D.whiteTexture); GUI.color = Color.white; }
-    void Panel(Rect r, Color c) { Box(r, Ink); Box(new Rect(r.x + 3, r.y + 3, r.width - 6, r.height - 6), c); }
+    void Panel(Rect r, Color c) { DadUi.Panel(r,c,Ink); }
     void Text(Rect r, string s, int size = 20, Color? color = null, bool display = false, TextAnchor align = TextAnchor.MiddleLeft)
-    { GUI.Label(r, s, new GUIStyle { font = display ? title : body, fontSize = size, alignment = align, wordWrap = true, normal = { textColor = color ?? Ink } }); }
+    { DadUi.Text(r,s,display?title:body,size,color??Ink,align); }
     bool Button(Rect r, string s, Color c, bool enabled = true, int size = 23)
     {
-        Panel(new Rect(r.x, r.y + 5, r.width, r.height), Ink); Panel(r, enabled ? c : new Color(.6f, .6f, .55f));
+        Rect hitRect=r;
+        DadUi.Fill(new Rect(r.x,r.y+4,r.width,r.height),new Color(.09f,.14f,.11f,.24f));
+        if(enabled&&DadUi.Pressed(r))r.y+=3;Panel(r, enabled ? c : new Color(.79f,.78f,.72f));
         Text(r, s, size, Ink, true, TextAnchor.MiddleCenter);
         bool previous = GUI.enabled; GUI.enabled = previous && enabled;
-        bool clicked = GUI.Button(r, GUIContent.none, GUIStyle.none); GUI.enabled = previous;
+        bool clicked = GUI.Button(hitRect, GUIContent.none, GUIStyle.none); GUI.enabled = previous;
         if (clicked) PlaySfx("sfx_button", .45f);
         return clicked;
     }
@@ -378,7 +390,7 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
         if (SlingBattle)
         {
             // The slingshot view draws the fight underneath (GUI.depth 1); the result card, reveal and toasts go on top.
-            bool on = GUI.enabled; if (Revealing) GUI.enabled = false;
+            bool on = GUI.enabled; if (Revealing || settingsOpen) GUI.enabled = false;
             if (SlingResult != null) DrawSlingResult();
             GUI.enabled = on;
             DrawReveal(); DrawToast();
@@ -387,10 +399,10 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
         Box(new Rect(0, 0, Width, Height), Paper);
         if (InOpening) { DrawOpening(); GUI.matrix = previous; return; }
         // The lunchbox reveal sits on top of home or the result screen; nothing under it takes taps meanwhile.
-        bool enabled = GUI.enabled; if (Revealing) GUI.enabled = false;
+        bool enabled = GUI.enabled; if (Revealing || settingsOpen) GUI.enabled = false;
         if (Home) DrawHome(); else if (Combat != null) DrawBattle();
         GUI.enabled = enabled;
-        DrawReveal(); DrawToast();
+        DrawReveal(); DrawToast(); DrawSettings();
         GUI.matrix = previous;
     }
     void Backdrop()

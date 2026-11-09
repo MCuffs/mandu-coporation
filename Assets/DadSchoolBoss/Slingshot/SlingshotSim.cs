@@ -39,6 +39,7 @@ public sealed class SlingshotSim
     {
         public string label, title, lesson;
         public int par;                       // shots for the third star
+        public int challengeLevel, shotLimit; // rank 0 = campaign; shotLimit 0 = unrestricted
         public float speedScale = 1;
         public bool bossEscorts;              // the boss keeps calling more dads in while he stands
         public int floor = 1;                 // which floor's boss art and lines (main game: 1 corridor, 2 cafeteria, 3 gym)
@@ -72,10 +73,14 @@ public sealed class SlingshotSim
     // Growth from the main game (change request C-08 draft): 들이받기 = how hard dad's hit sends a dad, 도움닫기 = launch
     // speed, 멀리 날리기 = how far a hit dad flies and extra wall damage. Health comes in through dad.maxHealth.
     public float knockBonus = 1, launchBonus = 1, throwBonus = 1;
+    public float impactBonus, impactCarry;
+    public float bounceRetention = DadBounce, aimSlow = .5f, hurtGrace = .6f;
     public int wallBonus;
     public void SetHealth(float max) { dad.maxHealth = dad.health = Mathf.Max(1, max); }
     public int shots, kills, wallSlams, shotChain, bestChain;
     public float elapsed, freeze;
+    float spentShotsClock;
+    public string lossReason = "";
     readonly System.Random rng;
     int nextSpawn, nextId, escortsCalled;
     float escortClock;
@@ -101,7 +106,7 @@ public sealed class SlingshotSim
     // pull = direction and length the player dragged (already pointing where dad should fly).
     public bool Launch(Vector2 pull)
     {
-        if (phase != Phase.Ready || pull.magnitude < PullDeadZone) return false;
+        if (phase != Phase.Ready || (stage.shotLimit > 0 && shots >= stage.shotLimit) || dad.landed > .01f || pull.magnitude < PullDeadZone) return false;
         dad.rage = ragePending; ragePending = false; dad.bounces = 0;
         dad.vel = LaunchVelocity(pull) * (dad.rage ? 1.15f : 1) * launchBonus; dad.flying = true; dad.flightTime = 0;
         shots++; shotChain = 0; phase = Phase.Flying;
@@ -110,9 +115,9 @@ public sealed class SlingshotSim
     }
     // The aiming guide: straight to the first wall, then a short stretch after the bounce. Bodies are not shown; reading
     // the crowd is the player's job.
-    public static List<Vector2> Predict(Vector2 from, Vector2 pull, Rect arena, float dadRadius)
+    public static List<Vector2> Predict(Vector2 from, Vector2 pull, Rect arena, float dadRadius, List<Vector2> reuse = null)
     {
-        var points = new List<Vector2> { from };
+        var points = reuse ?? new List<Vector2>(4);points.Clear();points.Add(from);
         if (pull.magnitude < PullDeadZone) return points;
         Vector2 v = LaunchVelocity(pull), dir = v.normalized, p = from;
         float budget = v.magnitude / DadDrag * .9f, after = -1;
@@ -167,6 +172,14 @@ public sealed class SlingshotSim
         }
         if (dad.health <= 0) { phase = Phase.Lost; events.Add(new Event { text = "", sound = "jingle_lose", pos = dad.pos }); return; }
         if (nextSpawn >= stage.spawns.Count && AliveCount == 0 && !stage.bossEscorts) { phase = Phase.Won; events.Add(new Event { text = "", sound = "jingle_win", pos = dad.pos }); }
+        // Let the last flight and every chain finish before judging a spent shot budget.
+        if (!Over && stage.shotLimit > 0 && shots >= stage.shotLimit && !dad.flying)
+        {
+            bool moving = false; foreach (Foe f in foes) if (f.hp > 0 && f.Flying) moving = true;
+            foreach (Ball ball in balls) if (ball.returned && ball.life > 0) moving = true;
+            spentShotsClock = moving ? 0 : spentShotsClock + dt;
+            if (spentShotsClock >= .55f) { phase = Phase.Lost; lossReason = "발사 소진 · " + Remaining + "명 남음"; events.Add(new Event { text = lossReason, style = 3, sound = "jingle_lose", pos = dad.pos }); }
+        }
     }
     void UpdateCorpses(float dt)
     {
@@ -202,10 +215,10 @@ public sealed class SlingshotSim
         if (!dad.flying) return;
         dad.flightTime += dt;
         Vector2 p = dad.pos + dad.vel * dt; bool bumped = false;
-        if (p.x < arena.xMin + DadRadius) { p.x = arena.xMin + DadRadius; dad.vel.x = Mathf.Abs(dad.vel.x) * DadBounce; bumped = true; dad.bounceSide = 0; dad.bounceClock = .09f; }
-        if (p.x > arena.xMax - DadRadius) { p.x = arena.xMax - DadRadius; dad.vel.x = -Mathf.Abs(dad.vel.x) * DadBounce; bumped = true; dad.bounceSide = 1; dad.bounceClock = .09f; }
-        if (p.y < arena.yMin + DadRadius) { p.y = arena.yMin + DadRadius; dad.vel.y = Mathf.Abs(dad.vel.y) * DadBounce; bumped = true; }
-        if (p.y > arena.yMax - DadRadius) { p.y = arena.yMax - DadRadius; dad.vel.y = -Mathf.Abs(dad.vel.y) * DadBounce; bumped = true; }
+        if (p.x < arena.xMin + DadRadius) { p.x = arena.xMin + DadRadius; dad.vel.x = Mathf.Abs(dad.vel.x) * bounceRetention; bumped = true; dad.bounceSide = 0; dad.bounceClock = .09f; }
+        if (p.x > arena.xMax - DadRadius) { p.x = arena.xMax - DadRadius; dad.vel.x = -Mathf.Abs(dad.vel.x) * bounceRetention; bumped = true; dad.bounceSide = 1; dad.bounceClock = .09f; }
+        if (p.y < arena.yMin + DadRadius) { p.y = arena.yMin + DadRadius; dad.vel.y = Mathf.Abs(dad.vel.y) * bounceRetention; bumped = true; }
+        if (p.y > arena.yMax - DadRadius) { p.y = arena.yMax - DadRadius; dad.vel.y = -Mathf.Abs(dad.vel.y) * bounceRetention; bumped = true; }
         if (bumped)
         {
             dad.bounces = Mathf.Min(3, dad.bounces + 1);
@@ -216,7 +229,7 @@ public sealed class SlingshotSim
     }
     void Land()
     {
-        dad.flying = false; dad.vel = Vector2.zero; dad.landed = .18f; dad.bounceClock = 0;
+        dad.flying = false; dad.vel = Vector2.zero; dad.landed = shotChain >= 3 ? .16f : .48f; dad.bounceClock = 0;
         events.Add(new Event { text = "", pos = dad.pos, sound = "sfx_landing_skid" });
         if (!Over) phase = Phase.Ready;
         if (shotChain >= 3) events.Add(new Event { text = shotChain + "연쇄!!", pos = dad.pos, style = 2, sound = "sfx_chain" });
@@ -226,7 +239,7 @@ public sealed class SlingshotSim
     void Hurt(int amount, Vector2 from)
     {
         if (dad.flying || dad.hurt > 0) return;   // a flying dad cannot be hit; a short grace after each hit
-        dad.health = Mathf.Max(0, dad.health - amount); dad.hurt = .6f;
+        dad.health = Mathf.Max(0, dad.health - amount); dad.hurt = hurtGrace;
         events.Add(new Event { text = "-" + amount, pos = dad.pos, style = 1, sound = "sfx_punch_2" });
     }
 
@@ -324,6 +337,14 @@ public sealed class SlingshotSim
         f.vel *= Mathf.Exp(-(f.Boss ? BossDrag : FoeDrag) * dt);   // an opened-up boss slides far: reaching a wall is the payoff
         if (!f.Flying) { f.vel = Vector2.zero; f.stun = Mathf.Max(f.stun, .35f); }
     }
+    // Fractional direct-hit growth carries between hits instead of rounding every small upgrade down to zero.
+    public int ImpactDamage(int baseDamage)
+    {
+        impactCarry += baseDamage * impactBonus;
+        int extra = Mathf.FloorToInt(impactCarry + 1e-5f);
+        impactCarry = Mathf.Max(0, impactCarry - extra);
+        return baseDamage + extra;
+    }
     void Damage(Foe f, int amount) { if (f.hp <= 0) return; f.hp -= amount; f.flash = .12f; }
     // The tray covers the side turned toward dad, so a straight shot bounces off; bank off a locker or come from behind.
     static bool Guarded(Foe f, Vector2 incoming) { return f.shield && !f.Flying && Vector2.Dot(incoming.normalized, f.face) < -.5f; }
@@ -362,7 +383,7 @@ public sealed class SlingshotSim
             {
                 // A fresh boss is a wall: dad bounces off with a chip of damage. A thrown dad has to open him up first;
                 // a rage shot knocks the wind out of him for a moment instead.
-                dad.vel = Vector2.Reflect(dad.vel, n) * .65f; Damage(f, rage ? 2 : 1); f.pos = Clamp(f.pos + n * 10, f.Radius);
+                dad.vel = Vector2.Reflect(dad.vel, n) * .65f; Damage(f, ImpactDamage(rage ? 2 : 1)); f.pos = Clamp(f.pos + n * 10, f.Radius);
                 if (rage) f.groggy = 1.2f;
                 events.Add(new Event { text = rage ? "분노의 들이받기!" : "퍽!", pos = f.pos, style = rage ? 2 : 0, sound = "sfx_punch_1" });
                 continue;
@@ -370,7 +391,7 @@ public sealed class SlingshotSim
             if (f.elite && !rage && f.heavyHits == 0)
             {
                 // Too heavy for one hit: he staggers and dad bounces off. A second hit within three seconds sends him.
-                f.heavyHits = 1; f.heavyClock = 3; f.stun = Mathf.Max(f.stun, .5f); f.windup = 0; Damage(f, 1);
+                f.heavyHits = 1; f.heavyClock = 3; f.stun = Mathf.Max(f.stun, .5f); f.windup = 0; Damage(f, ImpactDamage(1));
                 f.pos = Clamp(f.pos + n * 24 * scale, f.Radius); dad.vel = Vector2.Reflect(dad.vel, n) * .6f;
                 events.Add(new Event { text = "무거워!  한 번 더", pos = f.pos, style = 1, sound = "sfx_tray_block" });
                 continue;
@@ -381,7 +402,7 @@ public sealed class SlingshotSim
             Vector2 dir = (dad.vel.normalized * .55f + n * .45f).normalized;
             f.vel = dir * Mathf.Max(380, speed * .95f) * bank * (f.elite ? .8f : 1) * knockBonus * throwBonus;
             f.air = 0; f.windup = 0; f.dash = 0; f.stun = .6f; f.contact = .15f; f.heavyHits = 0;
-            Damage(f, 1 + (dad.bounces >= 2 ? 1 : 0) + (rage ? 1 : 0)); shotChain++; bestChain = Mathf.Max(bestChain, shotChain);
+            Damage(f, ImpactDamage(1 + (dad.bounces >= 2 ? 1 : 0) + (rage ? 1 : 0))); shotChain++; bestChain = Mathf.Max(bestChain, shotChain);
             // Dad ploughs on at 80% speed (95% in a rage): straight through a head-on hit, glancing off a side hit.
             Vector2 heading = Vector2.Lerp(dad.vel.normalized, Vector2.Reflect(dad.vel, n).normalized, rage ? .1f : .35f);
             dad.vel = (heading.sqrMagnitude > .01f ? heading.normalized : dad.vel.normalized) * speed * (rage ? .95f : .8f);
@@ -531,18 +552,20 @@ public sealed class SlingshotSim
                 case 2: Copy(proto[1], st); break;
                 case 3: st.lesson = "한 발로 여럿! 사물함에 튕겨 줄 선 아빠들을 쓸어요"; st.par = 5; Wave(st, 0, Kind.Gum, 4, c); Wave(st, 5, Kind.Gum, 4, c); break;
                 case 4: st.lesson = "의자 아빠는 돌진 전에 먼저!"; st.par = 5; Wave(st, 0, Kind.Gum, 3, c); Add(st, 2, Kind.Chair, c); Wave(st, 7, Kind.Gum, 2, c); break;
-                case 5: st.lesson = "돌진 예고선이 보이면 그 의자 아빠부터"; st.par = 7; Wave(st, 0, Kind.Gum, 3, c); Add(st, 1.5f, Kind.Chair, c - 60); Wave(st, 6, Kind.Gum, 2, c); Add(st, 8, Kind.Chair, c + 60); break;
+                case 5: st.speedScale = 1.08f; st.lesson = "돌진 예고선이 보이면 그 의자 아빠부터"; st.par = 7; Wave(st, 0, Kind.Gum, 3, c); Add(st, 1.5f, Kind.Chair, c - 60); Wave(st, 6, Kind.Gum, 2, c); Add(st, 8, Kind.Chair, c + 60); break;
                 case 6: st.lesson = "몸풀기! 뭉친 아빠들을 한 번에"; st.par = 4; st.speedScale = .85f; Wave(st, 0, Kind.Gum, 5, c); Wave(st, 4, Kind.Gum, 5, c); break;
                 case 7: st.lesson = "쟁반은 정면을 막아요. 벽에 튕겨 옆이나 뒤로"; st.par = 6; Wave(st, 0, Kind.Gum, 3, c); Add(st, 1, Kind.Tray, c); Wave(st, 7, Kind.Gum, 2, c); break;
-                case 8: Copy(proto[2], st); break;
+                case 8: Copy(proto[2], st); st.speedScale = 1.12f; break;
                 case 9: Copy(proto[3], st); break;
             }
             st.label = floor + "-" + number; st.title = FloorTitles[f];
             return st;
         }
-        if (floor == 1 && number == 10) { Copy(PrototypeStages(arena)[4], st); st.label = "1-10"; st.title = FloorTitles[f]; return st; }
+        if (floor == 1 && number == 10) { Copy(PrototypeStages(arena)[4], st); st.label = "1-10"; st.title = FloorTitles[f]; st.shotLimit=st.par+8; return st; }
         float step = (number - 1) / 19f + f;   // 0 .. 3 across the whole school
-        st.speedScale = 1 + .04f * step;
+        st.speedScale = 1 + .09f * step;
+        // After the tutorial, a generous budget prevents endless invulnerable flights; rematches tighten it further.
+        st.shotLimit = (number == 20 ? 15+2*f : number == 10 ? 12+f : Mathf.CeilToInt((7+number/3+2*f)*.6f)+2) + 8;
         Kind[] roles = { Kind.Chair, Kind.Tray, Kind.Dodge };
         if (number == 20)
         {
@@ -569,11 +592,27 @@ public sealed class SlingshotSim
             for (int i = 0; i < n; i++)
             {
                 Kind kind = rng.NextDouble() < special ? roles[rng.Next(Mathf.Min(3, 1 + number / 7 + f))] : Kind.Gum;
-                Add(st, wave * 5.5f + i * .3f, kind, c + (i - (n - 1) / 2f) * 60);
+                Add(st, wave * Mathf.Max(3.6f, 5.1f - .4f * f - .025f * number) + i * .25f, kind, c + (i - (n - 1) / 2f) * 60);
             }
             made += n; wave++;
         }
         st.par = Mathf.CeilToInt(total * .6f) + 2;
+        return st;
+    }
+    // Cleared stages can be revisited under a visible shot budget. Roles never appear before their campaign lesson.
+    public static Stage Rematch(int floor, int number, int level, Rect arena)
+    {
+        level = Mathf.Clamp(level, 1, 3);
+        Stage st = ForMain(floor, number, arena);
+        st.challengeLevel = level;
+        st.speedScale *= 1 + .12f * level;
+        st.title = "단톡방 재대결 " + level + "단계";
+        st.shotLimit = st.par + 5 - level; // rank 1: par+4, rank 3: par+2; calibrate with observed play
+        st.lesson = st.shotLimit + "발 안에 전원 제압! · " + (level == 1 ? "지원군 추가" : level == 2 ? "양쪽에서 압박" : "집중 공세");
+        Kind role = floor > 1 || number >= 9 ? Kind.Dodge : number >= 7 ? Kind.Tray : number >= 4 ? Kind.Chair : Kind.Gum;
+        // Distinct roles and offset entry positions create a choice; HP is unchanged.
+        for (int i = 0; i < level + 1; i++)
+            Add(st, .8f + i * 1.4f, i % 2 == 0 ? role : Kind.Gum, arena.center.x + (i % 2 == 0 ? -110 : 110));
         return st;
     }
     static void Copy(Stage from, Stage to)

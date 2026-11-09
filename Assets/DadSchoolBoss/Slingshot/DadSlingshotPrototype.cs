@@ -6,7 +6,7 @@ using UnityEngine;
 // builds can be compared side by side; the small drawing helpers below mirror that class on purpose.
 // Wide view (Design/dad-war-b-changes-v1.md C-01..C-03): bodies drawn at 72% (or 80%) of the battle size, the fight uses
 // the whole corridor floor, one thin bar on top, and the chain count stays out of the crowd's way.
-public sealed class DadSlingshotPrototype : MonoBehaviour
+public sealed partial class DadSlingshotPrototype : MonoBehaviour
 {
     public const float Width = 540, Height = 960, AimSlow = .5f, DefaultScale = .72f;
     // The V13 long corridor (Art/V13Slingshot/arena-guide.json, 9:16 crop [0,210,1080,1920] at half scale): the wall fronts
@@ -36,6 +36,8 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
     float S { get { return Sim != null ? Sim.scale : BodyScale; } }
     SlingshotSim.Stage[] stages;
     DadArt art;
+    DadOutfitRenderer outfit;
+    public DadProgress OutfitProgress;
     Font body, title;
     Texture2D disc;
     AudioSource sfx, music, pullLoop;
@@ -43,7 +45,8 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
     readonly Dictionary<string, Texture2D> v13 = new Dictionary<string, Texture2D>();
     readonly Dictionary<string, AudioClip> v13Audio = new Dictionary<string, AudioClip>();
     Texture2D V(string name) { Texture2D t; return v13.TryGetValue(name, out t) ? t : null; }
-    bool aiming;
+    bool aiming, queuedLaunch;
+    Vector2 queuedPull;
     int finger = -1, shownChain;
     Vector2 aimStart, aimNow;
     float clock, shake, chainChip, chainBig, bannerTime, endClock;
@@ -53,6 +56,8 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
     bool resultSaved;
     sealed class Popup { public Vector2 pos; public string text; public float life = .75f; public int style; }
     sealed class Dent { public int side, spot, level; public float y; }
+    readonly List<object> drawOrder=new List<object>(16);
+    readonly List<Vector2> aimPath=new List<Vector2>(4);
     readonly List<Popup> popups = new List<Popup>();
     readonly List<Dent> dents = new List<Dent>();
     // 1F corridor locker faces measured on bg_floor1_corridor (same numbers as DadSchoolRewards.WallFaces[0]).
@@ -64,7 +69,8 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
     void Load()
     {
         art = DadArt.Load();
-        body = Resources.Load<Font>("Fonts/GothicA1-Bold"); title = Resources.Load<Font>("Fonts/BlackHanSans-Regular");
+        if(outfit!=null)outfit.Dispose();outfit=new DadOutfitRenderer(art);
+        body = Resources.Load<Font>("Fonts/GothicA1-Regular"); title = Resources.Load<Font>("Fonts/BlackHanSans-Regular");
         if (body == null) body = Font.CreateDynamicFontFromOSFont("Arial", 20);
         if (title == null) title = body;
         disc = new Texture2D(64, 64, TextureFormat.RGBA32, false);
@@ -88,9 +94,9 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
         if (stages == null) stages = SlingshotSim.PrototypeStages(Arena);
         if (Camera.main != null) Camera.main.backgroundColor = Ink;
     }
-    void OnDestroy() { if (disc != null) Destroy(disc); if (pullLoop != null) pullLoop.Stop(); }
+    void OnDestroy() { if(outfit!=null)outfit.Dispose(); if (disc != null) Destroy(disc); if (pullLoop != null) pullLoop.Stop(); }
     // Losing focus drops the pull (no launch) and silences the rubber band.
-    void OnApplicationFocus(bool focused) { if (!focused) { aiming = false; finger = -1; if (pullLoop != null) pullLoop.Stop(); } }
+    void OnApplicationFocus(bool focused) { if (!focused) SetPaused(true); }
 
     public int BestStars(int i) { return PlayerPrefs.GetInt(StarsKey + i, 0); }
     public int StageCount { get { return stages.Length; } }
@@ -100,7 +106,7 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
         stages = SlingshotSim.PrototypeStages(Arena);   // fresh spawn lists each try
         Sim = new SlingshotSim(stages[StageIndex], Arena, 7 + StageIndex, BodyScale);
         ResetFight(); firstLesson = StageIndex == 0;
-        banner = stages[StageIndex].label + "  " + stages[StageIndex].title + "  ·  상대 " + stages[StageIndex].spawns.Count + "명" + (stages[StageIndex].bossEscorts ? " +" : ""); bannerTime = 1.8f;
+        banner = stages[StageIndex].label + "  " + stages[StageIndex].title + "  ·  상대 " + stages[StageIndex].spawns.Count + "명" + (stages[StageIndex].bossEscorts ? " +" : ""); bannerTime = 1.8f;PrepareOpponentLesson();
     }
     // Main game: a stage built by the host (SlingshotSim.ForMain) with its growth applied in setup.
     public void StartEmbedded(SlingshotSim.Stage stage, System.Action<SlingshotSim> setup)
@@ -108,15 +114,15 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
         Embedded = true; StageIndex = -1;
         Sim = new SlingshotSim(stage, Arena, 7 + stage.floor * 100 + stage.spawns.Count, BodyScale);
         if (setup != null) setup(Sim);
-        ResetFight(); firstLesson = stage.label == "1-1";
-        banner = stage.label + "  " + stage.title + "  ·  상대 " + stage.spawns.Count + "명" + (stage.bossEscorts ? " +" : ""); bannerTime = 1.8f;
+        ResetFight(); firstLesson = stage.label == "1-1" && stage.challengeLevel == 0;
+        banner = stage.label + "  " + stage.title + "  ·  상대 " + stage.spawns.Count + "명" + (stage.bossEscorts ? " +" : ""); bannerTime = 1.8f;PrepareOpponentLesson();
     }
-    public void StopEmbedded() { Sim = null; aiming = false; finger = -1; if (pullLoop != null) pullLoop.Stop(); }
-    void ResetFight() { aiming = false; finger = -1; popups.Clear(); dents.Clear(); shownChain = 0; chainChip = chainBig = endClock = 0; resultSaved = false; finishedSent = false; }
+    public void StopEmbedded() { Sim = null; aiming = false; finger = -1; queuedLaunch = false; if (pullLoop != null) pullLoop.Stop(); }
+    void ResetFight() { ResetPresentation(); aiming = false; finger = -1; queuedLaunch = false; popups.Clear(); dents.Clear(); shownChain = 0; chainChip = chainBig = endClock = 0; resultSaved = false; finishedSent = false; }
     public void ShowMenu() { Sim = null; StageIndex = -1; aiming = false; }
     // Editor audits hold an aim on screen without a finger.
-    public void DebugAim(Vector2 start, Vector2 now) { aiming = true; finger = -2; aimStart = start; aimNow = now; }
-    public void DebugRelease() { if (!aiming) return; aiming = false; finger = -1; Sim.Launch(aimStart - aimNow); }
+    public void DebugAim(Vector2 start, Vector2 now) { SetPaused(false); lessonKind=-1; aiming = true; finger = -2; aimStart = start; aimNow = now; }
+    public void DebugRelease() { if (!aiming) return; aiming = false; finger = -1; queuedLaunch = false; Sim.Launch(aimStart - aimNow); }
 
     // ---- frame ------------------------------------------------------------------------------------------------------
     float ViewScale { get { return Mathf.Min(Screen.safeArea.width / Width, Screen.safeArea.height / Height); } }
@@ -135,16 +141,24 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
         for (int i = popups.Count - 1; i >= 0; i--) { popups[i].life -= dt; popups[i].pos.y -= dt * 40; if (popups[i].life <= 0) popups.RemoveAt(i); }
         UpdateMusic();
         if (Sim == null) return;
+        if(Input.GetKeyDown(KeyCode.Escape)&&!Sim.Over)SetPaused(!UserPaused);
+        if(UserPaused||TutorialOpen)return;
+        UpdatePresentation(dt);
         if (!Sim.Over)
         {
-            if (Input.GetKeyDown(KeyCode.Escape)) { if (Embedded) { if (Quit != null) Quit(); } else ShowMenu(); return; }
             ReadInput();
         }
         // Aiming is a calm moment: the walkers slow down while dad is pulled back. Once it is over, the last bodies keep
         // flying in slow motion for a moment (the finisher) before the result card.
         UpdatePullSound();
-        Sim.Tick(dt * (Sim.Over ? .3f : aiming ? AimSlow : 1));
+        ObserveShot();
+        if(impactPause>0)impactPause=Mathf.Max(0,impactPause-dt);
+        else Sim.Tick(dt * (Sim.Over ? .3f : aiming ? Sim.aimSlow : 1));
+        if (queuedLaunch && Sim.phase == SlingshotSim.Phase.Ready && Sim.dad.landed <= .01f)
+        { Sim.Launch(queuedPull); queuedLaunch = false; }
+        if (Sim.Over) queuedLaunch = false;
         ConsumeEvents();
+        CompleteShot();
         endClock = Mathf.Max(0, endClock - dt);
         if (Sim.Over && !resultSaved)
         {
@@ -160,25 +174,31 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
         bool began, held, ended; Vector2 p; int id;
         if (Input.touchCount > 0)
         {
-            Touch t = Input.GetTouch(0); p = Pointer(t.position); id = t.fingerId;
-            if (t.phase == TouchPhase.Canceled) { if (finger == id) { aiming = false; finger = -1; } return; }   // a cancel never fires
+            Touch t=Input.GetTouch(0);
+            if(aiming&&finger>=0){bool found=false;for(int i=0;i<Input.touchCount;i++)if(Input.GetTouch(i).fingerId==finger){t=Input.GetTouch(i);found=true;break;}if(!found){aiming=false;finger=-1;queuedLaunch=false;return;}}
+            p = Pointer(t.position); id = t.fingerId;
+            if (t.phase == TouchPhase.Canceled) { if (finger == id) { aiming = false; finger = -1; queuedLaunch = false; } return; }   // a cancel never fires
             began = t.phase == TouchPhase.Began; ended = t.phase == TouchPhase.Ended; held = !ended;
         }
         else { p = Pointer(Input.mousePosition); id = -1; began = Input.GetMouseButtonDown(0); held = Input.GetMouseButton(0); ended = Input.GetMouseButtonUp(0); }
-        if (began && !aiming && Sim.phase == SlingshotSim.Phase.Ready && p.y > BarHeight - Pad && p.y < Height + Pad && !ListButton.Contains(p))
-        { aiming = true; finger = id; aimStart = aimNow = p; }
+        if (began && !aiming && Sim.phase == SlingshotSim.Phase.Ready && (Sim.stage.shotLimit == 0 || Sim.shots < Sim.stage.shotLimit) && p.x>=0 && p.x<=Width && p.y > BarHeight - Pad && p.y < Height + Pad && !ListButton.Contains(p))
+        { queuedLaunch = false; aiming = true; finger = id; aimStart = aimNow = p; }
         if (!aiming || finger != id) return;
         if (held) aimNow = p;
         if (ended)
         {
-            aiming = false; finger = -1;
-            Sim.Launch(aimStart - aimNow);   // pulled back -> flies the other way; a short tap is ignored by the dead zone
+            aiming = false; finger = -1; queuedLaunch = false;
+            Vector2 pull = aimStart - aimNow;
+            if (!Sim.Launch(pull) && Sim.phase == SlingshotSim.Phase.Ready && Sim.dad.landed > .01f && pull.magnitude >= SlingshotSim.PullDeadZone)
+            { queuedPull = pull; queuedLaunch = true; }
+            // pulled back -> flies the other way; a short tap is ignored by the dead zone
         }
     }
     void ConsumeEvents()
     {
         foreach (SlingshotSim.Event e in Sim.events)
         {
+            PresentImpact(e);
             if (!string.IsNullOrEmpty(e.sound)) PlaySfx(e.sound, e.sound.StartsWith("jingle") ? .8f : .6f, e.sound == "sfx_chain" ? 1 + Mathf.Min(.5f, Sim.shotChain * .06f) : 1);
             if (e.dentSide >= 0) AddDent(e.dentSide, e.pos.y);
             if (string.IsNullOrEmpty(e.text) || e.text.EndsWith("연쇄!!")) continue;   // the chain count has its own chip
@@ -231,6 +251,8 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
     void UpdateMusic()
     {
         if (music == null || art == null) return;
+        music.mute=!DadPreferences.Music;music.volume=UserPaused?.12f:.3f;
+        if(pullLoop!=null)pullLoop.mute=!DadPreferences.Effects;
         AudioClip want = Sim == null ? (Embedded ? null : art.Clip("bgm_home")) : Sim.Over ? null : art.Clip("bgm_battle");   // embedded: the host plays home music
         if (music.clip == want) return;
         music.clip = want; if (want != null) music.Play(); else music.Stop();
@@ -239,7 +261,7 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
     {
         AudioClip clip;
         if (!v13Audio.TryGetValue(name, out clip)) clip = art != null ? art.Clip(name) : null;
-        if (clip == null || sfx == null) return;
+        if (!DadPreferences.Effects || clip == null || sfx == null) return;
         sfx.pitch = pitch; sfx.PlayOneShot(clip, volume);
     }
 
@@ -253,7 +275,7 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
         GUI.matrix = Matrix4x4.TRS(new Vector3(Offset.x, Offset.y, 0), Quaternion.identity, Vector3.one * ViewScale);
         Box(new Rect(0, -Pad, Width, Height + 2 * Pad), Paper);
         if (Sim == null) DrawMenu();
-        else { DrawFight(); if (Sim.Over && endClock <= 0 && !Embedded) DrawResult(); }
+        else { bool enabled=GUI.enabled;GUI.enabled=enabled&&!UserPaused&&!TutorialOpen;DrawFight();GUI.enabled=enabled;if (Sim.Over && endClock <= 0 && !Embedded) DrawResult(); if(UserPaused)DrawBattlePause();else if(TutorialOpen)DrawOpponentLesson(); }
         GUI.matrix = previous;
     }
 
@@ -300,10 +322,10 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
         float s = S;
         Texture2D bg = art != null ? art.Background(Floor) : null;
         Matrix4x4 stage = GUI.matrix;
-        GUI.matrix *= Matrix4x4.Translate(new Vector3(Mathf.Sin(clock * 61) * shake, Mathf.Cos(clock * 49) * shake * .5f, 0));
+        GUI.matrix *= Matrix4x4.Translate(new Vector3(Mathf.Sin(clock * 61) * (DadPreferences.ReducedMotion?0:shake), Mathf.Cos(clock * 49) * (DadPreferences.ReducedMotion?0:shake) * .5f, 0));
         // Boss finisher: about 0.25 s of zoom (x1.15) on the boss as he goes down, then back while the card waits.
         SlingshotSim.Corpse fallen = Sim.phase == SlingshotSim.Phase.Won ? Sim.corpses.Find(c => c.kind == SlingshotSim.Kind.Boss) : null;
-        if (fallen != null && endClock > .75f)
+        if (!DadPreferences.ReducedMotion && fallen != null && endClock > .75f)
         {
             float z = 1 + .15f * Mathf.Clamp01((1f - endClock) / .1f); Vector3 c = new Vector3(fallen.pos.x, fallen.pos.y - 80, 0);
             GUI.matrix *= Matrix4x4.Translate(c) * Matrix4x4.Scale(new Vector3(z, z, 1)) * Matrix4x4.Translate(-c);
@@ -332,10 +354,11 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
             else if (f.kind == SlingshotSim.Kind.Chair || f.Boss) { Vector2 end = f.pos + f.aim * 240; Line(f.pos, end, 18 * s, new Color(.9f, .2f, .1f, .28f)); Ellipse(end, 26 * s, 14 * s, Red); }
             else Ellipse(f.pos + f.aim * 30 * s, 70 * s, 26 * s, new Color(.9f, .2f, .1f, .35f));
         }
-        var order = new List<object> { Sim.dad }; foreach (SlingshotSim.Foe f in Sim.foes) order.Add(f);
+        var order=drawOrder;order.Clear();order.Add(Sim.dad); foreach (SlingshotSim.Foe f in Sim.foes) order.Add(f);
         order.Sort((a, b) => Feet(a).y.CompareTo(Feet(b).y));
         foreach (object o in order) { if (o is SlingshotSim.Dad) DrawDad(); else DrawFoe((SlingshotSim.Foe)o); }
         DrawBalls();
+        DrawImpactBursts();
         if (DebugWalls)
         {
             Line(new Vector2(Arena.xMin, Arena.yMin), new Vector2(Arena.xMin, Arena.yMax), 3, Red); Line(new Vector2(Arena.xMax, Arena.yMin), new Vector2(Arena.xMax, Arena.yMax), 3, Red);
@@ -344,9 +367,12 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
         }
         if (aiming && Sim.phase == SlingshotSim.Phase.Ready) DrawAim();
         else if (Sim.phase == SlingshotSim.Phase.Ready && Sim.shots == 0) DrawPullHint();
+        if (Sim.stage.shotLimit > 0 && Sim.shots >= Sim.stage.shotLimit && !Sim.Over) Text(new Rect(140, Height-90, 260, 32), "마지막 연쇄 판정 중…", 18, Ink, true, TextAnchor.MiddleCenter);
+        else if (Sim.dad.landed > .01f) Text(new Rect(155, Height-90, 230, 32), "착지 중…", 18, Ink, true, TextAnchor.MiddleCenter);
         foreach (Popup p in popups) Text(new Rect(p.pos.x - 130, p.pos.y, 260, 40), p.text, p.style >= 2 ? 26 : p.style == 1 ? 20 : 16, p.style >= 1 ? Red : Ink, true, TextAnchor.MiddleCenter);
         GUI.matrix = stage;
         DrawHud();
+        DrawShotFeedback();
     }
     static Vector2 Feet(object o) { return o is SlingshotSim.Dad ? ((SlingshotSim.Dad)o).pos : ((SlingshotSim.Foe)o).pos; }
 
@@ -435,10 +461,12 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
     }
     void DrawPose(Texture2D tex, Vector2 at, Vector2 pivot, float scale, bool flip, float tilt, bool flash)
     {
+        Texture2D source=tex;if(outfit!=null)tex=outfit.Body(source,OutfitProgress);
         Matrix4x4 old = GUI.matrix;
         GUI.matrix = old * Matrix4x4.TRS(new Vector3(at.x, at.y, 0), Quaternion.Euler(0, 0, tilt), new Vector3(flip ? -1 : 1, 1, 1));
         GUI.color = flash ? new Color(1, .86f, .74f, 1) : Color.white;
         GUI.DrawTexture(new Rect(-pivot.x * scale, -pivot.y * scale, 768 * scale, 768 * scale), tex);
+        if(outfit!=null)outfit.Layers(source.name,new Rect(-pivot.x*scale,-pivot.y*scale,768*scale,768*scale),OutfitProgress);
         GUI.color = Color.white; GUI.matrix = old;
     }
     void DrawFx(Texture2D tex, Vector2 center, float w, float h, float angle, Color tint)
@@ -507,7 +535,7 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
         Vector2 chest = d.pos - new Vector2(0, 60 * s);
         Line(chest, chest - pull.normalized * Mathf.Min(pull.magnitude, SlingshotSim.PullMax) * .7f, 7 * s, new Color(Ink.r, Ink.g, Ink.b, .55f));
         if (!live) return;
-        List<Vector2> path = SlingshotSim.Predict(d.pos, pull, Arena, Sim.DadRadius);
+        List<Vector2> path = SlingshotSim.Predict(d.pos, pull, Arena, Sim.DadRadius,aimPath);
         for (int i = 0; i + 1 < path.Count; i++)
         {
             Vector2 a = path[i], b = path[i + 1]; float len = (b - a).magnitude;
@@ -543,9 +571,11 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
         // One thin bar at the top of the screen: stage, health, shots against the target, and the way out.
         Box(new Rect(0, y0, Width, BarHeight), Night);
         Text(new Rect(12, y0, 196, BarHeight), st.label + "  " + st.title, 16, Paper, true);
-        Bar(new Rect(210, y0 + 15, 150, 14), d.health / d.maxHealth, d.health < 30 ? Red : new Color(.45f, .75f, .45f));
-        Text(new Rect(366, y0, 112, BarHeight), "발사 " + Sim.shots + " / " + st.par, 16, Sim.shots > st.par ? new Color(1, .6f, .5f) : Paper, true, TextAnchor.MiddleCenter);
-        if (Button(ListButton, Embedded ? "집으로" : "목록", Color.white, true, 15)) { if (!Embedded) ShowMenu(); else if (Quit != null) Quit(); }
+        Bar(new Rect(210, y0 + 15, 150, 14), d.health / d.maxHealth, d.health < d.maxHealth*.3f ? Red : new Color(.45f, .75f, .45f));
+        Box(new Rect(285,y0+12,1,20),new Color(1,1,1,.7f));
+        Text(new Rect(211,y0+12,148,20),"체력 "+Mathf.CeilToInt(100*d.health/d.maxHealth)+"%",11,Ink,false,TextAnchor.MiddleCenter);
+        Text(new Rect(366, y0, 112, BarHeight), (st.shotLimit > 0 ? "남은 " + Mathf.Max(0, st.shotLimit - Sim.shots) + "발" : "발사 " + Sim.shots + " / " + st.par), 16, Sim.shots > st.par ? new Color(1, .6f, .5f) : Paper, true, TextAnchor.MiddleCenter);
+        if (Button(ListButton, "정지", Color.white, !Sim.Over, 15)) SetPaused(true);
         float top = y0 + BarHeight;
         SlingshotSim.Foe boss = Sim.Boss ?? Sim.foes.Find(x => x.elite && x.hp > 0);
         if (boss != null)
@@ -640,23 +670,26 @@ public sealed class DadSlingshotPrototype : MonoBehaviour
         if (art == null || !art.characters.TryGetValue(id, out c)) return;
         Texture2D tex = c.Frame(action, index);
         if (tex == null) return;
+        Texture2D source=tex;if(id=="dad"&&outfit!=null)tex=outfit.Body(source,OutfitProgress);
         float scale = standHeight / c.standHeight, size = DadArt.Canvas * scale;
         Matrix4x4 old = GUI.matrix; Vector2 shape = stretch ?? Vector2.one;
         GUI.matrix = old * Matrix4x4.TRS(new Vector3(feet.x, feet.y, 0), Quaternion.Euler(0, 0, tilt), new Vector3((flip ? -1 : 1) * shape.x, shape.y, 1));
         GUI.color = flash ? new Color(1, .86f, .74f, opacity) : new Color(1, 1, 1, opacity);
         GUI.DrawTexture(new Rect(-DadArt.PivotX * scale, -DadArt.PivotY * scale, size, size), tex);
+        if(id=="dad"&&outfit!=null)outfit.Layers(source.name,new Rect(-DadArt.PivotX*scale,-DadArt.PivotY*scale,size,size),OutfitProgress);
         GUI.color = Color.white; GUI.matrix = old;
     }
     void Box(Rect r, Color c) { GUI.color = c; GUI.DrawTexture(r, Texture2D.whiteTexture); GUI.color = Color.white; }
-    void Panel(Rect r, Color c) { Box(r, Ink); Box(new Rect(r.x + 3, r.y + 3, r.width - 6, r.height - 6), c); }
+    void Panel(Rect r, Color c) { DadUi.Panel(r,c,Ink); }
     void Text(Rect r, string s, int size = 20, Color? color = null, bool display = false, TextAnchor align = TextAnchor.MiddleLeft)
-    { GUI.Label(r, s, new GUIStyle { font = display ? title : body, fontSize = size, alignment = align, wordWrap = true, normal = { textColor = color ?? Ink } }); }
+    { DadUi.Text(r,s,display?title:body,size,color??Ink,align); }
     bool Button(Rect r, string s, Color c, bool enabled = true, int size = 23)
     {
-        Panel(new Rect(r.x, r.y + 5, r.width, r.height), Ink); Panel(r, enabled ? c : new Color(.6f, .6f, .55f));
+        Rect hitRect=r;
+        DadUi.Fill(new Rect(r.x,r.y+4,r.width,r.height),new Color(.09f,.14f,.11f,.24f));if(enabled&&DadUi.Pressed(r))r.y+=3;Panel(r,enabled?c:new Color(.79f,.78f,.72f));
         if (s.Length > 0) Text(r, s, size, Ink, true, TextAnchor.MiddleCenter);
         bool previous = GUI.enabled; GUI.enabled = previous && enabled;
-        bool clicked = GUI.Button(r, GUIContent.none, GUIStyle.none); GUI.enabled = previous;
+        bool clicked = GUI.Button(hitRect, GUIContent.none, GUIStyle.none); GUI.enabled = previous;
         if (clicked) PlaySfx("sfx_button", .45f);
         return clicked;
     }
