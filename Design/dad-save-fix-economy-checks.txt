@@ -1,0 +1,74 @@
+School stage, economy and equipment checks
+PASS stage numbering: 3 floors x 20, mid-boss 10, floor boss 20
+PASS recommended power matches the progression simulation (shared JSON)
+PASS first stage of a floor relaxes after the boss spike
+PASS fresh save starts at 1-1 with base power
+PASS first three-star clear pays base and mastery rewards once and unlocks the next stage
+PASS replaying a cleared stage pays the replay share and keeps the best stars
+PASS a loss pays the consolation share and counts toward the stuck assist
+PASS no assist before the third loss
+PASS the third loss starts mom's cheer
+PASS mom's cheer is capped
+PASS winning clears the assist
+PASS an upgrade is refused without coins
+PASS any upgrade adds the same power and raises the shared cost
+PASS floor boss first clear pays boss coins and bonus lunchboxes
+PASS under a minute away pays nothing
+PASS idle reward accrues at the best farm stage and caps at 8 hours
+PASS an unclaimed idle chest never grows past the cap
+PASS claiming pays (ad doubles) and empties the idle chest
+PASS save round-trips through the file
+PASS an unreadable save without a backup blocks saving instead of silently resetting
+PASS fresh save: no gear and nothing to open
+PASS first lunchbox is a guaranteed rare card, decided before the next box opens
+PASS equipping adds the card's value to power
+PASS the first six boxes fill six different slots
+PASS dismantling pays coins and leaves the gear alone
+PASS equipping over an item dismantles the old one for coins
+PASS an undecided card and the equipped set survive a reload
+PASS open all decides every box, never lowers power and pays for the rest
+PASS rolled gear after 50 boxes stays within 20% of the simulation curve (0.86x)
+PASS rolled gear after 150 boxes stays within 20% of the simulation curve (0.98x)
+PASS a v1 save keeps its gear power as a starter set
+PASS 1-1 is a small teaching stage
+PASS chargers from 1-4, tray guys from 1-12 and on every later floor
+PASS stage 10 is an elite fight, stage 20 the floor boss
+PASS regular stages grow in enemy count within and across floors
+PASS the first encounter is one dazed target in front of dad
+PASS landing a punch advances the lesson
+PASS enemies walk in from the doors, never next to dad
+PASS clearing every wave wins a regular stage
+PASS the mid-boss elite walks in with two escorts
+PASS defeating the elite wins the mid-boss stage
+PASS the floor boss arrives with school HP and two escorts
+PASS escorts keep arriving during the boss fight
+PASS 1-12 introduces the tray guy once
+PASS the power ratio scales enemy HP and the damage dad takes
+PASS plain punch only shoves a fresh boss, even in fever
+PASS a thrown body makes the boss groggy
+PASS groggy boss can be launched toward a wall
+PASS wall slam is the big payoff and ends the opening
+PASS slipper changes actual punch trajectory strength
+PASS phone interrupts and scatters beyond normal special reach
+PASS phone trades damage and fever for crowd control
+PASS phone cannot be spammed without charge
+PASS phone call restores a little health instead of fever
+PASS phone call scares the school boss into a groggy opening
+PASS tray blocks a punch from the front
+PASS punch from below the tray breaks it and launches
+PASS frontal punches dent the tray until it gives way
+PASS punch from behind breaks the tray
+PASS a body thrown into the tray face bounces off
+PASS a body hitting the tray from the side breaks it
+PASS tray guy turns around slowly, leaving a rear opening
+PASS dad's special smashes trays
+PASS opponent is an adult dad: 지호 아빠 (34세) / 육아휴직 3개월 차
+PASS opponent is an adult dad: 서연이 아빠 (41세) / 운동회 자리 맡기 전문
+PASS opponent is an adult dad: 민준이 아빠 (47세) / 급식 봉사 12년 차
+PASS opponent is an adult dad: 학부모회장 아빠 (42세) / 학부모 단톡방 방장
+PASS opponent is an adult dad: 지호 큰아빠 (39세) / 동생 대신 출동
+PASS opponent is an adult dad: 서연이 큰아빠 (46세) / 의자도 두 개
+PASS opponent is an adult dad: 민준이 큰아빠 (52세) / 쟁반도 두 배
+PASS opponent is an adult dad: 학부모회장 아빠 (42세) / 학부모 단톡방 방장
+PASS opponent is an adult dad: 급식 봉사 반장 (52세) / 세쌍둥이 아빠
+PASS opponent is an adult dad: 체육 선생님 (51세) / 두 아이 아빠 · 계주 10연패

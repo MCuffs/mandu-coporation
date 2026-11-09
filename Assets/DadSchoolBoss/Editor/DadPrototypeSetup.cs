@@ -825,7 +825,7 @@ public static class DadPrototypeSetup
             p.Persist(); var reloaded = new DadProgress(eco, temp);
             Expect(reloaded.Save.bestStage == p.Save.bestStage && Math.Abs(reloaded.Save.coins - p.Save.coins) < .01 && reloaded.Stars(1) == 3 && reloaded.Save.upgrades[3] == 1, "save round-trips through the file", report);
             File.WriteAllText(temp, "{ broken");
-            Expect(new DadProgress(eco, temp).Save.bestStage == 1, "an unreadable save starts fresh instead of crashing", report);
+            Expect(new DadProgress(eco, temp).RecoveryFailed, "an unreadable save without a backup blocks saving instead of silently resetting", report);
         }
         finally { DeleteTemp(temp); }
     }

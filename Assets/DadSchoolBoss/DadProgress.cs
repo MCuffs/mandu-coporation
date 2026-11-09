@@ -45,6 +45,7 @@ public sealed partial class DadProgress
     public DadSave Save { get; private set; }
     readonly string path;
     bool recoveredSave;
+    public bool RecoveryFailed { get; private set; }
 
     public static string DefaultPath
     {
@@ -60,14 +61,28 @@ public sealed partial class DadProgress
 
     public void Load()
     {
-        Save = null;
+        Save = null; recoveredSave = false; RecoveryFailed = false;
+        bool existingCopy = false;
         foreach(string candidate in new[]{path,path+".bak",path+".tmp"})
         {
-            try{if(File.Exists(candidate))Save=JsonUtility.FromJson<DadSave>(File.ReadAllText(candidate));}
+            try
+            {
+                if (!File.Exists(candidate)) continue;
+                existingCopy = true;
+                string json = File.ReadAllText(candidate).Trim();
+                if (!json.StartsWith("{") || !json.EndsWith("}")) throw new FormatException("Incomplete save object");
+                // FromJson silently fills absent fields. Overwrite sentinels instead, so {} and unrelated JSON
+                // cannot masquerade as a new game and shadow a healthy backup. v1/v2 optional fields retain defaults.
+                var copy = new DadSave { version = -1, coins = double.NaN, bestStage = -1, currentStage = -1 };
+                JsonUtility.FromJsonOverwrite(json, copy);
+                if (copy.version > 2) { Debug.LogWarning("A newer save version is present; refusing to replace it"); break; }
+                if (!ValidSave(copy)) throw new FormatException("Invalid save structure or values");
+                Save = copy;
+            }
             catch(Exception e){Debug.LogWarning("Save copy unreadable: "+candidate+" / "+e.Message);}
             if(Save!=null){if(candidate!=path){recoveredSave=true;Debug.LogWarning("Recovered dad save from "+candidate);}break;}
         }
-        if (Save == null) Save = new DadSave();
+        if (Save == null) { RecoveryFailed = existingCopy; Save = new DadSave(); }
         if (Save.upgrades == null || Save.upgrades.Length != StatCount) Array.Resize(ref Save.upgrades, StatCount);
         if (Save.rematchRanks == null) Save.rematchRanks = new int[0];
         if (Save.bestShots == null) Save.bestShots = new int[0];
@@ -92,6 +107,8 @@ public sealed partial class DadProgress
     }
     public void Persist()
     {
+        if (RecoveryFailed) throw new InvalidOperationException("Save recovery failed; existing copies are protected");
+        if (!ValidSave(Save)) throw new InvalidOperationException("Refusing to persist invalid progress");
         string directory=Path.GetDirectoryName(path);if(!string.IsNullOrEmpty(directory))Directory.CreateDirectory(directory);
         string tmp=path+".tmp",backup=path+".bak";
         byte[] bytes=System.Text.Encoding.UTF8.GetBytes(JsonUtility.ToJson(Save));
@@ -105,6 +122,38 @@ public sealed partial class DadProgress
     {
         // On platforms without atomic replace, keep a known-good copy before overwriting the primary.
         if(!recoveredSave)File.Copy(path,backup,true);File.Copy(tmp,path,true);File.Delete(tmp);recoveredSave=false;
+    }
+
+    static bool Nonnegative(double value) { return !double.IsNaN(value) && !double.IsInfinity(value) && value >= 0; }
+    static bool IntValues(int[] values, int maxLength, int min, int max)
+    {
+        if (values == null) return true; // Optional legacy arrays are repaired after selecting a valid copy.
+        if (values.Length > maxLength) return false;
+        foreach (int value in values) if (value < min || value > max) return false;
+        return true;
+    }
+    static bool GearValues(float[] values)
+    {
+        if (values == null) return true;
+        if (values.Length > SlotCount) return false;
+        foreach (float value in values) if (!Nonnegative(value)) return false;
+        return true;
+    }
+    bool ValidSave(DadSave data)
+    {
+        return data != null && (data.version == 1 || data.version == 2)
+            && Nonnegative(data.coins) && data.bestStage >= 1 && data.bestStage <= Eco.TotalStages
+            && data.currentStage >= 1 && data.currentStage <= data.bestStage
+            && data.lunchboxes >= 0 && data.boxesOpened >= 0 && data.lossesAtStage >= 0
+            && data.lossStage >= 0 && data.lossStage <= Eco.TotalStages && data.lastSeenUnix >= 0
+            && Nonnegative(data.pendingIdleCoins) && data.pendingIdleBoxes >= 0 && Nonnegative(data.pendingIdleHours)
+            && Nonnegative(data.pendingValue) && data.pendingSlot >= -1 && data.pendingSlot < SlotCount
+            && data.pendingRarity >= 0 && data.pendingRarity < RarityCount
+            && IntValues(data.upgrades, StatCount, 0, int.MaxValue)
+            && IntValues(data.stars, Eco.TotalStages, 0, 3)
+            && IntValues(data.rematchRanks, Eco.TotalStages, 0, 3)
+            && IntValues(data.bestShots, Eco.TotalStages, 0, int.MaxValue)
+            && IntValues(data.gearRarity, SlotCount, -1, RarityCount - 1) && GearValues(data.gearValue);
     }
 
     // ---- power ----------------------------------------------------------------------------------

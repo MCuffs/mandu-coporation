@@ -22,6 +22,7 @@ public static class DadReleaseAudit
         run("equipment native loading", DadOutfitChecks.Run);
         run("difficulty and JSON reload", DadDifficultySetup.Run);
         run("presentation and backup recovery", DadCommercialChecks.Run);
+        run("save validation and legacy recovery", () => DadSaveRecoveryChecks.Run());
         run("new content assets resolve in native Unity", () =>
         {
             foreach (string name in new[] { "lunch_cart", "rebound_mat" })
@@ -40,7 +41,7 @@ public static class DadReleaseAudit
             }
             finally { foreach (string suffix in new[] { "", ".bak", ".tmp" }) if (File.Exists(path + suffix)) File.Delete(path + suffix); }
         });
-        File.WriteAllText("Design/dad-release-native-audit.txt", report.ToString());
+        File.WriteAllText("Design/dad-save-fix-native-audit.txt", report.ToString());
         Debug.Log(report.ToString());
         EditorApplication.Exit(failures == 0 ? 0 : 1);
     }

@@ -67,7 +67,7 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
     {
         Application.targetFrameRate = 60; LoadResources(); ReloadProgress();
         Progress = new DadProgress(DadEconomy.Load(), DadProgress.DefaultPath);
-        Progress.AccrueIdle(System.DateTime.UtcNow); Progress.Persist();
+        if (!Progress.RecoveryFailed) { Progress.AccrueIdle(System.DateTime.UtcNow); Progress.Persist(); }
         EnsureSling(); ShowSplash();
     }
     // Tests and audits swap in a throwaway save so they never touch the player's progress.
@@ -255,6 +255,7 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
     void Update()
     {
         if (ResourcesLost) LoadResources();
+        if (Progress.RecoveryFailed) return;
         touchClock += Time.unscaledDeltaTime;
         if (touchClock > 30) { touchClock = 0; PersistNow(); }   // time spent playing must not count as offline time
         specialPose = Mathf.Max(0, specialPose - Time.unscaledDeltaTime); coinSoundClock = Mathf.Max(0, coinSoundClock - Time.unscaledDeltaTime);
@@ -387,6 +388,20 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
         Matrix4x4 previous = GUI.matrix;
         GUI.matrix = Matrix4x4.TRS(new Vector3(Offset.x, Offset.y, 0), Quaternion.identity, Vector3.one * ViewScale);
         GUI.depth = 0;
+        if (Progress.RecoveryFailed)
+        {
+            Box(new Rect(0, 0, Width, Height), Paper);
+            Panel(new Rect(28, 245, 484, 400), Paper);
+            Text(new Rect(48, 267, 444, 70), "저장 기록을 읽지 못했어요", 29, Ink, true, TextAnchor.MiddleCenter);
+            Text(new Rect(54, 349, 432, 135), "진행 기록을 보호하기 위해 저장을 멈췄습니다.\n기존 파일은 그대로 보관되어 있습니다.\n다시 시도하거나 앱을 종료해 주세요.", 20, Ink, false, TextAnchor.MiddleCenter);
+            if (Button(new Rect(54, 508, 432, 54), "다시 불러오기", Yellow, true, 23))
+            {
+                Progress.Load();
+                if (!Progress.RecoveryFailed) { Progress.AccrueIdle(System.DateTime.UtcNow); PersistNow(); ShowSplash(); }
+            }
+            if (Button(new Rect(54, 574, 432, 48), "앱 종료", Color.white, true, 21)) Application.Quit();
+            GUI.matrix = previous; return;
+        }
         if (SlingBattle)
         {
             // The slingshot view draws the fight underneath (GUI.depth 1); the result card, reveal and toasts go on top.
