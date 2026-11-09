@@ -16,7 +16,7 @@ class DadContentRunner
     {
         for (int level = 0; level < DadFunLabModel.Titles.Length; level++)
         {
-            int wins = 0, bestLeft = 99, pad = 0; string example = "none";
+            int wins = 0, bestLeft = 99, pad = 0, medalUnion = 0; string example = "none";
             for (int seed = 0; seed < 180; seed++)
             {
                 var m = new DadFunLabModel(level); int shot = 0; float firedAt = 0;
@@ -37,10 +37,11 @@ class DadContentRunner
                 }
                 if (m.sim.shots > m.ShotBudget) throw new Exception("budget exceeded");
                 bestLeft = Math.Min(bestLeft, m.sim.AliveCount); pad += m.padHits;
-                if (m.sim.phase == SlingshotSim.Phase.Won) { wins++; if (example == "none") example = route + " cart=" + m.cartHits + " pad=" + m.padHits; }
+                if (m.sim.phase == SlingshotSim.Phase.Won) { wins++; medalUnion |= m.MedalMask; if (example == "none") example = route + " cart=" + m.cartHits + " pad=" + m.padHits; }
             }
-            Console.WriteLine("CONTENT level=" + (level + 1) + " wins=" + wins + "/180 bestRemaining=" + bestLeft + " padContacts=" + pad + " example=" + example);
+            Console.WriteLine("CONTENT level=" + (level + 1) + " wins=" + wins + "/180 bestRemaining=" + bestLeft + " padContacts=" + pad + " medalUnion=" + medalUnion + " example=" + example);
             Check(wins > 0, "stage " + (level + 1) + " has a reproducible winning route");
+            Check(medalUnion == 7, "stage " + (level + 1) + " has winning routes for all three medals");
         }
         var reset = new DadFunLabModel(4);
         Check(reset.padEnabled && reset.padHits == 0 && !reset.boostUsed, "pad stage resets cleanly");

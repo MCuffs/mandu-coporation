@@ -3,30 +3,42 @@ Compilation succeeded - 3 warning(s)
 C:\Users\user\DadWarLatest\Assets\Alley\Alley3DWorld.cs(35,31): warning CS0414: The private field `Alley3DWorld.shockwaveRings' is assigned but its value is never used
 C:\Users\user\DadWarLatest\Assets\Alley\Alley3DWorld.cs(26,38): warning CS0414: The private field `Alley3DWorld.matWhite' is assigned but its value is never used
 C:\Users\user\DadWarLatest\Assets\Alley\ArcadeProfile.cs(114,108): warning CS0414: The private field `AlleyGame.runStars' is assigned but its value is never used
-CONTENT level=1 wins=20/180 bestRemaining=0 padContacts=0 example= shot1=-144 shot2=-150 cart=0 pad=0
+CONTENT level=1 wins=20/180 bestRemaining=0 padContacts=0 medalUnion=7 example= shot1=-144 shot2=-150 cart=0 pad=0
 PASS stage 1 has a reproducible winning route
-CONTENT level=2 wins=22/180 bestRemaining=0 padContacts=0 example= shot1=-160 shot2=-122 cart=2 pad=0
+PASS stage 1 has winning routes for all three medals
+CONTENT level=2 wins=22/180 bestRemaining=0 padContacts=0 medalUnion=7 example= shot1=-160 shot2=-122 cart=2 pad=0
 PASS stage 2 has a reproducible winning route
-CONTENT level=3 wins=134/180 bestRemaining=0 padContacts=0 example= shot1=-180 shot2=15 cart=0 pad=0
+PASS stage 2 has winning routes for all three medals
+CONTENT level=3 wins=134/180 bestRemaining=0 padContacts=0 medalUnion=7 example= shot1=-180 shot2=15 cart=0 pad=0
 PASS stage 3 has a reproducible winning route
-CONTENT level=4 wins=49/180 bestRemaining=0 padContacts=0 example= shot1=-178 shot2=120 cart=2 pad=0
+PASS stage 3 has winning routes for all three medals
+CONTENT level=4 wins=49/180 bestRemaining=0 padContacts=0 medalUnion=7 example= shot1=-178 shot2=120 cart=2 pad=0
 PASS stage 4 has a reproducible winning route
-CONTENT level=5 wins=178/180 bestRemaining=0 padContacts=61 example= shot1=-180 shot2=-12 cart=0 pad=0
+PASS stage 4 has winning routes for all three medals
+CONTENT level=5 wins=178/180 bestRemaining=0 padContacts=61 medalUnion=7 example= shot1=-180 shot2=-12 cart=0 pad=0
 PASS stage 5 has a reproducible winning route
-CONTENT level=6 wins=121/180 bestRemaining=0 padContacts=0 example= shot1=-180 shot2=-35 cart=0 pad=0
+PASS stage 5 has winning routes for all three medals
+CONTENT level=6 wins=121/180 bestRemaining=0 padContacts=0 medalUnion=7 example= shot1=-180 shot2=-35 cart=0 pad=0
 PASS stage 6 has a reproducible winning route
-CONTENT level=7 wins=172/180 bestRemaining=0 padContacts=0 example= shot1=-180 shot2=45 shot3=-137 cart=0 pad=0
+PASS stage 6 has winning routes for all three medals
+CONTENT level=7 wins=172/180 bestRemaining=0 padContacts=0 medalUnion=7 example= shot1=-180 shot2=45 shot3=-137 cart=0 pad=0
 PASS stage 7 has a reproducible winning route
-CONTENT level=8 wins=136/180 bestRemaining=0 padContacts=72 example= shot1=-180 shot2=174 shot3=92 cart=2 pad=0
+PASS stage 7 has winning routes for all three medals
+CONTENT level=8 wins=136/180 bestRemaining=0 padContacts=72 medalUnion=7 example= shot1=-180 shot2=174 shot3=92 cart=2 pad=0
 PASS stage 8 has a reproducible winning route
-CONTENT level=9 wins=134/180 bestRemaining=0 padContacts=0 example= shot1=-180 shot2=-175 shot3=-85 cart=1 pad=0
+PASS stage 8 has winning routes for all three medals
+CONTENT level=9 wins=134/180 bestRemaining=0 padContacts=0 medalUnion=7 example= shot1=-180 shot2=-175 shot3=-85 cart=1 pad=0
 PASS stage 9 has a reproducible winning route
-CONTENT level=10 wins=153/180 bestRemaining=0 padContacts=95 example= shot1=-178 shot2=42 shot3=-167 cart=0 pad=0
+PASS stage 9 has winning routes for all three medals
+CONTENT level=10 wins=153/180 bestRemaining=0 padContacts=95 medalUnion=7 example= shot1=-178 shot2=42 shot3=-167 cart=0 pad=0
 PASS stage 10 has a reproducible winning route
-CONTENT level=11 wins=148/180 bestRemaining=0 padContacts=0 example= shot1=-180 shot2=11 shot3=-94 cart=0 pad=0
+PASS stage 10 has winning routes for all three medals
+CONTENT level=11 wins=148/180 bestRemaining=0 padContacts=0 medalUnion=7 example= shot1=-180 shot2=11 shot3=-94 cart=0 pad=0
 PASS stage 11 has a reproducible winning route
-CONTENT level=12 wins=130/180 bestRemaining=0 padContacts=80 example= shot1=-180 shot2=150 cart=2 pad=1
+PASS stage 11 has winning routes for all three medals
+CONTENT level=12 wins=130/180 bestRemaining=0 padContacts=80 medalUnion=7 example= shot1=-180 shot2=150 cart=2 pad=1
 PASS stage 12 has a reproducible winning route
+PASS stage 12 has winning routes for all three medals
 PASS pad stage resets cleanly
 PASS mat launches upward as its painted arrow promises
 PASS next shot restores one redirect

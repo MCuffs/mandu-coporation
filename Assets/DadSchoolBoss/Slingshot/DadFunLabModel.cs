@@ -15,7 +15,7 @@ public sealed class DadFunLabModel
         "비스듬한 줄을 카트로 연결해 보세요", "매트로 올라간 뒤 좌우 중 먼저 갈 곳을 고르세요",
         "움직이는 쟁반의 옆을 노려 돌진", "두 무리를 카트와 돌진으로 이어 보세요" };
     public int ShotBudget { get { return level == 4 || level >= 6 ? 3 : 2; } }
-    public int ParShots { get { return level >= 7 ? 2 : 1; } }
+    public int ParShots { get { return level >= 7 || level == 3 || level == 4 || level == 6 ? 2 : 1; } }
     public int boosts, wallBounces;
     public string SkillGoal
     {
