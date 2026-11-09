@@ -29,6 +29,12 @@ public static class DadReleaseAudit
                 if (Resources.Load<Texture2D>("DadContentV2/" + name) == null) throw new Exception("Missing " + name);
             if (Resources.Load<Font>("Fonts/GothicA1-Regular") == null) throw new Exception("Missing Korean font");
         });
+        run("offline privacy policy matches public document and contact", () =>
+        {
+            var policy = Resources.Load<TextAsset>("DadPrivacy");
+            if (policy == null || policy.text != File.ReadAllText("PrivacyPolicy.md")) throw new Exception("Privacy document copy is missing or out of sync");
+            if (!policy.text.Contains("파랑버섯 스튜디오") || !policy.text.Contains("alstnwjd0424@naver.com")) throw new Exception("Missing confirmed privacy contact");
+        });
         run("empty primary does not shadow valid backup", () =>
         {
             string path = Path.Combine(Path.GetTempPath(), "dad-release-" + Guid.NewGuid() + ".json");

@@ -90,7 +90,7 @@ public sealed partial class DadSchoolPrototype
     void DrawSplash()
     {
         float t = openingClock, a = t < SplashIn ? t / SplashIn : t < SplashIn + SplashHold ? 1 : 1 - (t - SplashIn - SplashHold) / SplashOut;
-        Text(new Rect(0, 440, Width, 80), "Mandu Corporation", 34, new Color(1, 1, 1, Mathf.Clamp01(a)), false, TextAnchor.MiddleCenter);
+        Text(new Rect(0, 440, Width, 80), "파랑버섯 스튜디오", 34, new Color(1, 1, 1, Mathf.Clamp01(a)), false, TextAnchor.MiddleCenter);
         if (GUI.Button(new Rect(0, 0, Width, Height), GUIContent.none, GUIStyle.none)) ShowTitle();
     }
     void DrawTitle()
