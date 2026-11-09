@@ -1,0 +1,14 @@
+Native Unity release audit; no interactive rendering/device verification.
+Android application ID: com.manducorporation.dadwar
+Android backend: Mono2x
+Android architectures: ARMv7
+Android target SDK setting: AndroidApiLevelAuto
+PASS prototype assets
+PASS economy and stage rules
+PASS equipment native loading
+PASS difficulty and JSON reload
+PASS presentation and backup recovery
+PASS save validation and legacy recovery
+PASS new content assets resolve in native Unity
+PASS offline privacy policy matches public document and contact
+PASS empty primary does not shadow valid backup
