@@ -26,4 +26,7 @@ PASS cannot fire again during flight
 PASS spent budget cannot launch again
 PASS invalid stage index is clamped
 PASS play order includes every stage and teaches redirect first
+PASS extended background preserves physics mapping for height 960
+PASS extended background preserves physics mapping for height 1170
+PASS extended background preserves physics mapping for height 1200
 PASS negative time does not mutate shot count

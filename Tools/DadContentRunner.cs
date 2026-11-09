@@ -57,6 +57,13 @@ class DadContentRunner
         Check(new DadFunLabModel(-5).level == 0 && new DadFunLabModel(999).level == 7, "invalid stage index is clamped");
         var sequence = new System.Collections.Generic.HashSet<int>(DadFunLabModel.PlayOrder);
         Check(sequence.Count == 8 && DadFunLabModel.PlayOrder[0] == 2, "play order includes every stage and teaches redirect first");
+        foreach (Rect frame in new[] { new Rect(0,0,540,960), new Rect(0,-105,540,1170), new Rect(0,-130,540,1200) })
+        {
+            Rect uv = DadFunLab.BackgroundUv(frame);
+            float sourceAtCanonicalZero = (1 - uv.yMax) * 2340 + (-frame.y / frame.height) * uv.height * 2340;
+            Check(Mathf.Abs(sourceAtCanonicalZero - 210) < .01f && Mathf.Abs(uv.height * 2340 / frame.height - 2) < .001f,
+                "extended background preserves physics mapping for height " + frame.height);
+        }
         var original = new DadFunLabModel(1); original.Launch(Vector2.up * 150);
         original.Tick(-1); Check(original.sim.shots == 1, "negative time does not mutate shot count");
     }
