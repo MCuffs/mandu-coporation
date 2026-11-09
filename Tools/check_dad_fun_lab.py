@@ -6,7 +6,9 @@ import tempfile
 import argparse
 
 parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument('--content', action='store_true', help='Play all eight content challenges')
+group = parser.add_mutually_exclusive_group()
+group.add_argument('--content', action='store_true', help='Play all eight content challenges')
+group.add_argument('--campaign', action='store_true', help='Play six policies on each of the sixty campaign stages')
 args = parser.parse_args()
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -29,11 +31,14 @@ with tempfile.TemporaryDirectory(prefix='dad-fun-lab-') as folder:
     sources = [str(p) for p in (ROOT / 'Assets').rglob('*.cs') if 'Editor' not in p.relative_to(ROOT / 'Assets').parts]
     base = [str(MONO), str(MCS), '-langversion:latest', '-define:SLING_HEADLESS']
     compilation = run(base + ['-target:library', '-out:' + str(temp / 'Rules.dll')] + refs + sources)
-    runner = 'DadContentRunner.cs' if args.content else 'DadFunLabRunner.cs'
+    runner = 'DadCampaignAuditRunner.cs' if args.campaign else 'DadContentRunner.cs' if args.content else 'DadFunLabRunner.cs'
     run(base + ['-out:' + str(temp / 'Play.exe'), '-r:' + str(temp / 'Rules.dll')] + refs + [str(ROOT / 'Tools' / runner)])
     env = dict(os.environ, MONO_PATH=str(MANAGED))
     report = run([str(MONO), str(temp / 'Play.exe')], env)
-    report_name = 'dad-content-v2-checks.txt' if args.content else 'dad-fun-lab-playchecks.txt'
+    report_name = 'dad-release-campaign-bot.txt' if args.campaign else 'dad-content-v2-checks.txt' if args.content else 'dad-fun-lab-playchecks.txt'
     (ROOT / 'Design' / report_name).write_text('Programmatic strategy play, not human fun or rendering validation.\n' + compilation + report, encoding='utf-8')
     print('\n'.join(line for line in report.splitlines() if line.startswith(('PLAY ', 'CONTENT '))))
-    print('PASS:', sum(line.startswith('PASS ') for line in report.splitlines()))
+    if not args.campaign:
+        print('PASS:', sum(line.startswith('PASS ') for line in report.splitlines()))
+    if args.campaign:
+        print(report)
