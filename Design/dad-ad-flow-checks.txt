@@ -1,0 +1,14 @@
+Rewarded-ad gate and persisted bonus checks; no live SDK
+PASS second request is rejected while an ad is active
+PASS cancel pays nothing and releases the gate
+PASS duplicate completion cannot award twice
+PASS successful ad starts cooldown
+PASS cooldown expires
+PASS not-ready provider hides opt-in
+PASS session cap prevents unlimited ad requests
+PASS no SDK means no ad offer
+PASS first three campaign stages have no rewarded offer
+PASS stale completion cannot grant the current receipt
+PASS earned receipt grants exactly the offered bonus
+PASS persisted consumed receipt cannot be claimed again
+PASS loss never creates an offer

@@ -12,6 +12,7 @@ public sealed class DadPlayerSmoke : MonoBehaviour
     static void Boot()
     {
         string[] args=Environment.GetCommandLineArgs();
+        if(Array.IndexOf(args,"--dad-headless-root")>=0)return;
         for(int i=0;i+1<args.Length;i++)if(args[i]=="--dad-smoke-root")
         {Application.runInBackground=true;var test=new GameObject("Native player smoke").AddComponent<DadPlayerSmoke>();test.root=args[i+1];test.started=-1;Directory.CreateDirectory(test.root);File.WriteAllText(Path.Combine(test.root,"report.txt"),"Native macOS player smoke\n");break;}
     }

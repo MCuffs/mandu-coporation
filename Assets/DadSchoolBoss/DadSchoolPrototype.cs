@@ -254,6 +254,7 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
     }
     void Update()
     {
+        if (DadRewardedAds.Busy) return;
         if (ResourcesLost) LoadResources();
         if (Progress.RecoveryFailed) return;
         touchClock += Time.unscaledDeltaTime;
@@ -384,6 +385,7 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
     }
     void OnGUI()
     {
+        if (DadRewardedAds.Busy) return;
         if (ResourcesLost) LoadResources();
         Matrix4x4 previous = GUI.matrix;
         GUI.matrix = Matrix4x4.TRS(new Vector3(Offset.x, Offset.y, 0), Quaternion.identity, Vector3.one * ViewScale);

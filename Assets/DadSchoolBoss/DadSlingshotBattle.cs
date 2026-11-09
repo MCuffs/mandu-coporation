@@ -115,6 +115,7 @@ public sealed partial class DadSchoolPrototype
             : Progress.ApplyResult(PlayingStage, won, sim.dad.health / sim.dad.maxHealth, sim.bestChain, sim.Stars);
         NewShotRecord=won&&sim.stage.challengeLevel==0&&previousShotRecord>0&&sim.shots<previousShotRecord;
         if (sim.stage.challengeLevel == 0) Progress.RecordShots(PlayingStage, sim.shots, won);
+        Progress.PrepareAdBonus(LastReward);
         PlaySfx(won ? "jingle_win" : "jingle_lose", .8f);
         PersistNow();
     }

@@ -54,9 +54,17 @@ class DadContentRunner
         Check(!multi.Launch(Vector2.up * 150), "cannot fire again during flight");
         for (int i = 0; i < 1800 && !multi.sim.Over; i++) multi.Tick(1 / 120f);
         Check(!multi.Launch(new Vector2(150, 0)), "spent budget cannot launch again");
-        Check(new DadFunLabModel(-5).level == 0 && new DadFunLabModel(999).level == 7, "invalid stage index is clamped");
+        Check(new DadFunLabModel(-5).level == 0 && new DadFunLabModel(999).level == 11, "invalid stage index is clamped");
         var sequence = new System.Collections.Generic.HashSet<int>(DadFunLabModel.PlayOrder);
-        Check(sequence.Count == 8 && DadFunLabModel.PlayOrder[0] == 2, "play order includes every stage and teaches redirect first");
+        Check(sequence.Count == 12 && DadFunLabModel.PlayOrder[0] == 2, "play order includes all twelve stages and teaches redirect first");
+        var dailyDate=new DateTime(2026,11,10,14,59,0,DateTimeKind.Utc);
+        var daily=DadFunLabModel.DailyLevels(dailyDate);
+        Check(new System.Collections.Generic.HashSet<int>(daily).Count==4,"daily four are unique");
+        Check(string.Join(",",daily)==string.Join(",",DadFunLabModel.DailyLevels(dailyDate.AddMinutes(-30))),"same Korean calendar day keeps the same challenge");
+        Check(string.Join(",",daily)!=string.Join(",",DadFunLabModel.DailyLevels(dailyDate.AddMinutes(2))),"daily challenge changes at Korean midnight");
+        var medals=new DadFunLabModel(1);medals.sim.phase=SlingshotSim.Phase.Won;medals.sim.shots=1;medals.cartHits=2;
+        Check(medals.MedalMask==7&&DadFunLabModel.CountMedals(7)==3,"clear, efficient shot and skill goal award separate medals");
+        medals.sim.phase=SlingshotSim.Phase.Lost;Check(medals.MedalMask==0,"failed rounds cannot award medals");
         foreach (Rect frame in new[] { new Rect(0,0,540,960), new Rect(0,-105,540,1170), new Rect(0,-130,540,1200) })
         {
             Rect uv = DadFunLab.BackgroundUv(frame);

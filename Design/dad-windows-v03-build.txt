@@ -1,0 +1,8 @@
+Unity: 2021.3.2f1
+Result: Succeeded
+Errors: 0
+Warnings: 0
+Size: 365382830
+Time: 00:00:27.2000978
+Artifact: C:\Users\user\DadWarLatest\Builds\DadWar-v0.3.0-Windows\DadWar.exe
+Security patch and native smoke required before packaging.

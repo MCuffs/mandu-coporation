@@ -19,13 +19,26 @@ CONTENT level=7 wins=172/180 bestRemaining=0 padContacts=0 example= shot1=-180 s
 PASS stage 7 has a reproducible winning route
 CONTENT level=8 wins=136/180 bestRemaining=0 padContacts=72 example= shot1=-180 shot2=174 shot3=92 cart=2 pad=0
 PASS stage 8 has a reproducible winning route
+CONTENT level=9 wins=134/180 bestRemaining=0 padContacts=0 example= shot1=-180 shot2=-175 shot3=-85 cart=1 pad=0
+PASS stage 9 has a reproducible winning route
+CONTENT level=10 wins=153/180 bestRemaining=0 padContacts=95 example= shot1=-178 shot2=42 shot3=-167 cart=0 pad=0
+PASS stage 10 has a reproducible winning route
+CONTENT level=11 wins=148/180 bestRemaining=0 padContacts=0 example= shot1=-180 shot2=11 shot3=-94 cart=0 pad=0
+PASS stage 11 has a reproducible winning route
+CONTENT level=12 wins=130/180 bestRemaining=0 padContacts=80 example= shot1=-180 shot2=150 cart=2 pad=1
+PASS stage 12 has a reproducible winning route
 PASS pad stage resets cleanly
 PASS mat launches upward as its painted arrow promises
 PASS next shot restores one redirect
 PASS cannot fire again during flight
 PASS spent budget cannot launch again
 PASS invalid stage index is clamped
-PASS play order includes every stage and teaches redirect first
+PASS play order includes all twelve stages and teaches redirect first
+PASS daily four are unique
+PASS same Korean calendar day keeps the same challenge
+PASS daily challenge changes at Korean midnight
+PASS clear, efficient shot and skill goal award separate medals
+PASS failed rounds cannot award medals
 PASS extended background preserves physics mapping for height 960
 PASS extended background preserves physics mapping for height 1170
 PASS extended background preserves physics mapping for height 1200

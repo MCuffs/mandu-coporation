@@ -25,6 +25,8 @@ public sealed class DadSave
     public float[] gearValue = new float[DadProgress.SlotCount]; // legacy quality value, now mapped to a monotonic passive per slot
     public int pendingSlot = -1, pendingRarity;                 // a lunchbox roll waiting for equip / dismantle
     public float pendingValue;
+    public string adBonusToken = "";
+    public double adBonusCoins;
 }
 
 public sealed class StageReward
@@ -142,7 +144,7 @@ public sealed partial class DadProgress
     bool ValidSave(DadSave data)
     {
         return data != null && (data.version == 1 || data.version == 2)
-            && Nonnegative(data.coins) && data.bestStage >= 1 && data.bestStage <= Eco.TotalStages
+            && Nonnegative(data.coins) && Nonnegative(data.adBonusCoins) && data.bestStage >= 1 && data.bestStage <= Eco.TotalStages
             && data.currentStage >= 1 && data.currentStage <= data.bestStage
             && data.lunchboxes >= 0 && data.boxesOpened >= 0 && data.lossesAtStage >= 0
             && data.lossStage >= 0 && data.lossStage <= Eco.TotalStages && data.lastSeenUnix >= 0

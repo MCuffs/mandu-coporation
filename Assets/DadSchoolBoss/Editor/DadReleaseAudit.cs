@@ -23,6 +23,7 @@ public static class DadReleaseAudit
         run("difficulty and JSON reload", DadDifficultySetup.Run);
         run("presentation and backup recovery", DadCommercialChecks.Run);
         run("save validation and legacy recovery", () => DadSaveRecoveryChecks.Run());
+        run("rewarded ad gate and persisted receipt", DadAdChecks.Run);
         run("new content assets resolve in native Unity", () =>
         {
             foreach (string name in new[] { "lunch_cart", "rebound_mat" })

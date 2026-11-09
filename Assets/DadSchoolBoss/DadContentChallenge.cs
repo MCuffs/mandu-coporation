@@ -2,6 +2,7 @@ using UnityEngine;
 
 public sealed partial class DadSchoolPrototype
 {
+    public void StartQuickChallenge() { GoHome(); OpenContentChallenge(); }
     void OpenContentChallenge()
     {
         // Separate object/state: no scene load, build-settings edit or campaign reward mutation.

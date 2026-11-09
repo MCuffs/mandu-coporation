@@ -74,7 +74,7 @@ public sealed partial class DadSchoolPrototype
         Text(new Rect(418, 106, 100, 56), stars.ToString(), 36, Ink, true, TextAnchor.MiddleRight);
         Text(new Rect(24,164,492,26),Progress.Eco.Label(stage)+"  ·  "+StagePlan.FloorNames[Mathf.Clamp(floor-1,0,2)]+" 출동 준비",17,Green);
         DrawHomeScene(floor);
-        if (Button(new Rect(310, 216, 210, 44), "대소동 도전 · 8판", Yellow, true, 19)) OpenContentChallenge();
+        if (Button(new Rect(310, 216, 210, 44), "대소동 도전 · 12판", Yellow, true, 19)) OpenContentChallenge();
 
         // Mom's stash (idle reward): always on its own row so it never covers dad's face (v9).
         bool idle = Progress.HasIdleReward;
@@ -243,6 +243,14 @@ public sealed partial class DadSchoolPrototype
         if (won && LastReward != null && LastReward.challengeLevel > 0) Text(new Rect(20,196,500,40),"재대결 " + LastReward.challengeLevel + "단계 격파",24,Green,true,TextAnchor.MiddleCenter);
         else if (won && LastReward != null) for (int s = 0; s < 3; s++) Icon(s < LastReward.stars ? "star_full" : "star_empty", new Rect(Width / 2 - 66 + s * 44, 196, 40, 40));
         scene();
+        if(won&&DadRewardedAds.Ready&&Progress.Save.adBonusCoins>0)
+        {
+            if(Button(new Rect(70,382,400,44),"광고 완료 후 코인 추가 받기",Yellow,true,19))
+            {
+                string receipt=Progress.Save.adBonusToken;
+                DadRewardedAds.Show(()=>{if(Progress.GrantAdBonus(receipt)){PersistNow();toast="추가 코인 지급 완료";toastTime=2.2f;}});
+            }
+        }
         for (int i = 0; i < 3; i++)
         {
             Rect r = new Rect(32 + i * 164, 448, 148, 82); Panel(r, Color.white);

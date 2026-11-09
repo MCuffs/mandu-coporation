@@ -4,12 +4,17 @@ using UnityEngine;
 public sealed class DadFunLab : MonoBehaviour
 {
     DadFunLabModel model;
+    public DadFunLabModel Model { get { return model; } }
     DadArt art;
-    Texture2D background, pullPose, flightPose, cartSprite, padSprite;
+    Texture2D background, pullPose, flightPose, landPose, cartSprite, padSprite;
     public System.Action Exit;
     bool recorded;
     float dashFlash;
     int bestShots;
+    int medals;
+    bool dailyMode;
+    int dailyIndex;
+    int[] dailyLevels;
     AudioSource sound;
     bool aiming, paused;
     int finger = -1;
@@ -31,17 +36,22 @@ public sealed class DadFunLab : MonoBehaviour
         background = Resources.Load<Texture2D>("DadV13/bg/corridor_floor1_long");
         pullPose = Resources.Load<Texture2D>("DadV13/chars/dad_pull_0");
         flightPose = Resources.Load<Texture2D>("DadV13/chars/dad_flight_0");
+        landPose = Resources.Load<Texture2D>("DadV13/chars/dad_land_0");
         cartSprite = Resources.Load<Texture2D>("DadContentV2/lunch_cart");
         padSprite = Resources.Load<Texture2D>("DadContentV2/rebound_mat");
         sound = gameObject.AddComponent<AudioSource>();
         StartLevel(DadFunLabModel.PlayOrder[0]);
     }
-    void StartLevel(int level)
+    void StartLevel(int level, bool keepDaily = false)
     {
+        if (!keepDaily) dailyMode = false;
         model = new DadFunLabModel(level); aiming = paused = recorded = false; finger = -1;
         feedback = ""; feedbackTime = dashFlash = 0;
         bestShots = PlayerPrefs.GetInt("DadContentV2.Best." + model.level, 0);
+        medals = PlayerPrefs.GetInt("DadContentV3.Medals." + model.level, bestShots > 0 ? 1 : 0);
     }
+    void StartDaily()
+    { dailyLevels=DadFunLabModel.DailyLevels(System.DateTime.UtcNow);dailyIndex=0;dailyMode=true;StartLevel(dailyLevels[0],true); }
     void OnApplicationFocus(bool focused) { if (!focused) { paused = true; aiming = false; finger = -1; } }
     void OnApplicationPause(bool pause) { if (pause) OnApplicationFocus(false); }
     void Layout()
@@ -53,6 +63,7 @@ public sealed class DadFunLab : MonoBehaviour
     void Update()
     {
         Layout();
+        if (Input.GetKeyDown(KeyCode.R)) { StartLevel(model.level,dailyMode); return; }
         if (Input.GetKeyDown(KeyCode.Escape)) { paused = !paused; aiming = false; finger = -1; }
         if (paused) return;
         if (model.sim.Over)
@@ -62,7 +73,9 @@ public sealed class DadFunLab : MonoBehaviour
             {
                 recorded = true;
                 if (bestShots == 0 || model.sim.shots < bestShots)
-                { bestShots = model.sim.shots; PlayerPrefs.SetInt("DadContentV2.Best." + model.level, bestShots); PlayerPrefs.Save(); }
+                { bestShots = model.sim.shots; PlayerPrefs.SetInt("DadContentV2.Best." + model.level, bestShots); }
+                medals |= model.MedalMask;
+                PlayerPrefs.SetInt("DadContentV3.Medals." + model.level, medals); PlayerPrefs.Save();
             }
             return;
         }
@@ -137,18 +150,21 @@ public sealed class DadFunLab : MonoBehaviour
         Rect painting = new Rect(0, screen.y, 540, screen.height);
         if (background != null) GUI.DrawTextureWithTexCoords(painting, background, BackgroundUv(painting));
         Box(new Rect(0, 0, 540, 175), new Color(.12f, .23f, .17f)); text.normal.textColor = Color.white;
-        Label(new Rect(10, 8, 425, 30), "아빠 대소동 · 8개 도전", 23);
+        int stars = 0;
+        for (int i=0;i<DadFunLabModel.Titles.Length;i++) stars += DadFunLabModel.CountMedals(PlayerPrefs.GetInt("DadContentV3.Medals."+i,PlayerPrefs.GetInt("DadContentV2.Best."+i,0)>0?1:0));
+        Label(new Rect(8, 8, 310, 30), "대소동  ★ " + stars + "/36", 23);
+        if (Button(new Rect(325,6,113,34),"오늘의 4판")) StartDaily();
         if (Exit != null && Button(new Rect(448, 6, 80, 34), "집으로")) { Exit(); GUI.matrix = Matrix4x4.identity; return; }
         for (int i = 0; i < DadFunLabModel.Titles.Length; i++)
         {
             int index = DadFunLabModel.PlayOrder[i];
             GUI.backgroundColor = index == model.level ? new Color(1, .8f, .2f) : Color.white;
             bool clear = PlayerPrefs.GetInt("DadContentV2.Best." + index, 0) > 0;
-            if (Button(new Rect(10 + i * 65, 48, 60, 34), (i + 1) + (clear ? "★" : ""))) StartLevel(index);
+            if (Button(new Rect(10 + (i % 6) * 87, 44 + (i / 6) * 34, 80, 30), (i + 1) + (clear ? "★" : ""))) StartLevel(index);
         }
         GUI.backgroundColor = Color.white;
-        Label(new Rect(8, 88, 524, 36), DadFunLabModel.Titles[model.level], 24);
-        Label(new Rect(10, 126, 520, 40), DadFunLabModel.Hints[model.level], 17);
+        Label(new Rect(8, 111, 524, 30), (dailyMode ? "오늘 "+(dailyIndex+1)+"/4 · " : "") + DadFunLabModel.Titles[model.level], 22);
+        Label(new Rect(10, 143, 520, 30), DadFunLabModel.Hints[model.level], 16);
         text.normal.textColor = Color.black;
         if (model.padEnabled)
         {
@@ -176,7 +192,7 @@ public sealed class DadFunLab : MonoBehaviour
         }
         var dad = model.sim.dad;
         DadArt.Character dadArt; Texture2D idle = art.characters.TryGetValue("dad", out dadArt) ? dadArt.Frame("idle", 0) : null;
-        Character(dad.flying ? flightPose : aiming ? pullPose : idle, dad.pos, dad.flying, dad.flying ? Mathf.Atan2(dad.vel.y, dad.vel.x) * Mathf.Rad2Deg : 0);
+        Character(dad.flying ? flightPose : aiming ? pullPose : dad.landed > 0 ? landPose : idle, dad.pos, dad.flying, dad.flying ? Mathf.Atan2(dad.vel.y, dad.vel.x) * Mathf.Rad2Deg : 0);
         if (dad.flying && (dashFlash > 0 || (model.CanBoost && !model.boostUsed)))
         {
             Color ring = dashFlash > 0 ? new Color(1, .75f, .1f) : new Color(.15f, .65f, .65f, .65f);
@@ -194,19 +210,25 @@ public sealed class DadFunLab : MonoBehaviour
         }
         Box(new Rect(0, 875, 540, 85), new Color(.95f, .9f, .72f));
         Label(new Rect(8, 878, 524, 28), "남은 " + model.sim.AliveCount + "명 · 발사 " + model.sim.shots + "/" + model.ShotBudget + " · 연쇄 " + model.sim.bestChain + (bestShots > 0 ? " · 최고 " + bestShots + "발" : ""));
-        if (Button(new Rect(12, 914, 250, 34), "다시")) StartLevel(model.level);
+        if (Button(new Rect(12, 914, 250, 34), "다시")) StartLevel(model.level,dailyMode);
         if (Button(new Rect(278, 914, 250, 34), paused ? "계속" : "정지")) { paused = !paused; aiming = false; finger = -1; }
         if (model.sim.Over || paused)
         {
-            Box(new Rect(45, 360, 450, 200), new Color(.98f, .94f, .8f));
+            Box(new Rect(45, 335, 450, 310), new Color(.98f, .94f, .8f));
             bool won = model.sim.phase == SlingshotSim.Phase.Won;
-            Label(new Rect(55, 380, 430, 62), paused ? "잠깐 쉬기" : won ? "대소동 해결! · " + model.sim.shots + "발" : model.sim.lossReason, 28);
-            Label(new Rect(60, 445, 420, 40), paused ? "준비되면 계속하세요" : won ? "최대 연쇄 " + model.sim.bestChain + " · 카트 " + model.cartHits + "명" : DadFunLabModel.Hints[model.level], 19);
-            if (Button(new Rect(60, 500, 205, 42), paused ? "계속하기" : "바로 다시")) { if (paused) paused = false; else StartLevel(model.level); }
-            if (!paused && won && Button(new Rect(275, 500, 205, 42), model.level == 7 ? "처음부터" : "다음 도전 →"))
+            Label(new Rect(55, 347, 430, 50), paused ? "잠깐 쉬기" : won ? "대소동 해결! · " + model.sim.shots + "발" : model.sim.lossReason, 27);
+            if (won && !paused)
             {
-                int order = System.Array.IndexOf(DadFunLabModel.PlayOrder, model.level);
-                StartLevel(DadFunLabModel.PlayOrder[(order + 1) % DadFunLabModel.PlayOrder.Length]);
+                Label(new Rect(60,401,420,32),"★ 클리어    "+((model.MedalMask&2)!=0?"★":"☆")+" "+model.ParShots+"발 이내",21);
+                Label(new Rect(60,435,420,32),((model.MedalMask&4)!=0?"★ ":"☆ ")+model.SkillGoal,21);
+                Label(new Rect(60,471,420,34),"최대 연쇄 "+model.sim.bestChain+" · 모은 별 "+DadFunLabModel.CountMedals(medals)+"/3",18);
+            }
+            else Label(new Rect(60,405,420,108),paused?"준비되면 계속하세요\nR 키로 즉시 다시 시작":DadFunLabModel.Hints[model.level],20);
+            if (Button(new Rect(60, 570, 205, 48), paused ? "계속하기" : "바로 다시")) { if (paused) paused = false; else StartLevel(model.level,dailyMode); }
+            if (!paused && won && Button(new Rect(275,570,205,48),dailyMode && dailyIndex==3?"오늘 도전 완료":model.level==11?"처음부터":"다음 도전 →"))
+            {
+                if (dailyMode && dailyIndex < 3) { dailyIndex++;StartLevel(dailyLevels[dailyIndex],true); }
+                else { int order = System.Array.IndexOf(DadFunLabModel.PlayOrder, model.level);StartLevel(DadFunLabModel.PlayOrder[(order + 1) % DadFunLabModel.PlayOrder.Length]); }
             }
         }
         GUI.matrix = Matrix4x4.identity;
