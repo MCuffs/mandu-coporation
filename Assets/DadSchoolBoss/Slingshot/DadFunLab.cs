@@ -120,14 +120,22 @@ public sealed class DadFunLab : MonoBehaviour
         GUI.DrawTexture(new Rect(feet.x - 384 * k, feet.y - (centered ? 384 : 720) * k, 768 * k, 768 * k), image);
         GUI.matrix = old;
     }
+    public static Rect BackgroundUv(Rect frame)
+    {
+        // Canonical 9:16 crop starts at source y=210. Extend the painting while preserving x-wall positions
+        // and the same two source pixels per gameplay unit, including asymmetric notch safe areas.
+        return new Rect(0, (2130 - 2 * frame.yMax) / 2340f, 1, 2 * frame.height / 2340f);
+    }
     void OnGUI()
     {
         if (model == null) return; Layout();
         if (text == null) text = new GUIStyle(GUI.skin.label) { font = font, alignment = TextAnchor.MiddleCenter, wordWrap = true };
         if (button == null) button = new GUIStyle(GUI.skin.button) { font = font, fontSize = 18 };
         GUI.matrix = Matrix4x4.TRS(offset, Quaternion.identity, new Vector3(scale, scale, 1));
-        Box(new Rect(0, 0, 540, 960), new Color(.93f, .9f, .78f));
-        if (background != null) GUI.DrawTextureWithTexCoords(new Rect(0, 0, 540, 960), background, new Rect(0, 210f / 2340, 1, 1920f / 2340));
+        Rect screen = new Rect(-offset.x / scale, -offset.y / scale, Screen.width / scale, Screen.height / scale);
+        Box(screen, new Color(.93f, .9f, .78f));
+        Rect painting = new Rect(0, screen.y, 540, screen.height);
+        if (background != null) GUI.DrawTextureWithTexCoords(painting, background, BackgroundUv(painting));
         Box(new Rect(0, 0, 540, 175), new Color(.12f, .23f, .17f)); text.normal.textColor = Color.white;
         Label(new Rect(10, 8, 425, 30), "아빠 대소동 · 8개 도전", 23);
         if (Exit != null && Button(new Rect(448, 6, 80, 34), "집으로")) { Exit(); GUI.matrix = Matrix4x4.identity; return; }
