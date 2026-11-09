@@ -1,0 +1,31 @@
+{
+  "date": "2026-11-10",
+  "status": "WAITING_FOR_WINDOWS_ADMIN_INSTALL",
+  "editorVersion": "6000.3.28f1",
+  "revision": "8f082d2fe476",
+  "editorInstalled": false,
+  "installerMd5VerifiedAgainstUnityMetadata": true,
+  "editorAuthenticode": "Valid / Unity Technologies SF",
+  "plannedAndroid": {
+    "applicationId": "com.manducorporation.dadwar",
+    "backend": "IL2CPP",
+    "architecture": "ARM64",
+    "targetApi": 36,
+    "minApi": 23
+  },
+  "toolchainStage": "Build\\AndroidUpgrade\\toolchain-stage\\Editor\\Data\\PlaybackEngines\\AndroidPlayer",
+  "apkProduced": false,
+  "aabProduced": false,
+  "limits": "Source preparation and downloaded packages only; Unity6 compilation and artifacts not verified.",
+  "stagedComponents": {
+    "JDK17": true,
+    "NDKr27c": true,
+    "SDK36": true,
+    "BuildTools36": true,
+    "PlatformTools": true,
+    "CommandLineTools16": true,
+    "CMake": true
+  },
+  "sdkLicenseAcceptanceVerified": false,
+  "sdkLicenseNote": "No existing SDK license directory was found in the old SDK. Verify license state after manual Android module installation."
+}
