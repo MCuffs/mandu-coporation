@@ -173,3 +173,39 @@
 
 ### 2026-11-09 · V19 재개 / 화면 공유 배려
 제목/버튼 잘림의 GUI 그룹 충돌 수정 상태를 확인하고 기존 정상 캡처의 필수 문구 3개를 오프라인 OCR로 재검증. 빌드 후 자동 Play 제거, Game view 자동 생성 제거, 프로젝트 AGENTS에 창 활성화 금지 기록. Mono만으로 수행하는 창 없는 규칙 검사 56개 통과. 이번에는 Unity/플레이어를 실행하지 않음. [기록](dad-title-and-background-verification-v19.md).
+
+## 2026-11-11 · 출시 검토 (PM)
+
+**판정: Google Play 정식 출시는 NO-GO 유지.** 지금 가능한 것은 Windows v0.3.0 사람 테스트와 Android 테스트 APK의 실기기 검수다. 대상은 `codex/dad-war-admob-test`(`1279c0d`). 11/9 [출시 검수](dad-release-audit-2026-11-09.md)와 [검토 관문](play-launch-and-d1-gates-2026-11-11.md)의 항목을 소스·설정·산출물에서 다시 확인했다. 검사 보고서는 기록만 확인했고 다시 실행하지 않았다. Unity 창과 Play Mode는 열지 않았다.
+
+| 관문 | 11/11 확인 | 다음 행동 |
+| --- | --- | --- |
+| 저장 복구(R-01) | 수정됨. 검사 26개 통과 기록 | — |
+| Android 앱 ID(R-02) | `com.manducorporation.dadwar` 설정 확인. 회사명은 `SecondFistStudio`, 운영자 표기는 「파랑버섯 스튜디오」로 서로 다름 | 사용자: 첫 업로드 전에 이름 확정(앱 ID는 올린 뒤 변경 불가) |
+| 엔진·빌드(R-03) | 최신 브랜치 설정은 2021.3.2f1·ARMv7·Mono. Unity 6.3 설치 파일은 관리자 실행 대기. **11/11 Unity 6000.1.5f1(이미 설치돼 있던 버전)로 최신 소스의 ARM64 테스트 APK를 만들었다(아래).** Unity 6.3 LTS에서의 빌드와 AAB는 아직이다 | 사용자: Unity 6.3 설치 2개 실행. 개발: 6.3에서 AAB |
+| 브랜치 | `main`이 최신보다 13커밋 뒤. `codex/dad-war-android6`에는 v0.3 콘텐츠·광고가 없음(버전 0.1.0) | 개발: 검증 뒤 한 줄로 합치기 |
+| 실기기 | 한 번도 실행하지 않음. 연결된 기기 없음 | 테스트 APK 설치 후 첫 10판·보스·대소동·광고·앱 전환·저장 확인 |
+| 사람 테스트 | 결과 기록 없음. 근거는 봇 검사뿐 | PM: Windows v0.3.0으로 처음 하는 사람 5~20명 관찰 |
+| 측정 | 분석 SDK 없음. 목표인 D1 30%와 이탈 지점을 잴 수 없음 | 결정 필요: 분석 SDK 도입 여부(도입 시 처리방침·Data safety 갱신) |
+| 광고 | 구글 테스트 ID만 연결. AdMob 계정 없음 | 사용자: AdMob 계정·앱·광고 단위 |
+| 계정·서명 | Play Console 미가입, 업로드 키 없음 | 사용자: 개인/조직 경로 결정. 개인이면 12명·14일 비공개 테스트 필요 |
+| 처리방침 주소 | 앱 링크가 GitHub 브랜치 주소(`.../blob/codex/dad-war-admob-test/PrivacyPolicy.md`)라 브랜치를 지우면 깨짐 | 개발: 고정 주소로 교체 |
+
+**제품 쪽 판단(가설, 사람 테스트로 확인):**
+
+1. 주 게임이 둘이다. 타이틀의 큰 버튼은 「대소동 바로 시작」인데 성장·장비·광고는 본편 60판에 붙어 있다. 첫 사용자에게 보여 줄 주 게임을 정한다(11/9 검수 Q-03).
+2. 다음 날 올 이유가 「오늘의 4판」 하나다. D1 30%는 코호트 데이터 전까지 가정이다.
+3. 3-20 보스는 강화 없는 봇이 6번 중 1번 이겼다. 실제 성장 상태에서 확인한다(Q-04).
+
+**순서:** ① 사용자 몫(Unity 6.3 설치, 계정 경로, AdMob, 이름)을 먼저 시작한다. ② 그동안 Windows v0.3.0 사람 테스트와 테스트 APK 실기기 검수를 한다. ③ 브랜치를 합치고 Unity 6.3에서 서명된 AAB를 만든다. ④ 내부 테스트 → 비공개 테스트 14일 → 한국 제한 출시. 개인 계정 경로면 빨라도 3~4주로 본다(추정).
+
+### Android 테스트 APK (11/11)
+
+Unity 6.3 설치를 기다리지 않고, 이 PC에 Android 도구와 함께 설치돼 있던 **Unity 6000.1.5f1**(API 36 플랫폼, NDK r27c, JDK 17, IL2CPP)로 빌드했다. 6000.1은 LTS가 아니므로 출시용 엔진 결정(6.3 LTS)을 바꾸는 것은 아니다.
+
+- **소스:** `1279c0d`(v0.3 콘텐츠 + AdMob 테스트 광고)를 별도 사본 `C:/Users/user/DadWarApkTest`(detached, 미커밋)에 받아 창 없는 배치 모드로 열었다. Unity 2021 → 6 전환에서 컴파일 오류는 0개였다(경고는 구식 API 안내).
+- **설정:** `com.manducorporation.dadwar`, 0.3.0(1), IL2CPP, ARM64, 최소 API 24, 타깃 API 36, OpenGLES3, 세로 고정. 빌드 스크립트는 `codex/dad-war-android6`의 `DadAndroidBuild.cs`에서 버전 가드·최소 API·출력 이름만 바꿨다.
+- **결과:** 빌드 성공, 오류 0, 5분 17초. `Builds/AndroidPlaytest/DadWar-v0.3.0-arm64-test.apk`, 89,561,740바이트, SHA-256 `2dd2a5ef…b502fc`. [빌드 기록](dad-android-test-apk-build.txt)
+- **산출물 검사 7개 통과**([기록](dad-android-test-apk-artifact.json), Build Tools 36 사용): ARM64 단독, 모든 네이티브 라이브러리 16KB 정렬, 앱 ID, 타깃 API 36, zipalign 16KB, 서명 검증, 플레이어 데이터.
+- **광고:** Google Mobile Ads와 UMP 클래스가 APK에 들어 있고, 매니페스트의 앱 ID는 구글 테스트 ID다. 빌드 중 External Dependency Manager의 별도 해결 단계는 실패로 기록됐지만(JAVA_HOME 없음, Gradle 템플릿 없음) Gradle 빌드가 의존성을 포함했다. 실제 광고 표시는 기기에서 확인해야 한다.
+- **한계:** 디버그 키 서명이라 Play에 올릴 수 없다. 기기에 설치하거나 실행해 보지 않았다(연결된 기기 없음). 전환 과정에서 `.meta` 171개가 바뀌었는데(11/9 검수 P2의 importer 차이와 같은 종류) 커밋하지 않았다.
