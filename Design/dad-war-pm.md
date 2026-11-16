@@ -209,3 +209,36 @@ Unity 6.3 설치를 기다리지 않고, 이 PC에 Android 도구와 함께 설�
 - **산출물 검사 7개 통과**([기록](dad-android-test-apk-artifact.json), Build Tools 36 사용): ARM64 단독, 모든 네이티브 라이브러리 16KB 정렬, 앱 ID, 타깃 API 36, zipalign 16KB, 서명 검증, 플레이어 데이터.
 - **광고:** Google Mobile Ads와 UMP 클래스가 APK에 들어 있고, 매니페스트의 앱 ID는 구글 테스트 ID다. 빌드 중 External Dependency Manager의 별도 해결 단계는 실패로 기록됐지만(JAVA_HOME 없음, Gradle 템플릿 없음) Gradle 빌드가 의존성을 포함했다. 실제 광고 표시는 기기에서 확인해야 한다.
 - **한계:** 디버그 키 서명이라 Play에 올릴 수 없다. 기기에 설치하거나 실행해 보지 않았다(연결된 기기 없음). 전환 과정에서 `.meta` 171개가 바뀌었는데(11/9 검수 P2의 importer 차이와 같은 종류) 커밋하지 않았다.
+
+## 2026-11-16 · Play 조직 계정 진행 기록 (PM)
+
+**결정(11/11, 사용자):** 11/11 관문표의 "계정·서명"은 **조직 계정 경로**로 간다. 12명·14일 비공개 테스트 요건은 2023-11-13 이후 만든 개인 계정에만 적혀 있다([Google 조직 정보 요구사항](https://support.google.com/googleplay/android-developer/answer/13628312)). 개인 계정과 테스터단은 예비 경로로 둔다. 이 저장소는 공개 저장소이므로 D-U-N-S 번호, 사업자등록번호, 주소, 개인 메일은 적지 않는다.
+
+| 준비물 | 11/16 상태 | 근거·비고 |
+| --- | --- | --- |
+| D-U-N-S 번호 | 발급됨. Play에서는 아직 조회되지 않음 | 사용자가 11/9 D&B 무료 경로(D&B Support for Apple)로 신청해 발급 메일을 받았다. 한국 공식 창구(나이스디앤비)는 유료다. D&B에 등록된 법적 상호는 "Bluemushroom studio" |
+| 영문 사업자등록증명 | 재발급 완료(11/16) | 처음 발급본의 영문 상호가 D&B와 달라 "Bluemushroom studio"로 맞춰 다시 받았다. 조직 확인 서류로 쓴다 |
+| 조직 웹사이트 | 완료 | <https://mcuffs.github.io/bluemushroom/> (저장소 `MCuffs/bluemushroom`, GitHub Pages) |
+| Search Console 소유권 | 완료(11/16) | URL 접두어 속성, HTML 파일 방식. 사이트 저장소의 `docs/google6c6a5495e3adbfbc.html` 파일과 홈 화면 메타태그를 지우면 인증이 풀린다 |
+| 조직 이메일 | 완료(11/16) | `contact@shuffla.io`. shuffla.io의 메일 서버(MX)를 Google 5줄에서 ImprovMX 2줄로 바꾸고 SPF를 추가했다. 수신 전용 전달이며 시험 메일 수신을 사용자가 확인했다 |
+| 처리방침 고정 주소 | 사이트는 완료, 앱은 미완 | <https://mcuffs.github.io/bluemushroom/dadwar/privacy/>. 사이트의 문의 주소는 `contact@shuffla.io`로 바꿨다(사이트 커밋 `8159373`). 앱 쪽은 아래 "개발 후속" 참고 |
+| Play Console 가입 | 진행 중, D-U-N-S 조회에서 대기 | 소유 Google 계정은 대표의 개인 계정으로 확정(가입 화면 안내: 만든 뒤 소유 계정 변경 불가). 조직 유형 「회사 또는 비즈니스」, 공개 개발자 이름 "Bluemushroom studio"까지 입력 |
+
+**11/16 가입 중 멈춘 지점:** 결제 프로필 단계에서 D-U-N-S 번호를 넣자 "D-U-N-S 번호를 조회할 수 없습니다"가 떴다. 같은 화면에 "입력 시도 횟수가 제한되어 있다"는 경고가 있다. D&B 발급 메일은 발급 후 24~48시간 뒤부터 쓸 수 있다고 안내한다. Google이 새 번호를 인식하는 공식 기준 시간은 찾지 못했고, 지원팀이 48시간 대기를 안내했다는 사례 한 건만 확인했다. **48시간이 지나기 전에는 다시 넣지 않는다.** 그 뒤에도 안 되면 [개발자 인증 문의 양식](https://support.google.com/googleplay/android-developer/contact/kyd)에 발급일과 화면을 보낸다.
+
+**남은 가입 단계:** 결제 프로필(D-U-N-S) → 내 조직 → 공개 프로필 → 내 정보 → 앱 → Google에서 연락하는 방법 → 약관 → 등록비 25달러 → 본인·조직 인증. 번호 입력, 결제, 약관 동의, 본인 인증은 사용자가 직접 한다.
+
+**알고 진행하는 것:**
+
+- 조직 계정은 법적 이름, 법적 주소, 개발자 이메일, 개발자 전화번호가 스토어에 공개된다. 사업장 주소가 그대로 공개되는 것을 알고 진행하기로 했다(11/11, 사용자).
+- 인증 통과와 소요 기간은 보장할 수 없다.
+- 개인사업자 조직 계정에서 인앱결제 정산이 보류됐다는 커뮤니티 사례가 한 건 있다. 이 게임의 수익은 광고(AdMob)라 경로가 다르지만 확인된 사실은 아니다.
+- 통신판매업 신고번호를 가입 화면이 요구하는지는 아직 그 단계까지 가지 못해 모른다(신고는 돼 있다).
+
+**개발 후속(이 브랜치 소스 기준, 11/16 확인):**
+
+1. `DadSettingsScreen.PrivacyPolicyUrl`이 아직 GitHub 브랜치 주소다. 위 고정 주소로 바꾼다(11/11 관문표의 "처리방침 주소").
+2. `PrivacyPolicy.md`, `Resources/DadPrivacy.txt`, `DadSettingsScreen`의 대체 문구에 예전 개인 메일이 남아 있다. 공개 페이지와 같은 `contact@shuffla.io`로 맞춘다. `DadReleaseAudit`가 예전 주소 포함 여부를 검사하므로 같이 고친다.
+3. 이름이 세 가지다: 앱 ID `com.manducorporation.dadwar`, Unity 회사명 `SecondFistStudio`, 공개 개발자 이름 "Bluemushroom studio". 앱 ID는 올린 뒤 바꿀 수 없으니 첫 업로드 전에 사용자가 확정한다(11/11 관문표 R-02와 같은 건).
+
+**11/11 관문표에서 바뀐 것:** "계정·서명"은 조직 경로로 결정되고 가입이 진행 중이다(업로드 키는 여전히 없음). "처리방침 주소"는 고정 주소가 생겼고 앱 링크 교체만 남았다. 나머지 관문(실기기, 사람 테스트, 측정, AdMob 계정, Unity 6.3·AAB, 브랜치 합치기)은 11/11과 같다. **Google Play 정식 출시 판정은 NO-GO 유지.**
