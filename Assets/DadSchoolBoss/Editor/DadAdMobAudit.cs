@@ -26,7 +26,7 @@ public static class DadAdMobAudit
             check(serialized.FindProperty("overrideDefaultGmaAndroidSdk").boolValue && serialized.FindProperty("selectedGmaAndroidSdk").intValue == 0,"standard Android SDK selected explicitly");
             check((int)PlayerSettings.Android.minSdkVersion >= 24,"minimum Android API is 24 or newer");
             check(File.ReadAllText("PrivacyPolicy.md") == Resources.Load<TextAsset>("DadPrivacy").text,"public and in-game privacy text match");
-            DadAdChecks.Run(); report.AppendLine("PASS rewarded gate/persisted receipt checks (13 cases)");
+            DadAdChecks.Run(); report.AppendLine("PASS rewarded gate/persisted receipt/startup checks (14 cases)");
             string output = "Build/AdMob/AndroidScripts"; Directory.CreateDirectory(output);
             var result = PlayerBuildInterface.CompilePlayerScripts(new ScriptCompilationSettings {
                 group = BuildTargetGroup.Android, target = BuildTarget.Android,
@@ -37,5 +37,14 @@ public static class DadAdMobAudit
         }
         catch(Exception e) { report.AppendLine("FAIL " + e); Debug.LogException(e); }
         finally { File.WriteAllText("Design/dad-admob-sdk-checks.txt",report.ToString()); EditorApplication.Exit(exit); }
+    }
+    public static void BuildStartupSmoke()
+    {
+        var result = BuildPipeline.BuildPlayer(new BuildPlayerOptions {
+            scenes = new[] { "Assets/DadSchoolBoss.unity" },
+            locationPathName = "Build/StartupFix/WindowsSmoke/DadWar.exe",
+            target = BuildTarget.StandaloneWindows64, options = BuildOptions.Development
+        });
+        EditorApplication.Exit(result.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded ? 0 : 1);
     }
 }

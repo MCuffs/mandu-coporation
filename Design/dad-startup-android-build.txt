@@ -1,0 +1,17 @@
+Android test artifact build; not approved for store upload.
+Unity: 6000.1.5f1
+Version: 0.3.1 (2)
+Application ID: com.manducorporation.dadwar
+Backend: IL2CPP
+Architectures: ARM64
+Minimum SDK: AndroidApiLevel24
+Target SDK: AndroidApiLevel36
+Graphics: OpenGLES3
+Android dependency resolution: True
+Result: Succeeded
+Errors: 0
+Warnings: 14
+Size: 447848965 bytes
+Duration: 00:03:19.5655280
+Artifact: C:\Users\user\DadWarApkTest\Builds\AndroidPlaytest\DadWar-v0.3.1-arm64-test.apk
+Signing: local DEBUG key, not the store upload key

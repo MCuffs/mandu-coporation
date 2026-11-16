@@ -385,7 +385,13 @@ public sealed partial class DadSchoolPrototype : MonoBehaviour
     }
     void OnGUI()
     {
-        if (DadRewardedAds.Busy) return;
+        // Keep the current screen visible behind native ads. Block taps, not rendering.
+        bool previousEnabled = GUI.enabled;
+        try { GUI.enabled = previousEnabled && !DadRewardedAds.Busy; DrawGameGUI(); }
+        finally { GUI.enabled = previousEnabled; }
+    }
+    void DrawGameGUI()
+    {
         if (ResourcesLost) LoadResources();
         Matrix4x4 previous = GUI.matrix;
         GUI.matrix = Matrix4x4.TRS(new Vector3(Offset.x, Offset.y, 0), Quaternion.identity, Vector3.one * ViewScale);

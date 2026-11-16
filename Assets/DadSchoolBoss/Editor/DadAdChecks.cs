@@ -23,6 +23,9 @@ public static class DadAdChecks
         for(int i=0;i<4;i++){time+=31;gate.Show(()=>rewards++);provider.Pending(true);}
         time+=31;Check(!gate.Available&&gate.Earned==5,"session cap prevents unlimited ad requests",report);
         Check(!new DadRewardedGate(null,()=>0).Available,"no SDK means no ad offer",report);
+        DadAdPrivacy.Busy=true;
+        try { Check(!DadRewardedAds.Busy,"pending consent cannot freeze game startup",report); }
+        finally { DadAdPrivacy.Busy=false; }
         string path=Path.Combine(Path.GetTempPath(),"dad-ad-check-"+Guid.NewGuid()+".json");
         try
         {

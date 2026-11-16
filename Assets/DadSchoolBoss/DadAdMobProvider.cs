@@ -13,7 +13,7 @@ public sealed class DadAdMobProvider : MonoBehaviour, IDadRewardedProvider
     Action<bool> completion;
     bool loading, initialized, initializing, earned;
     int requestVersion;
-    float retryAt, loadedAt, retryDelay = 5;
+    float retryAt = float.PositiveInfinity, loadedAt, retryDelay = 5;
     public bool Ready { get { return initialized && !DadAdPrivacy.Busy && ConsentInformation.CanRequestAds()
         && completion == null && ad != null && Time.realtimeSinceStartup - loadedAt < 3300 && ad.CanShowAd(); } }
 
@@ -26,8 +26,18 @@ public sealed class DadAdMobProvider : MonoBehaviour, IDadRewardedProvider
         DadRewardedAds.Bind(host);
         DadAdPrivacy.Required = () => ConsentInformation.PrivacyOptionsRequirementStatus == PrivacyOptionsRequirementStatus.Required;
         DadAdPrivacy.Open = host.PrivacyOptions;
-        host.GatherConsent();
     }
+    System.Collections.IEnumerator Start()
+    {
+        // Let the game draw before any consent/network work starts.
+        yield return null;
+        yield return null;
+        try { PrepareMainThreadDispatcher(); retryAt = 0; GatherConsent(); }
+        catch (Exception e) { DadAdPrivacy.Busy = false; retryAt = Time.realtimeSinceStartup + 60; Debug.LogWarning("Ad consent unavailable: " + e.Message); }
+    }
+    // UMP runs before MobileAds.Initialize; ExecuteInUpdate only queues work and
+    // does not create the dispatcher. Without this, the consent callback deadlocks.
+    public static void PrepareMainThreadDispatcher() { MobileAdsEventExecutor.Initialize(); }
     static void Main(Action action) { MobileAdsEventExecutor.ExecuteInUpdate(action); }
 
     void GatherConsent()

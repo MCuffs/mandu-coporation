@@ -23,6 +23,14 @@ public sealed class DadHeadlessPlayerSmoke : MonoBehaviour
         yield return null;
         try
         {
+            DadAdMobProvider.PrepareMainThreadDispatcher();
+            bool callbackRan = false;
+            GoogleMobileAds.Common.MobileAdsEventExecutor.ExecuteInUpdate(() => callbackRan = true);
+            GoogleMobileAds.Common.MobileAdsEventExecutor.instance.Update();
+            Check(callbackRan,"consent callback queue drains before Mobile Ads initialization");
+            DadAdPrivacy.Busy=true;
+            Check(!DadRewardedAds.Busy,"consent network wait cannot pause game startup");
+            DadAdPrivacy.Busy=false;
             var game=FindObjectOfType<DadSchoolPrototype>();Check(game!=null,"main scene starts in actual Windows player");
             Check(Path.GetFullPath(DadProgress.DefaultPath).StartsWith(Path.GetFullPath(root)+Path.DirectorySeparatorChar),"smoke save is isolated");
             Check(Resources.Load<Font>("Fonts/GothicA1-Regular")!=null,"Korean font is included");

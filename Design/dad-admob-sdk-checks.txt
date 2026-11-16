@@ -6,5 +6,5 @@ PASS Android demo app ID configured
 PASS standard Android SDK selected explicitly
 PASS minimum Android API is 24 or newer
 PASS public and in-game privacy text match
-PASS rewarded gate/persisted receipt checks (13 cases)
+PASS rewarded gate/persisted receipt/startup checks (14 cases)
 PASS Android player scripts compile against actual SDK
