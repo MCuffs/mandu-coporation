@@ -221,7 +221,7 @@ Unity 6.3 설치를 기다리지 않고, 이 PC에 Android 도구와 함께 설�
 | 조직 웹사이트 | 완료 | <https://mcuffs.github.io/bluemushroom/> (저장소 `MCuffs/bluemushroom`, GitHub Pages) |
 | Search Console 소유권 | 완료(11/16) | URL 접두어 속성, HTML 파일 방식. 사이트 저장소의 `docs/google6c6a5495e3adbfbc.html` 파일과 홈 화면 메타태그를 지우면 인증이 풀린다 |
 | 조직 이메일 | 완료(11/16) | `contact@shuffla.io`. shuffla.io의 메일 서버(MX)를 Google 5줄에서 ImprovMX 2줄로 바꾸고 SPF를 추가했다. 수신 전용 전달이며 시험 메일 수신을 사용자가 확인했다 |
-| 처리방침 고정 주소 | 사이트는 완료, 앱은 미완 | <https://mcuffs.github.io/bluemushroom/dadwar/privacy/>. 사이트의 문의 주소는 `contact@shuffla.io`로 바꿨다(사이트 커밋 `8159373`). 앱 쪽은 아래 "개발 후속" 참고 |
+| 처리방침 고정 주소 | 사이트·소스 완료(11/16), 새 빌드 필요 | <https://mcuffs.github.io/bluemushroom/dadwar/privacy/>. 사이트의 문의 주소는 `contact@shuffla.io`로 바꿨다(사이트 커밋 `8159373`). 앱 소스의 링크와 문구도 같은 날 맞췄다(아래 "개발 후속") |
 | Play Console 가입 | 진행 중, D-U-N-S 조회에서 대기 | 소유 Google 계정은 대표의 개인 계정으로 확정(가입 화면 안내: 만든 뒤 소유 계정 변경 불가). 조직 유형 「회사 또는 비즈니스」, 공개 개발자 이름 "Bluemushroom studio"까지 입력 |
 
 **11/16 가입 중 멈춘 지점:** 결제 프로필 단계에서 D-U-N-S 번호를 넣자 "D-U-N-S 번호를 조회할 수 없습니다"가 떴다. 같은 화면에 "입력 시도 횟수가 제한되어 있다"는 경고가 있다. D&B 발급 메일은 발급 후 24~48시간 뒤부터 쓸 수 있다고 안내한다. Google이 새 번호를 인식하는 공식 기준 시간은 찾지 못했고, 지원팀이 48시간 대기를 안내했다는 사례 한 건만 확인했다. **48시간이 지나기 전에는 다시 넣지 않는다.** 그 뒤에도 안 되면 [개발자 인증 문의 양식](https://support.google.com/googleplay/android-developer/contact/kyd)에 발급일과 화면을 보낸다.
@@ -237,8 +237,8 @@ Unity 6.3 설치를 기다리지 않고, 이 PC에 Android 도구와 함께 설�
 
 **개발 후속(이 브랜치 소스 기준, 11/16 확인):**
 
-1. `DadSettingsScreen.PrivacyPolicyUrl`이 아직 GitHub 브랜치 주소다. 위 고정 주소로 바꾼다(11/11 관문표의 "처리방침 주소").
-2. `PrivacyPolicy.md`, `Resources/DadPrivacy.txt`, `DadSettingsScreen`의 대체 문구에 예전 개인 메일이 남아 있다. 공개 페이지와 같은 `contact@shuffla.io`로 맞춘다. `DadReleaseAudit`가 예전 주소 포함 여부를 검사하므로 같이 고친다.
+1. **완료(11/16).** `DadSettingsScreen.PrivacyPolicyUrl`을 GitHub 브랜치 주소에서 위 고정 주소로 바꿨다(11/11 관문표의 "처리방침 주소").
+2. **완료(11/16).** `PrivacyPolicy.md`, `Resources/DadPrivacy.txt`, `DadSettingsScreen`의 대체 문구, `DadReleaseAudit`의 검사 문자열에서 예전 개인 메일을 `contact@shuffla.io`로 바꿨다. 앱 안 문구, `PrivacyPolicy.md`, 사이트 원문 세 곳이 글자까지 같은 것을 파일 비교로 확인했다. Unity를 열지 않았으므로 `DadReleaseAudit`·`DadAdMobAudit`는 실행하지 않았고, 그 두 검사의 처리방침 조건만 파일 기준으로 재현해 통과를 확인했다. **이미 만든 테스트 APK에는 예전 링크와 메일이 들어 있으니 다음 빌드부터 반영된다.**
 3. 이름이 세 가지다: 앱 ID `com.manducorporation.dadwar`, Unity 회사명 `SecondFistStudio`, 공개 개발자 이름 "Bluemushroom studio". 앱 ID는 올린 뒤 바꿀 수 없으니 첫 업로드 전에 사용자가 확정한다(11/11 관문표 R-02와 같은 건).
 
-**11/11 관문표에서 바뀐 것:** "계정·서명"은 조직 경로로 결정되고 가입이 진행 중이다(업로드 키는 여전히 없음). "처리방침 주소"는 고정 주소가 생겼고 앱 링크 교체만 남았다. 나머지 관문(실기기, 사람 테스트, 측정, AdMob 계정, Unity 6.3·AAB, 브랜치 합치기)은 11/11과 같다. **Google Play 정식 출시 판정은 NO-GO 유지.**
+**11/11 관문표에서 바뀐 것:** "계정·서명"은 조직 경로로 결정되고 가입이 진행 중이다(업로드 키는 여전히 없음). "처리방침 주소"는 고정 주소로 교체됐고 새 빌드에 반영하는 일만 남았다. 나머지 관문(실기기, 사람 테스트, 측정, AdMob 계정, Unity 6.3·AAB, 브랜치 합치기)은 11/11과 같다. **Google Play 정식 출시 판정은 NO-GO 유지.**

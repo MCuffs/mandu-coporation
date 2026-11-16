@@ -7,7 +7,7 @@ public sealed partial class DadSchoolPrototype
     Vector2 privacyScroll;
     string privacyText;
     GUIStyle privacyMeasure;
-    public const string PrivacyPolicyUrl = "https://github.com/MCuffs/mandu-coporation/blob/codex/dad-war-admob-test/PrivacyPolicy.md";
+    public const string PrivacyPolicyUrl = "https://mcuffs.github.io/bluemushroom/dadwar/privacy/";
     public void OpenSettings(){settingsOpen=true;privacyOpen=false;}
     void DrawSettings()
     {
@@ -34,7 +34,7 @@ public sealed partial class DadSchoolPrototype
         if (privacyText == null)
         {
             var asset = Resources.Load<TextAsset>("DadPrivacy");
-            privacyText = asset != null ? asset.text.Replace("## ", "").Replace("# ", "") : "처리방침을 불러오지 못했습니다. 문의: alstnwjd0424@naver.com";
+            privacyText = asset != null ? asset.text.Replace("## ", "").Replace("# ", "") : "처리방침을 불러오지 못했습니다. 문의: contact@shuffla.io";
         }
         if (privacyMeasure == null) privacyMeasure = new GUIStyle { font=body, fontSize=18, wordWrap=true };
         Panel(new Rect(28,130,484,700),Paper);
