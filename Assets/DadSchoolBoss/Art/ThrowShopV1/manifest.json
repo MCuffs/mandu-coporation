@@ -1,0 +1,364 @@
+{
+  "version": 1,
+  "coordinateOrigin": "top-left",
+  "boundsConvention": "[left,top,right,bottom], right/bottom exclusive; alpha > 0",
+  "assets": [
+    {
+      "id": "icon_won",
+      "file": "icon_won.png",
+      "width": 256,
+      "height": 256,
+      "sourceType": "vector",
+      "source": "sources/icon_won.svg",
+      "pivotPixels": {
+        "x": 128,
+        "y": 128
+      },
+      "bounds": [
+        24,
+        24,
+        232,
+        232
+      ],
+      "sha256": "38e54b31d131d07a09b360489b2fc27b09819a560b6d00f64e306117ca300b61",
+      "status": "review-candidate"
+    },
+    {
+      "id": "icon_shop",
+      "file": "icon_shop.png",
+      "width": 256,
+      "height": 256,
+      "sourceType": "vector",
+      "source": "sources/icon_shop.svg",
+      "pivotPixels": {
+        "x": 128,
+        "y": 128
+      },
+      "bounds": [
+        23,
+        38,
+        233,
+        230
+      ],
+      "sha256": "ffb1bd915a6a6849b9f2195f51c8c5c19250bee43026d5d99aee5c837bbe2580",
+      "status": "review-candidate"
+    },
+    {
+      "id": "mark_soldout",
+      "file": "mark_soldout.png",
+      "width": 256,
+      "height": 256,
+      "sourceType": "vector",
+      "source": "sources/mark_soldout.svg",
+      "pivotPixels": {
+        "x": 128,
+        "y": 128
+      },
+      "bounds": [
+        22,
+        22,
+        234,
+        234
+      ],
+      "sha256": "f0189afa840d72cc2495594959cf6db875e0e2bfc9e6cf205c78651851212d62",
+      "status": "review-candidate"
+    },
+    {
+      "id": "shop_pierce",
+      "file": "shop_pierce.png",
+      "width": 512,
+      "height": 512,
+      "bounds": [
+        51,
+        80,
+        448,
+        394
+      ],
+      "pivotPixels": {
+        "x": 256,
+        "y": 256
+      },
+      "sourceType": "image_gen",
+      "source": "Design/dad-throw-v3-review/sources/shop_pierce.png",
+      "nativeSourceSize": [
+        1254,
+        1254
+      ],
+      "sourceCropBounds": [
+        0,
+        109,
+        1216,
+        1156
+      ],
+      "resizeScale": 0.3363486842105263,
+      "resample": "Lanczos downsample only",
+      "sourceSha256": "f264cba768365c5b26ea0385796d774fb8de37eb13490b5447f1f856441e4479",
+      "status": "review-candidate",
+      "sha256": "9fd4eb4c51fed0479fb163dc0748b454dc22a6abbf82c57f06990e41814e7345"
+    },
+    {
+      "id": "shop_reload",
+      "file": "shop_reload.png",
+      "width": 512,
+      "height": 512,
+      "bounds": [
+        85,
+        83,
+        449,
+        448
+      ],
+      "pivotPixels": {
+        "x": 256,
+        "y": 256
+      },
+      "sourceType": "image_gen",
+      "source": "Design/dad-throw-v3-review/sources/shop_reload.png",
+      "nativeSourceSize": [
+        1254,
+        1254
+      ],
+      "sourceCropBounds": [
+        39,
+        35,
+        1168,
+        1230
+      ],
+      "resizeScale": 0.3422594142259414,
+      "resample": "Lanczos downsample only",
+      "sourceSha256": "74d1be7ea8a1e2220fec61c40fde69fa0cc8dd035d88c0d622046b2eac89cf68",
+      "status": "review-candidate",
+      "sha256": "b63a55b692dc95d9e5b2f2a996191e0544d8431218718c3f486043e0b4f55f47"
+    },
+    {
+      "id": "shop_twin",
+      "file": "shop_twin.png",
+      "width": 512,
+      "height": 512,
+      "bounds": [
+        88,
+        82,
+        430,
+        414
+      ],
+      "pivotPixels": {
+        "x": 256,
+        "y": 256
+      },
+      "sourceType": "image_gen",
+      "source": "Design/dad-throw-v3-review/sources/shop_twin.png",
+      "nativeSourceSize": [
+        1254,
+        1254
+      ],
+      "sourceCropBounds": [
+        33,
+        70,
+        1180,
+        1254
+      ],
+      "resizeScale": 0.3454391891891892,
+      "resample": "Lanczos downsample only",
+      "sourceSha256": "fb0eed20d02ca18c6e88765be46df9171f21eabd54e620375d7b9542a46a7289",
+      "status": "review-candidate",
+      "sha256": "80b86249ca7e1cd575a48ee80f1dc89629a09f4076c44bee6ccb24d0aa4d88fd"
+    },
+    {
+      "id": "shop_heavy",
+      "file": "shop_heavy.png",
+      "width": 512,
+      "height": 512,
+      "bounds": [
+        85,
+        52,
+        426,
+        454
+      ],
+      "pivotPixels": {
+        "x": 256,
+        "y": 256
+      },
+      "sourceType": "image_gen",
+      "source": "Design/dad-throw-v3-review/sources/shop_heavy.png",
+      "nativeSourceSize": [
+        1254,
+        1254
+      ],
+      "sourceCropBounds": [
+        0,
+        3,
+        1043,
+        1254
+      ],
+      "resizeScale": 0.3269384492406075,
+      "resample": "Lanczos downsample only",
+      "sourceSha256": "a635b619d332265c13043f887f7f7e40c2585d4adb4f525ea841585c6d88d721",
+      "status": "review-candidate",
+      "sha256": "06e8402e83826bc289e94d144f0c7b68e43289c9109646c5e8129bb4a4c398ed"
+    },
+    {
+      "id": "shop_bounce",
+      "file": "shop_bounce.png",
+      "width": 512,
+      "height": 512,
+      "bounds": [
+        58,
+        113,
+        402,
+        386
+      ],
+      "pivotPixels": {
+        "x": 256,
+        "y": 256
+      },
+      "sourceType": "image_gen",
+      "source": "Design/dad-throw-v3-review/sources/shop_bounce.png",
+      "nativeSourceSize": [
+        1254,
+        1254
+      ],
+      "sourceCropBounds": [
+        95,
+        126,
+        1218,
+        1154
+      ],
+      "resizeScale": 0.36420302760463047,
+      "resample": "Lanczos downsample only",
+      "sourceSha256": "cc918d01f2218883a4ed0fc6b6d3b9347a3c594b690ae1baf625a281321c1ee0",
+      "status": "review-candidate",
+      "sha256": "1b3559336be5ac4c0b41cd9146538dc0dfbcb61c2999e31e17db71a553b5e1db"
+    },
+    {
+      "id": "shop_blast",
+      "file": "shop_blast.png",
+      "width": 512,
+      "height": 512,
+      "bounds": [
+        67,
+        53,
+        436,
+        443
+      ],
+      "pivotPixels": {
+        "x": 256,
+        "y": 256
+      },
+      "sourceType": "image_gen",
+      "source": "Design/dad-throw-v3-review/sources/shop_blast.png",
+      "nativeSourceSize": [
+        1254,
+        1254
+      ],
+      "sourceCropBounds": [
+        41,
+        33,
+        1234,
+        1214
+      ],
+      "resizeScale": 0.34283319362950543,
+      "resample": "Lanczos downsample only",
+      "sourceSha256": "a7f46c880370db5ccaa491de58dab73e18361a4dee887cae6074e7ca0d9030d2",
+      "status": "review-candidate",
+      "sha256": "373dae73718b4f1c4aae418eca6d0b484d35f0fe760e2dbf9c1b61ee247f0b05"
+    },
+    {
+      "id": "shop_wide",
+      "file": "shop_wide.png",
+      "width": 512,
+      "height": 512,
+      "bounds": [
+        64,
+        168,
+        460,
+        415
+      ],
+      "pivotPixels": {
+        "x": 256,
+        "y": 256
+      },
+      "sourceType": "image_gen",
+      "source": "Design/dad-throw-v3-review/sources/shop_wide.png",
+      "nativeSourceSize": [
+        1254,
+        1254
+      ],
+      "sourceCropBounds": [
+        0,
+        69,
+        1212,
+        1015
+      ],
+      "resizeScale": 0.33745874587458746,
+      "resample": "Lanczos downsample only",
+      "sourceSha256": "d88d010493a35903a61376db383f7682b84c1039f979820fcc91e477ac0b114e",
+      "status": "review-candidate",
+      "sha256": "dd2e5914f2a705e295402a27199395224a25d9013b11083673c31d68e2d9edf0"
+    },
+    {
+      "id": "shop_sticky",
+      "file": "shop_sticky.png",
+      "width": 512,
+      "height": 512,
+      "bounds": [
+        51,
+        169,
+        441,
+        396
+      ],
+      "pivotPixels": {
+        "x": 256,
+        "y": 256
+      },
+      "sourceType": "image_gen",
+      "source": "Design/dad-throw-v3-review/sources/shop_sticky.png",
+      "nativeSourceSize": [
+        1254,
+        1254
+      ],
+      "sourceCropBounds": [
+        0,
+        37,
+        1218,
+        1134
+      ],
+      "resizeScale": 0.33579638752052543,
+      "resample": "Lanczos downsample only",
+      "sourceSha256": "872e4db2c01390385259af3c1943cbd8e6d363604f359f2f551b0a73775ef89d",
+      "status": "review-candidate",
+      "sha256": "95121d05cb5f1e416dea62374101d2aed204c64110665f51da59648662eabd29"
+    },
+    {
+      "id": "shop_flow",
+      "file": "shop_flow.png",
+      "width": 512,
+      "height": 512,
+      "bounds": [
+        51,
+        108,
+        428,
+        434
+      ],
+      "pivotPixels": {
+        "x": 256,
+        "y": 256
+      },
+      "sourceType": "image_gen",
+      "source": "Design/dad-throw-v3-review/sources/shop_flow.png",
+      "nativeSourceSize": [
+        1254,
+        1254
+      ],
+      "sourceCropBounds": [
+        65,
+        84,
+        1224,
+        1092
+      ],
+      "resizeScale": 0.3528904227782571,
+      "resample": "Lanczos downsample only",
+      "sourceSha256": "4e4f6562a44c069d784b6674b20404a4194e43b2ed214c97758439e24ca9784e",
+      "status": "review-candidate",
+      "sha256": "fddd288f1c042b04f4e245168b45e9ac5da0f46f404dd68b77fdc2ec4eca00d2"
+    }
+  ]
+}

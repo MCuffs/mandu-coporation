@@ -1,0 +1,62 @@
+[
+  {
+    "id": "shop_pierce",
+    "prompt": "Game shop upgrade icon, one isolated object symbol, true transparent alpha, square native 1024px source, no sprite sheet. A plain white dimpled golf ball punching through THREE overlapping thick dark metal rings, one bold straight speed streak behind the ball. Strong single readable silhouette. Match the referenced game's golf ball and sandal appearance where relevant, heavy dark black contour about28px at1024 resolution, flat muted cream/white/navy/grey with ONE solid shadow shape only. Main symbol occupies80percent of canvas, centered, comfortable10percent clear margins, every part inside. Instantly readable when downsampled to48px. No face, no character, no lettering, digits, currency symbols, gradients, glossy highlights, texture, checkerboard or ground shadow. This will be downsampled, never enlarged, to512px.",
+    "source": "Design/dad-throw-v3-review/sources/shop_pierce.png"
+  },
+  {
+    "id": "shop_reload",
+    "prompt": "Game shop upgrade icon, one isolated object symbol, true transparent alpha, square native 1024px source, no sprite sheet. ONE adult hand gripping a plain white dimpled golf ball, with exactly two offset faint flat silhouette after-images of that same hand behind it. Clear five-finger anatomy of the main gripping hand. No arm beyond a short wrist. Match the referenced game's golf ball and sandal appearance where relevant, heavy dark black contour about28px at1024 resolution, flat muted cream/white/navy/grey with ONE solid shadow shape only. Main symbol occupies80percent of canvas, centered, comfortable10percent clear margins, every part inside. Instantly readable when downsampled to48px. No face, no character, no lettering, digits, currency symbols, gradients, glossy highlights, texture, checkerboard or ground shadow. This will be downsampled, never enlarged, to512px.",
+    "source": "Design/dad-throw-v3-review/sources/shop_reload.png"
+  },
+  {
+    "id": "shop_twin",
+    "prompt": "Game shop upgrade icon, one isolated object symbol, true transparent alpha, square native 1024px source, no sprite sheet. Exactly TWO plain white dimpled golf balls flying in parallel, vertically slightly separated and horizontally slightly offset. Two short broad motion streaks, clear twin-ball symbol. Match the referenced game's golf ball and sandal appearance where relevant, heavy dark black contour about28px at1024 resolution, flat muted cream/white/navy/grey with ONE solid shadow shape only. Main symbol occupies80percent of canvas, centered, comfortable10percent clear margins, every part inside. Instantly readable when downsampled to48px. No face, no character, no lettering, digits, currency symbols, gradients, glossy highlights, texture, checkerboard or ground shadow. This will be downsampled, never enlarged, to512px.",
+    "source": "Design/dad-throw-v3-review/sources/shop_twin.png"
+  },
+  {
+    "id": "shop_heavy",
+    "prompt": "Use case: stylized-concept. Single game shop icon on true transparent background. ONE rough grey stone-like ball, three bold broad cracks, short heavy weight lines underneath. Muted grey solid fill. Match reference golf ball and sandal object style. Bold black outline about 28px at 1024. Flat muted cream/navy/yellow palette and ONE hard-edged darker shadow. Isolated readable silhouette occupying 80 percent of a square canvas with clear 10 percent margin. No gradient, glow, ambient haze, paper texture, letters, digits, logo, people, face, background, ground or cast shadow. Readable when reduced to 48px. Native 1024px or larger, not enlarged raster.",
+    "source": "Design/dad-throw-v3-review/sources/shop_heavy.png"
+  },
+  {
+    "id": "shop_bounce",
+    "prompt": "Single isolated GAME HUD ITEM SYMBOL: exactly ONE white dimpled golf ball bouncing UPWARD. One thick dotted arc curves downward to a tiny contact dash then upward toward the ball. NOTHING ELSE. In particular NO SHOP, no awning, no store, no frame, no card, no sandal, no text, no people, no floor. True transparent empty background. Heavy black contour, flat cream-white with one solid grey shadow only; no gradients, glow, gloss, lighting or texture. Native square1024px. Center the combined ball and dotted arc within the central80percent, leave10percent transparent margin. Clear readable at48px. Reference image is ball design ONLY.",
+    "source": "Design/dad-throw-v3-review/sources/shop_bounce.png"
+  },
+  {
+    "id": "shop_blast",
+    "prompt": "Use case: stylized-concept. Single game shop icon on true transparent background. ONE navy slide sandal with exactly THREE broad cream stripes on the strap, a large spiky cream/yellow comic impact star behind. No flame, fuse, explosive or smoke. Match reference golf ball and sandal object style. Bold black outline about 28px at 1024. Flat muted cream/navy/yellow palette and ONE hard-edged darker shadow. Isolated readable silhouette occupying 80 percent of a square canvas with clear 10 percent margin. No gradient, glow, ambient haze, paper texture, letters, digits, logo, people, face, background, ground or cast shadow. Readable when reduced to 48px. Native 1024px or larger, not enlarged raster.",
+    "source": "Design/dad-throw-v3-review/sources/shop_blast.png"
+  },
+  {
+    "id": "shop_wide",
+    "prompt": "Use case: stylized-concept. Single game shop upgrade icon on true transparent background. Exactly TWO navy slide sandals, each with THREE broad cream stripes: ONE HUGE sandal in rear and ONE ordinary sandal in front, very obvious size comparison. Huge sandal about1.8 times ordinary size. Match the reference golf ball/sandal design. Bold heavy BLACK contour about28px on1024 source. Flat muted fills, ONE solid hard shadow. Square canvas, symbol fits within central80percent, at least10percent empty margin all sides. Readable at48px. No gradients, glow, haze, texture, shiny highlights, checkerboard, letters, digits, logos, faces, people, background, ground or cast shadow. Native1024or larger source; never upscale.",
+    "source": "Design/dad-throw-v3-review/sources/shop_wide.png"
+  },
+  {
+    "id": "shop_sticky",
+    "prompt": "Use case: stylized-concept. Single game shop upgrade icon on true transparent background. ONE navy slide sandal with THREE broad cream stripes and a clearly visible stretched PINK chewing gum ribbon hanging from its sole, two sticky strands and a small gum pad. No extra footwear. Match the reference golf ball/sandal design. Bold heavy BLACK contour about28px on1024 source. Flat muted fills, ONE solid hard shadow. Square canvas, symbol fits within central80percent, at least10percent empty margin all sides. Readable at48px. No gradients, glow, haze, texture, shiny highlights, checkerboard, letters, digits, logos, faces, people, background, ground or cast shadow. Native1024or larger source; never upscale.",
+    "source": "Design/dad-throw-v3-review/sources/shop_sticky.png"
+  },
+  {
+    "id": "shop_flow",
+    "prompt": "Isolated HUD icon, square transparent PNG. ONE white dimpled golf ball in center, EXACTLY THREE curved WIND swoosh lines spiraling around it: one upper, one lowerleft, one right. Only THREE swooshes, no fourth. Reference ball shape/colors. Bold black outline, flat cream and mutedbluegrey with one hardshadow. Entire symbol inside80percentcanvas,10percentclear margins. No frame, shop, building, text, ground, shadow, texture, gradient, glow or glossy lighting. Make legible at48px.",
+    "source": "Design/dad-throw-v3-review/sources/shop_flow.png"
+  },
+  {
+    "id": "tray_entrance_attempt5",
+    "prompt": "Tall 1:2 portrait transparent character sprite. Same lunch-tray man as reference facing LEFT. CRITICAL framing: HEAD ALMOST TOUCHES TOP OF IMAGE (no blank headroom at all), BOTH SHOE SOLES ALMOST TOUCH BOTTOM OF IMAGE. FULL BODY fills 96 percent of canvas height. Native tall1774pixel canvas, actual scalp-to-sole at least1500pixels. He has short brown hair, thickbrows, squarejaw, white short sleeves, stainednavy apron, browntrousers, blackworkboots. Legs slightly bent wide braced stance. Both hands thrust a steel COMPARTMENT tray toward LEFT like shield. Teeth clenched, stubborn wide eyes. No part cut off, very narrow transparent margin. Bold BLACK outlined FLAT cartoon cel colors with ONE flat hardshadow; NO gradients, lighting, softglow, haze, backdrop, floor, shadow, text or effects. Draw new native big sprite, not enlargement.",
+    "source": "Design/dad-throw-v3-review/sources/tray_entrance.png"
+  },
+  {
+    "id": "chair_entrance_attempt4",
+    "prompt": "Native resolution character sprite on transparent background. VERY TALL PORTRAIT canvas aspect1:2. FULL BODY the SAME BALD PURPLE TRACKSUIT MAN as reference, facing left, two cream stripes on sleeves and pants, grey sneakers. Confident toothy grin. He holds a SMALL FOLDED STEEL CHAIR horizontally tightly ABOVE his head with both hands. COMPOSITION STRICT: no wasted headroom; chair top at y40; HEAD SCALP at y200; feet soles at y1730 on a native887x1774 portrait. The face/body should occupy MOST of the canvas HEIGHT, NOT the chair. Scale the chair SMALL enough to keep the head close to the top of the illustration. Body scalp-to-sole native1500px. Whole person/prop uncut,10px side margin. Thick BLACK ink contour, perfectly FLAT muted colors and exactly one HARD shadow. No gradients, glow, ground, cast shadow, background, text, blur or haze. Redraw native, not enlarged reference.",
+    "source": "Design/dad-throw-v3-review/sources/chair_entrance.png"
+  },
+  {
+    "id": "dodge_entrance_attempt4",
+    "prompt": "Native resolution character sprite, tall PORTRAIT canvas1:2, native887x1774or larger. True transparent empty background. SAME PERSON as reference, FACING LEFT. Dodge man: white headband, scruffy black hair, stubble, white sleeveless shirt, darkgreen shorts, kneepads, white sneakers. Low crouched runner pose, onefoot back, redball tuckedhip, narrow determined eyes. SCALP at y120, soles y1710, so body height1590 native pixels. NO EMPTY SPACE ABOVE HIS HEAD; fill the canvas vertically. Do not draw skin spots. Fullbody and prop, no cropping; native scalp-to-sole at least1400px. Thick black ink contour, perfectly flat muted colors with ONE hard flatshadow. No gradients, softlighting, airbrush, glow, haze, ground, castshadow, speedlines, speechbubble, text, injuries. Redraw at native large resolution, never upscale reference.",
+    "source": "Design/dad-throw-v3-review/sources/dodge_entrance.png"
+  }
+]

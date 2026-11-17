@@ -1,0 +1,695 @@
+{
+  "assetCount": 24,
+  "checks": 171,
+  "failures": [],
+  "scope": "File/geometry QA only; not art approval, Unity integration, device QA or gameplay verification.",
+  "artReviewPending": [
+    "Entrance proportions/pose fidelity and strict flat-color shading."
+  ],
+  "results": [
+    {
+      "pass": true,
+      "check": "ThrowEntranceV1 exact requested IDs/count"
+    },
+    {
+      "pass": true,
+      "check": "tray_entrance RGBA/canvas"
+    },
+    {
+      "pass": true,
+      "check": "tray_entrance measured alpha bounds"
+    },
+    {
+      "pass": true,
+      "check": "tray_entrance actual transparency/content"
+    },
+    {
+      "pass": true,
+      "check": "tray_entrance checksum"
+    },
+    {
+      "pass": true,
+      "check": "tray_entrance no raster upscaling"
+    },
+    {
+      "pass": true,
+      "check": "tray_entrance native source retained"
+    },
+    {
+      "pass": true,
+      "check": "tray_entrance foot/standing metadata"
+    },
+    {
+      "pass": true,
+      "check": "tray_entrance native body resolution/top clearance"
+    },
+    {
+      "pass": true,
+      "check": "tray_entrance transformed foot within1px"
+    },
+    {
+      "pass": true,
+      "check": "tray_entrance transformed body height within1px"
+    },
+    {
+      "pass": true,
+      "check": "tray_entrance transparent canvas border"
+    },
+    {
+      "pass": true,
+      "check": "chair_entrance RGBA/canvas"
+    },
+    {
+      "pass": true,
+      "check": "chair_entrance measured alpha bounds"
+    },
+    {
+      "pass": true,
+      "check": "chair_entrance actual transparency/content"
+    },
+    {
+      "pass": true,
+      "check": "chair_entrance checksum"
+    },
+    {
+      "pass": true,
+      "check": "chair_entrance no raster upscaling"
+    },
+    {
+      "pass": true,
+      "check": "chair_entrance native source retained"
+    },
+    {
+      "pass": true,
+      "check": "chair_entrance foot/standing metadata"
+    },
+    {
+      "pass": true,
+      "check": "chair_entrance native body resolution/top clearance"
+    },
+    {
+      "pass": true,
+      "check": "chair_entrance transformed foot within1px"
+    },
+    {
+      "pass": true,
+      "check": "chair_entrance transformed body height within1px"
+    },
+    {
+      "pass": true,
+      "check": "chair_entrance transparent canvas border"
+    },
+    {
+      "pass": true,
+      "check": "dodge_entrance RGBA/canvas"
+    },
+    {
+      "pass": true,
+      "check": "dodge_entrance measured alpha bounds"
+    },
+    {
+      "pass": true,
+      "check": "dodge_entrance actual transparency/content"
+    },
+    {
+      "pass": true,
+      "check": "dodge_entrance checksum"
+    },
+    {
+      "pass": true,
+      "check": "dodge_entrance no raster upscaling"
+    },
+    {
+      "pass": true,
+      "check": "dodge_entrance native source retained"
+    },
+    {
+      "pass": true,
+      "check": "dodge_entrance foot/standing metadata"
+    },
+    {
+      "pass": true,
+      "check": "dodge_entrance native body resolution/top clearance"
+    },
+    {
+      "pass": true,
+      "check": "dodge_entrance transformed foot within1px"
+    },
+    {
+      "pass": true,
+      "check": "dodge_entrance transformed body height within1px"
+    },
+    {
+      "pass": true,
+      "check": "dodge_entrance transparent canvas border"
+    },
+    {
+      "pass": true,
+      "check": "entrance_band_lines RGBA/canvas"
+    },
+    {
+      "pass": true,
+      "check": "entrance_band_lines measured alpha bounds"
+    },
+    {
+      "pass": true,
+      "check": "entrance_band_lines actual transparency/content"
+    },
+    {
+      "pass": true,
+      "check": "entrance_band_lines checksum"
+    },
+    {
+      "pass": true,
+      "check": "entrance_burst RGBA/canvas"
+    },
+    {
+      "pass": true,
+      "check": "entrance_burst measured alpha bounds"
+    },
+    {
+      "pass": true,
+      "check": "entrance_burst actual transparency/content"
+    },
+    {
+      "pass": true,
+      "check": "entrance_burst checksum"
+    },
+    {
+      "pass": true,
+      "check": "entrance_burst transparent canvas border"
+    },
+    {
+      "pass": true,
+      "check": "entrance_balloon RGBA/canvas"
+    },
+    {
+      "pass": true,
+      "check": "entrance_balloon measured alpha bounds"
+    },
+    {
+      "pass": true,
+      "check": "entrance_balloon actual transparency/content"
+    },
+    {
+      "pass": true,
+      "check": "entrance_balloon checksum"
+    },
+    {
+      "pass": true,
+      "check": "entrance_balloon transparent canvas border"
+    },
+    {
+      "pass": true,
+      "check": "ThrowShopV1 exact requested IDs/count"
+    },
+    {
+      "pass": true,
+      "check": "shop_pierce RGBA/canvas"
+    },
+    {
+      "pass": true,
+      "check": "shop_pierce measured alpha bounds"
+    },
+    {
+      "pass": true,
+      "check": "shop_pierce actual transparency/content"
+    },
+    {
+      "pass": true,
+      "check": "shop_pierce checksum"
+    },
+    {
+      "pass": true,
+      "check": "shop_pierce at least10percent clear margin"
+    },
+    {
+      "pass": true,
+      "check": "shop_pierce no raster upscaling"
+    },
+    {
+      "pass": true,
+      "check": "shop_pierce native source retained"
+    },
+    {
+      "pass": true,
+      "check": "shop_pierce transparent canvas border"
+    },
+    {
+      "pass": true,
+      "check": "shop_reload RGBA/canvas"
+    },
+    {
+      "pass": true,
+      "check": "shop_reload measured alpha bounds"
+    },
+    {
+      "pass": true,
+      "check": "shop_reload actual transparency/content"
+    },
+    {
+      "pass": true,
+      "check": "shop_reload checksum"
+    },
+    {
+      "pass": true,
+      "check": "shop_reload at least10percent clear margin"
+    },
+    {
+      "pass": true,
+      "check": "shop_reload no raster upscaling"
+    },
+    {
+      "pass": true,
+      "check": "shop_reload native source retained"
+    },
+    {
+      "pass": true,
+      "check": "shop_reload transparent canvas border"
+    },
+    {
+      "pass": true,
+      "check": "shop_twin RGBA/canvas"
+    },
+    {
+      "pass": true,
+      "check": "shop_twin measured alpha bounds"
+    },
+    {
+      "pass": true,
+      "check": "shop_twin actual transparency/content"
+    },
+    {
+      "pass": true,
+      "check": "shop_twin checksum"
+    },
+    {
+      "pass": true,
+      "check": "shop_twin at least10percent clear margin"
+    },
+    {
+      "pass": true,
+      "check": "shop_twin no raster upscaling"
+    },
+    {
+      "pass": true,
+      "check": "shop_twin native source retained"
+    },
+    {
+      "pass": true,
+      "check": "shop_twin transparent canvas border"
+    },
+    {
+      "pass": true,
+      "check": "shop_heavy RGBA/canvas"
+    },
+    {
+      "pass": true,
+      "check": "shop_heavy measured alpha bounds"
+    },
+    {
+      "pass": true,
+      "check": "shop_heavy actual transparency/content"
+    },
+    {
+      "pass": true,
+      "check": "shop_heavy checksum"
+    },
+    {
+      "pass": true,
+      "check": "shop_heavy at least10percent clear margin"
+    },
+    {
+      "pass": true,
+      "check": "shop_heavy no raster upscaling"
+    },
+    {
+      "pass": true,
+      "check": "shop_heavy native source retained"
+    },
+    {
+      "pass": true,
+      "check": "shop_heavy transparent canvas border"
+    },
+    {
+      "pass": true,
+      "check": "shop_bounce RGBA/canvas"
+    },
+    {
+      "pass": true,
+      "check": "shop_bounce measured alpha bounds"
+    },
+    {
+      "pass": true,
+      "check": "shop_bounce actual transparency/content"
+    },
+    {
+      "pass": true,
+      "check": "shop_bounce checksum"
+    },
+    {
+      "pass": true,
+      "check": "shop_bounce at least10percent clear margin"
+    },
+    {
+      "pass": true,
+      "check": "shop_bounce no raster upscaling"
+    },
+    {
+      "pass": true,
+      "check": "shop_bounce native source retained"
+    },
+    {
+      "pass": true,
+      "check": "shop_bounce transparent canvas border"
+    },
+    {
+      "pass": true,
+      "check": "shop_blast RGBA/canvas"
+    },
+    {
+      "pass": true,
+      "check": "shop_blast measured alpha bounds"
+    },
+    {
+      "pass": true,
+      "check": "shop_blast actual transparency/content"
+    },
+    {
+      "pass": true,
+      "check": "shop_blast checksum"
+    },
+    {
+      "pass": true,
+      "check": "shop_blast at least10percent clear margin"
+    },
+    {
+      "pass": true,
+      "check": "shop_blast no raster upscaling"
+    },
+    {
+      "pass": true,
+      "check": "shop_blast native source retained"
+    },
+    {
+      "pass": true,
+      "check": "shop_blast transparent canvas border"
+    },
+    {
+      "pass": true,
+      "check": "shop_wide RGBA/canvas"
+    },
+    {
+      "pass": true,
+      "check": "shop_wide measured alpha bounds"
+    },
+    {
+      "pass": true,
+      "check": "shop_wide actual transparency/content"
+    },
+    {
+      "pass": true,
+      "check": "shop_wide checksum"
+    },
+    {
+      "pass": true,
+      "check": "shop_wide at least10percent clear margin"
+    },
+    {
+      "pass": true,
+      "check": "shop_wide no raster upscaling"
+    },
+    {
+      "pass": true,
+      "check": "shop_wide native source retained"
+    },
+    {
+      "pass": true,
+      "check": "shop_wide transparent canvas border"
+    },
+    {
+      "pass": true,
+      "check": "shop_sticky RGBA/canvas"
+    },
+    {
+      "pass": true,
+      "check": "shop_sticky measured alpha bounds"
+    },
+    {
+      "pass": true,
+      "check": "shop_sticky actual transparency/content"
+    },
+    {
+      "pass": true,
+      "check": "shop_sticky checksum"
+    },
+    {
+      "pass": true,
+      "check": "shop_sticky at least10percent clear margin"
+    },
+    {
+      "pass": true,
+      "check": "shop_sticky no raster upscaling"
+    },
+    {
+      "pass": true,
+      "check": "shop_sticky native source retained"
+    },
+    {
+      "pass": true,
+      "check": "shop_sticky transparent canvas border"
+    },
+    {
+      "pass": true,
+      "check": "shop_flow RGBA/canvas"
+    },
+    {
+      "pass": true,
+      "check": "shop_flow measured alpha bounds"
+    },
+    {
+      "pass": true,
+      "check": "shop_flow actual transparency/content"
+    },
+    {
+      "pass": true,
+      "check": "shop_flow checksum"
+    },
+    {
+      "pass": true,
+      "check": "shop_flow at least10percent clear margin"
+    },
+    {
+      "pass": true,
+      "check": "shop_flow no raster upscaling"
+    },
+    {
+      "pass": true,
+      "check": "shop_flow native source retained"
+    },
+    {
+      "pass": true,
+      "check": "shop_flow transparent canvas border"
+    },
+    {
+      "pass": true,
+      "check": "icon_won RGBA/canvas"
+    },
+    {
+      "pass": true,
+      "check": "icon_won measured alpha bounds"
+    },
+    {
+      "pass": true,
+      "check": "icon_won actual transparency/content"
+    },
+    {
+      "pass": true,
+      "check": "icon_won checksum"
+    },
+    {
+      "pass": true,
+      "check": "icon_won transparent canvas border"
+    },
+    {
+      "pass": true,
+      "check": "icon_shop RGBA/canvas"
+    },
+    {
+      "pass": true,
+      "check": "icon_shop measured alpha bounds"
+    },
+    {
+      "pass": true,
+      "check": "icon_shop actual transparency/content"
+    },
+    {
+      "pass": true,
+      "check": "icon_shop checksum"
+    },
+    {
+      "pass": true,
+      "check": "icon_shop transparent canvas border"
+    },
+    {
+      "pass": true,
+      "check": "mark_soldout RGBA/canvas"
+    },
+    {
+      "pass": true,
+      "check": "mark_soldout measured alpha bounds"
+    },
+    {
+      "pass": true,
+      "check": "mark_soldout actual transparency/content"
+    },
+    {
+      "pass": true,
+      "check": "mark_soldout checksum"
+    },
+    {
+      "pass": true,
+      "check": "mark_soldout transparent canvas border"
+    },
+    {
+      "pass": true,
+      "check": "ThrowFxV2 exact requested IDs/count"
+    },
+    {
+      "pass": true,
+      "check": "fx_tray_clang_0 RGBA/canvas"
+    },
+    {
+      "pass": true,
+      "check": "fx_tray_clang_0 measured alpha bounds"
+    },
+    {
+      "pass": true,
+      "check": "fx_tray_clang_0 actual transparency/content"
+    },
+    {
+      "pass": true,
+      "check": "fx_tray_clang_0 checksum"
+    },
+    {
+      "pass": true,
+      "check": "fx_tray_clang_0 transparent canvas border"
+    },
+    {
+      "pass": true,
+      "check": "fx_tray_clang_1 RGBA/canvas"
+    },
+    {
+      "pass": true,
+      "check": "fx_tray_clang_1 measured alpha bounds"
+    },
+    {
+      "pass": true,
+      "check": "fx_tray_clang_1 actual transparency/content"
+    },
+    {
+      "pass": true,
+      "check": "fx_tray_clang_1 checksum"
+    },
+    {
+      "pass": true,
+      "check": "fx_tray_clang_1 transparent canvas border"
+    },
+    {
+      "pass": true,
+      "check": "fx_tray_clang_2 RGBA/canvas"
+    },
+    {
+      "pass": true,
+      "check": "fx_tray_clang_2 measured alpha bounds"
+    },
+    {
+      "pass": true,
+      "check": "fx_tray_clang_2 actual transparency/content"
+    },
+    {
+      "pass": true,
+      "check": "fx_tray_clang_2 checksum"
+    },
+    {
+      "pass": true,
+      "check": "fx_tray_clang_2 transparent canvas border"
+    },
+    {
+      "pass": true,
+      "check": "fx_coin_pop_0 RGBA/canvas"
+    },
+    {
+      "pass": true,
+      "check": "fx_coin_pop_0 measured alpha bounds"
+    },
+    {
+      "pass": true,
+      "check": "fx_coin_pop_0 actual transparency/content"
+    },
+    {
+      "pass": true,
+      "check": "fx_coin_pop_0 checksum"
+    },
+    {
+      "pass": true,
+      "check": "fx_coin_pop_0 transparent canvas border"
+    },
+    {
+      "pass": true,
+      "check": "fx_coin_pop_1 RGBA/canvas"
+    },
+    {
+      "pass": true,
+      "check": "fx_coin_pop_1 measured alpha bounds"
+    },
+    {
+      "pass": true,
+      "check": "fx_coin_pop_1 actual transparency/content"
+    },
+    {
+      "pass": true,
+      "check": "fx_coin_pop_1 checksum"
+    },
+    {
+      "pass": true,
+      "check": "fx_coin_pop_1 transparent canvas border"
+    },
+    {
+      "pass": true,
+      "check": "fx_coin_pop_2 RGBA/canvas"
+    },
+    {
+      "pass": true,
+      "check": "fx_coin_pop_2 measured alpha bounds"
+    },
+    {
+      "pass": true,
+      "check": "fx_coin_pop_2 actual transparency/content"
+    },
+    {
+      "pass": true,
+      "check": "fx_coin_pop_2 checksum"
+    },
+    {
+      "pass": true,
+      "check": "fx_coin_pop_2 transparent canvas border"
+    },
+    {
+      "pass": true,
+      "check": "band left/right pixel seam identical"
+    },
+    {
+      "pass": true,
+      "check": "burst center transparent"
+    },
+    {
+      "pass": true,
+      "check": "fx_tray_clang fixed frame pivot"
+    },
+    {
+      "pass": true,
+      "check": "fx_coin_pop fixed frame pivot"
+    }
+  ]
+}
