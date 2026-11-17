@@ -36,6 +36,14 @@
       "resource": "DadV5/chars/tray/tray_walk",
       "bareResource": "DadV5/chars/tray/tray_notray_walk",
       "guards": true,
+      "entrance": {
+        "resource": "DadV5/chars/tray/tray_block_0",
+        "pivotX": 335,
+        "standPixels": 531,
+        "name": "쟁반 아저씨",
+        "shout": "공? 쟁반으로 다 막아 주지!",
+        "hint": "슬리퍼를 먼저 맞혀 쟁반을 떨어뜨리세요"
+      },
       "frames": 2,
       "facesLeft": true,
       "canvas": 768,

@@ -64,6 +64,15 @@ public sealed class DadThrowLayout
     public static Rect ShopPip(Rect card,int index){return new Rect(card.x+20+index*30,card.y+130,22,22);}
     public static Rect ShopBuy(Rect card){return new Rect(card.xMax-170,card.y+112,152,52);}
 
+    // ── an opponent's entrance: a slanted band across the street, his name and his line on its left, the man
+    // himself large on the right, and under the band what to do about him ──
+    public static readonly Rect EntranceBand=new Rect(-120,196,W+240,292),EntranceName=new Rect(56,214,700,104),EntranceShout=new Rect(64,326,650,88);
+    public static readonly Rect EntranceHint=new Rect(64,504,740,88),EntranceSkip=new Rect(476,646,330,44);
+    public const float EntranceTilt=-4,EntranceTall=520,EntranceSlide=560,EntranceIn=.28f;
+    public static readonly Vector2 EntranceFeet=new Vector2(1010,696);
+    public static Vector2 EntranceHintIcon {get{return new Vector2(EntranceHint.x+62,EntranceHint.center.y);}}
+    public static Rect EntranceHintText {get{return Rect.MinMaxRect(EntranceHint.x+122,EntranceHint.y,EntranceHint.xMax-16,EntranceHint.yMax);}}
+
     // ── clear / defeat / pause cards (plan §6.3-6.5, sizes from the wide v2 screens) ──
     public static readonly Rect ResultCard=new Rect(650,218,460,330),PauseCard=new Rect(445,145,390,430);
     // The result pose stands left of the card. Feet point and scale come from the v2 screen (a 410-wide box for a 1254 picture).
@@ -209,6 +218,8 @@ public sealed class DadThrowLayout
         rect("title_art",TitleArt());rect("title_text",TitleText);rect("start_button",StartButton);
         rect("shop_button",ShopButton);rect("shop_purse",ShopPurse);rect("coin_label",CoinLabel);rect("result_earned",ResultEarned);rect("defeat_shop",DefeatShop);
         rect("shop_heading",ShopHeading);rect("shop_coins",ShopCoins);rect("shop_close",ShopClose);
+        rect("entrance_band",EntranceBand);rect("entrance_name",EntranceName);rect("entrance_shout",EntranceShout);rect("entrance_hint",EntranceHint);rect("entrance_skip",EntranceSkip);
+        point("entrance_feet",EntranceFeet);
         for(int i=0;i<DadThrowShop.Cards.Length;i++)rect("shop_card_"+i,ShopCard(i));
         rect("result_card",ResultCard);rect("pause_card",PauseCard);rect("hero_clear",HeroRect(Clear));rect("hero_retry",HeroRect(Retry));
         rect("clear_heading",ClearHeading);rect("clear_left",ClearLeft);rect("clear_right",ClearRight);rect("clear_word_name",ClearWordName);rect("clear_word_line",ClearWordLine);

@@ -98,13 +98,17 @@ public sealed class DadThrowSave
     // Won in the purse and how many times each shop item has been bought (in the order of DadThrowShop.Item).
     // Files written before the shop existed have neither and read as an empty purse with nothing bought.
     public int coins;public readonly int[] upgrades=new int[DadThrowShop.Cards.Length];
+    // The opponents whose entrance has been shown (by the name the stage file gives them). Optional when read.
+    public readonly List<string> met=new List<string>();
     public string ToJson()
     {
         var text=new StringBuilder("{\"schemaVersion\":"+Schema+",\"introSeen\":"+(introSeen?"true":"false")+",\"furthest\":"+furthest+",\"cleared\":[");
         for(int i=0;i<cleared.Count;i++)text.Append(i>0?",":"").Append('"').Append(cleared[i].Replace("\\","\\\\").Replace("\"","\\\"")).Append('"');
         text.Append("],\"coins\":"+coins+",\"upgrades\":{");
         for(int i=0;i<upgrades.Length;i++)text.Append(i>0?",":"").Append('"').Append(DadThrowShop.Cards[i].item.ToString()).Append("\":").Append(upgrades[i]);
-        return text.Append("}}").ToString();
+        text.Append("},\"met\":[");
+        for(int i=0;i<met.Count;i++)text.Append(i>0?",":"").Append('"').Append(met[i].Replace("\\","\\\\").Replace("\"","\\\"")).Append('"');
+        return text.Append("]}").ToString();
     }
     public static DadThrowSave Parse(string json)
     {
@@ -120,6 +124,7 @@ public sealed class DadThrowSave
             foreach(DadThrowShop.Card card in DadThrowShop.Cards)
                 if(DadThrowJson.Has(bought,card.item.ToString()))save.upgrades[(int)card.item]=Mathf.Clamp(DadThrowJson.Whole(bought,card.item.ToString(),"save upgrades"),0,card.most);
         }
+        if(DadThrowJson.Has(map,"met"))foreach(object who in DadThrowJson.List(map["met"],"save met"))if(who is string&&!save.met.Contains((string)who))save.met.Add((string)who);
         object list;if(!map.TryGetValue("cleared",out list))throw new ArgumentException("save needs cleared");
         foreach(object id in DadThrowJson.List(list,"save cleared"))
         {if(!(id is string))throw new ArgumentException("save has a stage that is not a name");if(!save.cleared.Contains((string)id))save.cleared.Add((string)id);}

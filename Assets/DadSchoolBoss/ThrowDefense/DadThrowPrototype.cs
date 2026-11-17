@@ -27,6 +27,8 @@ public sealed class DadThrowPrototype:MonoBehaviour
     readonly Dictionary<DadThrowStage.Kind,Texture2D[]> people=new Dictionary<DadThrowStage.Kind,Texture2D[]>();
     // The same people once a shoe has taken the tray out of their hands.
     readonly Dictionary<DadThrowStage.Kind,Texture2D[]> bare=new Dictionary<DadThrowStage.Kind,Texture2D[]>();
+    // The big picture an opponent comes on with.
+    readonly Dictionary<DadThrowStage.Kind,Texture2D> entranceArt=new Dictionary<DadThrowStage.Kind,Texture2D>();
     // A ball stopped by a tray: a clang where it stopped, and the shoe button asks to be used for a few seconds.
     const float BlockTime=.3f,NudgeTime=4;float blockClock,shoeNudge;int seenBlock;Vector2 blockAt;
     // Words with a number in them, rebuilt only when the number changes.
@@ -106,6 +108,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
         foreach(DadThrowStage.Kind kind in stages.kinds.Values)
         {
             var frames=new Texture2D[kind.frames];for(int i=0;i<frames.Length;i++)frames[i]=Need<Texture2D>(kind.Frame(i));people[kind]=frames;
+            if(kind.entrance!=null)entranceArt[kind]=Need<Texture2D>(kind.entrance.resource);
             if(kind.bare==null)continue;
             var without=new Texture2D[kind.frames];for(int i=0;i<without.Length;i++)without[i]=Need<Texture2D>(kind.BareFrame(i));bare[kind]=without;
         }
@@ -149,6 +152,8 @@ public sealed class DadThrowPrototype:MonoBehaviour
         if(back){aim.Cancel();Flow.Back();}
         Fresh();
         if(Flow.Now!=DadThrowFlow.Screen.Playing){aim.Cancel();Flow.Tick(dt);return;}
+        // An entrance holds the street still: nothing is aimed, and a tap anywhere lets the fight begin.
+        if(Flow.Entering!=null){aim.Cancel();if(Tapped())Flow.SkipEntrance();Flow.Tick(dt);Fresh();return;}
         Pointer();Keys();
         // After the opening the street waits for the first pull; hints count fight time only, so neither that
         // wait nor a pause uses them up.
@@ -242,6 +247,15 @@ public sealed class DadThrowPrototype:MonoBehaviour
         else if(Input.GetMouseButtonUp(0))Release(DadThrowAim.Mouse,mouse);
         else if(Input.GetMouseButton(0))aim.Move(DadThrowAim.Mouse,mouse);
         else aim.Cancel();
+    }
+    // A finger went down or the mouse was pressed this frame.
+    bool Tapped()
+    {
+#if UNITY_EDITOR
+        if(heldForCapture||scripted)return false;
+#endif
+        for(int i=0;i<Input.touchCount;i++)if(Input.GetTouch(i).phase==TouchPhase.Began)return true;
+        return Input.GetMouseButtonDown(0);
     }
     void Select(DadThrowModel.Weapon weapon)
     {if(selected==weapon)return;selected=weapon;aim.Cancel();if(weapon==DadThrowModel.Weapon.Shoe)shoeHintDone=true;}
@@ -476,7 +490,8 @@ public sealed class DadThrowPrototype:MonoBehaviour
     void DrawBattle()
     {
         Fresh();DadThrowModel m=Flow.Model;DadThrowFlow.Screen now=Flow.Now;
-        bool live=now==DadThrowFlow.Screen.Playing,result=now==DadThrowFlow.Screen.Clear||now==DadThrowFlow.Screen.Defeat;
+        bool entering=now==DadThrowFlow.Screen.Playing&&Flow.Entering!=null;
+        bool live=now==DadThrowFlow.Screen.Playing&&!entering,result=now==DadThrowFlow.Screen.Clear||now==DadThrowFlow.Screen.Defeat;
         // The street jolts on a big hit or a touch on the gate. It is drawn a touch larger while it does, so no
         // edge of the picture shows; the bar, the buttons and the aim line stay where the finger expects them.
         Matrix4x4 still=GUI.matrix;
@@ -494,11 +509,35 @@ public sealed class DadThrowPrototype:MonoBehaviour
         // Nothing under a card can be pressed.
         bool was=GUI.enabled;GUI.enabled=was&&live;
         DrawTopBar(Flow.Stage,m.Health,m.Remaining);DrawPurse(DadThrowLayout.CoinLabel,26,Ink,bold);DrawControls(Flow.Stage,m.ReloadTotal>0?Mathf.Clamp01(m.Reload/m.ReloadTotal):0,selected);GUI.enabled=was;
+        if(entering)DrawEntrance();
         if(now==DadThrowFlow.Screen.Paused)DrawPause();
         else if(now==DadThrowFlow.Screen.Clear)DrawClear();
         else if(now==DadThrowFlow.Screen.Defeat)DrawDefeat();
     }
     void Veil(Color color){Box(new Rect(0,0,DadThrowLayout.W,DadThrowLayout.H),color);}
+    // A new opponent comes on: the street dims, a slanted band crosses it, the man himself slides in large from
+    // the right, his name and his line stand on the band, and under it one line says what to do about him.
+    void DrawEntrance()
+    {
+        DadThrowStage.Kind kind=Flow.Entering;DadThrowStage.Kind.Entrance words=kind.entrance;float t=Flow.EnterClock;
+        float arrive=1-Mathf.Pow(1-Mathf.Clamp01(t/DadThrowLayout.EntranceIn),3);
+        Veil(PauseVeil);
+        Matrix4x4 old=GUI.matrix;Vector3 middle=new Vector3(DadThrowLayout.W/2,DadThrowLayout.H/2,0);
+        GUI.matrix=old*Matrix4x4.TRS(middle,Quaternion.Euler(0,0,DadThrowLayout.EntranceTilt),new Vector3(1,Mathf.Max(.02f,arrive),1))*Matrix4x4.TRS(-middle,Quaternion.identity,Vector3.one);
+        Rect band=DadThrowLayout.EntranceBand;Box(band,Ink);Box(new Rect(band.x,band.y+8,band.width,band.height-16),Gold);
+        GUI.matrix=old;
+        // He lands with a small jolt: a touch too large for a moment, then his own size.
+        float pop=1+.06f*Mathf.Clamp01(1-(t-DadThrowLayout.EntranceIn)/.18f)*(t>=DadThrowLayout.EntranceIn?1:0);
+        GUI.DrawTexture(kind.EntrancePlace(DadThrowLayout.EntranceFeet.x+(1-arrive)*DadThrowLayout.EntranceSlide,DadThrowLayout.EntranceFeet.y,DadThrowLayout.EntranceTall*pop),entranceArt[kind]);
+        if(t<DadThrowLayout.EntranceIn)return;
+        Outlined(DadThrowLayout.EntranceName,words.name,76,Paper,Ink,4,display);
+        DadUi.Panel(DadThrowLayout.EntranceShout,Paper,Ink);Text(DadThrowLayout.EntranceShout,words.shout,34,Ink,display);
+        // What to do about him, with the thing to do it with.
+        DadUi.Panel(DadThrowLayout.EntranceHint,Gold,Ink);
+        GUI.DrawTexture(layout.ItemRect(layout.Shoe,DadThrowLayout.EntranceHintIcon,92),shoe);
+        Text(DadThrowLayout.EntranceHintText,words.hint,29,Ink,bold,TextAnchor.MiddleLeft);
+        if(t>=DadThrowFlow.EnterSkip)Outlined(DadThrowLayout.EntranceSkip,"화면을 누르면 시작",22,Paper,Ink,2,bold);
+    }
     void DrawPause()
     {
         Veil(PauseVeil);DadUi.Panel(DadThrowLayout.PauseCard,Paper,Ink);

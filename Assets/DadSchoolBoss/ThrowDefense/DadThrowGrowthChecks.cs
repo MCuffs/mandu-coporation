@@ -249,6 +249,35 @@ public static class DadThrowGrowthChecks
         int owned=0;foreach(int levelBought in career.upgrades)owned+=levelBought;
         check(reached==3&&owned>=2,"a bot that never misses clears the first three stages, buying the cheapest thing it can after each fight");
 
+        // ── a new opponent's entrance ──
+        DadThrowStage.Kind trayKind=set.kinds["guard"];
+        check(trayKind.entrance!=null&&trayKind.entrance.name.Length>0&&trayKind.entrance.shout.Length>0&&trayKind.entrance.hint.Length>0&&trayKind.entrance.stand>0&&set.kinds["normal"].entrance==null,
+            "the stage file gives the tray-holder an entrance: a picture, a name, a line to shout and what to do about him");
+        check(!refused(kindJson.Replace("GUARDS",",\"entrance\":{\"resource\":\"x/big\",\"pivotX\":300,\"standPixels\":500,\"name\":\"n\",\"shout\":\"s\",\"hint\":\"h\"}"))
+            &&refused(kindJson.Replace("GUARDS",",\"entrance\":{\"resource\":\"x/big\",\"pivotX\":300,\"standPixels\":500,\"name\":\"n\",\"shout\":\"s\"}"))
+            &&refused(kindJson.Replace("GUARDS",",\"entrance\":{\"resource\":\"x/big\",\"pivotX\":300,\"standPixels\":0,\"name\":\"n\",\"shout\":\"s\",\"hint\":\"h\"}")),
+            "an entrance in the stage file needs all its words and a standing height; one without is refused");
+        bool onlyOne=game[3].entrance==trayKind;for(int i=0;i<game.Count;i++)if(i!=3)onlyOne&=game[i].entrance==null;
+        check(onlyOne,"the tray-holder makes his entrance on 1-4, the first stage he is in, and on no other");
+        var newcomer=new DadThrowSave{introSeen=true,furthest=3};var enter=new DadThrowFlow(game,field,null,newcomer,null);enter.Tick(2);
+        check(enter.Start()&&enter.Stage.id=="1-4"&&enter.Entering==trayKind&&enter.EnterClock==0,"starting 1-4 for the first time brings him on");
+        enter.Tick(.3f);
+        check(enter.Model.enemies.Count>0&&enter.Model.Clock<.02f&&enter.Model.Health==5&&enter.EnterClock>=.29f&&!enter.SkipEntrance()&&enter.Entering!=null,
+            "while he comes on the street holds still with his first people in view, and a tap in the first moment does nothing");
+        enter.Tick(.4f);check(enter.Pause()&&enter.Resume()&&enter.Entering!=null,"an entrance can be paused and comes back");
+        check(enter.SkipEntrance()&&enter.Entering==null&&newcomer.met.Contains("guard")&&!enter.SkipEntrance(),"a tap after that starts the fight and he is remembered as met");
+        float held0=enter.Model.Clock;enter.Tick(.2f);enter.Tick(.2f);
+        check(enter.Model.Clock>held0+.3f,"after the entrance the street runs");
+        for(int i=0;i<120*60&&enter.Now==OnFight;i++)enter.Tick(1/120f);
+        check(enter.Now==OnDefeat&&enter.Retry()&&enter.Entering==null,"trying the stage again does not bring him on a second time");
+        var patient=new DadThrowSave{introSeen=true,furthest=3};var waits=new DadThrowFlow(game,field,null,patient,null);waits.Tick(2);waits.Start();
+        waits.Tick(DadThrowFlow.EnterTime-.1f);bool still=waits.Entering!=null;waits.Tick(.2f);
+        check(still&&waits.Entering==null&&patient.met.Contains("guard"),"left alone the entrance ends by itself");
+        var leaver=new DadThrowSave{introSeen=true,furthest=3};var leaves=new DadThrowFlow(game,field,null,leaver,null);leaves.Tick(2);leaves.Start();leaves.Tick(.2f);
+        check(leaves.Pause()&&leaves.ToTitle()&&leaves.Entering==null&&!leaver.met.Contains("guard")&&leaves.Start()&&leaves.Entering==trayKind,"leaving before he has been seen through means he comes on again next time");
+        DadThrowSave remembered=DadThrowSave.Parse(newcomer.ToJson());
+        check(remembered.met.Count==1&&remembered.met[0]=="guard"&&old.met.Count==0,"who has been met is saved and read back; a save from before has met nobody");
+
         // ── where the shop's screens sit ──
         Rect canvas=new Rect(0,0,DadThrowLayout.W,DadThrowLayout.H),resultCard=DadThrowLayout.ResultCard;
         Func<Rect,Rect,bool> inside=(inner,outer)=>inner.xMin>=outer.xMin&&inner.xMax<=outer.xMax&&inner.yMin>=outer.yMin&&inner.yMax<=outer.yMax;
@@ -271,6 +300,11 @@ public static class DadThrowGrowthChecks
             for(int pip=0;pip<DadThrowShop.Cards[i].most;pip++)shelf&=inside(DadThrowLayout.ShopPip(card,pip),card)&&!DadThrowLayout.ShopPip(card,pip).Overlaps(DadThrowLayout.ShopBuy(card))&&DadThrowLayout.ShopPip(card,pip).yMin>=DadThrowLayout.ShopLine(card).yMax;
         }
         check(shelf,"the shop's heading, purse and way out share the top; nine cards stand three by three under them, each with its picture, name, line, cells and price in order");
+        check(inside(DadThrowLayout.EntranceName,canvas)&&inside(DadThrowLayout.EntranceShout,canvas)&&inside(DadThrowLayout.EntranceHint,canvas)&&inside(DadThrowLayout.EntranceSkip,canvas)
+            &&DadThrowLayout.EntranceName.yMin>=DadThrowLayout.TopBar&&DadThrowLayout.EntranceName.yMax<=DadThrowLayout.EntranceShout.yMin&&DadThrowLayout.EntranceShout.yMax<=DadThrowLayout.EntranceHint.yMin
+            &&DadThrowLayout.EntranceHint.yMax<=DadThrowLayout.GolfButton.yMin&&DadThrowLayout.EntranceHint.Contains(DadThrowLayout.EntranceHintIcon)&&inside(DadThrowLayout.EntranceHintText,DadThrowLayout.EntranceHint)
+            &&canvas.Contains(DadThrowLayout.EntranceFeet)&&DadThrowLayout.EntranceFeet.y-DadThrowLayout.EntranceTall>=DadThrowLayout.TopBar&&!DadThrowLayout.EntranceSkip.Overlaps(DadThrowLayout.EntranceHint),
+            "an entrance puts the name, the line and the advice one under the other on the left, clear of the top bar and the buttons, and stands the man inside the canvas on the right");
         return r.ToString();
     }
 

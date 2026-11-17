@@ -33,6 +33,13 @@ public sealed class DadThrowFlow
     // Why the last save did not reach the disk, if it did not. Play goes on from memory.
     public string SaveProblem {get;private set;}
     readonly IList<DadThrowStage> stages;readonly DadThrowField field;readonly string savePath;float boot;bool primed;
+    // A new kind of opponent makes an entrance the first time a stage with him in it starts: the street holds
+    // still, his first people already in view, while a big picture of him comes on with a line and what to do
+    // about him. It ends by itself after EnterTime, or on a tap once EnterSkip has passed, and is not shown again.
+    public const float EnterTime=3.2f,EnterSkip=.6f;
+    public DadThrowStage.Kind Entering {get;private set;} public float EnterClock {get;private set;}
+    void EndEntrance(){if(!Save.met.Contains(Entering.id))Save.met.Add(Entering.id);Entering=null;Persist();}
+    public bool SkipEntrance(){if(Now!=Screen.Playing||Entering==null||EnterClock<EnterSkip)return false;EndEntrance();return true;}
     // Whether the stage in hand has paid out, and the screen the shop was opened from.
     bool banked;Screen shopFrom;
     // The purse as the player sees it: what is saved, plus those sent back in the fight still going on.
@@ -70,6 +77,8 @@ public sealed class DadThrowFlow
     {
         StageIndex=index;Model=new DadThrowModel(field,stages[index]){Rules=DadThrowShop.Rules(Save)};
         Runs++;Word=null;WaitingForAim=wait;primed=false;banked=false;Now=Screen.Playing;
+        DadThrowStage.Kind entrant=stages[index].entrance;EnterClock=0;
+        Entering=entrant!=null&&entrant.entrance!=null&&!Save.met.Contains(entrant.id)?entrant:null;
     }
     // One won for each challenger sent back, once per stage start, whether the stage was won, lost or left.
     void Bank(bool persist=true)
@@ -100,7 +109,7 @@ public sealed class DadThrowFlow
     // There is no stage after the last one to move to.
     public bool Next(){if(Now!=Screen.Clear||!HasNext)return false;Load(StageIndex+1);return true;}
     // Leaving drops the stage in progress; what was opened stays opened.
-    public bool ToTitle(){if(Now!=Screen.Paused&&Now!=Screen.Clear&&Now!=Screen.Defeat)return false;Bank();Model=null;Now=Screen.Title;return true;}
+    public bool ToTitle(){if(Now!=Screen.Paused&&Now!=Screen.Clear&&Now!=Screen.Defeat)return false;Bank();Model=null;Entering=null;Now=Screen.Title;return true;}
     // Android back: pause a fight; skip a story; close the shop; from the pause or a result, go to the title.
     public bool Back(){return Now==Screen.Playing?Pause():Now==Screen.Intro||Now==Screen.Ending?Skip():Now==Screen.Shop?CloseShop():ToTitle();}
     // The app went to the background or lost focus. Only a live fight changes; a result never turns back into a fight.
@@ -122,6 +131,13 @@ public sealed class DadThrowFlow
         if(Now==Screen.Intro){StoryClock+=dt;if(StoryClock>=Story.OpeningSeconds)EndIntro();return;}
         if(Now==Screen.Ending){StoryClock+=dt;if(StoryClock>=Story.EndingSeconds)EndEnding();return;}
         if(Now!=Screen.Playing)return;
+        if(Entering!=null)
+        {
+            // One step puts the stage's first group on the street behind the picture; then nothing moves.
+            if(!primed){Model.Tick(1/120f);primed=true;}
+            EnterClock+=dt;if(EnterClock>=EnterTime)EndEntrance();
+            return;
+        }
         if(WaitingForAim)
         {
             // One step puts the stage's first group on the street; then nothing moves until the first pull.

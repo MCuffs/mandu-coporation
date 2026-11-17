@@ -144,13 +144,15 @@ public static class DadThrowCurve
     // points at the shoe, and the first chapter's last stage is followed by the ending.
     public static List<DadThrowStage> Build(IDictionary<string,DadThrowStage.Kind> kinds,string background,IList<DadThrowStage> written=null)
     {
-        var stages=new List<DadThrowStage>(Stages);
+        var stages=new List<DadThrowStage>(Stages);var met=new HashSet<DadThrowStage.Kind>();
         for(int number=1;number<=Stages;number++)
         {
             DadThrowStage stage=Stage(number,kinds,background);
             if(written!=null)foreach(DadThrowStage old in written)if(old.id==stage.id)stage.after=old.after;
             stage.hint=number==1?"pull":Guards(number)>0&&Guards(number-1)==0&&stage.groups.Exists(g=>g.kind!=null&&g.kind.guards)?"shoe":null;
             stage.ending=number==PerChapter;
+            // An opponent the stage file gives an entrance to makes it on the first stage he is in.
+            foreach(DadThrowStage.Group g in stage.groups)if(met.Add(g.kind)&&g.kind.entrance!=null&&stage.entrance==null)stage.entrance=g.kind;
             stages.Add(stage);
         }
         return stages;

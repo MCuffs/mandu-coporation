@@ -13,6 +13,12 @@ public sealed class DadThrowStage
         // guards: walks in holding a tray (see DadThrowModel.Enemy.guard). bare: the frames to draw once the tray is gone.
         public bool guards;public string bare;
         public string BareFrame(int index){return bare+"_"+index;}
+        // The big picture, the line he shouts and the advice shown the first time this opponent comes on
+        // (DadThrowFlow.Entering). The picture sits on the same canvas as the walking frames.
+        public sealed class Entrance { public string resource,name,shout,hint;public float pivotX,stand; }
+        public Entrance entrance;
+        // Whole-canvas rectangle that stands the entrance picture `height` tall with its feet on (x, ground).
+        public Rect EntrancePlace(float x,float ground,float height){float k=height/entrance.stand;return new Rect(x-entrance.pivotX*k,ground-pivotY*k,canvas*k,canvas*k);}
         public float canvas,pivotX,pivotY,stand;public readonly List<float> heights=new List<float>();
         public string Frame(int index){return resource+"_"+index;}
         // Sizes differ a little so a crowd reads as people, while every one keeps the same feet line and hit circle.
@@ -31,6 +37,8 @@ public sealed class DadThrowStage
     public Line after;
     // The chapter's ending plays after this stage the first time it is cleared.
     public bool ending;
+    // The opponent who makes an entrance when this stage is started for the first time (DadThrowFlow.Entering).
+    public Kind entrance;
     public readonly List<Group> groups=new List<Group>();
     public int Total {get{int n=0;foreach(Group g in groups)n+=g.count;return n;}}
     // Leaves nobody on the schedule: used to stand a crowd up by hand in checks.
@@ -61,6 +69,13 @@ public sealed class DadThrowStageSet
             kind.facesLeft=(bool)faces;
             object tray;if(map.TryGetValue("guards",out tray)){if(!(tray is bool))throw new ArgumentException(owner+" must say guards true or false");kind.guards=(bool)tray;}
             kind.bare=DadThrowJson.TextOr(map,"bareResource",null,owner);
+            if(DadThrowJson.Has(map,"entrance"))
+            {
+                string own=owner+" entrance";var word=DadThrowJson.Map(map["entrance"],own);
+                kind.entrance=new DadThrowStage.Kind.Entrance{resource=DadThrowJson.Text(word,"resource",own),name=DadThrowJson.Text(word,"name",own),
+                    shout=DadThrowJson.Text(word,"shout",own),hint=DadThrowJson.Text(word,"hint",own),pivotX=DadThrowJson.Number(word,"pivotX",own),stand=DadThrowJson.Number(word,"standPixels",own)};
+                if(kind.entrance.stand<=0)throw new ArgumentException(own+" needs a standing height above zero");
+            }
             foreach(object value in DadThrowJson.List(Need(map,"heights",owner),owner+" heights"))
             {if(!(value is double)||(double)value<=0)throw new ArgumentException(owner+" has a height that is not above zero");kind.heights.Add((float)(double)value);}
             if(kind.frames<1||kind.canvas<=0||kind.stand<=0||kind.heights.Count==0)throw new ArgumentException(owner+" needs frames, a canvas, a standing height and at least one drawn height");
