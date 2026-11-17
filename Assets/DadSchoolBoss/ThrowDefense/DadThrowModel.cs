@@ -46,8 +46,26 @@ public sealed class DadThrowModel
     public const float FanDegrees=7;
     public enum Weapon { Golf, Shoe }
     public enum Phase { Playing, WaveClear, Lost }
-    // guard: holding a tray. A ball stops on it; a shoe knocks it away.
-    public sealed class Enemy { public int id,hp; public float x,speed,slow,flash,along; public DadThrowStage.Kind kind; public bool guard; }
+    // What a boss is doing. Everyone else only ever walks.
+    public enum Mood { Walk, Brace, Dash, Dazed, Roar, Back }
+    // guard: holding a tray, or a boss braced for his dash. A ball stops on it; a shoe knocks it away.
+    // full: the health he came with. mood, moodClock, raged: a boss's state (BossStep).
+    public sealed class Enemy
+    {
+        public int id,hp,full; public float x,speed,slow,flash,along,moodClock; public DadThrowStage.Kind kind; public bool guard,raged; public Mood mood;
+        public bool IsChief {get{return kind!=null&&kind.boss!=null;}}
+    }
+    // A chapter's boss (2026-11-18, Design/dad-throw-content-strategy-v2.md). He walks in slowly. Every BossEvery
+    // seconds he braces for BossBrace seconds and then dashes for BossDash seconds at BossDashPace times his walk;
+    // from the moment he braces until the dash is over a ball stops on him as it does on a tray. A shoe that
+    // reaches him then takes his feet from under him: he stands dazed for BossDazed seconds and a ball hurts him
+    // BossDazedHurt times over. A shoe pushes him BossShove as far as it pushes anyone. At half his health he
+    // loses his temper once (BossRoar seconds on the spot); after that he walks BossRagedPace as fast and braces
+    // every BossEveryRaged seconds. Touching the gate costs a touch like anyone's, but he is not out of it: he
+    // trots BossBack back out and comes again.
+    public const float BossEvery=4,BossEveryRaged=2.8f,BossBrace=.9f,BossDash=1,BossDashPace=5,BossDazed=2.5f,BossRoar=.8f,
+        BossRagedPace=1.25f,BossBack=460,BossBackPace=6,BossShove=.5f,BossInView=60;
+    public const int BossDazedHurt=2;
     public sealed class Projectile
     {
         public Weapon weapon;public Vector2 pos,vel;public int remaining,bounces;public float life;
@@ -70,6 +88,12 @@ public sealed class DadThrowModel
     public int BlockSerial {get;private set;} public Vector2 BlockAt {get;private set;}
     // Shoes thrown in this fight, for telling a player who never reaches for one (DadThrowTuner).
     public int ShoesThrown {get;private set;}
+    // Won paid on top of the head count: what the bosses sent back were worth.
+    public int Bounty {get;private set;}
+    // The boss on the street, if one is.
+    public Enemy Chief {get{foreach(Enemy e in enemies)if(e.IsChief)return e;return null;}}
+    // Counts every time a shoe takes a braced or dashing boss off his feet, and where.
+    public int DazeSerial {get;private set;}
     public int Total {get{return Stage!=null?Stage.Total:12+Math.Min(18,Wave-1)*4;}}
     public float Interval {get{return Math.Max(.22f,.8f-(Wave-1)*.045f);}}
     public int UpgradeCost {get{return 30+Level*25;}}
@@ -90,7 +114,7 @@ public sealed class DadThrowModel
     public bool Upgrade(){if(Stage!=null||phase!=Phase.WaveClear||Level>=5||Coins<UpgradeCost)return false;Coins-=UpgradeCost;Level++;return true;}
     public bool NextWave(){if(Stage!=null||phase!=Phase.WaveClear)return false;Wave++;Spawned=Killed=Escaped=0;spawnClock=Reload=0;phase=Phase.Playing;return true;}
     public Enemy AddEnemy(float x,int hp=1,float speed=-1)
-    {var e=new Enemy{id=++nextId,x=x,hp=hp,speed=speed>0?speed:25+Math.Min(Wave-1,20)*2};enemies.Add(e);return e;}
+    {var e=new Enemy{id=++nextId,x=x,hp=hp,full=hp,speed=speed>0?speed:25+Math.Min(Wave-1,20)*2};enemies.Add(e);return e;}
     public static Vector2 LaunchVelocity(Vector2 pull)
     {
         // Forward throws only. Up/down dragging still changes the arc; minimum forward motion avoids accidental self-shots.
@@ -116,11 +140,12 @@ public sealed class DadThrowModel
     // Whether this step of a flight touches a standing body: three circles from the shins to the top of the head,
     // each as wide as the body. Until 2026-11-17 a body was one circle at the belly, so a ball that met the head
     // flew through (owner's play: "hit the head and they do not go down").
-    public static bool SweptBody(Vector2 from,Vector2 to,float x,float feet,float tall,float radius)
+    // half: half the body's width; a boss is wider than the rest.
+    public static bool SweptBody(Vector2 from,Vector2 to,float x,float feet,float tall,float radius,float half=BodyHalf)
     {
-        float reach=radius+BodyHalf,top=Mathf.Max(BodyHalf,tall-BodyHalf);
+        float reach=radius+half,top=Mathf.Max(half,tall-half);
         if(Mathf.Max(from.x,to.x)<x-reach||Mathf.Min(from.x,to.x)>x+reach)return false;
-        for(int i=0;i<3;i++)if(SweptHit(from,to,new Vector2(x,feet-Mathf.Lerp(BodyHalf,top,i*.5f)),reach))return true;
+        for(int i=0;i<3;i++)if(SweptHit(from,to,new Vector2(x,feet-Mathf.Lerp(half,top,i*.5f)),reach))return true;
         return false;
     }
     public static bool SweptHit(Vector2 from,Vector2 to,Vector2 point,float radius)
@@ -163,15 +188,44 @@ public sealed class DadThrowModel
         if(Spawned<Total&&spawnClock<=0&&enemies.Count<80)
         {AddEnemy(Wave==1&&Spawned<3?750+Spawned*100:Width+20,Wave>=5&&Spawned%6==0?2:1);Spawned++;spawnClock+=Interval;}
     }
+    void BossStep(Enemy e,float dt)
+    {
+        e.moodClock+=dt;float pace=e.speed*(e.raged?BossRagedPace:1);
+        switch(e.mood)
+        {
+            case Mood.Walk:
+                e.x-=pace*(e.slow>0?Rules.SlowFactor:1)*dt;
+                // He braces only where the player can see him do it.
+                if(e.moodClock>=(e.raged?BossEveryRaged:BossEvery)&&e.x<=Width-BossInView){e.mood=Mood.Brace;e.moodClock=0;e.guard=true;}
+                break;
+            case Mood.Brace:if(e.moodClock>=BossBrace){e.mood=Mood.Dash;e.moodClock=0;}break;
+            case Mood.Dash:e.x-=pace*BossDashPace*dt;if(e.moodClock>=BossDash){e.mood=Mood.Walk;e.moodClock=0;e.guard=false;}break;
+            case Mood.Dazed:if(e.moodClock>=BossDazed){e.mood=Mood.Walk;e.moodClock=0;}break;
+            case Mood.Roar:if(e.moodClock>=BossRoar){e.mood=Mood.Walk;e.moodClock=0;}break;
+            case Mood.Back:e.x+=e.speed*BossBackPace*dt;if(e.x>=Field.Gate+BossBack){e.mood=Mood.Walk;e.moodClock=0;}break;
+        }
+    }
+    // Takes `amount` off someone's health; true when that sends them back. A boss brought to half his health
+    // loses his temper, once.
+    bool Hurt(Enemy e,int amount)
+    {
+        e.hp-=amount;
+        if(e.hp<=0){Killed++;if(e.IsChief)Bounty+=e.kind.boss.bounty;return true;}
+        if(e.IsChief&&!e.raged&&e.hp*2<=e.full){e.raged=true;if(e.mood!=Mood.Back){e.mood=Mood.Roar;e.moodClock=0;e.guard=false;}}
+        return false;
+    }
     void Step(float dt)
     {
         Reload=Mathf.Max(0,Reload-dt);Arrive(dt);
         for(int i=enemies.Count-1;i>=0;i--)
         {
             Enemy e=enemies[i];e.slow=Mathf.Max(0,e.slow-dt);e.flash=Mathf.Max(0,e.flash-dt);
-            e.x-=e.speed*(e.slow>0?Rules.SlowFactor:1)*dt;
+            if(e.IsChief)BossStep(e,dt);else e.x-=e.speed*(e.slow>0?Rules.SlowFactor:1)*dt;
+            if(e.x>Field.Gate)continue;
+            // A boss takes his touch and trots back out to come again; anyone else is done for this stage.
+            if(e.IsChief){e.x=Field.Gate+.5f;e.mood=Mood.Back;e.moodClock=0;e.guard=false;}else{enemies.RemoveAt(i);Escaped++;}
             // Losing the house outranks clearing the street: the last person walking in at one health is a defeat.
-            if(e.x<=Field.Gate){enemies.RemoveAt(i);Escaped++;Health--;if(Health<=0){phase=Phase.Lost;projectiles.Clear();return;}}
+            Health--;if(Health<=0){phase=Phase.Lost;projectiles.Clear();return;}
         }
         for(int i=projectiles.Count-1;i>=0;i--)
         {
@@ -188,7 +242,7 @@ public sealed class DadThrowModel
             touched.Clear();Vector2 flight=p.pos-from;float length=flight.sqrMagnitude;
             foreach(Enemy e in enemies)
             {
-                if(p.hit.Contains(e.id)||!SweptBody(from,p.pos,e.x,Field.Ground,e.kind!=null?e.kind.Height(e.id):BodyTall,radius))continue;
+                if(p.hit.Contains(e.id)||!SweptBody(from,p.pos,e.x,Field.Ground,e.kind!=null?e.kind.Height(e.id):BodyTall,radius,e.IsChief?e.kind.boss.half:BodyHalf))continue;
                 Vector2 body=new Vector2(e.x,Field.Ground-35);
                 e.along=length<.001f?0:Vector2.Dot(body-from,flight)/length;touched.Add(e);
             }
@@ -206,13 +260,17 @@ public sealed class DadThrowModel
                     for(int k=enemies.Count-1;k>=0;k--)
                     {
                         Enemy target=enemies[k];if(Mathf.Abs(target.x-center)>=Rules.ShoeRadius)continue;
-                        target.x=Mathf.Min(Width+40,target.x+Rules.ShoePush);target.slow=Rules.SlowTime;target.flash=.16f;target.guard=false;
+                        // A boss is heavy and goes half as far. Caught braced or dashing, his feet go from under him.
+                        target.x=Mathf.Min(Width+40,target.x+Rules.ShoePush*(target.IsChief?BossShove:1));target.slow=Rules.SlowTime;target.flash=.16f;
+                        if(target.IsChief&&target.guard){target.mood=Mood.Dazed;target.moodClock=0;DazeSerial++;}
+                        target.guard=false;
                         // A blasting shoe (bought in the shop) also hurts everyone it gathers. The struck one is settled just below.
-                        if(Rules.ShoeBlast>0&&target!=e){target.hp-=Rules.ShoeBlast;if(target.hp<=0){enemies.RemoveAt(k);Killed++;}}
+                        if(Rules.ShoeBlast>0&&target!=e&&Hurt(target,Rules.ShoeBlast))enemies.RemoveAt(k);
                     }
                 }
-                p.hit.Add(e.id);p.remaining--;e.hp-=p.weapon==Weapon.Shoe?Rules.ShoeDamage+Rules.ShoeBlast:Rules.GolfDamage+Level/3;e.flash=.16f;
-                if(e.hp<=0){enemies.Remove(e);Killed++;if(Stage==null)Coins+=2;}
+                p.hit.Add(e.id);p.remaining--;e.flash=.16f;
+                // A ball hurts a dazed boss several times over.
+                if(Hurt(e,p.weapon==Weapon.Shoe?Rules.ShoeDamage+Rules.ShoeBlast:(Rules.GolfDamage+Level/3)*(e.mood==Mood.Dazed?BossDazedHurt:1))){enemies.Remove(e);if(Stage==null)Coins+=2;}
                 BestChain=Math.Max(BestChain,p.hit.Count);
                 // A ball through a whole pack readies the hand at once (bought in the shop): the reward for waiting for a pack.
                 if(p.weapon==Weapon.Golf&&Rules.ChainReload>0&&p.hit.Count==Rules.ChainReload)Reload=0;

@@ -45,7 +45,7 @@ public static class DadThrowBots
         foreach(DadThrowModel.Enemy e in m.enemies)
         {
             if(e.x>DadThrowModel.Width){twins.Add(null);continue;}
-            DadThrowModel.Enemy c=s.AddEnemy(e.x,e.hp,e.speed);c.slow=e.slow;c.kind=e.kind;c.guard=e.guard;twins.Add(c);
+            DadThrowModel.Enemy c=s.AddEnemy(e.x,e.hp,e.speed);c.slow=e.slow;c.kind=e.kind;c.guard=e.guard;c.full=e.full;c.mood=e.mood;c.moodClock=e.moodClock;c.raged=e.raged;twins.Add(c);
         }
         return s;
     }
@@ -78,8 +78,8 @@ public static class DadThrowBots
             Fly(s);int moved=0;bool leadMoved=false;
             for(int i=0;i<twins.Count;i++)
             {
-                // Thrown back further than they could have walked forward, or hurt.
-                if(twins[i]==null||!(twins[i].x>before[i]+20||twins[i].hp<m.enemies[i].hp))continue;
+                // Thrown back further than they could have walked forward, or hurt, or (a boss) taken off his feet.
+                if(twins[i]==null||!(twins[i].x>before[i]+20||twins[i].hp<m.enemies[i].hp||twins[i].mood==DadThrowModel.Mood.Dazed&&m.enemies[i].mood!=DadThrowModel.Mood.Dazed))continue;
                 moved++;leadMoved|=i==leadAt;
             }
             if(leadMoved&&moved>best.hits){best.pull=candidate;best.hits=moved;best.any=true;}

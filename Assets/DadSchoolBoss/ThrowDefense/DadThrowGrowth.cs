@@ -105,6 +105,11 @@ public static class DadThrowCurve
     // alone does not carry a player through.
     public static int Guards(int stage){return stage<4?0:Math.Min(24,2*Steep(stage,3)+Gentle(stage));}
     public const int PackSize=14,FastPack=6;public const float FastLead=70,ToughPace=.55f,TraySpacing=38;
+    // A chapter's last stage ends with its boss, where the stage file declares one ("boss"). He is one of the
+    // stage's people, walks in alone BossAfter gaps behind the last pack at BossPace of the stage's pace, and
+    // has this much health. Only the first chapter has its boss so far (Design/dad-throw-content-strategy-v2.md).
+    public static int BossHealth(int stage){return stage==PerChapter?40:0;}
+    public const float BossPace=.5f,BossAfter=1.5f;
 
     static DadThrowStage.Group Pack(float at,int count,float firstX,float spacing,float speed,int hp,DadThrowStage.Kind kind)
     {return new DadThrowStage.Group{at=at,count=count,firstX=firstX,spacing=spacing,speed=speed,hp=hp,kind=kind};}
@@ -119,9 +124,11 @@ public static class DadThrowCurve
         if(kinds==null||!kinds.TryGetValue("normal",out normal))throw new ArgumentException("the stage curve needs the normal opponent");
         if(!kinds.TryGetValue("tough",out tough))tough=normal;if(!kinds.TryGetValue("fast",out fast))fast=normal;
         if(!kinds.TryGetValue("guard",out guard)||!guard.guards)guard=null;
+        DadThrowStage.Kind chief=null;
+        if(BossHealth(number)>0){kinds.TryGetValue("boss",out chief);if(chief!=null&&chief.boss==null)chief=null;}
         var stage=new DadThrowStage{id=Id(number),backgroundKey=background,health=MaxHealth,baseReward=People(number)};
         int people=Math.Min(MaxPeople,Math.Max(PackSize,Mathf.RoundToInt(People(number)*crowd)));
-        int hard=Mathf.RoundToInt(Tough(number)*crowd),quick=Mathf.RoundToInt(Fast(number)*crowd),trays=guard!=null?Mathf.RoundToInt(Guards(number)*crowd):0,plain=people-hard-quick-trays;
+        int hard=Mathf.RoundToInt(Tough(number)*crowd),quick=Mathf.RoundToInt(Fast(number)*crowd),trays=guard!=null?Mathf.RoundToInt(Guards(number)*crowd):0,plain=people-hard-quick-trays-(chief!=null?1:0);
         float pace=Math.Min(MaxPace,Pace(number)*tempo),gap=Gap(number);
         // Ordinary runners, about fourteen to a pack: one pack already close, one at the far end of the street,
         // the rest from off screen, a pack every `gap` seconds. Later packs run a little faster and closer together.
@@ -131,6 +138,8 @@ public static class DadThrowCurve
             int count=i==packs-1?left:plain/packs;left-=count;if(i>=2)at+=gap;
             stage.groups.Add(Pack(at,count,i==0?700:i==1?1080:1300,i==0?44:i==1?32:Math.Max(22,30-number),pace+i%3*8,1,normal));
         }
+        // The boss comes in by himself once the last pack is on the street. An eased or heated stage bends his health with the crowd.
+        if(chief!=null)stage.groups.Add(Pack(at+gap*BossAfter,1,1300,0,pace*BossPace,Math.Max(1,Mathf.RoundToInt(BossHealth(number)*crowd)),chief));
         // Trays are shared out over the packs behind the first, a few at the very front of each, at the pack's own pace.
         for(int i=1,behind=packs-1;i<packs&&trays>0;i++)
         {

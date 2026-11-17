@@ -405,7 +405,7 @@ PASS the stage file gives the tray-holder an entrance: a picture, a name, a line
 PASS an entrance in the stage file needs all its words and a standing height; one without is refused
 PASS the chair-holder and the quick one have entrances too, with advice about the ball where the tray-holder's is about the shoe
 PASS advice can be about the ball or the shoe and nothing else
-PASS the quick one makes his entrance on 1-2, the chair-holder on 1-3 and the tray-holder on 1-4, the first stage each is in, and on no other
+PASS the quick one makes his entrance on 1-2, the chair-holder on 1-3, the tray-holder on 1-4 and the boss on 1-5, the first stage each is in, and on no other
 PASS starting 1-2 for the first time brings the quick one on
 PASS and he is the one remembered
 PASS starting 1-3 for the first time brings the chair-holder on

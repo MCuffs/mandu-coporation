@@ -34,9 +34,11 @@ public static class DadThrowGrowthChecks
             if(run.think>0){run.think--;return;}
             DadThrowModel.Enemy lead=DadThrowBots.Lead(m);if(lead==null)return;
             bool aimed=random.NextDouble()<good;
-            if(shoes&&aimed&&lead.guard)
+            // A braced or dashing boss is a tray too, wherever on the street he is.
+            DadThrowModel.Enemy chief=m.Chief,mark=lead.guard?lead:chief!=null&&chief.guard&&chief.x<=DadThrowModel.Width?chief:null;
+            if(shoes&&aimed&&mark!=null)
             {
-                DadThrowBots.Aim shoe=DadThrowBots.BestShoe(m,lead);
+                DadThrowBots.Aim shoe=DadThrowBots.BestShoe(m,mark);
                 if(shoe.any&&m.Fire(Shoe,shoe.pull)){run.shoe++;run.think=-1;return;}
             }
             Vector2 pull=DadThrowBots.Pulls[random.Next(DadThrowBots.Pulls.Length)];
@@ -272,8 +274,9 @@ public static class DadThrowGrowthChecks
             "the chair-holder and the quick one have entrances too, with advice about the ball where the tray-holder's is about the shoe");
         check(refused(kindJson.Replace("GUARDS",",\"entrance\":{\"resource\":\"x/big\",\"pivotX\":300,\"standPixels\":500,\"name\":\"n\",\"shout\":\"s\",\"hint\":\"h\",\"with\":\"car\"}")),
             "advice can be about the ball or the shoe and nothing else");
-        bool onlyOne=game[1].entrance==quickKind&&game[2].entrance==chairKind&&game[3].entrance==trayKind;for(int i=0;i<game.Count;i++)if(i<1||i>3)onlyOne&=game[i].entrance==null;
-        check(onlyOne,"the quick one makes his entrance on 1-2, the chair-holder on 1-3 and the tray-holder on 1-4, the first stage each is in, and on no other");
+        DadThrowStage.Kind bossKind=set.kinds["boss"];
+        bool onlyOne=game[1].entrance==quickKind&&game[2].entrance==chairKind&&game[3].entrance==trayKind&&game[4].entrance==bossKind;for(int i=0;i<game.Count;i++)if(i<1||i>4)onlyOne&=game[i].entrance==null;
+        check(onlyOne,"the quick one makes his entrance on 1-2, the chair-holder on 1-3, the tray-holder on 1-4 and the boss on 1-5, the first stage each is in, and on no other");
         var first2=new DadThrowSave{introSeen=true,furthest=1};var quick=new DadThrowFlow(game,field,null,first2,null);quick.Tick(2);
         check(quick.Start()&&quick.Stage.id=="1-2"&&quick.Entering==quickKind,"starting 1-2 for the first time brings the quick one on");
         quick.Tick(DadThrowFlow.EnterTime+.1f);

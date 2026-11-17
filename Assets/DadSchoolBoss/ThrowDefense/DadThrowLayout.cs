@@ -80,6 +80,8 @@ public sealed class DadThrowLayout
     public static Vector2 EntranceBurstCentre {get{return new Vector2(EntranceFeet.x,EntranceFeet.y-EntranceTall*.56f);}}
     // Small pictures: an item on its shop card, a coin leaving someone sent back, a ball stopped on a tray.
     public const float ShopIconSize=84,CoinPopSize=46,ClangSize=84;
+    // A boss's name and what is left of him, just under the top bar, in the middle.
+    public static readonly Rect BossName=new Rect(W/2-210,TopBar+2,420,34),BossBar=new Rect(W/2-210,TopBar+36,420,26);
     public static Vector2 EntranceHintIcon {get{return new Vector2(EntranceHint.x+62,EntranceHint.center.y);}}
     public static Rect EntranceHintText {get{return Rect.MinMaxRect(EntranceHint.x+122,EntranceHint.y,EntranceHint.xMax-16,EntranceHint.yMax);}}
 

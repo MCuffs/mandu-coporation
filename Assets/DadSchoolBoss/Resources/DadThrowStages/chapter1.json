@@ -76,6 +76,35 @@
       "pivotY": 720,
       "standPixels": 560,
       "heights": [104, 108, 112]
+    },
+    "boss": {
+      "resource": "DadV5/chars/boss1/boss1_walk",
+      "boss": {
+        "brace": "DadV5/chars/boss1/boss1_windup_0",
+        "dash": "DadV5/chars/boss1/boss1_dash_0",
+        "hit": "DadV5/chars/boss1/boss1_hit_0",
+        "dazed": "DadV5/chars/boss1/boss1_groggy_0",
+        "roar": "DadV5/chars/boss1/boss1_enrage_0",
+        "fly": "DadV5/chars/boss1/boss1_fly_0",
+        "bodyHalf": 45,
+        "bounty": 30
+      },
+      "entrance": {
+        "resource": "DadV5/chars/boss1/boss1_enrage_0",
+        "pivotX": 386,
+        "standPixels": 637,
+        "name": "점퍼 아저씨",
+        "shout": "비켜라, 내가 간다!",
+        "hint": "웅크리면 공이 안 통합니다. 슬리퍼로 멈추세요",
+        "with": "shoe"
+      },
+      "frames": 2,
+      "facesLeft": true,
+      "canvas": 768,
+      "pivotX": 390,
+      "pivotY": 720,
+      "standPixels": 635,
+      "heights": [160]
     }
   },
   "stages": [

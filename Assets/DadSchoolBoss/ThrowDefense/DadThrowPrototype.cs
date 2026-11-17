@@ -30,6 +30,12 @@ public sealed class DadThrowPrototype:MonoBehaviour
     readonly Dictionary<DadThrowStage.Kind,Texture2D[]> bare=new Dictionary<DadThrowStage.Kind,Texture2D[]>();
     // The big picture an opponent comes on with.
     readonly Dictionary<DadThrowStage.Kind,Texture2D> entranceArt=new Dictionary<DadThrowStage.Kind,Texture2D>();
+    // A boss's pictures besides his walking frames, in this order, and the words for what he was worth.
+    const int Braced=0,Dashing=1,Struck=2,Stunned=3,Raging=4,Flying=5;
+    readonly Dictionary<DadThrowStage.Kind,Texture2D[]> bossArt=new Dictionary<DadThrowStage.Kind,Texture2D[]>();
+    readonly Dictionary<DadThrowStage.Kind,string> bountyText=new Dictionary<DadThrowStage.Kind,string>();
+    // A boss sent back goes over backwards the length of the street: longer, further and higher than anyone's hop.
+    const float BossOutTime=.9f,BossOutReach=520,BossOutLift=150,BossOutTurn=-300;int seenDaze;
     // What an entrance is dressed with, the shop's own pictures, and the two small effects (asset request v3: I, J, K, M).
     Texture2D bandLines,burstArt,balloonArt,coinArt,shopSign,soldOut;GUIStyle balloon;
     readonly Texture2D[] shopArt=new Texture2D[DadThrowShop.Cards.Length],clang=new Texture2D[3],coinPop=new Texture2D[3];
@@ -115,6 +121,11 @@ public sealed class DadThrowPrototype:MonoBehaviour
         {
             var frames=new Texture2D[kind.frames];for(int i=0;i<frames.Length;i++)frames[i]=Need<Texture2D>(kind.Frame(i));people[kind]=frames;
             if(kind.entrance!=null)entranceArt[kind]=Need<Texture2D>(kind.entrance.resource);
+            if(kind.boss!=null)
+            {
+                bossArt[kind]=new[]{Need<Texture2D>(kind.boss.brace),Need<Texture2D>(kind.boss.dash),Need<Texture2D>(kind.boss.hit),Need<Texture2D>(kind.boss.dazed),Need<Texture2D>(kind.boss.roar),Need<Texture2D>(kind.boss.fly)};
+                bountyText[kind]="+"+kind.boss.bounty+"원";
+            }
             if(kind.bare==null)continue;
             var without=new Texture2D[kind.frames];for(int i=0;i<without.Length;i++)without[i]=Need<Texture2D>(kind.BareFrame(i));bare[kind]=without;
         }
@@ -182,6 +193,10 @@ public sealed class DadThrowPrototype:MonoBehaviour
         // as long as a tray is in view, without waiting for the next ball to be stopped.
         if(Flow.ShoeShy&&selected==DadThrowModel.Weapon.Golf&&shoeNudge<.5f)
             foreach(DadThrowModel.Enemy e in m.enemies)if(e.guard&&e.x<=DadThrowLayout.W){shoeNudge=.5f;break;}
+        // A boss braced for his dash: the shoe is what stops him, so its button lights up the moment he braces.
+        // A shoe that takes him off his feet jolts the street.
+        DadThrowModel.Enemy boss=m.Chief;if(boss!=null&&boss.guard&&selected==DadThrowModel.Weapon.Golf&&shoeNudge<.5f)shoeNudge=.5f;
+        if(m.DazeSerial!=seenDaze){seenDaze=m.DazeSerial;shake=Mathf.Max(shake,.6f);}
         if(Flow.Now!=DadThrowFlow.Screen.Playing)aim.Cancel();
     }
     // A fresh stage: nothing from the last attempt may leak into it. A button starts the stage while the screen
@@ -189,7 +204,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
     void Fresh()
     {
         if(Flow.Model==null||Flow.Runs==seenRun)return;
-        seenRun=Flow.Runs;seenHealth=Flow.Model.Health;seenChain=Flow.Model.ChainSerial;seenBlock=Flow.Model.BlockSerial;blockClock=shoeNudge=0;
+        seenRun=Flow.Runs;seenHealth=Flow.Model.Health;seenChain=Flow.Model.ChainSerial;seenBlock=Flow.Model.BlockSerial;seenDaze=Flow.Model.DazeSerial;blockClock=shoeNudge=0;
         thrown=false;hintClock=throwPose=palm=chainClock=shake=0;shownRemaining=-1;aim.Cancel();seen.Clear();leaving.Clear();
     }
     // Someone who is no longer on the street either touched the gate or was hit. A hit knocks them back the way
@@ -202,7 +217,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
             bool still=false;foreach(DadThrowModel.Enemy e in m.enemies)if(e.id==was.id){still=true;break;}
             if(still||was.kind==null||was.x<=m.Field.Gate+8)continue;
             if(leaving.Count>=MaxLeaving)leaving.RemoveAt(0);
-            leaving.Add(new Leaving{id=was.id,x=was.x,kind=was.kind,bare=was.bare});
+            leaving.Add(new Leaving{id=was.id,x=was.x,kind=was.kind,bare=was.bare,age=was.kind.boss!=null?LeaveTime-BossOutTime:0});
         }
         seen.Clear();foreach(DadThrowModel.Enemy e in m.enemies)seen.Add(new Seen{id=e.id,x=e.x,kind=e.kind,bare=e.kind!=null&&e.kind.guards&&!e.guard});
     }
@@ -219,6 +234,13 @@ public sealed class DadThrowPrototype:MonoBehaviour
     {
         var save=new DadThrowSave{introSeen=true,furthest=index,coins=coins};save.met.AddRange(met);
         aim.Cancel();heldForCapture=false;seenRun=-1;Flow=new DadThrowFlow(game,layout.Field,story,save,null);
+    }
+    // The player's own save, held in memory only and opened at stage `index` (from 0): for playing one stage
+    // without playing up to it. Nothing that happens from here is written to the save on disk.
+    public void DebugPlayAt(int index)
+    {
+        string problem;DadThrowSave save=DadThrowSave.Load(savePath,out problem);save.furthest=Mathf.Clamp(index,0,game.Count-1);
+        aim.Cancel();heldForCapture=false;seenRun=-1;Flow=new DadThrowFlow(game,layout.Field,story,save,null,tuner);
     }
     // Back to the player's own save, from the logo, when a capture run is over.
     public void DebugReal(){heldForCapture=false;if(Flow!=null)Begin();}
@@ -410,6 +432,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
         // fading over its second half. A ring of sparks marks where each was hit.
         foreach(Leaving gone in leaving)
         {
+            if(gone.kind.boss!=null){ChiefOut(gone,m);continue;}
             float t=gone.age/LeaveTime;GUI.color=new Color(1,1,1,Mathf.Clamp01(2-2*t));
             Person(gone.kind,gone.id,gone.x+KnockBack*t,m.Field.Ground-Mathf.Sin(t*Mathf.PI)*KnockLift,!gone.kind.Mirror,200,true,gone.bare);
             if(t>=.36f)continue;
@@ -420,6 +443,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
         foreach(DadThrowModel.Enemy e in order)
         {
             if(e.kind==null)continue;
+            if(e.IsChief){Chief(e,m.Field.Ground);continue;}
             GUI.color=e.flash>0?new Color(1,.6f,.45f):Color.white;
             Person(e.kind,e.id,e.x,m.Field.Ground,e.kind.Mirror,e.speed,false,e.kind.guards&&!e.guard);
         }
@@ -429,10 +453,56 @@ public sealed class DadThrowPrototype:MonoBehaviour
         // by the same foot point (64,108 of 128).
         foreach(Leaving gone in leaving)
         {
-            if(gone.age>=CoinPopTime)continue;
+            if(gone.kind.boss!=null||gone.age>=CoinPopTime)continue;
             float k=DadThrowLayout.CoinPopSize/128;Vector2 head=new Vector2(gone.x,m.Field.Ground+Lane(gone.id)-gone.kind.Height(gone.id)-4);
             GUI.DrawTexture(new Rect(head.x-64*k,head.y-108*k,DadThrowLayout.CoinPopSize,DadThrowLayout.CoinPopSize),coinPop[Mathf.Min(2,(int)(gone.age/CoinPopTime*3))]);
         }
+    }
+    // The boss: his walking frames while he walks (turned round while he trots back out from the gate), and one
+    // picture each for bracing, dashing, standing dazed, losing his temper and taking a ball.
+    void Chief(DadThrowModel.Enemy e,float ground)
+    {
+        DadThrowStage.Kind kind=e.kind;Texture2D[] poses=bossArt[kind],steps=people[kind];float x=e.x,tall=kind.Height(e.id);ground+=Lane(e.id);
+        bool back=e.mood==DadThrowModel.Mood.Back;Texture2D frame;
+        switch(e.mood)
+        {
+            case DadThrowModel.Mood.Brace:frame=poses[Braced];x+=Mathf.Sin(clock*46)*1.5f;break;
+            case DadThrowModel.Mood.Dash:frame=poses[Dashing];break;
+            case DadThrowModel.Mood.Dazed:frame=poses[Stunned];x+=Mathf.Sin(clock*5)*4;break;
+            case DadThrowModel.Mood.Roar:frame=poses[Raging];x+=Mathf.Sin(clock*63)*3;break;
+            default:frame=e.flash>0&&!back?poses[Struck]:steps[(int)(clock*Mathf.Max(48,e.speed*(back?DadThrowModel.BossBackPace:1))/8)%steps.Length];break;
+        }
+        // Sand off his heels while he dashes.
+        if(e.mood==DadThrowModel.Mood.Dash)
+            for(int i=0;i<3;i++)
+            {
+                float puff=(clock*3+i/3f)%1,size=14+26*puff;GUI.color=new Color(Dust.r,Dust.g,Dust.b,.6f*(1-puff));
+                GUI.DrawTexture(new Rect(x+50+puff*70-size/2,ground-6-size/2-puff*14,size,size),dot);
+            }
+        GUI.color=e.flash>0?new Color(1,.6f,.45f):e.raged?new Color(1,.84f,.8f):Color.white;
+        Rect r=kind.Place(x,ground,tall);
+        if(kind.Mirror==back)GUI.DrawTexture(r,frame);
+        else
+        {
+            Matrix4x4 old=GUI.matrix;GUI.matrix=old*Matrix4x4.TRS(new Vector3(x,ground,0),Quaternion.identity,new Vector3(-1,1,1));
+            GUI.DrawTexture(new Rect(r.x-x,r.y-ground,r.width,r.height),frame);GUI.matrix=old;
+        }
+        GUI.color=Color.white;Vector2 head=new Vector2(x,ground-tall);
+        // Braced: a warning over his head. Dazed: stars going round it.
+        if(e.mood==DadThrowModel.Mood.Brace)Outlined(new Rect(head.x-40,head.y-64,80,60),"!",52,Warn,Paper,3,display);
+        else if(e.mood==DadThrowModel.Mood.Dazed)
+            for(int i=0;i<3;i++){Vector2 star=head+new Vector2(Mathf.Cos(clock*5+i*2.094f)*30,-10+Mathf.Sin(clock*5+i*2.094f)*8);Dot(star,13,Ink);Dot(star,8,Gold);}
+    }
+    // A boss sent back does not hop away: he goes over backwards down the street, turning as he goes, and what
+    // he was worth rises from where he stood.
+    void ChiefOut(Leaving gone,DadThrowModel m)
+    {
+        DadThrowStage.Kind kind=gone.kind;float t=Mathf.Clamp01(1-(LeaveTime-gone.age)/BossOutTime),tall=kind.Height(gone.id),ground=m.Field.Ground+Lane(gone.id);
+        Vector2 feet=new Vector2(gone.x+BossOutReach*t,ground-Mathf.Sin(t*Mathf.PI)*BossOutLift);
+        GUI.color=new Color(1,1,1,Mathf.Clamp01(3-3*t));
+        Spun(bossArt[kind][Flying],kind.Place(feet.x,feet.y,tall),new Vector2(feet.x,feet.y-tall/2),t*BossOutTurn);
+        GUI.color=Color.white;
+        if(kind.boss.bounty>0&&t<.85f)Outlined(new Rect(gone.x-100,ground-tall-64-46*t,200,52),bountyText[kind],40,Gold,Ink,3,display);
     }
     void DrawDad()
     {
@@ -535,10 +605,20 @@ public sealed class DadThrowPrototype:MonoBehaviour
         // Nothing under a card can be pressed.
         bool was=GUI.enabled;GUI.enabled=was&&live;
         DrawTopBar(Flow.Stage,m.Health,m.Remaining);DrawPurse(DadThrowLayout.CoinLabel,26,Ink,bold);DrawControls(Flow.Stage,m.ReloadTotal>0?Mathf.Clamp01(m.Reload/m.ReloadTotal):0,selected);GUI.enabled=was;
+        if(!result)DrawBossBar(m);
         if(entering)DrawEntrance();
         if(now==DadThrowFlow.Screen.Paused)DrawPause();
         else if(now==DadThrowFlow.Screen.Clear)DrawClear();
         else if(now==DadThrowFlow.Screen.Defeat)DrawDefeat();
+    }
+    // A boss's name and what is left of him, from the moment he is on the street. The bar turns red once he has lost his temper.
+    void DrawBossBar(DadThrowModel m)
+    {
+        DadThrowModel.Enemy chief=m.Chief;if(chief==null||chief.x>DadThrowLayout.W-DadThrowFlow.BossShown)return;
+        Rect bar=DadThrowLayout.BossBar;DadUi.Panel(bar,PaperDown,Ink);
+        float share=Mathf.Clamp01((float)chief.hp/Mathf.Max(1,chief.full));
+        if(share>0)DadUi.Fill(new Rect(bar.x+4,bar.y+4,Mathf.Max(8,(bar.width-8)*share),bar.height-8),chief.raged?Warn:Gold,4);
+        Outlined(DadThrowLayout.BossName,chief.kind.entrance!=null?chief.kind.entrance.name:"대장",26,Paper,Ink,3,display);
     }
     void Veil(Color color){Box(new Rect(0,0,DadThrowLayout.W,DadThrowLayout.H),color);}
     // A new opponent comes on: the street dims, a slanted band crosses it, the man himself slides in large from

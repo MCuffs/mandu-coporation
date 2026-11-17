@@ -36,7 +36,9 @@ public sealed class DadThrowFlow
     // A new kind of opponent makes an entrance the first time a stage with him in it starts: the street holds
     // still, his first people already in view, while a big picture of him comes on with a line and what to do
     // about him. It ends by itself after EnterTime, or on a tap once EnterSkip has passed, and is not shown again.
-    public const float EnterTime=3.2f,EnterSkip=.6f;
+    // A boss makes his entrance in the middle of the fight, at the moment he steps this far onto the street:
+    // everything stops where it is, balls in the air included, and goes on when the picture is gone.
+    public const float EnterTime=3.2f,EnterSkip=.6f,BossShown=40;
     public DadThrowStage.Kind Entering {get;private set;} public float EnterClock {get;private set;}
     void EndEntrance(){if(!Save.met.Contains(Entering.id))Save.met.Add(Entering.id);Entering=null;Persist();}
     public bool SkipEntrance(){if(Now!=Screen.Playing||Entering==null||EnterClock<EnterSkip)return false;EndEntrance();return true;}
@@ -45,7 +47,7 @@ public sealed class DadThrowFlow
     // The purse as the player sees it: what is saved, plus those sent back in the fight still going on.
     public int Coins {get{return Save.coins+(Model!=null&&!banked?Earned:0);}}
     // What the stage in hand has earned so far (it stays readable on the result card).
-    public int Earned {get{return Model!=null?DadThrowTuner.Pay(Model.Killed,Heat):0;}}
+    public int Earned {get{return Model!=null?DadThrowTuner.Pay(Model.Killed,Heat)+Model.Bounty:0;}}
     // The difficulty tuner, when the game has one, and how far the stage in hand was eased or heated when it
     // started (0 when nothing was owed). The player is never shown these.
     readonly DadThrowTuner tuner;
@@ -91,7 +93,7 @@ public sealed class DadThrowFlow
         // for a save that is already past that stage, on the next stage he turns up in.
         Entering=null;EnterClock=0;
         foreach(DadThrowStage.Group g in stages[index].groups)
-            if(g.kind!=null&&g.kind.entrance!=null&&!Save.met.Contains(g.kind.id)){Entering=g.kind;break;}
+            if(g.kind!=null&&g.kind.entrance!=null&&g.kind.boss==null&&!Save.met.Contains(g.kind.id)){Entering=g.kind;break;}
     }
     // One won for each challenger sent back, once per stage start, whether the stage was won, lost or left.
     void Bank(bool persist=true)
@@ -160,6 +162,8 @@ public sealed class DadThrowFlow
             return;
         }
         Model.Tick(dt);
+        DadThrowModel.Enemy chief=Model.phase==DadThrowModel.Phase.Playing?Model.Chief:null;
+        if(chief!=null&&chief.kind.entrance!=null&&chief.x<=DadThrowModel.Width-BossShown&&!Save.met.Contains(chief.kind.id)){Entering=chief.kind;EnterClock=0;primed=true;return;}
         if(Model.phase==DadThrowModel.Phase.Lost){if(tuner!=null)DadThrowTuner.Lost(Save,Stage.id);Bank();Now=Screen.Defeat;}
         else if(Model.phase==DadThrowModel.Phase.WaveClear)Cleared();
     }

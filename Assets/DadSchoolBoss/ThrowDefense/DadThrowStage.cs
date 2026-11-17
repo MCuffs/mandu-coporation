@@ -20,6 +20,10 @@ public sealed class DadThrowStage
         // shoe: the advice is about the shoe (the card shows it); otherwise it is about the ball.
         public sealed class Entrance { public string resource,name,shout,hint;public float pivotX,pivotY,stand,canvas;public bool shoe; }
         public Entrance entrance;
+        // A chapter's boss (DadThrowModel.BossStep): the pictures for what he does besides walking, how wide he is
+        // to a thrown thing, and what sending him back pays on top of the one won everyone pays.
+        public sealed class Boss { public string brace,dash,hit,dazed,roar,fly;public float half;public int bounty; }
+        public Boss boss;
         // Whole-canvas rectangle that stands the entrance picture's body `height` tall with its feet on (x, ground).
         public Rect EntrancePlace(float x,float ground,float height)
         {float k=height/entrance.stand;return new Rect(x-entrance.pivotX*k,ground-entrance.pivotY*k,entrance.canvas*k,entrance.canvas*k);}
@@ -83,6 +87,15 @@ public sealed class DadThrowStageSet
                 string with=DadThrowJson.TextOr(word,"with","shoe",own);
                 if(with!="shoe"&&with!="golf")throw new ArgumentException(own+" is done with the shoe or with golf, not with "+with);
                 kind.entrance.shoe=with=="shoe";
+            }
+            if(DadThrowJson.Has(map,"boss"))
+            {
+                string own=owner+" boss";var word=DadThrowJson.Map(map["boss"],own);
+                kind.boss=new DadThrowStage.Kind.Boss{brace=DadThrowJson.Text(word,"brace",own),dash=DadThrowJson.Text(word,"dash",own),hit=DadThrowJson.Text(word,"hit",own),
+                    dazed=DadThrowJson.Text(word,"dazed",own),roar=DadThrowJson.Text(word,"roar",own),fly=DadThrowJson.Text(word,"fly",own),
+                    half=DadThrowJson.NumberOr(word,"bodyHalf",DadThrowModel.BodyHalf,own),bounty=(int)DadThrowJson.NumberOr(word,"bounty",0,own)};
+                if(kind.boss.half<DadThrowModel.BodyHalf||kind.boss.bounty<0)throw new ArgumentException(own+" needs a body at least as wide as anyone's and a bounty that is not negative");
+                if(kind.guards)throw new ArgumentException(own+" cannot also carry a tray");
             }
             foreach(object value in DadThrowJson.List(Need(map,"heights",owner),owner+" heights"))
             {if(!(value is double)||(double)value<=0)throw new ArgumentException(owner+" has a height that is not above zero");kind.heights.Add((float)(double)value);}

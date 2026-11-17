@@ -202,6 +202,47 @@ public static class DadThrowRemote
         nextStep=EditorApplication.timeSinceStartup;
         Note("shop audit started: "+folder);
     }
+    // The boss of 1-5: his entrance in the middle of the fight, then each thing he does stood up by hand, so
+    // every picture of his is on a screen once. A bot keeps the street busy meanwhile.
+    static void BossAudit(string folder)
+    {
+        steps.Clear();bot=null;DadThrowPrototype g=Game;
+        if(g==null){Note("boss audit: no DadThrowPrototype in the open scene");return;}
+        Action<string> shot=name=>Shot(Path.Combine(folder,name+".png"));
+        Func<DadThrowFlow.Screen,Func<bool>> on=screen=>()=>g.Flow.Now==screen;
+        Func<bool> fighting=()=>g.Flow.Now==DadThrowFlow.Screen.Playing&&g.Model!=null;
+        Func<DadThrowModel.Enemy> chief=()=>fighting()?g.Model.Chief:null;
+        Action<DadThrowModel.Mood,float> pose=(mood,x)=>
+        {
+            DadThrowModel.Enemy c=chief();if(c==null){Note("no boss on the street for "+mood);return;}
+            c.mood=mood;c.moodClock=0;c.slow=0;c.guard=mood==DadThrowModel.Mood.Brace||mood==DadThrowModel.Mood.Dash;if(x>0)c.x=x;
+        };
+        Step(0,()=>{Size(1920,1080);g.DebugScripted(true);g.DebugStartAt(4,0,"fast","tough","guard");});
+        Until(on(DadThrowFlow.Screen.Title),3);
+        Step(.3f,()=>{Note("start: "+g.Flow.Start()+" "+g.Flow.Stage.id);Play(DadThrowGrowthChecks.Hand(7,true,.2f,.9f));});
+        Until(()=>g.Flow.Entering!=null&&g.Flow.Entering.boss!=null&&g.Flow.EnterClock>=1.2f,40,()=>shot("boss-01-entrance-in-the-middle-of-the-fight"));
+        Step(.2f,()=>Note("entrance skipped: "+g.Flow.SkipEntrance()));
+        Until(()=>chief()!=null&&chief().x<1170,8,()=>shot("boss-02-walking-in-under-his-bar"));
+        Step(.1f,()=>pose(DadThrowModel.Mood.Brace,900));
+        Step(.4f,()=>shot("boss-03-braced-ball-stops-shoe-button-lit"));
+        Step(.05f,()=>pose(DadThrowModel.Mood.Dash,0));
+        Step(.3f,()=>shot("boss-04-dashing"));
+        Step(.05f,()=>pose(DadThrowModel.Mood.Dazed,0));
+        Step(.6f,()=>shot("boss-05-dazed-after-a-shoe"));
+        Step(.05f,()=>{DadThrowModel.Enemy c=chief();if(c!=null)c.raged=true;pose(DadThrowModel.Mood.Roar,0);});
+        Step(.35f,()=>shot("boss-06-losing-his-temper"));
+        Step(.05f,()=>pose(DadThrowModel.Mood.Back,g.Model!=null?g.Model.Field.Gate+90:0));
+        Step(.3f,()=>shot("boss-07-trotting-back-out-from-the-gate"));
+        Step(.05f,()=>{DadThrowModel.Enemy c=chief();if(c!=null){c.hp=1;pose(DadThrowModel.Mood.Walk,700);}});
+        Until(()=>!fighting()||chief()==null,12);
+        Step(.3f,()=>shot("boss-08-sent-flying-with-his-bounty"));
+        Until(()=>g.Flow.Now==DadThrowFlow.Screen.Clear||g.Flow.Now==DadThrowFlow.Screen.Defeat||g.Flow.Now==DadThrowFlow.Screen.Ending,90,()=>bot=null);
+        Step(.3f,()=>Note("after the fight: "+g.Flow.Now+", skip: "+g.Flow.Skip()));
+        Step(.5f,()=>shot("boss-09-result"));
+        Step(.6f,()=>{g.DebugScripted(false);g.DebugReal();Note("boss audit done: "+folder);});
+        nextStep=EditorApplication.timeSinceStartup;
+        Note("boss audit started: "+folder);
+    }
     static void Poll()
     {
         if(EditorApplication.isPlaying)
@@ -241,6 +282,10 @@ public static class DadThrowRemote
             else if(command.StartsWith("capture:"))Shot(command.Substring(8));
             else if(command.StartsWith("audit:"))Audit(command.Substring(6));
             else if(command.StartsWith("shopaudit:"))ShopAudit(command.Substring(10));
+            else if(command.StartsWith("bossaudit:"))BossAudit(command.Substring(10));
+            // at:5 opens the player's own save at the fifth stage, in memory only; real goes back to the save on disk.
+            else if(command.StartsWith("at:")){int number=int.Parse(command.Substring(3));Game.DebugPlayAt(number-1);Note("the player's save, in memory only, opened at stage "+number+" ("+DadThrowCurve.Id(number)+")");}
+            else if(command=="real"){Game.DebugReal();Note("back on the player's own save");}
             else Note("unknown command");
         }
         catch(Exception error){Note("command failed: "+error);}
