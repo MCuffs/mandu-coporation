@@ -163,15 +163,20 @@ public static class DadThrowRemote
         Step(.4f,()=>shot("shop-04-shop-after-1-1"));
         Step(.3f,()=>Note("bought Sticky: "+g.Flow.Buy(DadThrowShop.Item.Sticky)));
         Step(.4f,()=>shot("shop-05-shop-after-buying"));
+        // 1-3 is the first stage with the chair-holder: his entrance.
+        Step(.3f,()=>g.DebugStartAt(2,100));
+        Until(on(DadThrowFlow.Screen.Title),3);
+        Step(.3f,()=>Note("start: "+g.Flow.Start()+" "+g.Flow.Stage.id));
+        Until(()=>g.Flow.Entering!=null&&g.Flow.EnterClock>=1.2f,3,()=>shot("shop-06-entrance-chair-holder"));
         // Further on, with a purse: stage 1-4 is the first with trays.
         Step(.3f,()=>g.DebugStartAt(3,300));
         Until(on(DadThrowFlow.Screen.Title),3);
         // The tray-holder's entrance: once while he is still sliding in, once when everything is up.
         Step(.3f,()=>Note("start: "+g.Flow.Start()+" "+g.Flow.Stage.id));
-        Until(()=>g.Flow.Entering!=null&&g.Flow.EnterClock>=.12f,2,()=>shot("shop-06-entrance-coming-in"));
-        Until(()=>g.Flow.Entering!=null&&g.Flow.EnterClock>=1.2f,3,()=>shot("shop-07-entrance-tray-holder"));
+        Until(()=>g.Flow.Entering!=null&&g.Flow.EnterClock>=.12f,2,()=>shot("shop-07-entrance-coming-in"));
+        Until(()=>g.Flow.Entering!=null&&g.Flow.EnterClock>=1.2f,3,()=>shot("shop-08-entrance-tray-holder"));
         Step(.2f,()=>{Note("entrance skipped: "+g.Flow.SkipEntrance());Play(flat);});
-        Until(()=>!fighting()||g.Model.BlockSerial>=2,14,()=>shot("shop-08-stage-1-4-tray-stops-the-ball"));
+        Until(()=>!fighting()||g.Model.BlockSerial>=2,14,()=>shot("shop-09-stage-1-4-tray-stops-the-ball"));
         // The hand has to be ready again before the shoe can leave it.
         Step(.05f,()=>bot=null);
         Until(()=>!fighting()||g.Model.CanFire,2,()=>
@@ -185,10 +190,10 @@ public static class DadThrowRemote
             foreach(Vector2 pull in DadThrowBots.Pulls){m.Predict(DadThrowModel.Weapon.Shoe,pull,path);float miss=Mathf.Abs(path[path.Count-1].x-holder.x);if(miss<off){off=miss;best=pull;}}
             g.DebugSelect(DadThrowModel.Weapon.Shoe);Note("shoe at the tray: "+m.Fire(DadThrowModel.Weapon.Shoe,best));
         });
-        Until(()=>!fighting()||g.Model.enemies.Exists(e=>e.kind!=null&&e.kind.guards&&!e.guard),3,()=>shot("shop-09-shoe-knocks-the-tray-away"));
+        Until(()=>!fighting()||g.Model.enemies.Exists(e=>e.kind!=null&&e.kind.guards&&!e.guard),3,()=>shot("shop-10-shoe-knocks-the-tray-away"));
         // Nobody throws from here: the stage is lost, and the card offers the shop.
         Until(on(DadThrowFlow.Screen.Defeat),60);
-        Step(.5f,()=>shot("shop-10-defeat-with-shop"));
+        Step(.5f,()=>shot("shop-11-defeat-with-shop"));
         Step(.6f,()=>{g.DebugScripted(false);g.DebugReal();Note("shop audit done: "+folder);});
         nextStep=EditorApplication.timeSinceStartup;
         Note("shop audit started: "+folder);

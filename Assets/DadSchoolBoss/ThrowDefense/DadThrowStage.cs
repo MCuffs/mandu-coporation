@@ -15,7 +15,8 @@ public sealed class DadThrowStage
         public string BareFrame(int index){return bare+"_"+index;}
         // The big picture, the line he shouts and the advice shown the first time this opponent comes on
         // (DadThrowFlow.Entering). The picture sits on the same canvas as the walking frames.
-        public sealed class Entrance { public string resource,name,shout,hint;public float pivotX,stand; }
+        // shoe: the advice is about the shoe (the card shows it); otherwise it is about the ball.
+        public sealed class Entrance { public string resource,name,shout,hint;public float pivotX,stand;public bool shoe; }
         public Entrance entrance;
         // Whole-canvas rectangle that stands the entrance picture `height` tall with its feet on (x, ground).
         public Rect EntrancePlace(float x,float ground,float height){float k=height/entrance.stand;return new Rect(x-entrance.pivotX*k,ground-pivotY*k,canvas*k,canvas*k);}
@@ -75,6 +76,9 @@ public sealed class DadThrowStageSet
                 kind.entrance=new DadThrowStage.Kind.Entrance{resource=DadThrowJson.Text(word,"resource",own),name=DadThrowJson.Text(word,"name",own),
                     shout=DadThrowJson.Text(word,"shout",own),hint=DadThrowJson.Text(word,"hint",own),pivotX=DadThrowJson.Number(word,"pivotX",own),stand=DadThrowJson.Number(word,"standPixels",own)};
                 if(kind.entrance.stand<=0)throw new ArgumentException(own+" needs a standing height above zero");
+                string with=DadThrowJson.TextOr(word,"with","shoe",own);
+                if(with!="shoe"&&with!="golf")throw new ArgumentException(own+" is done with the shoe or with golf, not with "+with);
+                kind.entrance.shoe=with=="shoe";
             }
             foreach(object value in DadThrowJson.List(Need(map,"heights",owner),owner+" heights"))
             {if(!(value is double)||(double)value<=0)throw new ArgumentException(owner+" has a height that is not above zero");kind.heights.Add((float)(double)value);}

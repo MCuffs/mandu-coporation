@@ -400,7 +400,12 @@ PASS the stage reached is kept; start goes on from it
 PASS a bot that never misses clears the first three stages, buying the cheapest thing it can after each fight
 PASS the stage file gives the tray-holder an entrance: a picture, a name, a line to shout and what to do about him
 PASS an entrance in the stage file needs all its words and a standing height; one without is refused
-PASS the tray-holder makes his entrance on 1-4, the first stage he is in, and on no other
+PASS the chair-holder has an entrance too, with advice about the ball where the tray-holder's is about the shoe
+PASS advice can be about the ball or the shoe and nothing else
+PASS the chair-holder makes his entrance on 1-3 and the tray-holder on 1-4, the first stage each is in, and on no other
+PASS starting 1-3 for the first time brings the chair-holder on
+PASS and when he has been seen through he is the one remembered
+PASS a stage with two strangers in it brings on one each time it starts, never two in a row, and then nobody
 PASS starting 1-4 for the first time brings him on
 PASS while he comes on the street holds still with his first people in view, and a tap in the first moment does nothing
 PASS an entrance can be paused and comes back
@@ -502,4 +507,4 @@ LAYOUT painted_gate 145.41 570 0 0
 LAYOUT road_edge 0 622.41 0 0
 LAYOUT sand_top 0 522.13 0 0
 
-TOTAL PASS: 401
+TOTAL PASS: 406

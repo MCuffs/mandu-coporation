@@ -534,7 +534,8 @@ public sealed class DadThrowPrototype:MonoBehaviour
         DadUi.Panel(DadThrowLayout.EntranceShout,Paper,Ink);Text(DadThrowLayout.EntranceShout,words.shout,34,Ink,display);
         // What to do about him, with the thing to do it with.
         DadUi.Panel(DadThrowLayout.EntranceHint,Gold,Ink);
-        GUI.DrawTexture(layout.ItemRect(layout.Shoe,DadThrowLayout.EntranceHintIcon,92),shoe);
+        if(words.shoe)GUI.DrawTexture(layout.ItemRect(layout.Shoe,DadThrowLayout.EntranceHintIcon,92),shoe);
+        else GUI.DrawTexture(layout.ItemRect(layout.Golf,DadThrowLayout.EntranceHintIcon,60),golf);
         Text(DadThrowLayout.EntranceHintText,words.hint,29,Ink,bold,TextAnchor.MiddleLeft);
         if(t>=DadThrowFlow.EnterSkip)Outlined(DadThrowLayout.EntranceSkip,"화면을 누르면 시작",22,Paper,Ink,2,bold);
     }

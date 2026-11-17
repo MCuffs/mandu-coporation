@@ -14,6 +14,15 @@
     },
     "tough": {
       "resource": "DadV5/chars/chair/chair_walk",
+      "entrance": {
+        "resource": "DadV5/chars/chair/chair_windup_0",
+        "pivotX": 392,
+        "standPixels": 602,
+        "name": "의자 아저씨",
+        "shout": "한 방? 간지럽지도 않다!",
+        "hint": "공을 여러 번 맞혀야 쓰러집니다",
+        "with": "golf"
+      },
       "frames": 2,
       "facesLeft": true,
       "canvas": 768,
@@ -42,7 +51,8 @@
         "standPixels": 531,
         "name": "쟁반 아저씨",
         "shout": "공? 쟁반으로 다 막아 주지!",
-        "hint": "슬리퍼를 먼저 맞혀 쟁반을 떨어뜨리세요"
+        "hint": "슬리퍼를 먼저 맞혀 쟁반을 떨어뜨리세요",
+        "with": "shoe"
       },
       "frames": 2,
       "facesLeft": true,
