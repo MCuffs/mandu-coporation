@@ -51,6 +51,16 @@ public sealed class DadThrowLayout
     // ── title (plan §6.2) ──
     public static readonly Rect TitleText=new Rect(290,75,700,165),StartButton=new Rect(490,600,300,72);
 
+    // ── 연속전 (DadThrowRun): a second way in on the title, and three offers side by side between waves ──
+    public static readonly Rect RunButton=new Rect(820,606,230,60),RunBest=new Rect(820,668,230,30),PickHeading=new Rect(0,104,W,64);
+    public const float PickWidth=300,PickHeight=336,PickGap=28,PickTop=184;
+    public static Rect PickCard(int index,int count){float total=count*PickWidth+(count-1)*PickGap;return new Rect((W-total)/2+index*(PickWidth+PickGap),PickTop,PickWidth,PickHeight);}
+    // Inside a card: the thing's picture, its name, what it does, and whether it is new or one more of the same.
+    public static Vector2 PickIcon(Rect card){return new Vector2(card.center.x,card.y+78);}
+    public static Rect PickName(Rect card){return new Rect(card.x+12,card.y+140,card.width-24,48);}
+    public static Rect PickLine(Rect card){return new Rect(card.x+16,card.y+196,card.width-32,80);}
+    public static Rect PickLevel(Rect card){return new Rect(card.x+16,card.y+286,card.width-32,34);}
+
     // ── clear / defeat / pause cards (plan §6.3-6.5, sizes from the wide v2 screens) ──
     public static readonly Rect ResultCard=new Rect(650,218,460,330),PauseCard=new Rect(445,145,390,430);
     // The result pose stands left of the card. Feet point and scale come from the v2 screen (a 410-wide box for a 1254 picture).
@@ -192,6 +202,8 @@ public sealed class DadThrowLayout
         for(int i=0;i<HealthCells;i++)rect("health_cell_"+i,HealthCell(i));
         rect("remaining_label",RemainingLabel);rect("hint",Hint);rect("aim_area",AimArea);
         rect("title_art",TitleArt());rect("title_text",TitleText);rect("start_button",StartButton);
+        rect("run_button",RunButton);rect("run_best",RunBest);rect("pick_heading",PickHeading);
+        for(int i=0;i<DadThrowRun.Offered;i++)rect("pick_card_"+i,PickCard(i,DadThrowRun.Offered));
         rect("result_card",ResultCard);rect("pause_card",PauseCard);rect("hero_clear",HeroRect(Clear));rect("hero_retry",HeroRect(Retry));
         rect("clear_heading",ClearHeading);rect("clear_left",ClearLeft);rect("clear_right",ClearRight);rect("clear_word_name",ClearWordName);rect("clear_word_line",ClearWordLine);
         rect("gate_door",GateDoor);rect("story_dialogue",DadThrowStory.Dialogue);rect("story_name",DadThrowStory.DialogueName);rect("story_line",DadThrowStory.DialogueLine);rect("story_skip",DadThrowStory.Skip);

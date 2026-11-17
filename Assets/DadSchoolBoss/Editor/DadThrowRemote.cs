@@ -14,6 +14,7 @@ using UnityEngine;
 //   size:<w>x<h>    switch the Game view to a fixed resolution
 //   capture:<png>   save the Game view
 //   audit:<folder>  walk every screen with scripted input and save a picture of each (needs play, then pump)
+//   runaudit:<folder>  the same for 연속전: title, a wave, the three offers, later waves, the run's result
 //   stop            leave Play Mode
 //   refresh         pick up changed files (the editor does not look while it is in the background)
 // What happened is appended to Library/DadThrowRemote.log, errors and exceptions of the running game included.
@@ -139,6 +140,38 @@ public static class DadThrowRemote
         nextStep=EditorApplication.timeSinceStartup;
         Note("audit started: "+folder);
     }
+    // 연속전 once through: the title's second button, a wave, the offers, the waves where the quick and the tough
+    // ones join, and the card a run ends on. The bot that never misses plays, so the pictures do not depend on luck.
+    static void RunAudit(string folder)
+    {
+        steps.Clear();bot=null;DadThrowPrototype g=Game;
+        if(g==null){Note("run audit: no DadThrowPrototype in the open scene");return;}
+        Action<string> shot=name=>Shot(Path.Combine(folder,name+".png"));
+        Func<DadThrowFlow.Screen,Func<bool>> on=screen=>()=>g.Flow.Now==screen;
+        Func<string,float,Func<bool>> during=(wave,clock)=>()=>g.Flow.Now!=DadThrowFlow.Screen.Playing||(g.Flow.Stage.id==wave&&g.Model.Clock>=clock);
+        Step(0,()=>{Size(1920,1080);g.DebugScripted(true);g.DebugRestart();});
+        Until(on(DadThrowFlow.Screen.Title),3);
+        Step(.3f,()=>shot("run-01-title"));
+        Step(.2f,()=>{Note("run started: "+g.Flow.StartRun(7));Play(DadThrowBots.Spam);});
+        Until(during("1조",3),8,()=>shot("run-02-wave-1"));
+        Until(on(DadThrowFlow.Screen.Pick),60);
+        Step(.5f,()=>shot("run-03-offers-after-wave-1"));
+        Step(.3f,()=>Note("chose "+g.Flow.Run.Offers[0]+": "+g.Flow.Choose(0)));
+        Until(during("2조",4),10,()=>shot("run-04-wave-2-quick-ones"));
+        Until(on(DadThrowFlow.Screen.Pick),60);
+        Step(.5f,()=>shot("run-05-offers-after-wave-2"));
+        Step(.3f,()=>Note("chose "+g.Flow.Run.Offers[1]+": "+g.Flow.Choose(1)));
+        Until(during("3조",6),12,()=>shot("run-06-wave-3-tough-ones"));
+        Until(on(DadThrowFlow.Screen.Pick),60);
+        Step(.3f,()=>Note("chose "+g.Flow.Run.Offers[0]+": "+g.Flow.Choose(0)));
+        // Nobody throws from here: the run ends on its result card.
+        Step(.2f,()=>bot=null);
+        Until(on(DadThrowFlow.Screen.Defeat),60);
+        Step(.5f,()=>shot("run-07-run-over"));
+        Step(.6f,()=>{g.DebugScripted(false);g.DebugReal();Note("run audit done: "+folder);});
+        nextStep=EditorApplication.timeSinceStartup;
+        Note("run audit started: "+folder);
+    }
     static void Poll()
     {
         if(EditorApplication.isPlaying)
@@ -177,6 +210,7 @@ public static class DadThrowRemote
             else if(command.StartsWith("size:")){string[] wh=command.Substring(5).Split('x');Size(int.Parse(wh[0]),int.Parse(wh[1]));}
             else if(command.StartsWith("capture:"))Shot(command.Substring(8));
             else if(command.StartsWith("audit:"))Audit(command.Substring(6));
+            else if(command.StartsWith("runaudit:"))RunAudit(command.Substring(9));
             else Note("unknown command");
         }
         catch(Exception error){Note("command failed: "+error);}

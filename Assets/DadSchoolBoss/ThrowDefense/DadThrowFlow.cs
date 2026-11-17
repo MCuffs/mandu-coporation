@@ -7,11 +7,13 @@ using UnityEngine;
 //   Boot -> Title -> (first time: Intro) -> Playing <-> Paused -> Clear or Defeat
 //   Clear -> next stage / same stage again / Title        Defeat -> same stage again / Title
 //   The chapter's last stage, first time cleared: Playing -> Ending -> Clear
+//   연속전 (DadThrowRun), from the title: Playing -> Pick (one of three offers) -> Playing the next wave ... -> Defeat
+//   Defeat there -> a new run / Title. A run never touches the stages, the story or what the save has opened.
 // A request that does not belong to the current screen is refused, which is also what stops a double tap
 // from starting two stages.
 public sealed class DadThrowFlow
 {
-    public enum Screen { Boot, Title, Intro, Playing, Paused, Clear, Defeat, Ending }
+    public enum Screen { Boot, Title, Intro, Playing, Paused, Clear, Defeat, Ending, Pick }
     // Logo: 0.2 in, 0.8 held, 0.2 out (plan §6.1).
     public const float BootTime=1.2f,BootFade=.2f;
     public Screen Now {get;private set;}
@@ -22,6 +24,9 @@ public sealed class DadThrowFlow
     // Counts every fresh start of a stage, so the screen knows when to forget the last attempt's leftovers.
     public int Runs {get;private set;}
     public readonly DadThrowStory Story;public readonly DadThrowSave Save;
+    // The run being played, or null while the stages are. BestWave: the furthest wave any run has reached.
+    public DadThrowRun Run {get;private set;}
+    public int BestWave {get{return Save.bestWave;}}
     // Seconds into the opening or the ending.
     public float StoryClock {get;private set;}
     // After the opening the street holds still, first challenger in view, until the player's first pull.
@@ -31,18 +36,23 @@ public sealed class DadThrowFlow
     // Why the last save did not reach the disk, if it did not. Play goes on from memory.
     public string SaveProblem {get;private set;}
     readonly IList<DadThrowStage> stages;readonly DadThrowField field;readonly string savePath;float boot;bool primed;
+    readonly IDictionary<string,DadThrowStage.Kind> kinds;
 
     // story: null plays no opening or ending. savePath: null keeps progress in memory only (checks, captures).
-    public DadThrowFlow(IList<DadThrowStage> stages,DadThrowField field,DadThrowStory story=null,DadThrowSave save=null,string savePath=null)
+    // kinds: the opponents the stage file declares; without them the title has no 연속전.
+    public DadThrowFlow(IList<DadThrowStage> stages,DadThrowField field,DadThrowStory story=null,DadThrowSave save=null,string savePath=null,
+        IDictionary<string,DadThrowStage.Kind> kinds=null)
     {
         if(stages==null||stages.Count==0)throw new ArgumentException("the flow needs at least one stage");
         if(field==null)throw new ArgumentNullException("field");
-        this.stages=stages;this.field=field;this.savePath=savePath;Story=story;Save=save??new DadThrowSave();
+        this.stages=stages;this.field=field;this.savePath=savePath;this.kinds=kinds;Story=story;Save=save??new DadThrowSave();
         // A save from a longer build may point past the stages this one has.
         Furthest=Mathf.Clamp(Save.furthest,0,stages.Count-1);Now=Screen.Boot;
     }
-    public DadThrowStage Stage {get{return stages[StageIndex];}}
-    public bool HasNext {get{return StageIndex+1<stages.Count;}}
+    // In a run the stage is the wave on the street.
+    public DadThrowStage Stage {get{return Run!=null?Run.Stage:stages[StageIndex];}}
+    public bool HasNext {get{return Run==null&&StageIndex+1<stages.Count;}}
+    public bool RunAvailable {get{return kinds!=null&&kinds.ContainsKey("normal");}}
     // The title offers 계속하기 once a later stage has been opened.
     public bool Continuing {get{return Furthest>0;}}
     public float BootAlpha {get{return Mathf.Clamp01(Mathf.Min(boot,BootTime-boot)/BootFade);}}
@@ -59,6 +69,16 @@ public sealed class DadThrowFlow
     // This is the one way a stage begins, whether the opening ran to its end, was skipped, or never played.
     void Load(int index,bool wait=false)
     {StageIndex=index;Model=new DadThrowModel(field,stages[index]);Runs++;Word=null;WaitingForAim=wait;primed=false;Now=Screen.Playing;}
+    // A wave of the run: the gate keeps its touches and the throws keep the picks. Nothing waits for a first pull.
+    void LoadWave(){Model=new DadThrowModel(field,Run.Stage,Run.Health,Run.Rules);Runs++;Word=null;WaitingForAim=false;primed=false;Now=Screen.Playing;}
+    // 연속전 from the title. The seed decides which offers come up, so a check can replay a run.
+    public bool StartRun(int seed)
+    {
+        if(Now!=Screen.Title||!RunAvailable)return false;
+        Run=new DadThrowRun(kinds,stages[0].backgroundKey,seed);LoadWave();return true;
+    }
+    // One of the offers on the Pick screen; the next wave starts at once.
+    public bool Choose(int index){if(Now!=Screen.Pick||!Run.Take(index))return false;LoadWave();return true;}
     public bool Start()
     {
         if(Now!=Screen.Title)return false;
@@ -73,11 +93,17 @@ public sealed class DadThrowFlow
     public void AimStarted(){WaitingForAim=false;}
     public bool Pause(){if(Now!=Screen.Playing)return false;Now=Screen.Paused;return true;}
     public bool Resume(){if(Now!=Screen.Paused)return false;Now=Screen.Playing;return true;}
-    public bool Retry(){if(Now!=Screen.Defeat&&Now!=Screen.Clear)return false;Load(StageIndex);return true;}
+    // After a run, "again" is a new run from wave 1: the old seed moved on gives other offers.
+    public bool Retry()
+    {
+        if(Now!=Screen.Defeat&&Now!=Screen.Clear)return false;
+        if(Run!=null){Run=Run.Again(Run.Seed*31+Run.Wave+1);LoadWave();return true;}
+        Load(StageIndex);return true;
+    }
     // There is no stage after the last one to move to.
     public bool Next(){if(Now!=Screen.Clear||!HasNext)return false;Load(StageIndex+1);return true;}
     // Leaving drops the stage in progress; what was opened stays opened.
-    public bool ToTitle(){if(Now!=Screen.Paused&&Now!=Screen.Clear&&Now!=Screen.Defeat)return false;Model=null;Now=Screen.Title;return true;}
+    public bool ToTitle(){if(Now!=Screen.Paused&&Now!=Screen.Clear&&Now!=Screen.Defeat)return false;Model=null;Run=null;Now=Screen.Title;return true;}
     // Android back: pause a fight; skip a story; from the pause or a result, go to the title.
     public bool Back(){return Now==Screen.Playing?Pause():Now==Screen.Intro||Now==Screen.Ending?Skip():ToTitle();}
     // The app went to the background or lost focus. Only a live fight changes; a result never turns back into a fight.
@@ -92,6 +118,21 @@ public sealed class DadThrowFlow
         Word=first&&!closes?stage.after:null;
         if(closes){StoryClock=0;Now=Screen.Ending;}else Now=Screen.Clear;
     }
+    // A run's wave ended one way or the other. The furthest wave reached is the one thing a run leaves behind.
+    void RunTick()
+    {
+        if(Model.phase==DadThrowModel.Phase.Lost)
+        {
+            Run.Lost(Model);Now=Screen.Defeat;
+            if(Run.Wave>Save.bestWave){Save.bestWave=Run.Wave;Persist();}
+        }
+        else if(Model.phase==DadThrowModel.Phase.WaveClear)
+        {
+            Run.Cleared(Model);
+            // With nothing left to offer the next wave is already set.
+            if(Run.Offers.Count>0)Now=Screen.Pick;else LoadWave();
+        }
+    }
     public void Tick(float dt)
     {
         if(Now==Screen.Boot){boot+=dt;if(boot>=BootTime)Now=Screen.Title;return;}
@@ -105,6 +146,7 @@ public sealed class DadThrowFlow
             return;
         }
         Model.Tick(dt);
+        if(Run!=null){RunTick();return;}
         if(Model.phase==DadThrowModel.Phase.Lost)Now=Screen.Defeat;
         else if(Model.phase==DadThrowModel.Phase.WaveClear)Cleared();
     }

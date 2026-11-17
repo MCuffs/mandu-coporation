@@ -11,6 +11,26 @@
       "pivotY": 720,
       "standPixels": 560,
       "heights": [102, 107, 112]
+    },
+    "tough": {
+      "resource": "DadV5/chars/chair/chair_walk",
+      "frames": 2,
+      "facesLeft": true,
+      "canvas": 768,
+      "pivotX": 368,
+      "pivotY": 720,
+      "standPixels": 545,
+      "heights": [118, 122, 126]
+    },
+    "fast": {
+      "resource": "DadV5/chars/dodge/dodge_walk",
+      "frames": 2,
+      "facesLeft": true,
+      "canvas": 768,
+      "pivotX": 384,
+      "pivotY": 720,
+      "standPixels": 560,
+      "heights": [96, 100, 104]
     }
   },
   "stages": [

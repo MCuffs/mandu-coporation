@@ -26,6 +26,11 @@ public sealed class DadThrowRules
     // How fast the street runs while the player is pulling back. 1 is full speed. The first prototype slowed to
     // 0.35, which kept the whole fight in slow motion for anyone who throws without pause.
     public float AimPace=1;
+    // What a pick in a 연속전 run can change (DadThrowRun). A stage plays with these defaults, which leave every
+    // throw as it was: one ball, one point of hurt, a shoe that only pushes, a hand that always waits its reload.
+    // GolfCount: balls leaving the hand together. ShoeBlast: hurt done to everyone a shoe gathers.
+    // ChainReload: a ball that reaches this many people readies the hand at once (0 = never).
+    public int GolfDamage=1,GolfCount=1,ShoeBlast=0,ChainReload=0;
     public DadThrowRules Copy(){return (DadThrowRules)MemberwiseClone();}
 }
 
@@ -37,6 +42,8 @@ public sealed class DadThrowModel
     public const float Width=1280,Height=720;
     // Radius of the thrown thing itself in the hit test (a person adds 25).
     public const float GolfHit=11,ShoeHit=22;
+    // Degrees between the balls of a fan when more than one leaves the hand (run pick).
+    public const float FanDegrees=7;
     public enum Weapon { Golf, Shoe }
     public enum Phase { Playing, WaveClear, Lost }
     public sealed class Enemy { public int id,hp; public float x,speed,slow,flash,along; public DadThrowStage.Kind kind; }
@@ -61,7 +68,7 @@ public sealed class DadThrowModel
     public int Total {get{return Stage!=null?Stage.Total:12+Math.Min(18,Wave-1)*4;}}
     public float Interval {get{return Math.Max(.22f,.8f-(Wave-1)*.045f);}}
     public int UpgradeCost {get{return 30+Level*25;}}
-    public bool CanFire {get{return phase==Phase.Playing&&Reload<=0&&projectiles.Count<6;}}
+    public bool CanFire {get{return phase==Phase.Playing&&Reload<=0&&projectiles.Count<6*Math.Max(1,Rules.GolfCount);}}
     public DadThrowRules Rules=new DadThrowRules();
     float spawnClock;int nextId,nextGroup;
     readonly List<Enemy> touched=new List<Enemy>();
@@ -74,6 +81,9 @@ public sealed class DadThrowModel
         if(field==null)throw new ArgumentNullException("field");if(stage==null)throw new ArgumentNullException("stage");
         Field=field;Stage=stage;Wave=1;Health=stage.health;
     }
+    // One wave of a run (DadThrowRun): the gate keeps the touches it has left, the throws keep what was picked.
+    public DadThrowModel(DadThrowField field,DadThrowStage stage,int health,DadThrowRules rules):this(field,stage)
+    {if(rules==null)throw new ArgumentNullException("rules");Health=Math.Max(1,health);Rules=rules;}
     // Growth between waves belongs to the wave prototype. Stage rewards are not connected yet (plan §15).
     public bool Upgrade(){if(Stage!=null||phase!=Phase.WaveClear||Level>=5||Coins<UpgradeCost)return false;Coins-=UpgradeCost;Level++;return true;}
     public bool NextWave(){if(Stage!=null||phase!=Phase.WaveClear)return false;Wave++;Spawned=Killed=Escaped=0;spawnClock=Reload=0;phase=Phase.Playing;return true;}
@@ -88,7 +98,14 @@ public sealed class DadThrowModel
     public bool Fire(Weapon weapon,Vector2 pull)
     {
         if(!CanFire||pull.magnitude<18)return false;
-        projectiles.Add(new Projectile{weapon=weapon,pos=Field.Muzzle,vel=LaunchVelocity(pull),remaining=weapon==Weapon.Golf?Rules.Pierce+Level:1});
+        Vector2 launch=LaunchVelocity(pull);
+        projectiles.Add(new Projectile{weapon=weapon,pos=Field.Muzzle,vel=launch,remaining=weapon==Weapon.Golf?Rules.Pierce+Level:1});
+        // Extra balls (run pick) leave with the aimed one, fanned a little above and below it: 7 degrees up, 7 down, 14 up...
+        for(int extra=1;weapon==Weapon.Golf&&extra<Rules.GolfCount;extra++)
+        {
+            float turn=(extra+1)/2*FanDegrees*(extra%2==1?-1:1)*Mathf.Deg2Rad,cos=Mathf.Cos(turn),sin=Mathf.Sin(turn);
+            projectiles.Add(new Projectile{weapon=weapon,pos=Field.Muzzle,vel=new Vector2(launch.x*cos-launch.y*sin,launch.x*sin+launch.y*cos),remaining=Rules.Pierce+Level});
+        }
         Reload=ReloadTotal=weapon==Weapon.Golf?Rules.GolfReload:Rules.ShoeReload;return true;
     }
     public static bool SweptHit(Vector2 from,Vector2 to,Vector2 point,float radius)
@@ -168,12 +185,19 @@ public sealed class DadThrowModel
                     // Knock the leading group back into its followers. This changes spacing, not just damage.
                     // The spot is taken before the struck person can be removed, so the push still happens around it.
                     float center=e.x;
-                    foreach(Enemy target in enemies)if(Mathf.Abs(target.x-center)<Rules.ShoeRadius)
-                    {target.x=Mathf.Min(Width+40,target.x+Rules.ShoePush);target.slow=Rules.SlowTime;target.flash=.16f;}
+                    for(int k=enemies.Count-1;k>=0;k--)
+                    {
+                        Enemy target=enemies[k];if(Mathf.Abs(target.x-center)>=Rules.ShoeRadius)continue;
+                        target.x=Mathf.Min(Width+40,target.x+Rules.ShoePush);target.slow=Rules.SlowTime;target.flash=.16f;
+                        // A blasting shoe (run pick) also hurts everyone it gathers. The struck one is settled just below.
+                        if(Rules.ShoeBlast>0&&target!=e){target.hp-=Rules.ShoeBlast;if(target.hp<=0){enemies.RemoveAt(k);Killed++;}}
+                    }
                 }
-                p.hit.Add(e.id);p.remaining--;e.hp-=p.weapon==Weapon.Shoe?Rules.ShoeDamage:1+Level/3;e.flash=.16f;
+                p.hit.Add(e.id);p.remaining--;e.hp-=p.weapon==Weapon.Shoe?Rules.ShoeDamage+Rules.ShoeBlast:Rules.GolfDamage+Level/3;e.flash=.16f;
                 if(e.hp<=0){enemies.Remove(e);Killed++;if(Stage==null)Coins+=2;}
                 BestChain=Math.Max(BestChain,p.hit.Count);
+                // A ball through a whole pack readies the hand at once (run pick): the reward for waiting for a pack.
+                if(p.weapon==Weapon.Golf&&Rules.ChainReload>0&&p.hit.Count==Rules.ChainReload)Reload=0;
                 if(p.weapon==Weapon.Golf&&p.hit.Count>=3){ChainSerial++;ChainCount=p.hit.Count;ChainAt=p.pos;}
                 if(p.remaining<=0)break;
             }

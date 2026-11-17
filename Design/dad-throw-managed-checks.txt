@@ -332,14 +332,65 @@ STAGE 1-1 no throws: defeat at 5.4s, house 0/5, golf 0, shoe 0, most people one 
 STAGE 1-1 golf thrown at once: clear at 11.8s, house 5/5, golf 40, shoe 0, most people one ball reached 7, got in 0
 STAGE 1-1 golf held for three: clear at 11.8s, house 5/5, golf 39, shoe 0, most people one ball reached 7, got in 0
 STAGE 1-1 shoe on the lead, then golf: clear at 15.4s, house 5/5, golf 20, shoe 9, most people one ball reached 12, got in 0
-NOTE 1-1 steady bot players (aim takes 0.45s, good 65% of the time): cleared 27 of 30, gate touched 1.4 times on average
-NOTE 1-1 hurried bot players (aim takes 0.7s, good 50% of the time): cleared 13 of 30, gate touched 3.8 times on average
+NOTE 1-1 steady bot players (aim takes 0.45s, good 65% of the time): cleared 28 of 30, gate touched 1.5 times on average
+NOTE 1-1 hurried bot players (aim takes 0.7s, good 50% of the time): cleared 13 of 30, gate touched 3.7 times on average
 STAGE 1-3 no throws: defeat at 4.5s, house 0/5, golf 0, shoe 0, most people one ball reached 0, got in 5
 STAGE 1-3 golf thrown at once: clear at 11.7s, house 4/5, golf 39, shoe 0, most people one ball reached 11, got in 1
 STAGE 1-3 golf held for three: clear at 11.7s, house 4/5, golf 39, shoe 0, most people one ball reached 11, got in 1
 STAGE 1-3 shoe on the lead, then golf: clear at 12.3s, house 5/5, golf 31, shoe 4, most people one ball reached 12, got in 0
-NOTE 1-3 steady bot players (aim takes 0.45s, good 65% of the time): cleared 14 of 30, gate touched 3.1 times on average
+NOTE 1-3 steady bot players (aim takes 0.45s, good 65% of the time): cleared 17 of 30, gate touched 3.0 times on average
 NOTE 1-3 hurried bot players (aim takes 0.7s, good 50% of the time): cleared 0 of 30, gate touched 5.0 times on average
+PASS a stage plays with plain throws: one ball, one point of hurt, a shoe that only pushes
+PASS extra balls leave with the aimed one, one above it and one below
+PASS with two balls to a throw the hand may fill the air with twelve, not six
+PASS a plain ball takes one of a tough opponent's three; a heavy ball puts him down at once
+PASS a blasting shoe puts down the plain ones it gathers, hurts and pushes a tough one, and leaves those out of reach alone
+PASS a ball through enough people readies the hand at once; without the pick the reload still has to run
+PASS a wave of a run starts with the touches the gate has left and the throws the run has picked
+PASS the Pierce card is found by its pick and has words
+PASS the Reload card is found by its pick and has words
+PASS the Twin card is found by its pick and has words
+PASS the Heavy card is found by its pick and has words
+PASS the Bounce card is found by its pick and has words
+PASS the Blast card is found by its pick and has words
+PASS the Wide card is found by its pick and has words
+PASS the Sticky card is found by its pick and has words
+PASS the Flow card is found by its pick and has words
+PASS the Repair card is found by its pick and has words
+PASS each ball pick changes the one thing its card names
+PASS each shoe pick and the chain pick change the one thing their cards name
+PASS a repair changes no throw
+PASS a run opens on wave 1 with a whole gate, sixty people and plain throws
+PASS the first wave of a run is lighter than stage 1-1
+PASS every wave table up to wave 24 holds the people it promises, inside the ceiling, each pack starting in front of the gate
+PASS packs come in the order of their times, and no wave is smaller, slower or sparser than the one before
+PASS quick ones join from wave 2, tough ones from wave 3; pace and head count stop at their ceilings while the tough ones go on getting tougher
+PASS a stage file without the tough and quick faces still gives a run with one face; without the normal one it is refused by name
+PASS a cleared wave lays out three different offers and waits
+PASS an offer that is not on the table cannot be taken
+PASS taking an offer brings on the next wave and clears the table: nothing more can be taken until that wave is cleared
+PASS a repair is never offered to a whole gate; taken, it gives back one touch and changes no throw
+PASS the same seed lays out the same offers wave after wave; another seed lays out others
+PASS no pick is taken more often than its card allows; once nothing is left to offer the next wave simply comes
+PASS a lost run is over: no offers, nothing to take, the wave count stays where it fell
+PASS without the opponent kinds the title has no run to start
+PASS a run cannot be started behind the logo
+PASS 연속전 on the title opens wave 1 at once, on the run's own table
+PASS a second tap starts nothing more
+PASS clearing a wave lays out three offers; the stages and what the save has opened are not touched
+PASS the offers wait: time, leaving the app and every other button leave them on the table
+PASS an offer that is not there cannot be chosen
+PASS choosing starts wave 2 with the gate as it was and the pick in the throws; a second tap chooses nothing
+PASS a wave of a run pauses and resumes like any fight
+PASS letting the gate fall ends the run on its result, and the furthest wave is remembered
+PASS again is a new run: wave 1, a whole gate, plain throws, other offers
+PASS leaving from the pause drops the run and keeps the best
+PASS after a run the stages play as before, with plain throws
+PASS the best wave is saved and read back; a save written before runs existed still loads
+PASS a bot that never misses plays four waves of a run through the flow, taking an offer after each
+PASS a player who throws nothing loses the run on wave 1
+PASS the run button sits on the title beside start, inside the canvas, tall enough for a thumb
+PASS one, two or three offer cards stand side by side under their heading, inside the canvas, each with its picture, name, line and level in order
 LAYOUT background 0 0 1280 720.38
 LAYOUT dad_ready 110.29 427.46 156.92 156.92
 LAYOUT dad_windup 113.96 436.13 148.21 148.21
@@ -374,6 +425,12 @@ LAYOUT aim_area 25 100 1230 505
 LAYOUT title_art 0 0 1280 720.38
 LAYOUT title_text 290 75 700 165
 LAYOUT start_button 490 600 300 72
+LAYOUT run_button 820 606 230 60
+LAYOUT run_best 820 668 230 30
+LAYOUT pick_heading 0 104 1280 64
+LAYOUT pick_card_0 162 184 300 336
+LAYOUT pick_card_1 490 184 300 336
+LAYOUT pick_card_2 818 184 300 336
 LAYOUT result_card 650 218 460 330
 LAYOUT pause_card 445 145 390 430
 LAYOUT hero_clear 153.76 204.52 410 410
@@ -402,4 +459,4 @@ LAYOUT painted_gate 145.41 570 0 0
 LAYOUT road_edge 0 622.41 0 0
 LAYOUT sand_top 0 522.13 0 0
 
-TOTAL PASS: 324
+TOTAL PASS: 375

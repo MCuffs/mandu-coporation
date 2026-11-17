@@ -44,6 +44,9 @@ public sealed class DadThrowPrototype:MonoBehaviour
         PaperDown=new Color(.87f,.82f,.68f),GoldDown=new Color(.9f,.66f,.08f),Dim=new Color(.65f,.65f,.6f),Warn=new Color(.82f,.25f,.2f),
         ResultVeil=new Color(.09f,.145f,.105f,.83f),PauseVeil=new Color(0,0,0,.6f),Olive=new Color(.42f,.39f,.21f);
     static readonly string[] Times={"","한","두","세","네","다섯"};
+    // 연속전 words, rebuilt only when their numbers change.
+    static readonly string[] PickAgain={"새 능력","한 번 더","한 번 더","한 번 더"};
+    int shownPickWave=-1,shownOverWave=-1,shownOverFelled=-1,shownBest=-1;string pickTitle="",overTitle="",overLine="",bestText="";
 
     void Awake()
     {
@@ -69,7 +72,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
     {
         string problem;DadThrowSave save=DadThrowSave.Load(savePath,out problem);
         if(problem!=null)Debug.LogWarning("Throw prototype save: "+problem);
-        aim.Cancel();seenRun=-1;Flow=new DadThrowFlow(stages.stages,layout.Field,story,save,savePath);
+        aim.Cancel();seenRun=-1;Flow=new DadThrowFlow(stages.stages,layout.Field,story,save,savePath,stages.kinds);
     }
     // Only what this scene draws is loaded, by the keys the manifests and the stage file name.
     T Need<T>(string key) where T:Object{T asset=Resources.Load<T>(key);if(asset==null)missing.Add(key);return asset;}
@@ -174,7 +177,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
     bool heldForCapture,scripted;
     public void DebugScripted(bool on){scripted=on;aim.Cancel();heldForCapture=false;}
     // A new player in memory only: captures never read or write the real save.
-    public void DebugRestart(){aim.Cancel();heldForCapture=false;seenRun=-1;Flow=new DadThrowFlow(stages.stages,layout.Field,story,new DadThrowSave(),null);}
+    public void DebugRestart(){aim.Cancel();heldForCapture=false;seenRun=-1;Flow=new DadThrowFlow(stages.stages,layout.Field,story,new DadThrowSave(),null,stages.kinds);}
     // Back to the player's own save, from the logo, when a capture run is over.
     public void DebugReal(){heldForCapture=false;if(Flow!=null)Begin();}
     public string DebugSavePath {get{return savePath;}}
@@ -440,7 +443,46 @@ public sealed class DadThrowPrototype:MonoBehaviour
         DrawTopBar(Flow.Stage,m.Health,m.Remaining);DrawControls(Flow.Stage,m.ReloadTotal>0?Mathf.Clamp01(m.Reload/m.ReloadTotal):0,selected);GUI.enabled=was;
         if(now==DadThrowFlow.Screen.Paused)DrawPause();
         else if(now==DadThrowFlow.Screen.Clear)DrawClear();
-        else if(now==DadThrowFlow.Screen.Defeat)DrawDefeat();
+        else if(now==DadThrowFlow.Screen.Defeat){if(Flow.Run!=null)DrawRunOver();else DrawDefeat();}
+        else if(now==DadThrowFlow.Screen.Pick)DrawPick();
+    }
+    // 연속전, between waves: one of three. The whole card is the button, and the next wave starts on the press.
+    void DrawPick()
+    {
+        Veil(PauseVeil);DadThrowRun run=Flow.Run;
+        if(run.Wave!=shownPickWave){shownPickWave=run.Wave;pickTitle=run.Wave+"조 끝! 하나 골라요";}
+        Outlined(DadThrowLayout.PickHeading,pickTitle,44,Gold,Ink,3,display);
+        for(int i=0;i<run.Offers.Count;i++)
+        {
+            DadThrowRun.Card card=DadThrowRun.Of(run.Offers[i]);
+            Rect slot=DadThrowLayout.PickCard(i,run.Offers.Count),face=Face(slot,GUI.enabled);
+            DadUi.Panel(face,face.y!=slot.y?PaperDown:Paper,Ink);
+            Vector2 icon=DadThrowLayout.PickIcon(face);
+            // The gate's own cells stand for a repair; every other offer shows the thing it changes.
+            if(card.pick==DadThrowRun.Pick.Repair)for(int cell=0;cell<3;cell++)DadUi.Panel(new Rect(icon.x-52+cell*38,icon.y-14,28,28),Gold,Ink);
+            else if(card.shoe)GUI.DrawTexture(layout.ItemRect(layout.Shoe,icon,124),shoe);
+            else GUI.DrawTexture(layout.ItemRect(layout.Golf,icon,84),golf);
+            Text(DadThrowLayout.PickName(face),card.name,34,Ink,display);
+            Text(DadThrowLayout.PickLine(face),card.line,23,Ink,body,TextAnchor.UpperCenter);
+            if(card.pick!=DadThrowRun.Pick.Repair)
+                Text(DadThrowLayout.PickLevel(face),PickAgain[Mathf.Min(run.Level(card.pick),PickAgain.Length-1)],20,Olive,bold);
+            if(Click(slot,GUI.enabled)){Flow.Choose(i);break;}
+        }
+    }
+    // 연속전 over: how far this run got, how many were sent back, and the furthest any run has got.
+    void DrawRunOver()
+    {
+        Veil(ResultVeil);GUI.DrawTexture(layout.HeroRect(layout.Retry),retryArt);DadUi.Panel(DadThrowLayout.ResultCard,Paper,Ink);
+        DadThrowRun run=Flow.Run;
+        if(run.Wave!=shownOverWave||run.Felled!=shownOverFelled||Flow.BestWave!=shownBest)
+        {
+            shownOverWave=run.Wave;shownOverFelled=run.Felled;shownBest=Flow.BestWave;
+            overTitle=run.Wave+"조에서 뚫렸다";overLine=run.Felled+"명을 돌려보냈다 · 최고 "+Flow.BestWave+"조";bestText="최고 "+Flow.BestWave+"조";
+        }
+        Text(DadThrowLayout.DefeatHeading,overTitle,46,Ink,display);
+        Text(DadThrowLayout.DefeatLine,overLine,24,Ink,body);
+        if(Button(DadThrowLayout.DefeatRetry,"다시 도전",true,30))Flow.Retry();
+        if(Button(DadThrowLayout.DefeatTitle,"타이틀",false,24))Flow.ToTitle();
     }
     void Veil(Color color){Box(new Rect(0,0,DadThrowLayout.W,DadThrowLayout.H),color);}
     void DrawPause()
@@ -514,6 +556,14 @@ public sealed class DadThrowPrototype:MonoBehaviour
         GUI.DrawTexture(layout.TitleArt(),titleArt);
         Outlined(DadThrowLayout.TitleText,"아빠 전쟁",94,Gold,Ink,4,display);
         if(Button(DadThrowLayout.StartButton,Flow.Continuing?"계속하기":"게임 시작",true,30))Flow.Start();
+        // 연속전: wave after wave with a pick between them. It leaves the stages and the story as they are.
+        if(!Flow.RunAvailable)return;
+        if(Flow.BestWave>0)
+        {
+            if(Flow.BestWave!=shownBest){shownBest=Flow.BestWave;bestText="최고 "+shownBest+"조";}
+            Outlined(DadThrowLayout.RunBest,bestText,20,Paper,Ink,2,bold);
+        }
+        if(Button(DadThrowLayout.RunButton,"연속전",false,26))Flow.StartRun(System.Environment.TickCount);
     }
     void DrawMissing()
     {

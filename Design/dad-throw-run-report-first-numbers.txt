@@ -1,0 +1,38 @@
+THROW RUN REPORT (연속전)
+Bots, not people. A row shows what the numbers allow under one way of picking; it says nothing about fun.
+A run stops at wave 12 cleared, so a bot that never loses still ends.
+
+Wave tables
+  wave  1:  60 people (0 tough x3 health, 0 quick), pace 112, a pack every 1.60s
+  wave  2:  74 people (0 tough x3 health, 6 quick), pace 121, a pack every 1.52s
+  wave  3:  88 people (4 tough x3 health, 9 quick), pace 130, a pack every 1.44s
+  wave  4: 102 people (6 tough x3 health, 12 quick), pace 139, a pack every 1.36s
+  wave  5: 116 people (8 tough x3 health, 15 quick), pace 148, a pack every 1.28s
+  wave  6: 130 people (10 tough x3 health, 18 quick), pace 157, a pack every 1.20s
+  wave  7: 144 people (12 tough x4 health, 21 quick), pace 166, a pack every 1.12s
+  wave  8: 158 people (14 tough x4 health, 24 quick), pace 175, a pack every 1.04s
+  wave  9: 160 people (16 tough x4 health, 24 quick), pace 184, a pack every 0.96s
+  wave 10: 160 people (18 tough x4 health, 24 quick), pace 193, a pack every 0.90s
+  wave 11: 160 people (18 tough x5 health, 24 quick), pace 202, a pack every 0.90s
+  wave 12: 160 people (18 tough x5 health, 24 quick), pace 211, a pack every 0.90s
+
+Player: sloppy hand, shoes when crowded
+  first offer            waves held: 12+ 3 12+ 8 12+ | average 9.4, least 3, most 12, reached the limit 3/5 | seed 1 took: Piercex2, Reloadx2, Twin, Heavyx2, Bouncex2, Blast, Wide
+  ball: more and faster  waves held: 12+ 12+ 12+ 12+ 12+ | average 12.0, least 12, most 12, reached the limit 5/5 | seed 1 took: Piercex3, Reloadx3, Twinx2, Heavy, Bouncex2
+  ball: heavy first      waves held: 12+ 12+ 7 12+ 7 | average 10.0, least 7, most 12, reached the limit 3/5 | seed 1 took: Piercex3, Reloadx3, Twinx2, Heavyx2, Flow
+  shoe first             waves held: 5 3 12+ 7 3 | average 6.0, least 3, most 12, reached the limit 1/5 | seed 1 took: Heavy, Blastx2, Stickyx2
+  repair first           waves held: 8 12+ 12+ 12+ 12+ | average 11.2, least 8, most 12, reached the limit 4/5 | seed 1 took: Piercex2, Reload, Twinx2, Blastx2, Wide
+
+Player: sloppy hand, balls only
+  first offer            waves held: 12+ 12+ 12+ 4 12+ | average 10.4, least 4, most 12, reached the limit 4/5 | seed 1 took: Piercex2, Reloadx2, Twin, Heavyx2, Bouncex2, Blast, Wide
+  ball: more and faster  waves held: 12+ 12+ 12+ 12+ 12+ | average 12.0, least 12, most 12, reached the limit 5/5 | seed 1 took: Piercex3, Reloadx3, Twinx2, Heavyx2, Flow
+  ball: heavy first      waves held: 12+ 12+ 7 12+ 12+ | average 11.0, least 7, most 12, reached the limit 4/5 | seed 1 took: Piercex3, Reloadx3, Twinx2, Heavyx2, Flow
+  shoe first             waves held: 2 12+ 12+ 4 3 | average 6.6, least 2, most 12, reached the limit 2/5 | seed 1 took: Heavy, Wide
+  repair first           waves held: 12+ 12+ 12+ 12+ 12+ | average 12.0, least 12, most 12, reached the limit 5/5 | seed 1 took: Piercex2, Reload, Twinx2, Heavyx2, Blast, Widex2, Repair
+
+Player: never misses, shoe first
+  first offer            waves held: 12+ 12+ 12+ 12+ 12+ | average 12.0, least 12, most 12, reached the limit 5/5 | seed 1 took: Piercex2, Reloadx2, Twin, Heavyx2, Bouncex2, Blast, Wide
+  ball: more and faster  waves held: 12+ 12+ 12+ 12+ 12+ | average 12.0, least 12, most 12, reached the limit 5/5 | seed 1 took: Piercex3, Reloadx3, Twinx2, Heavy, Bouncex2
+  ball: heavy first      waves held: 12+ 12+ 12+ 12+ 12+ | average 12.0, least 12, most 12, reached the limit 5/5 | seed 1 took: Piercex3, Reloadx2, Twinx2, Heavyx2, Bounce, Flow
+  shoe first             waves held: 12+ 12+ 12+ 12+ 12+ | average 12.0, least 12, most 12, reached the limit 5/5 | seed 1 took: Twinx2, Heavyx2, Bounce, Blastx3, Widex2, Sticky
+  repair first           waves held: 12+ 12+ 12+ 12+ 12+ | average 12.0, least 12, most 12, reached the limit 5/5 | seed 1 took: Piercex2, Reload, Twinx2, Heavy, Blastx2, Widex2, Repair
