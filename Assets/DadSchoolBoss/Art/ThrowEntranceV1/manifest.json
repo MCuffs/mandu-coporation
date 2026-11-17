@@ -1,0 +1,222 @@
+{
+  "version": 1,
+  "coordinateOrigin": "top-left",
+  "boundsConvention": "[left,top,right,bottom], right/bottom exclusive; alpha > 0",
+  "assets": [
+    {
+      "id": "entrance_band_lines",
+      "file": "entrance_band_lines.png",
+      "width": 2048,
+      "height": 512,
+      "sourceType": "vector",
+      "source": "sources/entrance_band_lines.svg",
+      "pivotPixels": {
+        "x": 1024,
+        "y": 256
+      },
+      "tileX": true,
+      "bounds": [
+        0,
+        22,
+        2048,
+        492
+      ],
+      "sha256": "06ba3a7416a326403c7ae5c8a19fece71d2dc487f503c9259eb0016524364fec",
+      "status": "review-candidate"
+    },
+    {
+      "id": "entrance_burst",
+      "file": "entrance_burst.png",
+      "width": 1536,
+      "height": 1536,
+      "sourceType": "vector",
+      "source": "sources/entrance_burst.svg",
+      "pivotPixels": {
+        "x": 768,
+        "y": 768
+      },
+      "emptyCenterRadius": 340,
+      "bounds": [
+        45,
+        30,
+        1514,
+        1506
+      ],
+      "sha256": "b21e485ed4d641cfe2a4cb131ad8260e1c1c6558eeeda549d8b55c5a5b33621e",
+      "status": "review-candidate"
+    },
+    {
+      "id": "entrance_balloon",
+      "file": "entrance_balloon.png",
+      "width": 1024,
+      "height": 320,
+      "sourceType": "vector",
+      "source": "sources/entrance_balloon.svg",
+      "pivotPixels": {
+        "x": 512,
+        "y": 160
+      },
+      "nineSlice": {
+        "left": 96,
+        "top": 96,
+        "right": 96,
+        "bottom": 96
+      },
+      "textSafeRect": [
+        110,
+        96,
+        914,
+        224
+      ],
+      "bounds": [
+        10,
+        10,
+        1014,
+        306
+      ],
+      "sha256": "ef7e08fd5decb2725ab9865b56f50d6c5f3ba2a1894313d96d5eb40cd53adf76",
+      "status": "review-candidate"
+    },
+    {
+      "id": "tray_entrance",
+      "file": "tray_entrance.png",
+      "width": 2048,
+      "height": 2048,
+      "bounds": [
+        672,
+        496,
+        1375,
+        1902
+      ],
+      "pivotPixels": {
+        "x": 1024,
+        "y": 1900
+      },
+      "standPixels": 1400,
+      "facesLeft": true,
+      "sourceType": "image_gen",
+      "source": "Design/dad-throw-v3-review/sources/tray_entrance.png",
+      "nativeSourceSize": [
+        887,
+        1774
+      ],
+      "nativeStandPixels": 1767,
+      "sourceLandmarks": {
+        "scalpY": 5,
+        "soleY": 1772,
+        "feetCenterX": 444
+      },
+      "resizeScale": 0.7923033389926429,
+      "actualResizeScale": {
+        "x": 0.7925591882750845,
+        "y": 0.7925591882750845
+      },
+      "placementPixels": [
+        672,
+        496
+      ],
+      "resample": "Lanczos downsample, then transparent padding; no enlargement",
+      "sourceSha256": "e84bd819f05d3076617f8d119fa6aa44d70cd5fe621016a226545286e1f2fe6b",
+      "status": "art-review-required",
+      "reviewNotes": [
+        "Longer proportions than combat reference; approve or redraw before runtime integration.",
+        "Generated fills retain slight tonal variation; strict flat-color art review remains."
+      ],
+      "sha256": "e4c42f09fda12903cd25f644938fad7a641b5ddf7f3e40cbede99932b89bd2b4"
+    },
+    {
+      "id": "chair_entrance",
+      "file": "chair_entrance.png",
+      "width": 2048,
+      "height": 2048,
+      "bounds": [
+        585,
+        198,
+        1443,
+        1936
+      ],
+      "pivotPixels": {
+        "x": 1024,
+        "y": 1900
+      },
+      "standPixels": 1400,
+      "facesLeft": true,
+      "sourceType": "image_gen",
+      "source": "Design/dad-throw-v3-review/sources/chair_entrance.png",
+      "nativeSourceSize": [
+        887,
+        1774
+      ],
+      "nativeStandPixels": 1413,
+      "sourceLandmarks": {
+        "scalpY": 325,
+        "soleY": 1738,
+        "feetCenterX": 443
+      },
+      "resizeScale": 0.9907997169143666,
+      "actualResizeScale": {
+        "x": 0.9909808342728298,
+        "y": 0.9909808342728298
+      },
+      "placementPixels": [
+        585,
+        178
+      ],
+      "resample": "Lanczos downsample, then transparent padding; no enlargement",
+      "sourceSha256": "15818660cea47e9b5328e93a8ddbe784d127f9fc49c0eaa629d7339d3f4a9c1c",
+      "status": "art-review-required",
+      "reviewNotes": [
+        "Longer proportions than combat reference; approve or redraw before runtime integration.",
+        "Generated fills retain slight tonal variation; strict flat-color art review remains."
+      ],
+      "sha256": "2249292868835dc26b0d851bf539304faa4fb703c3eed1384cd30bddf7a50904"
+    },
+    {
+      "id": "dodge_entrance",
+      "file": "dodge_entrance.png",
+      "width": 2048,
+      "height": 2048,
+      "bounds": [
+        595,
+        394,
+        1404,
+        1904
+      ],
+      "pivotPixels": {
+        "x": 1024,
+        "y": 1900
+      },
+      "standPixels": 1400,
+      "facesLeft": true,
+      "sourceType": "image_gen",
+      "source": "Design/dad-throw-v3-review/sources/dodge_entrance.png",
+      "nativeSourceSize": [
+        887,
+        1774
+      ],
+      "nativeStandPixels": 1512,
+      "sourceLandmarks": {
+        "scalpY": 211,
+        "soleY": 1723,
+        "feetCenterX": 470
+      },
+      "resizeScale": 0.9259259259259259,
+      "actualResizeScale": {
+        "x": 0.9255918827508456,
+        "y": 0.9261555806087937
+      },
+      "placementPixels": [
+        589,
+        304
+      ],
+      "resample": "Lanczos downsample, then transparent padding; no enlargement",
+      "sourceSha256": "1eb174be41ea605acd4830baae508b9d9336e72fe73a33bff5b52d142bd8bb89",
+      "status": "art-review-required",
+      "reviewNotes": [
+        "Longer proportions than combat reference; approve or redraw before runtime integration.",
+        "Generated fills retain slight tonal variation; strict flat-color art review remains."
+      ],
+      "sha256": "108121d1e4b33033057b65021ea9890810e8b9b9a5e13e79432297a48b5dfd3b"
+    }
+  ]
+}
