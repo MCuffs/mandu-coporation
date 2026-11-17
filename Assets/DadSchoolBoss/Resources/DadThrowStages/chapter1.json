@@ -31,6 +31,18 @@
       "pivotY": 720,
       "standPixels": 560,
       "heights": [96, 100, 104]
+    },
+    "guard": {
+      "resource": "DadV5/chars/tray/tray_walk",
+      "bareResource": "DadV5/chars/tray/tray_notray_walk",
+      "guards": true,
+      "frames": 2,
+      "facesLeft": true,
+      "canvas": 768,
+      "pivotX": 380,
+      "pivotY": 720,
+      "standPixels": 560,
+      "heights": [104, 108, 112]
     }
   },
   "stages": [

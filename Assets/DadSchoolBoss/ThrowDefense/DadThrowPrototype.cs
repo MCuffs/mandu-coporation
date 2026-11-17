@@ -4,6 +4,7 @@ using UnityEngine;
 // Open DadThrowDefense.unity explicitly. This never replaces the current game's startup scene.
 // Screens follow DadThrowFlow, placement follows DadThrowLayout, the fight follows DadThrowModel and the
 // people who walk in come from Resources/DadThrowStages. The opening and the ending come from DadThrowStory.
+// The stages themselves come off DadThrowCurve (harder one by one) and the shop's shelf from DadThrowShop.
 // This class only reads pointers and draws.
 // A missing picture or data file stops on a screen that names it; nothing is replaced by stand-in blocks.
 public sealed class DadThrowPrototype:MonoBehaviour
@@ -11,16 +12,26 @@ public sealed class DadThrowPrototype:MonoBehaviour
     public DadThrowFlow Flow {get;private set;}
     public DadThrowModel Model {get{return Flow!=null?Flow.Model:null;}}
     DadThrowLayout layout;DadThrowStageSet stages;readonly DadThrowAim aim=new DadThrowAim();
+    // The game's stages, built off the curve from the opponents the stage file declares.
+    List<DadThrowStage> game;
     Font body,bold,display;Texture2D dot;
     Texture2D street,titleArt,golf,shoe,clearArt,retryArt;readonly Texture2D[] dad=new Texture2D[3];
     DadThrowStory story;Texture2D actorSheet,rivalArt,propArt;readonly Dictionary<string,Texture2D> backdropArt=new Dictionary<string,Texture2D>();
     string savePath;
     // Who was on the street last frame, to tell who has just left it, and those walking off after being hit.
-    struct Seen { public int id;public float x;public DadThrowStage.Kind kind; }
-    sealed class Leaving { public int id;public float x,age;public DadThrowStage.Kind kind; }
+    // bare: a tray-holder whose tray is gone.
+    struct Seen { public int id;public float x;public DadThrowStage.Kind kind;public bool bare; }
+    sealed class Leaving { public int id;public float x,age;public DadThrowStage.Kind kind;public bool bare; }
     readonly List<Seen> seen=new List<Seen>(96);readonly List<Leaving> leaving=new List<Leaving>(MaxLeaving);
     const float LeaveTime=.5f,PalmTime=.6f,KnockBack=150,KnockLift=46,ShakeTime=.3f,ShakeReach=7,ShakeGrow=.024f;const int MaxLeaving=48;float palm,shake;
     readonly Dictionary<DadThrowStage.Kind,Texture2D[]> people=new Dictionary<DadThrowStage.Kind,Texture2D[]>();
+    // The same people once a shoe has taken the tray out of their hands.
+    readonly Dictionary<DadThrowStage.Kind,Texture2D[]> bare=new Dictionary<DadThrowStage.Kind,Texture2D[]>();
+    // A ball stopped by a tray: a clang where it stopped, and the shoe button asks to be used for a few seconds.
+    const float BlockTime=.3f,NudgeTime=4;float blockClock,shoeNudge;int seenBlock;Vector2 blockAt;
+    // Words with a number in them, rebuilt only when the number changes.
+    int shownCoins=-1,shownEarned=-1;string coinText="",earnedText="";
+    readonly int[] shownPrice=new int[DadThrowShop.Cards.Length];readonly string[] priceText=new string[DadThrowShop.Cards.Length];
     readonly List<string> missing=new List<string>();string missingText;
     DadThrowModel.Weapon selected;DadThrowLayout.Fit fit;
     float clock,throwPose,chainClock,hintClock;
@@ -44,9 +55,6 @@ public sealed class DadThrowPrototype:MonoBehaviour
         PaperDown=new Color(.87f,.82f,.68f),GoldDown=new Color(.9f,.66f,.08f),Dim=new Color(.65f,.65f,.6f),Warn=new Color(.82f,.25f,.2f),
         ResultVeil=new Color(.09f,.145f,.105f,.83f),PauseVeil=new Color(0,0,0,.6f),Olive=new Color(.42f,.39f,.21f);
     static readonly string[] Times={"","한","두","세","네","다섯"};
-    // 연속전 words, rebuilt only when their numbers change.
-    static readonly string[] PickAgain={"새 능력","한 번 더","한 번 더","한 번 더"};
-    int shownPickWave=-1,shownOverWave=-1,shownOverFelled=-1,shownBest=-1;string pickTitle="",overTitle="",overLine="",bestText="";
 
     void Awake()
     {
@@ -72,7 +80,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
     {
         string problem;DadThrowSave save=DadThrowSave.Load(savePath,out problem);
         if(problem!=null)Debug.LogWarning("Throw prototype save: "+problem);
-        aim.Cancel();seenRun=-1;Flow=new DadThrowFlow(stages.stages,layout.Field,story,save,savePath,stages.kinds);
+        aim.Cancel();seenRun=-1;Flow=new DadThrowFlow(game,layout.Field,story,save,savePath);
     }
     // Only what this scene draws is loaded, by the keys the manifests and the stage file name.
     T Need<T>(string key) where T:Object{T asset=Resources.Load<T>(key);if(asset==null)missing.Add(key);return asset;}
@@ -86,6 +94,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
         {
             layout=DadThrowLayout.Parse(throwArt,wide,result);
             stages=DadThrowStageSet.Parse(table,layout.Backgrounds,layout.Field.Gate);
+            game=DadThrowCurve.Build(stages.kinds,stages.stages[0].backgroundKey,stages.stages);
             story=DadThrowStory.Parse(tale);
         }
         catch(System.ArgumentException error){missing.Add(error.Message);return;}
@@ -95,7 +104,11 @@ public sealed class DadThrowPrototype:MonoBehaviour
         dad[(int)DadThrowLayout.Pose.Ready]=Need<Texture2D>(layout.Ready.resource);dad[(int)DadThrowLayout.Pose.Windup]=Need<Texture2D>(layout.Windup.resource);
         dad[(int)DadThrowLayout.Pose.Release]=Need<Texture2D>(layout.Release.resource);
         foreach(DadThrowStage.Kind kind in stages.kinds.Values)
-        {var frames=new Texture2D[kind.frames];for(int i=0;i<frames.Length;i++)frames[i]=Need<Texture2D>(kind.Frame(i));people[kind]=frames;}
+        {
+            var frames=new Texture2D[kind.frames];for(int i=0;i<frames.Length;i++)frames[i]=Need<Texture2D>(kind.Frame(i));people[kind]=frames;
+            if(kind.bare==null)continue;
+            var without=new Texture2D[kind.frames];for(int i=0;i<without.Length;i++)without[i]=Need<Texture2D>(kind.BareFrame(i));bare[kind]=without;
+        }
         actorSheet=Need<Texture2D>(story.actorSheet);rivalArt=Need<Texture2D>(story.rivalResource);propArt=Need<Texture2D>(story.propResource);
         foreach(var backdrop in story.backdrops)backdropArt[backdrop.Key]=Need<Texture2D>(backdrop.Value);
     }
@@ -123,6 +136,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
         if(Flow==null)return;
         float dt=Mathf.Min(Time.unscaledDeltaTime,.1f);clock+=dt;throwPose=Mathf.Max(0,throwPose-dt);
         palm=Mathf.Max(0,palm-dt);chainClock=Mathf.Max(0,chainClock-dt);shake=Mathf.Max(0,shake-dt/ShakeTime);
+        blockClock=Mathf.Max(0,blockClock-dt);shoeNudge=selected==DadThrowModel.Weapon.Shoe?0:Mathf.Max(0,shoeNudge-dt);
         for(int i=leaving.Count-1;i>=0;i--){leaving[i].age+=dt;if(leaving[i].age>=LeaveTime)leaving.RemoveAt(i);}
         // A turned or resized screen moves every point under the finger: drop the aim, and stop the fight while held upright.
         if(Screen.orientation!=seenOrientation||Screen.width!=screenWidth||Screen.height!=screenHeight)
@@ -135,7 +149,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
         if(back){aim.Cancel();Flow.Back();}
         Fresh();
         if(Flow.Now!=DadThrowFlow.Screen.Playing){aim.Cancel();Flow.Tick(dt);return;}
-        Pointer();
+        Pointer();Keys();
         // After the opening the street waits for the first pull; hints count fight time only, so neither that
         // wait nor a pause uses them up.
         if(aim.Active)Flow.AimStarted();
@@ -147,6 +161,8 @@ public sealed class DadThrowPrototype:MonoBehaviour
         // A ball through a pack jolts the street, more the more it went through, but never as hard as a touch on
         // the gate: balls land every third of a second, and the street must not shake itself unreadable.
         if(m.ChainSerial!=seenChain){seenChain=m.ChainSerial;chainClock=.6f;shake=Mathf.Max(shake,Mathf.Min(.65f,.08f*m.ChainCount));}
+        // A tray stopped a ball: no words, the shoe button lights up instead.
+        if(m.BlockSerial!=seenBlock){seenBlock=m.BlockSerial;blockClock=BlockTime;blockAt=m.BlockAt;if(selected==DadThrowModel.Weapon.Golf)shoeNudge=NudgeTime;}
         if(Flow.Now!=DadThrowFlow.Screen.Playing)aim.Cancel();
     }
     // A fresh stage: nothing from the last attempt may leak into it. A button starts the stage while the screen
@@ -154,7 +170,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
     void Fresh()
     {
         if(Flow.Model==null||Flow.Runs==seenRun)return;
-        seenRun=Flow.Runs;seenHealth=Flow.Model.Health;seenChain=Flow.Model.ChainSerial;
+        seenRun=Flow.Runs;seenHealth=Flow.Model.Health;seenChain=Flow.Model.ChainSerial;seenBlock=Flow.Model.BlockSerial;blockClock=shoeNudge=0;
         thrown=false;hintClock=throwPose=palm=chainClock=shake=0;shownRemaining=-1;aim.Cancel();seen.Clear();leaving.Clear();
     }
     // Someone who is no longer on the street either touched the gate or was hit. A hit knocks them back the way
@@ -167,9 +183,9 @@ public sealed class DadThrowPrototype:MonoBehaviour
             bool still=false;foreach(DadThrowModel.Enemy e in m.enemies)if(e.id==was.id){still=true;break;}
             if(still||was.kind==null||was.x<=m.Field.Gate+8)continue;
             if(leaving.Count>=MaxLeaving)leaving.RemoveAt(0);
-            leaving.Add(new Leaving{id=was.id,x=was.x,kind=was.kind});
+            leaving.Add(new Leaving{id=was.id,x=was.x,kind=was.kind,bare=was.bare});
         }
-        seen.Clear();foreach(DadThrowModel.Enemy e in m.enemies)seen.Add(new Seen{id=e.id,x=e.x,kind=e.kind});
+        seen.Clear();foreach(DadThrowModel.Enemy e in m.enemies)seen.Add(new Seen{id=e.id,x=e.x,kind=e.kind,bare=e.kind!=null&&e.kind.guards&&!e.guard});
     }
 #if UNITY_EDITOR
     // Editor captures only (DadThrowRemote): these stand in for a finger so a screen can be photographed mid-gesture.
@@ -177,7 +193,10 @@ public sealed class DadThrowPrototype:MonoBehaviour
     bool heldForCapture,scripted;
     public void DebugScripted(bool on){scripted=on;aim.Cancel();heldForCapture=false;}
     // A new player in memory only: captures never read or write the real save.
-    public void DebugRestart(){aim.Cancel();heldForCapture=false;seenRun=-1;Flow=new DadThrowFlow(stages.stages,layout.Field,story,new DadThrowSave(),null,stages.kinds);}
+    public void DebugRestart(){aim.Cancel();heldForCapture=false;seenRun=-1;Flow=new DadThrowFlow(game,layout.Field,story,new DadThrowSave(),null);}
+    // A player in memory only who has opened stage `index` (from 0) and has `coins` in the purse.
+    public void DebugStartAt(int index,int coins)
+    {aim.Cancel();heldForCapture=false;seenRun=-1;Flow=new DadThrowFlow(game,layout.Field,story,new DadThrowSave{introSeen=true,furthest=index,coins=coins},null);}
     // Back to the player's own save, from the logo, when a capture run is over.
     public void DebugReal(){heldForCapture=false;if(Flow!=null)Begin();}
     public string DebugSavePath {get{return savePath;}}
@@ -223,6 +242,18 @@ public sealed class DadThrowPrototype:MonoBehaviour
         else if(Input.GetMouseButtonUp(0))Release(DadThrowAim.Mouse,mouse);
         else if(Input.GetMouseButton(0))aim.Move(DadThrowAim.Mouse,mouse);
         else aim.Cancel();
+    }
+    void Select(DadThrowModel.Weapon weapon)
+    {if(selected==weapon)return;selected=weapon;aim.Cancel();if(weapon==DadThrowModel.Weapon.Shoe)shoeHintDone=true;}
+    // With a keyboard: 1 the ball, 2 the shoe, space or tab the other one. A phone has only the two buttons.
+    void Keys()
+    {
+#if UNITY_EDITOR
+        if(heldForCapture||scripted)return;
+#endif
+        if(Input.GetKeyDown(KeyCode.Alpha1))Select(DadThrowModel.Weapon.Golf);
+        else if(Input.GetKeyDown(KeyCode.Alpha2))Select(DadThrowModel.Weapon.Shoe);
+        else if(Input.GetKeyDown(KeyCode.Space)||Input.GetKeyDown(KeyCode.Tab))Select(selected==DadThrowModel.Weapon.Golf?DadThrowModel.Weapon.Shoe:DadThrowModel.Weapon.Golf);
     }
     void Release(int finger,Vector2 point)
     {
@@ -318,7 +349,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
     }
     // Legs keep time with the pace: someone running at 160 steps three times as often as someone strolling at 50.
     // `toRight` is the way the person is heading: challengers come from the right, those sent back go right.
-    void Person(DadThrowStage.Kind kind,int id,float x,float ground,bool mirror,float speed,bool toRight=false)
+    void Person(DadThrowStage.Kind kind,int id,float x,float ground,bool mirror,float speed,bool toRight=false,bool noTray=false)
     {
         bool runs=speed>=RunPace;float stride=clock*Mathf.Max(48,speed)/8+id;
         ground+=Lane(id);
@@ -335,7 +366,8 @@ public sealed class DadThrowPrototype:MonoBehaviour
             ground-=Mathf.Abs(Mathf.Sin(stride*Mathf.PI))*RunBounce;
         }
         Rect r=kind.Place(x,ground,kind.Height(id));if(r.x>DadThrowLayout.W+60)return;
-        Texture2D[] frames=people[kind];Texture2D frame=frames[(int)stride%frames.Length];
+        Texture2D[] frames;if(!noTray||!bare.TryGetValue(kind,out frames))frames=people[kind];
+        Texture2D frame=frames[(int)stride%frames.Length];
         if(!mirror&&!runs){GUI.DrawTexture(r,frame);return;}
         Matrix4x4 old=GUI.matrix,turn=Matrix4x4.TRS(new Vector3(x,ground,0),Quaternion.Euler(0,0,runs?(toRight?RunLean:-RunLean):0),new Vector3(mirror?-1:1,1,1));
         GUI.matrix=old*turn;GUI.DrawTexture(new Rect(r.x-x,r.y-ground,r.width,r.height),frame);GUI.matrix=old;
@@ -347,7 +379,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
         foreach(Leaving gone in leaving)
         {
             float t=gone.age/LeaveTime;GUI.color=new Color(1,1,1,Mathf.Clamp01(2-2*t));
-            Person(gone.kind,gone.id,gone.x+KnockBack*t,m.Field.Ground-Mathf.Sin(t*Mathf.PI)*KnockLift,!gone.kind.Mirror,200,true);
+            Person(gone.kind,gone.id,gone.x+KnockBack*t,m.Field.Ground-Mathf.Sin(t*Mathf.PI)*KnockLift,!gone.kind.Mirror,200,true,gone.bare);
             if(t>=.36f)continue;
             GUI.color=Color.white;Vector2 chest=new Vector2(gone.x,m.Field.Ground+Lane(gone.id)-58);float reach=16+110*t;
             for(int i=0;i<6;i++){Vector2 spark=chest+new Vector2(Mathf.Cos(i*1.047f+gone.id),Mathf.Sin(i*1.047f+gone.id))*reach;Dot(spark,11,Ink);Dot(spark,7,Gold);}
@@ -357,7 +389,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
         {
             if(e.kind==null)continue;
             GUI.color=e.flash>0?new Color(1,.6f,.45f):Color.white;
-            Person(e.kind,e.id,e.x,m.Field.Ground,e.kind.Mirror,e.speed);
+            Person(e.kind,e.id,e.x,m.Field.Ground,e.kind.Mirror,e.speed,false,e.kind.guards&&!e.guard);
         }
         GUI.color=Color.white;
     }
@@ -377,6 +409,13 @@ public sealed class DadThrowPrototype:MonoBehaviour
             Vector2 at=m.ChainAt;float rise=(.6f-chainClock)*60;int size=Mathf.Min(60,36+8*(m.ChainCount-3));
             Outlined(new Rect(at.x-90,at.y-96-rise,180,70),ChainText[Mathf.Min(m.ChainCount,ChainText.Length-1)],size,Gold,Ink,3,display);
         }
+    }
+    // Where a tray stopped a ball: a ring of pale sparks, smaller and quicker than the ones a hit throws up.
+    void DrawBlock()
+    {
+        if(blockClock<=0)return;
+        float t=1-blockClock/BlockTime;
+        for(int i=0;i<8;i++){Vector2 spark=blockAt+new Vector2(Mathf.Cos(i*.785f),Mathf.Sin(i*.785f))*(10+46*t);Dot(spark,10,Ink);Dot(spark,6,Color.white);}
     }
     void DrawAim(DadThrowModel m)
     {
@@ -405,6 +444,20 @@ public sealed class DadThrowPrototype:MonoBehaviour
         if(remaining!=shownRemaining){shownRemaining=remaining;remainingText="남은 도전자 "+shownRemaining;}
         Text(DadThrowLayout.RemainingLabel,remainingText,24,Ink,bold,TextAnchor.MiddleRight);
     }
+    // The purse: a coin and the count. In a fight it goes up with every challenger sent back.
+    void DrawPurse(Rect r,int size,Color color,Font font)
+    {
+        if(Flow.Coins!=shownCoins){shownCoins=Flow.Coins;coinText=shownCoins+"원";}
+        Vector2 coin=new Vector2(r.x+r.height/2,r.center.y);float wide=r.height*.62f;
+        Dot(coin,wide+6,Ink);Dot(coin,wide,Gold);
+        Text(new Rect(r.x+r.height+4,r.y,r.width-r.height-4,r.height),coinText,size,color,font,TextAnchor.MiddleLeft);
+    }
+    // What this stage paid, over the top edge of the result card.
+    void DrawEarned()
+    {
+        if(Flow.Earned!=shownEarned){shownEarned=Flow.Earned;earnedText="+"+shownEarned+"원";}
+        Outlined(DadThrowLayout.ResultEarned,earnedText,36,Gold,Ink,3,display);
+    }
     // Pause and the two things to throw. `chosen` is the thing shown as picked.
     void DrawControls(DadThrowStage stage,float reload,DadThrowModel.Weapon chosen)
     {
@@ -412,10 +465,10 @@ public sealed class DadThrowPrototype:MonoBehaviour
         DadUi.Panel(pause,drop>0?PaperDown:Paper,Ink);
         for(int i=0;i<2;i++){Rect bar=DadThrowLayout.PauseBar(i);bar.y+=drop;DadUi.Fill(bar,Ink,3);}
         if(Click(DadThrowLayout.PauseButton,GUI.enabled)){aim.Cancel();Flow.Pause();}
-        bool nudge=stage.hint=="shoe"&&!shoeHintDone&&hintClock<6&&GUI.enabled;
+        bool nudge=(stage.hint=="shoe"&&!shoeHintDone&&hintClock<6||shoeNudge>0)&&GUI.enabled;
         // Switching things while aiming drops the aim and changes only the choice.
-        if(WeaponButton(DadThrowLayout.GolfButton,"골프공",golf,layout.Golf,chosen==DadThrowModel.Weapon.Golf,reload,false)){selected=DadThrowModel.Weapon.Golf;aim.Cancel();}
-        if(WeaponButton(DadThrowLayout.ShoeButton,"신발",shoe,layout.Shoe,chosen==DadThrowModel.Weapon.Shoe,reload,nudge)){selected=DadThrowModel.Weapon.Shoe;shoeHintDone=true;aim.Cancel();}
+        if(WeaponButton(DadThrowLayout.GolfButton,"골프공",golf,layout.Golf,chosen==DadThrowModel.Weapon.Golf,reload,false))Select(DadThrowModel.Weapon.Golf);
+        if(WeaponButton(DadThrowLayout.ShoeButton,"신발",shoe,layout.Shoe,chosen==DadThrowModel.Weapon.Shoe,reload,nudge))Select(DadThrowModel.Weapon.Shoe);
         if(stage.hint=="shoe"&&hintClock>=6)shoeHintDone=true;
         // First stage only: gone after the first real throw, or after six seconds of the fight either way.
         if(stage.hint=="pull"&&!thrown&&hintClock<6&&GUI.enabled)Outlined(DadThrowLayout.Hint,"당겨서 놓으세요",30,Paper,Ink,3,display);
@@ -435,54 +488,15 @@ public sealed class DadThrowPrototype:MonoBehaviour
         GUI.DrawTexture(layout.Background(),street);
         DrawGate();DrawPeople(m);
         // On a result the big pose beside the card stands in for dad, so the small one is left out.
-        if(!result){DrawDad();DrawFlight(m);}
+        if(!result){DrawDad();DrawFlight(m);DrawBlock();}
         GUI.matrix=still;
         if(live)DrawAim(m);
         // Nothing under a card can be pressed.
         bool was=GUI.enabled;GUI.enabled=was&&live;
-        DrawTopBar(Flow.Stage,m.Health,m.Remaining);DrawControls(Flow.Stage,m.ReloadTotal>0?Mathf.Clamp01(m.Reload/m.ReloadTotal):0,selected);GUI.enabled=was;
+        DrawTopBar(Flow.Stage,m.Health,m.Remaining);DrawPurse(DadThrowLayout.CoinLabel,26,Ink,bold);DrawControls(Flow.Stage,m.ReloadTotal>0?Mathf.Clamp01(m.Reload/m.ReloadTotal):0,selected);GUI.enabled=was;
         if(now==DadThrowFlow.Screen.Paused)DrawPause();
         else if(now==DadThrowFlow.Screen.Clear)DrawClear();
-        else if(now==DadThrowFlow.Screen.Defeat){if(Flow.Run!=null)DrawRunOver();else DrawDefeat();}
-        else if(now==DadThrowFlow.Screen.Pick)DrawPick();
-    }
-    // 연속전, between waves: one of three. The whole card is the button, and the next wave starts on the press.
-    void DrawPick()
-    {
-        Veil(PauseVeil);DadThrowRun run=Flow.Run;
-        if(run.Wave!=shownPickWave){shownPickWave=run.Wave;pickTitle=run.Wave+"조 끝! 하나 골라요";}
-        Outlined(DadThrowLayout.PickHeading,pickTitle,44,Gold,Ink,3,display);
-        for(int i=0;i<run.Offers.Count;i++)
-        {
-            DadThrowRun.Card card=DadThrowRun.Of(run.Offers[i]);
-            Rect slot=DadThrowLayout.PickCard(i,run.Offers.Count),face=Face(slot,GUI.enabled);
-            DadUi.Panel(face,face.y!=slot.y?PaperDown:Paper,Ink);
-            Vector2 icon=DadThrowLayout.PickIcon(face);
-            // The gate's own cells stand for a repair; every other offer shows the thing it changes.
-            if(card.pick==DadThrowRun.Pick.Repair)for(int cell=0;cell<3;cell++)DadUi.Panel(new Rect(icon.x-52+cell*38,icon.y-14,28,28),Gold,Ink);
-            else if(card.shoe)GUI.DrawTexture(layout.ItemRect(layout.Shoe,icon,124),shoe);
-            else GUI.DrawTexture(layout.ItemRect(layout.Golf,icon,84),golf);
-            Text(DadThrowLayout.PickName(face),card.name,34,Ink,display);
-            Text(DadThrowLayout.PickLine(face),card.line,23,Ink,body,TextAnchor.UpperCenter);
-            if(card.pick!=DadThrowRun.Pick.Repair)
-                Text(DadThrowLayout.PickLevel(face),PickAgain[Mathf.Min(run.Level(card.pick),PickAgain.Length-1)],20,Olive,bold);
-            if(Click(slot,GUI.enabled)){Flow.Choose(i);break;}
-        }
-    }
-    // 연속전 over: how far this run got, how many were sent back, and the furthest any run has got.
-    void DrawRunOver()
-    {
-        Veil(ResultVeil);GUI.DrawTexture(layout.HeroRect(layout.Retry),retryArt);DadUi.Panel(DadThrowLayout.ResultCard,Paper,Ink);
-        DadThrowRun run=Flow.Run;
-        if(run.Wave!=shownOverWave||run.Felled!=shownOverFelled||Flow.BestWave!=shownBest)
-        {
-            shownOverWave=run.Wave;shownOverFelled=run.Felled;shownBest=Flow.BestWave;
-            overTitle=run.Wave+"조에서 뚫렸다";overLine=run.Felled+"명을 돌려보냈다 · 최고 "+Flow.BestWave+"조";bestText="최고 "+Flow.BestWave+"조";
-        }
-        Text(DadThrowLayout.DefeatHeading,overTitle,46,Ink,display);
-        Text(DadThrowLayout.DefeatLine,overLine,24,Ink,body);
-        if(Button(DadThrowLayout.DefeatRetry,"다시 도전",true,30))Flow.Retry();
-        if(Button(DadThrowLayout.DefeatTitle,"타이틀",false,24))Flow.ToTitle();
+        else if(now==DadThrowFlow.Screen.Defeat)DrawDefeat();
     }
     void Veil(Color color){Box(new Rect(0,0,DadThrowLayout.W,DadThrowLayout.H),color);}
     void DrawPause()
@@ -494,7 +508,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
     }
     void DrawClear()
     {
-        Veil(ResultVeil);GUI.DrawTexture(layout.HeroRect(layout.Clear),clearArt);DadUi.Panel(DadThrowLayout.ResultCard,Paper,Ink);
+        Veil(ResultVeil);GUI.DrawTexture(layout.HeroRect(layout.Clear),clearArt);DadUi.Panel(DadThrowLayout.ResultCard,Paper,Ink);DrawEarned();
         // A stage is one group of challengers. After the last one that exists there is nowhere further to go, and the card says so.
         Text(DadThrowLayout.ClearHeading,Flow.HasNext?"이번 조 끝!":"여기까지 막았다!",46,Ink,display);
         if(Flow.Word!=null)
@@ -502,17 +516,20 @@ public sealed class DadThrowPrototype:MonoBehaviour
             Text(DadThrowLayout.ClearWordName,Flow.Word.name,20,Olive,display);
             Text(DadThrowLayout.ClearWordLine,Flow.Word.line,24,Ink,body,TextAnchor.UpperCenter);
         }
-        if(Button(DadThrowLayout.ClearLeft,"타이틀",false))Flow.ToTitle();
+        // The lesser choice is the shop now; the title is reached from the pause.
+        if(Button(DadThrowLayout.ClearLeft,"상점",false)){Flow.OpenShop();return;}
         if(Flow.HasNext){if(Button(DadThrowLayout.ClearRight,"다음",true))Flow.Next();}
         else if(Button(DadThrowLayout.ClearRight,"다시 하기",true))Flow.Retry();
     }
     void DrawDefeat()
     {
-        Veil(ResultVeil);GUI.DrawTexture(layout.HeroRect(layout.Retry),retryArt);DadUi.Panel(DadThrowLayout.ResultCard,Paper,Ink);
+        Veil(ResultVeil);GUI.DrawTexture(layout.HeroRect(layout.Retry),retryArt);DadUi.Panel(DadThrowLayout.ResultCard,Paper,Ink);DrawEarned();
         Text(DadThrowLayout.DefeatHeading,"다시 해볼까?",46,Ink,display);
         int touches=Flow.Stage.health;
         Text(DadThrowLayout.DefeatLine,"대문을 "+(touches<Times.Length?Times[touches]:touches.ToString())+" 번 만졌어요",24,Ink,body);
         if(Button(DadThrowLayout.DefeatRetry,"다시 도전",true,30))Flow.Retry();
+        // A lost stage still paid for everyone sent back: the shop is one tap away.
+        if(Button(DadThrowLayout.DefeatShop,"상점",false,24)){Flow.OpenShop();return;}
         if(Button(DadThrowLayout.DefeatTitle,"타이틀",false,24))Flow.ToTitle();
     }
 
@@ -555,15 +572,32 @@ public sealed class DadThrowPrototype:MonoBehaviour
         // The key art already holds dad and the neighbours; nothing else is placed over them.
         GUI.DrawTexture(layout.TitleArt(),titleArt);
         Outlined(DadThrowLayout.TitleText,"아빠 전쟁",94,Gold,Ink,4,display);
-        if(Button(DadThrowLayout.StartButton,Flow.Continuing?"계속하기":"게임 시작",true,30))Flow.Start();
-        // 연속전: wave after wave with a pick between them. It leaves the stages and the story as they are.
-        if(!Flow.RunAvailable)return;
-        if(Flow.BestWave>0)
+        if(Button(DadThrowLayout.StartButton,Flow.Continuing?"계속하기":"게임 시작",true,30)){Flow.Start();return;}
+        DrawPurse(DadThrowLayout.ShopPurse,22,Paper,bold);
+        if(Button(DadThrowLayout.ShopButton,"상점",false,26))Flow.OpenShop();
+    }
+    // The shop: nine things, each with a cell for every time it can be bought and the price of the next one.
+    void DrawShop()
+    {
+        GUI.DrawTexture(layout.TitleArt(),titleArt);Veil(ResultVeil);
+        Text(DadThrowLayout.ShopHeading,"상점",48,Paper,display,TextAnchor.MiddleLeft);
+        DrawPurse(DadThrowLayout.ShopCoins,36,Gold,display);
+        if(Button(DadThrowLayout.ShopClose,"닫기",true,28)){Flow.CloseShop();return;}
+        for(int i=0;i<DadThrowShop.Cards.Length;i++)
         {
-            if(Flow.BestWave!=shownBest){shownBest=Flow.BestWave;bestText="최고 "+shownBest+"조";}
-            Outlined(DadThrowLayout.RunBest,bestText,20,Paper,Ink,2,bold);
+            DadThrowShop.Card card=DadThrowShop.Cards[i];Rect slot=DadThrowLayout.ShopCard(i);
+            DadUi.Panel(slot,Paper,Ink);Vector2 icon=DadThrowLayout.ShopIcon(slot);
+            if(card.shoe)GUI.DrawTexture(layout.ItemRect(layout.Shoe,icon,80),shoe);else GUI.DrawTexture(layout.ItemRect(layout.Golf,icon,56),golf);
+            Text(DadThrowLayout.ShopName(slot),card.name,28,Ink,display,TextAnchor.MiddleLeft);
+            Text(DadThrowLayout.ShopLine(slot),card.line,19,Ink,body,TextAnchor.UpperLeft);
+            int level=DadThrowShop.Level(Flow.Save,card.item);
+            for(int pip=0;pip<card.most;pip++)DadUi.Panel(DadThrowLayout.ShopPip(slot,pip),pip<level?Gold:PaperDown,Ink);
+            if(level>=card.most){Text(DadThrowLayout.ShopBuy(slot),"다 샀다",22,Olive,bold);continue;}
+            int price=DadThrowShop.Price(Flow.Save,card.item);
+            if(price!=shownPrice[i]){shownPrice[i]=price;priceText[i]=price+"원";}
+            // A price out of reach is shown greyed and cannot be pressed.
+            if(Button(DadThrowLayout.ShopBuy(slot),priceText[i],true,24,DadThrowShop.CanBuy(Flow.Save,card.item)))Flow.Buy(card.item);
         }
-        if(Button(DadThrowLayout.RunButton,"연속전",false,26))Flow.StartRun(System.Environment.TickCount);
     }
     void DrawMissing()
     {
@@ -587,6 +621,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
             else if(Upright){DrawTurn();bars=Color.black;}
             else if(Flow.Now==DadThrowFlow.Screen.Boot){DrawBoot();bars=Color.black;}
             else if(Flow.Now==DadThrowFlow.Screen.Title)DrawTitle();
+            else if(Flow.Now==DadThrowFlow.Screen.Shop)DrawShop();
             else if(Flow.Now==DadThrowFlow.Screen.Intro||Flow.Now==DadThrowFlow.Screen.Ending)DrawStory(Flow.Cut);
             else DrawBattle();
             Letterbox(bars);

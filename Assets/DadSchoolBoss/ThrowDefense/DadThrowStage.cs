@@ -10,6 +10,9 @@ public sealed class DadThrowStage
     public sealed class Kind
     {
         public string id,resource;public int frames;public bool facesLeft;
+        // guards: walks in holding a tray (see DadThrowModel.Enemy.guard). bare: the frames to draw once the tray is gone.
+        public bool guards;public string bare;
+        public string BareFrame(int index){return bare+"_"+index;}
         public float canvas,pivotX,pivotY,stand;public readonly List<float> heights=new List<float>();
         public string Frame(int index){return resource+"_"+index;}
         // Sizes differ a little so a crowd reads as people, while every one keeps the same feet line and hit circle.
@@ -56,6 +59,8 @@ public sealed class DadThrowStageSet
                 stand=DadThrowJson.Number(map,"standPixels",owner)};
             object faces;if(!map.TryGetValue("facesLeft",out faces)||!(faces is bool))throw new ArgumentException(owner+" must say facesLeft true or false");
             kind.facesLeft=(bool)faces;
+            object tray;if(map.TryGetValue("guards",out tray)){if(!(tray is bool))throw new ArgumentException(owner+" must say guards true or false");kind.guards=(bool)tray;}
+            kind.bare=DadThrowJson.TextOr(map,"bareResource",null,owner);
             foreach(object value in DadThrowJson.List(Need(map,"heights",owner),owner+" heights"))
             {if(!(value is double)||(double)value<=0)throw new ArgumentException(owner+" has a height that is not above zero");kind.heights.Add((float)(double)value);}
             if(kind.frames<1||kind.canvas<=0||kind.stand<=0||kind.heights.Count==0)throw new ArgumentException(owner+" needs frames, a canvas, a standing height and at least one drawn height");

@@ -1,0 +1,57 @@
+THROW STAGES AND SHOP REPORT
+Bots, not people. A row shows what the numbers allow under one way of spending; it says nothing about fun.
+A bot plays the stages in order, banks one won for each challenger sent back (win or lose), spends after every fight,
+and tries a lost stage again. It stops after 36 fights or on reaching stage 20.
+
+Stage tables
+  1-1   60 people ( 0 tough x3 health,  0 quick,  0 trays), pace 112, a pack every 1.60s
+  1-2   70 people ( 0 tough x3 health,  4 quick,  0 trays), pace 118, a pack every 1.55s
+  1-3   80 people ( 3 tough x3 health,  6 quick,  0 trays), pace 124, a pack every 1.50s
+  1-4   90 people ( 5 tough x3 health,  8 quick,  2 trays), pace 130, a pack every 1.45s
+  1-5  100 people ( 7 tough x3 health, 10 quick,  4 trays), pace 136, a pack every 1.40s
+  2-1  110 people ( 9 tough x4 health, 12 quick,  6 trays), pace 142, a pack every 1.35s
+  2-2  120 people (11 tough x4 health, 14 quick,  8 trays), pace 148, a pack every 1.30s
+  2-3  130 people (13 tough x4 health, 16 quick, 10 trays), pace 154, a pack every 1.25s
+  2-4  140 people (15 tough x5 health, 18 quick, 12 trays), pace 160, a pack every 1.20s
+  2-5  150 people (17 tough x5 health, 20 quick, 14 trays), pace 166, a pack every 1.15s
+  3-1  160 people (19 tough x5 health, 22 quick, 16 trays), pace 172, a pack every 1.10s
+  3-2  160 people (21 tough x6 health, 24 quick, 18 trays), pace 178, a pack every 1.05s
+  3-3  160 people (23 tough x6 health, 26 quick, 20 trays), pace 184, a pack every 1.00s
+  3-4  160 people (25 tough x6 health, 28 quick, 22 trays), pace 190, a pack every 0.95s
+  3-5  160 people (27 tough x7 health, 30 quick, 24 trays), pace 196, a pack every 0.90s
+  4-1  160 people (29 tough x7 health, 30 quick, 24 trays), pace 202, a pack every 0.85s
+  4-2  160 people (30 tough x7 health, 30 quick, 24 trays), pace 208, a pack every 0.80s
+  4-3  160 people (30 tough x8 health, 30 quick, 24 trays), pace 214, a pack every 0.80s
+  4-4  160 people (30 tough x8 health, 30 quick, 24 trays), pace 220, a pack every 0.80s
+  4-5  160 people (30 tough x8 health, 30 quick, 24 trays), pace 226, a pack every 0.80s
+
+Shop
+  Pierce  first  40 won, up to 4 times
+  Reload  first  60 won, up to 3 times
+  Twin    first 200 won, up to 2 times
+  Heavy   first  80 won, up to 4 times
+  Bounce  first  80 won, up to 2 times
+  Blast   first  60 won, up to 4 times
+  Wide    first  60 won, up to 2 times
+  Sticky  first  50 won, up to 2 times
+  Flow    first 150 won, up to 1 times
+
+Player: unsteady hand, a shoe for every tray
+  cheapest first  seed 1: cleared 12 of 20 stages in 36 fights, stuck on 3-3 (4 tries) | fights per stage: 1 1 1 1 2 3 2 7 3 7 3 1 | bought: Piercex4, Reloadx3, Twin, Heavyx4, Bouncex2, Blastx4, Widex2, Stickyx2, Flow | purse 278
+  cheapest first  seed 2: cleared 12 of 20 stages in 36 fights, stuck on 3-3 (2 tries) | fights per stage: 1 1 1 1 1 3 7 3 3 5 1 7 | bought: Piercex4, Reloadx3, Twin, Heavyx4, Bouncex2, Blastx4, Widex2, Stickyx2, Flow | purse 157
+  balls first     seed 1: cleared 12 of 20 stages in 36 fights, stuck on 3-3 (4 tries) | fights per stage: 1 1 1 1 2 4 1 3 7 1 9 1 | bought: Piercex4, Reloadx3, Twinx2, Heavyx4, Bouncex2, Blastx4, Widex2, Stickyx2, Flow | purse 8
+  balls first     seed 2: cleared 12 of 20 stages in 36 fights, stuck on 3-3 (2 tries) | fights per stage: 1 1 1 1 2 1 3 2 8 6 1 7 | bought: Piercex4, Reloadx3, Twinx2, Heavyx4, Bouncex2, Blastx4, Widex2, Stickyx2, Flow | purse 60
+  shoes first     seed 1: cleared 12 of 20 stages in 36 fights, stuck on 3-3 (3 tries) | fights per stage: 1 1 1 1 2 3 2 2 8 10 1 1 | bought: Piercex4, Reloadx3, Twin, Heavyx4, Bouncex2, Blastx4, Widex2, Stickyx2, Flow | purse 208
+  shoes first     seed 2: cleared 11 of 20 stages in 36 fights, stuck on 3-2 (2 tries) | fights per stage: 1 1 1 1 1 4 4 2 3 8 8 | bought: Piercex4, Reloadx3, Twin, Heavyx4, Bouncex2, Blastx4, Widex2, Stickyx2, Flow | purse 221
+  a bit of both   seed 1: cleared 12 of 20 stages in 36 fights, stuck on 3-3 (4 tries) | fights per stage: 1 1 1 1 1 4 4 5 3 7 3 1 | bought: Piercex4, Reloadx3, Twin, Heavyx4, Bouncex2, Blastx4, Widex2, Stickyx2, Flow | purse 305
+  a bit of both   seed 2: cleared 11 of 20 stages in 36 fights, stuck on 3-2 (2 tries) | fights per stage: 1 1 1 1 2 4 5 3 3 5 8 | bought: Piercex4, Reloadx3, Twin, Heavyx4, Bouncex2, Blastx4, Widex2, Stickyx2, Flow | purse 201
+
+Player: unsteady hand, balls only
+  cheapest first  seed 1: cleared  4 of 20 stages in 36 fights, stuck on 1-5 (29 tries) | fights per stage: 1 1 1 4 | bought: Piercex4, Reloadx3, Twin, Heavyx3, Bouncex2, Blastx4, Widex2, Stickyx2, Flow | purse 202
+  cheapest first  seed 2: cleared  4 of 20 stages in 36 fights, stuck on 1-5 (32 tries) | fights per stage: 1 1 1 1 | bought: Piercex4, Reloadx3, Twin, Heavyx3, Bouncex2, Blastx4, Widex2, Stickyx2, Flow | purse 218
+  balls first     seed 1: cleared  4 of 20 stages in 36 fights, stuck on 1-5 (29 tries) | fights per stage: 1 1 1 4 | bought: Piercex4, Reloadx3, Twin, Heavyx3, Bouncex2, Blastx4, Widex2, Stickyx2, Flow | purse 251
+  balls first     seed 2: cleared  4 of 20 stages in 36 fights, stuck on 1-5 (32 tries) | fights per stage: 1 1 1 1 | bought: Piercex4, Reloadx3, Twin, Heavyx3, Bouncex2, Blastx4, Widex2, Stickyx2, Flow | purse 233
+  shoes first     seed 1: cleared  4 of 20 stages in 36 fights, stuck on 1-5 (32 tries) | fights per stage: 1 1 1 1 | bought: Piercex4, Reloadx3, Twin, Heavyx3, Bouncex2, Blastx4, Widex2, Stickyx2, Flow | purse 170
+  shoes first     seed 2: cleared  4 of 20 stages in 36 fights, stuck on 1-5 (32 tries) | fights per stage: 1 1 1 1 | bought: Piercex4, Reloadx3, Twin, Heavyx3, Bouncex2, Blastx4, Widex2, Stickyx2, Flow | purse 148
+  a bit of both   seed 1: cleared  4 of 20 stages in 36 fights, stuck on 1-5 (32 tries) | fights per stage: 1 1 1 1 | bought: Piercex4, Reloadx3, Twin, Heavyx3, Bouncex2, Blastx4, Widex2, Stickyx2, Flow | purse 217
+  a bit of both   seed 2: cleared  4 of 20 stages in 36 fights, stuck on 1-5 (32 tries) | fights per stage: 1 1 1 1 | bought: Piercex4, Reloadx3, Twin, Heavyx3, Bouncex2, Blastx4, Widex2, Stickyx2, Flow | purse 155

@@ -45,7 +45,7 @@ public static class DadThrowBots
         foreach(DadThrowModel.Enemy e in m.enemies)
         {
             if(e.x>DadThrowModel.Width){twins.Add(null);continue;}
-            DadThrowModel.Enemy c=s.AddEnemy(e.x,e.hp,e.speed);c.slow=e.slow;twins.Add(c);
+            DadThrowModel.Enemy c=s.AddEnemy(e.x,e.hp,e.speed);c.slow=e.slow;c.kind=e.kind;c.guard=e.guard;twins.Add(c);
         }
         return s;
     }

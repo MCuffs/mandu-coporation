@@ -51,15 +51,18 @@ public sealed class DadThrowLayout
     // ── title (plan §6.2) ──
     public static readonly Rect TitleText=new Rect(290,75,700,165),StartButton=new Rect(490,600,300,72);
 
-    // ── 연속전 (DadThrowRun): a second way in on the title, and three offers side by side between waves ──
-    public static readonly Rect RunButton=new Rect(820,606,230,60),RunBest=new Rect(820,668,230,30),PickHeading=new Rect(0,104,W,64);
-    public const float PickWidth=300,PickHeight=336,PickGap=28,PickTop=184;
-    public static Rect PickCard(int index,int count){float total=count*PickWidth+(count-1)*PickGap;return new Rect((W-total)/2+index*(PickWidth+PickGap),PickTop,PickWidth,PickHeight);}
-    // Inside a card: the thing's picture, its name, what it does, and whether it is new or one more of the same.
-    public static Vector2 PickIcon(Rect card){return new Vector2(card.center.x,card.y+78);}
-    public static Rect PickName(Rect card){return new Rect(card.x+12,card.y+140,card.width-24,48);}
-    public static Rect PickLine(Rect card){return new Rect(card.x+16,card.y+196,card.width-32,80);}
-    public static Rect PickLevel(Rect card){return new Rect(card.x+16,card.y+286,card.width-32,34);}
+    // ── shop (DadThrowShop): its button and the purse on the title, the purse in the fight's top bar, and the
+    // shop itself: a heading, the purse, the way out, and the shelf of nine cards three by three ──
+    public static readonly Rect ShopButton=new Rect(820,606,230,60),ShopPurse=new Rect(820,668,230,30),CoinLabel=new Rect(540,20,250,48);
+    public static readonly Rect ShopHeading=new Rect(40,16,300,64),ShopCoins=new Rect(640,20,380,56),ShopClose=new Rect(1070,16,170,64);
+    public const int ShopColumns=3;public const float ShopCardWidth=386,ShopCardHeight=176,ShopGap=21,ShopTop=104,ShopLeft=40;
+    public static Rect ShopCard(int index){return new Rect(ShopLeft+index%ShopColumns*(ShopCardWidth+ShopGap),ShopTop+index/ShopColumns*(ShopCardHeight+ShopGap),ShopCardWidth,ShopCardHeight);}
+    // Inside a card: the thing's picture, its name, what it does, a cell for each time it can be bought, the price.
+    public static Vector2 ShopIcon(Rect card){return new Vector2(card.x+54,card.y+56);}
+    public static Rect ShopName(Rect card){return new Rect(card.x+104,card.y+12,card.width-116,40);}
+    public static Rect ShopLine(Rect card){return new Rect(card.x+104,card.y+54,card.width-116,52);}
+    public static Rect ShopPip(Rect card,int index){return new Rect(card.x+20+index*30,card.y+130,22,22);}
+    public static Rect ShopBuy(Rect card){return new Rect(card.xMax-170,card.y+112,152,52);}
 
     // ── clear / defeat / pause cards (plan §6.3-6.5, sizes from the wide v2 screens) ──
     public static readonly Rect ResultCard=new Rect(650,218,460,330),PauseCard=new Rect(445,145,390,430);
@@ -76,7 +79,9 @@ public sealed class DadThrowLayout
     public static readonly Rect ClearWordName=new Rect(ResultCard.x+28,ResultCard.y+118,ResultCard.width-56,26),ClearWordLine=new Rect(ResultCard.x+28,ResultCard.y+146,ResultCard.width-56,70);
     // Defeat: heading, one line saying what happened, a large retry and a small way back to the title.
     public static readonly Rect DefeatHeading=CardHeading(ResultCard,32),DefeatLine=new Rect(ResultCard.x+24,ResultCard.y+98,ResultCard.width-48,36),
-        DefeatRetry=CardButton(ResultCard,148),DefeatTitle=new Rect(ResultCard.center.x-100,ResultCard.y+236,200,56);
+        DefeatRetry=CardButton(ResultCard,148),DefeatShop=new Rect(ResultCard.x+28,ResultCard.y+236,194,56),DefeatTitle=new Rect(ResultCard.xMax-222,ResultCard.y+236,194,56);
+    // What the stage paid, over the top edge of the result card.
+    public static readonly Rect ResultEarned=new Rect(ResultCard.x,ResultCard.y-56,ResultCard.width,48);
     // Pause: heading, resume, title. The sound switch joins when the game has sound.
     public static readonly Rect PauseHeading=CardHeading(PauseCard,88),PauseResume=CardButton(PauseCard,182),PauseTitle=CardButton(PauseCard,272);
 
@@ -202,8 +207,9 @@ public sealed class DadThrowLayout
         for(int i=0;i<HealthCells;i++)rect("health_cell_"+i,HealthCell(i));
         rect("remaining_label",RemainingLabel);rect("hint",Hint);rect("aim_area",AimArea);
         rect("title_art",TitleArt());rect("title_text",TitleText);rect("start_button",StartButton);
-        rect("run_button",RunButton);rect("run_best",RunBest);rect("pick_heading",PickHeading);
-        for(int i=0;i<DadThrowRun.Offered;i++)rect("pick_card_"+i,PickCard(i,DadThrowRun.Offered));
+        rect("shop_button",ShopButton);rect("shop_purse",ShopPurse);rect("coin_label",CoinLabel);rect("result_earned",ResultEarned);rect("defeat_shop",DefeatShop);
+        rect("shop_heading",ShopHeading);rect("shop_coins",ShopCoins);rect("shop_close",ShopClose);
+        for(int i=0;i<DadThrowShop.Cards.Length;i++)rect("shop_card_"+i,ShopCard(i));
         rect("result_card",ResultCard);rect("pause_card",PauseCard);rect("hero_clear",HeroRect(Clear));rect("hero_retry",HeroRect(Retry));
         rect("clear_heading",ClearHeading);rect("clear_left",ClearLeft);rect("clear_right",ClearRight);rect("clear_word_name",ClearWordName);rect("clear_word_line",ClearWordLine);
         rect("gate_door",GateDoor);rect("story_dialogue",DadThrowStory.Dialogue);rect("story_name",DadThrowStory.DialogueName);rect("story_line",DadThrowStory.DialogueLine);rect("story_skip",DadThrowStory.Skip);

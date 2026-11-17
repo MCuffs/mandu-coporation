@@ -169,7 +169,7 @@ public static class DadThrowChecks
         bool refused=false;try{DadThrowLayout.Parse("{}","{}","{}");}catch(ArgumentException){refused=true;}
         check(refused,"an unreadable manifest is refused by name instead of placing pictures at zero");
         r.Append(DadThrowStageChecks.Run(layout,check));
-        r.Append(DadThrowRunChecks.Run(layout,check));
+        r.Append(DadThrowGrowthChecks.Run(layout,check));
         r.Append(layout.Describe());
         return r.ToString();
     }

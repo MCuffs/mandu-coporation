@@ -95,13 +95,16 @@ public sealed class DadThrowSave
 {
     public const int Schema=1;
     public bool introSeen;public int furthest;public readonly List<string> cleared=new List<string>();
-    // The furthest wave a 연속전 run has reached. Files written before runs existed do not have it and read as 0.
-    public int bestWave;
+    // Won in the purse and how many times each shop item has been bought (in the order of DadThrowShop.Item).
+    // Files written before the shop existed have neither and read as an empty purse with nothing bought.
+    public int coins;public readonly int[] upgrades=new int[DadThrowShop.Cards.Length];
     public string ToJson()
     {
         var text=new StringBuilder("{\"schemaVersion\":"+Schema+",\"introSeen\":"+(introSeen?"true":"false")+",\"furthest\":"+furthest+",\"cleared\":[");
         for(int i=0;i<cleared.Count;i++)text.Append(i>0?",":"").Append('"').Append(cleared[i].Replace("\\","\\\\").Replace("\"","\\\"")).Append('"');
-        return text.Append("],\"bestWave\":"+bestWave+"}").ToString();
+        text.Append("],\"coins\":"+coins+",\"upgrades\":{");
+        for(int i=0;i<upgrades.Length;i++)text.Append(i>0?",":"").Append('"').Append(DadThrowShop.Cards[i].item.ToString()).Append("\":").Append(upgrades[i]);
+        return text.Append("}}").ToString();
     }
     public static DadThrowSave Parse(string json)
     {
@@ -109,7 +112,14 @@ public sealed class DadThrowSave
         if(DadThrowJson.Whole(map,"schemaVersion","save")!=Schema)throw new ArgumentException("save is from another version");
         object seen;if(!map.TryGetValue("introSeen",out seen)||!(seen is bool))throw new ArgumentException("save needs introSeen");
         var save=new DadThrowSave{introSeen=(bool)seen,furthest=Math.Max(0,DadThrowJson.Whole(map,"furthest","save"))};
-        if(DadThrowJson.Has(map,"bestWave"))save.bestWave=Math.Max(0,DadThrowJson.Whole(map,"bestWave","save"));
+        if(DadThrowJson.Has(map,"coins"))save.coins=Math.Max(0,DadThrowJson.Whole(map,"coins","save"));
+        if(DadThrowJson.Has(map,"upgrades"))
+        {
+            // A level is held to what the shop sells; an item this build does not know is left out.
+            var bought=DadThrowJson.Map(map["upgrades"],"save upgrades");
+            foreach(DadThrowShop.Card card in DadThrowShop.Cards)
+                if(DadThrowJson.Has(bought,card.item.ToString()))save.upgrades[(int)card.item]=Mathf.Clamp(DadThrowJson.Whole(bought,card.item.ToString(),"save upgrades"),0,card.most);
+        }
         object list;if(!map.TryGetValue("cleared",out list))throw new ArgumentException("save needs cleared");
         foreach(object id in DadThrowJson.List(list,"save cleared"))
         {if(!(id is string))throw new ArgumentException("save has a stage that is not a name");if(!save.cleared.Contains((string)id))save.cleared.Add((string)id);}

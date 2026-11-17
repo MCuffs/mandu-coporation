@@ -14,7 +14,7 @@ using UnityEngine;
 //   size:<w>x<h>    switch the Game view to a fixed resolution
 //   capture:<png>   save the Game view
 //   audit:<folder>  walk every screen with scripted input and save a picture of each (needs play, then pump)
-//   runaudit:<folder>  the same for 연속전: title, a wave, the three offers, later waves, the run's result
+//   shopaudit:<folder>  the stages and the shop: title, a stage paying out, the shop, trays stopping a ball, a shoe, defeat
 //   stop            leave Play Mode
 //   refresh         pick up changed files (the editor does not look while it is in the background)
 // What happened is appended to Library/DadThrowRemote.log, errors and exceptions of the running game included.
@@ -140,37 +140,54 @@ public static class DadThrowRemote
         nextStep=EditorApplication.timeSinceStartup;
         Note("audit started: "+folder);
     }
-    // 연속전 once through: the title's second button, a wave, the offers, the waves where the quick and the tough
-    // ones join, and the card a run ends on. The bot that never misses plays, so the pictures do not depend on luck.
-    static void RunAudit(string folder)
+    // The stages and the shop once through: the purse on the title, a stage paying out, the shop before and after
+    // a purchase, a later stage where trays stop the balls until a shoe has been there, and the defeat card.
+    // Nothing here touches the player's own save.
+    static void ShopAudit(string folder)
     {
         steps.Clear();bot=null;DadThrowPrototype g=Game;
-        if(g==null){Note("run audit: no DadThrowPrototype in the open scene");return;}
+        if(g==null){Note("shop audit: no DadThrowPrototype in the open scene");return;}
         Action<string> shot=name=>Shot(Path.Combine(folder,name+".png"));
         Func<DadThrowFlow.Screen,Func<bool>> on=screen=>()=>g.Flow.Now==screen;
-        Func<string,float,Func<bool>> during=(wave,clock)=>()=>g.Flow.Now!=DadThrowFlow.Screen.Playing||(g.Flow.Stage.id==wave&&g.Model.Clock>=clock);
-        Step(0,()=>{Size(1920,1080);g.DebugScripted(true);g.DebugRestart();});
+        Func<bool> fighting=()=>g.Flow.Now==DadThrowFlow.Screen.Playing&&g.Model!=null;
+        // A flat throw every time the hand is ready: it goes at head height, so the nearest tray stops it.
+        DadThrowBots.Policy flat=(m,run)=>{if(m.CanFire)m.Fire(DadThrowModel.Weapon.Golf,new Vector2(150,0));};
+        Step(0,()=>{Size(1920,1080);g.DebugScripted(true);g.DebugStartAt(0,0);});
         Until(on(DadThrowFlow.Screen.Title),3);
-        Step(.3f,()=>shot("run-01-title"));
-        Step(.2f,()=>{Note("run started: "+g.Flow.StartRun(7));Play(DadThrowBots.Spam);});
-        Until(during("1조",3),8,()=>shot("run-02-wave-1"));
-        Until(on(DadThrowFlow.Screen.Pick),60);
-        Step(.5f,()=>shot("run-03-offers-after-wave-1"));
-        Step(.3f,()=>Note("chose "+g.Flow.Run.Offers[0]+": "+g.Flow.Choose(0)));
-        Until(during("2조",4),10,()=>shot("run-04-wave-2-quick-ones"));
-        Until(on(DadThrowFlow.Screen.Pick),60);
-        Step(.5f,()=>shot("run-05-offers-after-wave-2"));
-        Step(.3f,()=>Note("chose "+g.Flow.Run.Offers[1]+": "+g.Flow.Choose(1)));
-        Until(during("3조",6),12,()=>shot("run-06-wave-3-tough-ones"));
-        Until(on(DadThrowFlow.Screen.Pick),60);
-        Step(.3f,()=>Note("chose "+g.Flow.Run.Offers[0]+": "+g.Flow.Choose(0)));
-        // Nobody throws from here: the run ends on its result card.
-        Step(.2f,()=>bot=null);
+        Step(.3f,()=>shot("shop-01-title-empty-purse"));
+        Step(.2f,()=>{Note("start: "+g.Flow.Start());Play(DadThrowBots.Spam);});
+        Until(()=>!fighting()||g.Model.Clock>=3,8,()=>shot("shop-02-stage-1-1-purse-counting"));
+        Until(on(DadThrowFlow.Screen.Clear),60,()=>bot=null);
+        Step(.5f,()=>shot("shop-03-clear-what-it-paid"));
+        Step(.3f,()=>Note("shop: "+g.Flow.OpenShop()));
+        Step(.4f,()=>shot("shop-04-shop-after-1-1"));
+        Step(.3f,()=>Note("bought Sticky: "+g.Flow.Buy(DadThrowShop.Item.Sticky)));
+        Step(.4f,()=>shot("shop-05-shop-after-buying"));
+        // Further on, with a purse: stage 1-4 is the first with trays.
+        Step(.3f,()=>g.DebugStartAt(3,300));
+        Until(on(DadThrowFlow.Screen.Title),3);
+        Step(.3f,()=>{Note("start: "+g.Flow.Start()+" "+g.Flow.Stage.id);Play(flat);});
+        Until(()=>!fighting()||g.Model.BlockSerial>=2,14,()=>shot("shop-06-stage-1-4-tray-stops-the-ball"));
+        // The hand has to be ready again before the shoe can leave it.
+        Step(.05f,()=>bot=null);
+        Until(()=>!fighting()||g.Model.CanFire,2,()=>
+        {
+            if(!fighting())return;
+            // The shoe goes where the nearest tray is.
+            DadThrowModel m=g.Model;DadThrowModel.Enemy holder=null;
+            foreach(DadThrowModel.Enemy e in m.enemies)if(e.guard&&e.x<=DadThrowModel.Width&&(holder==null||e.x<holder.x))holder=e;
+            if(holder==null){Note("no tray in view");return;}
+            var path=new List<Vector2>();Vector2 best=DadThrowBots.Pulls[0];float off=float.MaxValue;
+            foreach(Vector2 pull in DadThrowBots.Pulls){m.Predict(DadThrowModel.Weapon.Shoe,pull,path);float miss=Mathf.Abs(path[path.Count-1].x-holder.x);if(miss<off){off=miss;best=pull;}}
+            g.DebugSelect(DadThrowModel.Weapon.Shoe);Note("shoe at the tray: "+m.Fire(DadThrowModel.Weapon.Shoe,best));
+        });
+        Until(()=>!fighting()||g.Model.enemies.Exists(e=>e.kind!=null&&e.kind.guards&&!e.guard),3,()=>shot("shop-07-shoe-knocks-the-tray-away"));
+        // Nobody throws from here: the stage is lost, and the card offers the shop.
         Until(on(DadThrowFlow.Screen.Defeat),60);
-        Step(.5f,()=>shot("run-07-run-over"));
-        Step(.6f,()=>{g.DebugScripted(false);g.DebugReal();Note("run audit done: "+folder);});
+        Step(.5f,()=>shot("shop-08-defeat-with-shop"));
+        Step(.6f,()=>{g.DebugScripted(false);g.DebugReal();Note("shop audit done: "+folder);});
         nextStep=EditorApplication.timeSinceStartup;
-        Note("run audit started: "+folder);
+        Note("shop audit started: "+folder);
     }
     static void Poll()
     {
@@ -210,7 +227,7 @@ public static class DadThrowRemote
             else if(command.StartsWith("size:")){string[] wh=command.Substring(5).Split('x');Size(int.Parse(wh[0]),int.Parse(wh[1]));}
             else if(command.StartsWith("capture:"))Shot(command.Substring(8));
             else if(command.StartsWith("audit:"))Audit(command.Substring(6));
-            else if(command.StartsWith("runaudit:"))RunAudit(command.Substring(9));
+            else if(command.StartsWith("shopaudit:"))ShopAudit(command.Substring(10));
             else Note("unknown command");
         }
         catch(Exception error){Note("command failed: "+error);}

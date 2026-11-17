@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Play whole 연속전 runs with bots, using Unity's bundled Mono, without launching Unity or any windows.
+"""Play a bot through the throw game's stages and shop, using Unity's bundled Mono, without launching Unity or any windows.
 
-Compiles the same sources as Tools/run_dad_headless_checks.py and runs DadThrowRunChecks.Report(), which plays
-runs under different ways of picking offers. The bots are arithmetic, not people: the report shows what the
-numbers allow, never whether a run is fun.
+Compiles the same sources as Tools/run_dad_headless_checks.py and runs DadThrowGrowthChecks.Report(): a bot plays
+the stages in order, banks one won for each challenger sent back, spends in the shop after every fight and tries
+a lost stage again. The bots are arithmetic, not people: the report shows what the numbers allow, never whether
+it is fun.
 
 Windows: pass --editor-contents "C:/Program Files/Unity/Hub/Editor/<version>/Editor/Data".
 """
@@ -19,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 parser = argparse.ArgumentParser(description=__doc__)
 version = re.search(r'm_EditorVersion: (\S+)', (ROOT / 'ProjectSettings/ProjectVersion.txt').read_text()).group(1)
 parser.add_argument('--editor-contents', type=Path, default=Path('/Applications/Unity/Hub/Editor') / version / 'Unity.app/Contents')
-parser.add_argument('--report', type=Path, default=ROOT / 'Design/dad-throw-run-report.txt')
+parser.add_argument('--report', type=Path, default=ROOT / 'Design/dad-throw-growth-report.txt')
 args = parser.parse_args()
 mono = args.editor_contents / 'MonoBleedingEdge/bin/mono'
 if os.name == 'nt':
@@ -30,9 +31,9 @@ if not mono.is_file() or not mcs.is_file() or not managed.is_dir():
     parser.error('Bundled Mono/compiler not found. Supply --editor-contents; this script never opens or installs Unity.')
 
 RUNNER = '''using System;
-class DadThrowRunReportRunner {
+class DadThrowGrowthReportRunner {
     static int Main() {
-        try { Console.OutputEncoding = new System.Text.UTF8Encoding(false); Console.Write(DadThrowRunChecks.Report()); return 0; }
+        try { Console.OutputEncoding = new System.Text.UTF8Encoding(false); Console.Write(DadThrowGrowthChecks.Report()); return 0; }
         catch(Exception error) { Console.Error.WriteLine(error); return 1; }
     }
 }'''
@@ -46,7 +47,7 @@ def run(command, limit, **options):
 
 
 try:
-    with tempfile.TemporaryDirectory(prefix='dad-run-report-') as folder:
+    with tempfile.TemporaryDirectory(prefix='dad-growth-report-') as folder:
         temp = Path(folder)
         library = temp / 'DadRules.dll'
         references = ['-r:' + str(path) for path in sorted(managed.glob('*.dll'))]
@@ -59,7 +60,7 @@ try:
         environment['MONO_PATH'] = os.pathsep.join([str(managed), str(temp)])
         started = time.time()
         played = run([str(mono), str(temp / 'Runner.exe')], 3000, env=environment)
-        if 'THROW RUN REPORT' not in played.stdout:
+        if 'THROW STAGES AND SHOP REPORT' not in played.stdout:
             raise RuntimeError('Runner returned no report')
         args.report.parent.mkdir(parents=True, exist_ok=True)
         args.report.write_text(played.stdout, encoding='utf-8', newline='\n')

@@ -124,7 +124,7 @@ public static class DadThrowStageChecks
         float[] frames={1/60f,1/30f,1/10f};var seen=new List<DadThrowModel>();
         foreach(float frame in frames)
         {
-            var s=new DadThrowModel(test,DadThrowStage.Empty());s.AddEnemy(430,1,48);s.AddEnemy(460,1,48);s.AddEnemy(490,1,48);s.AddEnemy(300,1,48);
+            var s=new DadThrowModel(test,DadThrowStage.Empty());s.AddEnemy(430,1,48);s.AddEnemy(460,1,48);s.AddEnemy(490,1,48);s.AddEnemy(900,1,48);
             s.Fire(Golf,new Vector2(150,50));for(int i=0;i<Mathf.RoundToInt(1.5f/frame);i++)s.Tick(frame);seen.Add(s);
         }
         bool same=true;foreach(DadThrowModel s in seen)same&=s.Killed==seen[0].Killed&&s.enemies.Count==seen[0].enemies.Count&&s.enemies.Count==1&&Mathf.Abs(s.enemies[0].x-seen[0].enemies[0].x)<.5f;
