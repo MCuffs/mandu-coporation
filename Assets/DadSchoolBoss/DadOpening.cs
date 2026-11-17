@@ -98,8 +98,7 @@ public sealed partial class DadSchoolPrototype
         if (TitleArt != null) GUI.DrawTexture(new Rect(0, 0, Width, Height), TitleArt, ScaleMode.ScaleAndCrop);
         Text(new Rect(0, 92, Width, 34), "아빠, 장난이라니까!", 21, Ink, true, TextAnchor.MiddleCenter);
         OutlinedText(new Rect(0, 120, Width, 120), Title, 86, Yellow, Ink, 4);
-        if (Button(new Rect(90, 806, 360, 84), "대소동 바로 시작", Yellow, true, 30)) StartQuickChallenge();
-        if (Button(new Rect(90, 898, 360, 48), ReturningPlayer ? "본편 계속하기" : "이야기와 본편", Paper, true, 22)) StartGame();
+        if (Button(new Rect(90, 806, 360, 84), ReturningPlayer ? "계속하기" : "게임 시작", Yellow, true, 30)) StartGame();
         if (ReturningPlayer)
         {
             Rect replay = new Rect(170, 758, 200, 38);

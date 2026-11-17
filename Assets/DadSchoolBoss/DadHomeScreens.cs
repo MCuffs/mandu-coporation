@@ -65,7 +65,6 @@ public sealed partial class DadSchoolPrototype
     {
         DadSave save = Progress.Save; int stage = save.currentStage, floor = Progress.Eco.Floor(stage);
         Box(new Rect(0, BarHeight, Width, 146), Paper); Box(new Rect(22,196,496,1),new Color(.3f,.35f,.27f,.25f));
-        Text(new Rect(22, 70, 340, 26), "아들: \"지호가 자기 아빠 데려왔대…\"", 17, Red, true);
         Text(new Rect(22, 94, 330, 76), Title, 54, Ink, true);
         // Stars collected over the school (C-13: the power number moved out; the fight runs on upgrades, not power).
         int stars = 0; foreach (int s in save.stars) stars += s;
@@ -74,7 +73,6 @@ public sealed partial class DadSchoolPrototype
         Text(new Rect(418, 106, 100, 56), stars.ToString(), 36, Ink, true, TextAnchor.MiddleRight);
         Text(new Rect(24,164,492,26),Progress.Eco.Label(stage)+"  ·  "+StagePlan.FloorNames[Mathf.Clamp(floor-1,0,2)]+" 출동 준비",17,Green);
         DrawHomeScene(floor);
-        if (Button(new Rect(310, 216, 210, 44), "대소동 도전 · 12판", Yellow, true, 19)) OpenContentChallenge();
 
         // Mom's stash (idle reward): always on its own row so it never covers dad's face (v9).
         bool idle = Progress.HasIdleReward;
@@ -130,7 +128,6 @@ public sealed partial class DadSchoolPrototype
     {
         DadSave save = Progress.Save;
         Text(new Rect(24, 70, 492, 54), "엄마가 뭘 넣었지?", 36, Ink, true);
-        Text(new Rect(24, 120, 492, 26), "엄마: \"밥은 먹고 싸워.\"  열면 아빠 물건이 나온다", 16, Green, true);
         Panel(new Rect(20, 154, 500, 346), new Color(.84f, .86f, .78f));
         Ellipse(new Vector2(270, 474), 170, 26, new Color(0, 0, 0, .2f));
         if (NewArt) DrawCharacter("dad", "idle", Mathf.FloorToInt(clock / .6f), new Vector2(270, 474), 262, false);
@@ -158,8 +155,6 @@ public sealed partial class DadSchoolPrototype
         for (int i = 0; i < DadProgress.RarityCount && i < w.Length; i++) odds += (i > 0 ? " · " : "") + DadProgress.RarityNames[i] + " " + Mathf.RoundToInt(100 * w[i] / total) + "%";
         Box(new Rect(20, 708, 6, 66), Green);
         Text(new Rect(36, 708, 484, 30), "등급 확률  " + odds, 17, Ink, true);
-        Text(new Rect(36, 738, 484, 36), "첫 장비는 희귀 손 장비 · 두 번째는 신발 · 이후 빈 부위부터", 15, Muted);
-        Text(new Rect(24, 790, 492, 60), "\"밥 먹으려고 열었는데 효자손이 나왔다.\"", 18, Green, true, TextAnchor.MiddleCenter);
     }
 
     bool HasUpgradeableStat()

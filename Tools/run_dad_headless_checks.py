@@ -22,7 +22,7 @@ if not mono.is_file() or not mcs.is_file() or not managed.is_dir():
 RUNNER = '''using System;
 class DadHeadlessRunner {
     static int Main() {
-        try { Console.Write(SlingshotChecks.RunChecks()); Console.Write(DadDifficultyChecks.Run()); return 0; }
+        try { Console.Write(SlingshotChecks.RunChecks()); Console.Write(DadDifficultyChecks.Run()); Console.Write(DadS21ViewChecks.Run()); return 0; }
         catch(Exception error) { Console.Error.WriteLine(error); return 1; }
     }
 }'''

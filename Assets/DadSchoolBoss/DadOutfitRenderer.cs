@@ -71,7 +71,7 @@ public sealed class DadOutfitRenderer : IDisposable
     static bool HandArea(Vector2 point,Vector2 center,float angle,bool fist,float scale)
     {
         Vector2 d=Local(point,center,angle);
-        float rx=(fist?41:39)*scale,ry=(fist?34:46)*scale;
+        float rx=(fist?37:36)*scale,ry=(fist?31:42)*scale;
         return d.x*d.x/(rx*rx)+d.y*d.y/(ry*ry)<1;
     }
     static bool FootArea(Vector2 p,Vector2 center,float angle)
@@ -114,7 +114,7 @@ public sealed class DadOutfitRenderer : IDisposable
         if(texture==null||propCuts==null)return;
         int index=(slot==4?0:3)+rarity;Rect uv=propCuts.parts[index].UV;
         // Preserve the actual object's aspect ratio, use its physical grip rather than image center.
-        float height=slot==4?(rarity==2?115:110):(rarity==0?180:170);
+        float height=slot==4?DadBattleViewRules.PocketHeight(rarity):(rarity==0?150:145);
         float width=height*texture.width*uv.width/(texture.height*uv.height);
         Vector2 grip;float angle;
         if(slot==4){grip=rarity==2?new Vector2(.55f,.85f):new Vector2(.50f,.98f);angle=rarity==2?-55:-10;}
@@ -168,11 +168,11 @@ public sealed class DadOutfitRenderer : IDisposable
         if(progress.HasGear(1))
         {
             int rarity=save.gearRarity[1];bool gripA=p.fists||progress.HasGear(4),gripB=p.fists||progress.HasGear(5);
-            float w=p.fists?98:86,h=p.fists?82:112;
-            Part((gripA?3:0)+rarity,p.handA,gripA?98:w,gripA?82:h,p.handAngleA+(!p.fists&&gripA?90:0));
-            Part((gripB?3:0)+rarity,p.handB,(gripB?98:w)*p.handScaleB,(gripB?82:h)*p.handScaleB,p.handAngleB+(!p.fists&&gripB?90:0),!gripB);
+            float w=p.fists?90:80,h=p.fists?76:104;
+            Part((gripA?3:0)+rarity,p.handA,gripA?90:w,gripA?76:h,p.handAngleA+(!p.fists&&gripA?90:0));
+            Part((gripB?3:0)+rarity,p.handB,(gripB?90:w)*p.handScaleB,(gripB?76:h)*p.handScaleB,p.handAngleB+(!p.fists&&gripB?90:0),!gripB);
         }
-        if(!progress.HasGear(1)&&(progress.HasGear(4)||progress.HasGear(5)))GUI.DrawTexture(new Rect(0,0,768,768),Hands(sourceName));
+        if(!progress.HasGear(1)&&(progress.HasGear(4)||progress.HasGear(5))) { Texture2D hand=Hands(sourceName);if(hand!=null)GUI.DrawTexture(new Rect(0,0,768,768),hand); }
         if(progress.HasGear(3))
         {
             int rarity=save.gearRarity[3];
