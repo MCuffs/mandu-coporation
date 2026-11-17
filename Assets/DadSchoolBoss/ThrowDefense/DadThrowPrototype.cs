@@ -12,8 +12,9 @@ public sealed class DadThrowPrototype:MonoBehaviour
     public DadThrowFlow Flow {get;private set;}
     public DadThrowModel Model {get{return Flow!=null?Flow.Model:null;}}
     DadThrowLayout layout;DadThrowStageSet stages;readonly DadThrowAim aim=new DadThrowAim();
-    // The game's stages, built off the curve from the opponents the stage file declares.
-    List<DadThrowStage> game;
+    // The game's stages, built off the curve from the opponents the stage file declares, and the tuner that
+    // bends them a little toward how the player is doing.
+    List<DadThrowStage> game;DadThrowTuner tuner;
     Font body,bold,display;Texture2D dot;
     Texture2D street,titleArt,golf,shoe,clearArt,retryArt;readonly Texture2D[] dad=new Texture2D[3];
     DadThrowStory story;Texture2D actorSheet,rivalArt,propArt;readonly Dictionary<string,Texture2D> backdropArt=new Dictionary<string,Texture2D>();
@@ -86,7 +87,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
     {
         string problem;DadThrowSave save=DadThrowSave.Load(savePath,out problem);
         if(problem!=null)Debug.LogWarning("Throw prototype save: "+problem);
-        aim.Cancel();seenRun=-1;Flow=new DadThrowFlow(game,layout.Field,story,save,savePath);
+        aim.Cancel();seenRun=-1;Flow=new DadThrowFlow(game,layout.Field,story,save,savePath,tuner);
     }
     // Only what this scene draws is loaded, by the keys the manifests and the stage file name.
     T Need<T>(string key) where T:Object{T asset=Resources.Load<T>(key);if(asset==null)missing.Add(key);return asset;}
@@ -101,6 +102,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
             layout=DadThrowLayout.Parse(throwArt,wide,result);
             stages=DadThrowStageSet.Parse(table,layout.Backgrounds,layout.Field.Gate);
             game=DadThrowCurve.Build(stages.kinds,stages.stages[0].backgroundKey,stages.stages);
+            tuner=new DadThrowTuner(stages.kinds,stages.stages[0].backgroundKey);
             story=DadThrowStory.Parse(tale);
         }
         catch(System.ArgumentException error){missing.Add(error.Message);return;}
@@ -176,6 +178,10 @@ public sealed class DadThrowPrototype:MonoBehaviour
         if(m.ChainSerial!=seenChain){seenChain=m.ChainSerial;chainClock=.6f;shake=Mathf.Max(shake,Mathf.Min(.65f,.08f*m.ChainCount));}
         // A tray stopped a ball: no words, the shoe button lights up instead.
         if(m.BlockSerial!=seenBlock){seenBlock=m.BlockSerial;blockClock=BlockTime;blockAt=m.BlockAt;if(selected==DadThrowModel.Weapon.Golf)shoeNudge=NudgeTime;}
+        // Someone whose balls keep stopping on trays and who hardly throws a shoe: the button goes on asking for
+        // as long as a tray is in view, without waiting for the next ball to be stopped.
+        if(Flow.ShoeShy&&selected==DadThrowModel.Weapon.Golf&&shoeNudge<.5f)
+            foreach(DadThrowModel.Enemy e in m.enemies)if(e.guard&&e.x<=DadThrowLayout.W){shoeNudge=.5f;break;}
         if(Flow.Now!=DadThrowFlow.Screen.Playing)aim.Cancel();
     }
     // A fresh stage: nothing from the last attempt may leak into it. A button starts the stage while the screen

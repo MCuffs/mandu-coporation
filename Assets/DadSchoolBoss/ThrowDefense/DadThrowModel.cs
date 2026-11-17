@@ -68,6 +68,8 @@ public sealed class DadThrowModel
     public int ChainSerial {get;private set;} public int ChainCount {get;private set;} public Vector2 ChainAt {get;private set;}
     // The latest ball a tray stopped, for the clang on the street and the nudge toward the shoe.
     public int BlockSerial {get;private set;} public Vector2 BlockAt {get;private set;}
+    // Shoes thrown in this fight, for telling a player who never reaches for one (DadThrowTuner).
+    public int ShoesThrown {get;private set;}
     public int Total {get{return Stage!=null?Stage.Total:12+Math.Min(18,Wave-1)*4;}}
     public float Interval {get{return Math.Max(.22f,.8f-(Wave-1)*.045f);}}
     public int UpgradeCost {get{return 30+Level*25;}}
@@ -106,6 +108,7 @@ public sealed class DadThrowModel
             float turn=(extra+1)/2*FanDegrees*(extra%2==1?-1:1)*Mathf.Deg2Rad,cos=Mathf.Cos(turn),sin=Mathf.Sin(turn);
             projectiles.Add(new Projectile{weapon=weapon,pos=Field.Muzzle,vel=new Vector2(launch.x*cos-launch.y*sin,launch.x*sin+launch.y*cos),remaining=Rules.Pierce+Level});
         }
+        if(weapon==Weapon.Shoe)ShoesThrown++;
         Reload=ReloadTotal=weapon==Weapon.Golf?Rules.GolfReload:Rules.ShoeReload;return true;
     }
     // Half the width of a standing body, and how tall one stands when no picture says (checks, the wave formula).

@@ -303,6 +303,63 @@ public static class DadThrowGrowthChecks
         DadThrowSave remembered=DadThrowSave.Parse(newcomer.ToJson());
         check(remembered.met.Count==3&&remembered.met.Contains("guard")&&remembered.met.Contains("tough")&&remembered.met.Contains("fast")&&old.met.Count==0,"who has been met is saved and read back; a save from before has met nobody");
 
+        // ── difficulty that bends a little toward how the player is doing ──
+        var tuner=new DadThrowTuner(set.kinds,street);var note=new DadThrowSave();
+        check(DadThrowTuner.Ease(note,"2-1")==0&&DadThrowTuner.Heat(note)==0&&tuner.Table(game[5],6,note)==game[5],"a new player meets every stage exactly as the curve has it");
+        DadThrowTuner.Lost(note,"2-1");
+        check(DadThrowTuner.Ease(note,"2-1")==0&&tuner.Table(game[5],6,note)==game[5],"one defeat changes nothing");
+        DadThrowTuner.Lost(note,"2-1");DadThrowStage eased=tuner.Table(game[5],6,note);
+        check(DadThrowTuner.Ease(note,"2-1")==1&&eased!=game[5]&&eased.Total==Mathf.RoundToInt(game[5].Total*.94f)&&eased.id=="2-1"&&eased.health==5&&eased.entrance==game[5].entrance&&eased.hint==game[5].hint&&eased.groups.Count>=2,
+            "a second defeat on the same stage takes 6% of its people away and leaves its name, its gate and its words alone");
+        check(Mathf.Abs(eased.groups[0].speed-game[5].groups[0].speed*.96f)<.01f,"and 4% of its pace");
+        for(int i=0;i<6;i++)DadThrowTuner.Lost(note,"2-1");
+        DadThrowStage softest=tuner.Table(game[5],6,note);
+        check(DadThrowTuner.Ease(note,"2-1")==DadThrowTuner.MaxEase&&softest.Total==Mathf.RoundToInt(game[5].Total*.76f)&&softest.Total*4>=game[5].Total*3,
+            "however often a stage is lost it eases four steps and no further: three quarters of its people are always there");
+        check(DadThrowTuner.Ease(note,"2-2")==0&&tuner.Table(game[6],7,note)==game[6],"what one stage is owed is not owed on another");
+        DadThrowTuner.Cleared(note,true);
+        check(DadThrowTuner.Ease(note,"2-1")==0&&note.defeats==0&&tuner.Table(game[5],6,note)==game[5],"a clear puts the stage back as it was");
+        var streak=new DadThrowSave();DadThrowTuner.Cleared(streak,false);
+        check(DadThrowTuner.Heat(streak)==0&&tuner.Table(game[2],3,streak)==game[2],"one flawless clear changes nothing");
+        DadThrowTuner.Cleared(streak,false);DadThrowStage heated=tuner.Table(game[2],3,streak);
+        check(DadThrowTuner.Heat(streak)==1&&heated.Total==Mathf.RoundToInt(game[2].Total*1.05f)&&Mathf.Abs(heated.groups[0].speed-game[2].groups[0].speed*1.03f)<.01f&&DadThrowTuner.Pay(80,1)==88&&DadThrowTuner.Pay(80,0)==80,
+            "two flawless clears running heat the next stage by 5% of its people and 3% of its pace, and it pays a tenth more");
+        for(int i=0;i<6;i++)DadThrowTuner.Cleared(streak,false);
+        check(DadThrowTuner.Heat(streak)==DadThrowTuner.MaxHeat&&DadThrowTuner.Pay(100,3)==130,"heat stops at three steps");
+        DadThrowTuner.Cleared(streak,true);
+        check(DadThrowTuner.Heat(streak)==DadThrowTuner.MaxHeat-1,"a clear with a touch on the gate cools one step");
+        DadThrowTuner.Lost(streak,"3-1");
+        check(DadThrowTuner.Heat(streak)==0&&DadThrowTuner.Ease(streak,"3-1")==0,"a defeat cools it all, and eases nothing yet");
+        DadThrowStage fullest=tuner.Table(game[29],30,new DadThrowSave{flawless=4});
+        check(fullest!=game[29]&&fullest.Total==DadThrowStageSet.MaxTotal&&fullest.groups[0].speed<=DadThrowCurve.MaxPace,"heat never puts more people on the street or more pace into them than the game allows");
+        var shy=new DadThrowSave();
+        check(!DadThrowTuner.ShoeShy(shy),"a new player is not nagged about the shoe");
+        DadThrowTuner.Watched(shy,5,1);
+        check(DadThrowTuner.ShoeShy(shy),"five balls stopped on trays against one shoe thrown: the shoe button keeps asking");
+        DadThrowTuner.Watched(shy,1,2);
+        check(!DadThrowTuner.ShoeShy(shy),"once the shoes keep up with the trays it stops asking");
+        var counted=Quiet(field);counted.Fire(Shoe,Flat);DadThrowChecks.Advance(counted,.8f);counted.Fire(Golf,Flat);
+        check(counted.ShoesThrown==1,"the fight counts the shoes thrown, not the balls");
+        var owing=new DadThrowSave{introSeen=true,furthest=5};owing.met.Add("fast");owing.met.Add("tough");owing.met.Add("guard");
+        var bent=new DadThrowFlow(game,field,null,owing,null,tuner);bent.Tick(2);bent.Start();
+        check(bent.Stage.id=="2-1"&&bent.Ease==0&&bent.Heat==0&&bent.Model.Total==game[5].Total&&!bent.ShoeShy,"through the flow a stage starts plain when nothing is owed");
+        for(int i=0;i<120*60&&bent.Now==OnFight;i++)bent.Tick(1/120f);
+        bool once=bent.Now==OnDefeat&&owing.defeats==1&&bent.Retry()&&bent.Ease==0&&bent.Model.Total==game[5].Total;
+        for(int i=0;i<120*60&&bent.Now==OnFight;i++)bent.Tick(1/120f);
+        check(once&&bent.Now==OnDefeat&&owing.defeats==2&&owing.tunedStage=="2-1"&&bent.Retry()&&bent.Ease==1&&bent.Model.Total==Mathf.RoundToInt(game[5].Total*.94f)&&bent.Stage==game[5],
+            "lost twice through the flow, the third try is eased one step, and the stage the screen names is the same stage");
+        DadThrowSave owed=DadThrowSave.Parse(owing.ToJson());
+        check(owed.tunedStage=="2-1"&&owed.defeats==2&&owed.flawless==0&&old.defeats==0&&old.tunedStage==null&&old.flawless==0&&old.blocked==0,
+            "what the tuner keeps is saved and read back; a save from before has nothing owed");
+        var hot=new DadThrowSave{introSeen=true,flawless=2};var paying=new DadThrowFlow(game,field,null,hot,null,tuner);paying.Tick(2);paying.Start();
+        var thrower=new DadThrowBots.Run();
+        for(int i=0;i<120*120&&paying.Now==OnFight;i++){DadThrowBots.Spam(paying.Model,thrower);paying.Tick(1/120f);}
+        int sent=paying.Model.Killed;
+        check(paying.Heat==1&&paying.Model.Total==Mathf.RoundToInt(game[0].Total*1.05f)&&paying.Now==OnClear&&paying.Earned==DadThrowTuner.Pay(sent,1)&&hot.coins==paying.Earned&&paying.Earned>sent&&paying.Coins==hot.coins,
+            "a heated stage through the flow has more people and pays its bonus once");
+        var plainFlow=new DadThrowFlow(game,field,null,new DadThrowSave{introSeen=true,flawless=3,tunedStage="1-1",defeats=4},null);plainFlow.Tick(2);plainFlow.Start();
+        check(plainFlow.Ease==0&&plainFlow.Heat==0&&plainFlow.Model.Total==game[0].Total&&!plainFlow.ShoeShy,"a flow without a tuner plays every stage as it is listed, whatever the save says");
+
         // ── the pictures the game loads for the shop, the entrances and the two small effects (asset request v3) ──
         Func<string,bool> onDisk=key=>System.IO.File.Exists("Assets/DadSchoolBoss/Resources/"+key+".png")&&System.IO.File.Exists("Assets/DadSchoolBoss/Resources/"+key+".png.meta");
         bool icons=onDisk(DadThrowShop.CoinKey)&&onDisk(DadThrowShop.ShopKey)&&onDisk(DadThrowShop.SoldOutKey);var keys=new HashSet<string>();
@@ -411,6 +468,25 @@ public static class DadThrowGrowthChecks
                 r.AppendLine(string.Format(PlainNumbers,"  {0,-15} seed {1}: cleared {2,2} of {3} stages in {4} fights{5} | fights per stage: {6}| bought: {7} | purse {8}",
                     ways[w],seed,stage,Reach,fights,stage<Reach?", stuck on "+DadThrowCurve.Id(stage+1)+" ("+again+" tries)":"",perStage,Bought(save),save.coins));
             }
+        }
+        // The same player and the same ways of spending, with the tuner bending the stages.
+        var tuner=new DadThrowTuner(set.kinds,set.stages[0].backgroundKey);
+        r.AppendLine();r.AppendLine("Player: "+players[0]+", WITH the difficulty tuner (compare with the first block)");
+        for(int w=0;w<ways.Length;w++)for(int seed=1;seed<=Seeds;seed++)
+        {
+            var save=new DadThrowSave();int stage=0,fights=0,again=0,easedFights=0,heatedFights=0,worst=0;var perStage=new StringBuilder();
+            while(stage<Reach&&fights<Tries)
+            {
+                DadThrowStage listed=game[stage];int ease=DadThrowTuner.Ease(save,listed.id),heat=DadThrowTuner.Heat(save);
+                if(ease>0)easedFights++;if(heat>0)heatedFights++;
+                DadThrowModel fought=Fight(tuner.Table(listed,stage+1,save),field,save,Hand(seed*31+fights*7,true));fights++;again++;
+                save.coins+=DadThrowTuner.Pay(fought.Killed,heat);DadThrowTuner.Watched(save,fought.BlockSerial,fought.ShoesThrown);
+                if(fought.phase==Cleared){DadThrowTuner.Cleared(save,fought.Health<listed.health);perStage.Append(again).Append(' ');worst=Math.Max(worst,again);stage++;again=0;}
+                else DadThrowTuner.Lost(save,listed.id);
+                buyers[w](save);
+            }
+            r.AppendLine(string.Format(PlainNumbers,"  {0,-15} seed {1}: cleared {2,2} of {3} stages in {4} fights{5} | fights per stage: {6}| most on one stage {7} | eased fights {8}, heated fights {9} | purse {10}",
+                ways[w],seed,stage,Reach,fights,stage<Reach?", stuck on "+DadThrowCurve.Id(stage+1)+" ("+again+" tries)":"",perStage,Math.Max(worst,again),easedFights,heatedFights,save.coins));
         }
         return r.ToString();
     }

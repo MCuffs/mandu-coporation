@@ -100,6 +100,9 @@ public sealed class DadThrowSave
     public int coins;public readonly int[] upgrades=new int[DadThrowShop.Cards.Length];
     // The opponents whose entrance has been shown (by the name the stage file gives them). Optional when read.
     public readonly List<string> met=new List<string>();
+    // What the difficulty tuner keeps (DadThrowTuner): the stage defeats are being counted on and how many,
+    // flawless clears in a row, and balls stopped on trays against shoes thrown. Optional when read.
+    public string tunedStage;public int defeats,flawless,blocked,shoes;
     public string ToJson()
     {
         var text=new StringBuilder("{\"schemaVersion\":"+Schema+",\"introSeen\":"+(introSeen?"true":"false")+",\"furthest\":"+furthest+",\"cleared\":[");
@@ -108,7 +111,11 @@ public sealed class DadThrowSave
         for(int i=0;i<upgrades.Length;i++)text.Append(i>0?",":"").Append('"').Append(DadThrowShop.Cards[i].item.ToString()).Append("\":").Append(upgrades[i]);
         text.Append("},\"met\":[");
         for(int i=0;i<met.Count;i++)text.Append(i>0?",":"").Append('"').Append(met[i].Replace("\\","\\\\").Replace("\"","\\\"")).Append('"');
-        return text.Append("]}").ToString();
+        // The stage name is written only while defeats are being counted on one: the reader refuses an empty name.
+        text.Append("],\"tuning\":{");
+        if(!string.IsNullOrEmpty(tunedStage))text.Append("\"stage\":\"").Append(tunedStage.Replace("\\","\\\\").Replace("\"","\\\"")).Append("\",");
+        text.Append("\"defeats\":"+defeats+",\"flawless\":"+flawless+",\"blocked\":"+blocked+",\"shoes\":"+shoes);
+        return text.Append("}}").ToString();
     }
     public static DadThrowSave Parse(string json)
     {
@@ -123,6 +130,15 @@ public sealed class DadThrowSave
             var bought=DadThrowJson.Map(map["upgrades"],"save upgrades");
             foreach(DadThrowShop.Card card in DadThrowShop.Cards)
                 if(DadThrowJson.Has(bought,card.item.ToString()))save.upgrades[(int)card.item]=Mathf.Clamp(DadThrowJson.Whole(bought,card.item.ToString(),"save upgrades"),0,card.most);
+        }
+        if(DadThrowJson.Has(map,"tuning"))
+        {
+            var tuning=DadThrowJson.Map(map["tuning"],"save tuning");string on=DadThrowJson.TextOr(tuning,"stage","","save tuning");
+            save.tunedStage=on.Length>0?on:null;
+            if(DadThrowJson.Has(tuning,"defeats"))save.defeats=Math.Max(0,DadThrowJson.Whole(tuning,"defeats","save tuning"));
+            if(DadThrowJson.Has(tuning,"flawless"))save.flawless=Mathf.Clamp(DadThrowJson.Whole(tuning,"flawless","save tuning"),0,DadThrowTuner.MaxHeat+1);
+            if(DadThrowJson.Has(tuning,"blocked"))save.blocked=Math.Max(0,DadThrowJson.Whole(tuning,"blocked","save tuning"));
+            if(DadThrowJson.Has(tuning,"shoes"))save.shoes=Math.Max(0,DadThrowJson.Whole(tuning,"shoes","save tuning"));
         }
         if(DadThrowJson.Has(map,"met"))foreach(object who in DadThrowJson.List(map["met"],"save met"))if(who is string&&!save.met.Contains((string)who))save.met.Add((string)who);
         object list;if(!map.TryGetValue("cleared",out list))throw new ArgumentException("save needs cleared");

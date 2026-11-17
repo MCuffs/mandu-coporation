@@ -43,13 +43,21 @@ public sealed class DadThrowFlow
     // Whether the stage in hand has paid out, and the screen the shop was opened from.
     bool banked;Screen shopFrom;
     // The purse as the player sees it: what is saved, plus those sent back in the fight still going on.
-    public int Coins {get{return Save.coins+(Model!=null&&!banked?Model.Killed*DadThrowShop.WonPerFelled:0);}}
+    public int Coins {get{return Save.coins+(Model!=null&&!banked?Earned:0);}}
     // What the stage in hand has earned so far (it stays readable on the result card).
-    public int Earned {get{return Model!=null?Model.Killed*DadThrowShop.WonPerFelled:0;}}
+    public int Earned {get{return Model!=null?DadThrowTuner.Pay(Model.Killed,Heat):0;}}
+    // The difficulty tuner, when the game has one, and how far the stage in hand was eased or heated when it
+    // started (0 when nothing was owed). The player is never shown these.
+    readonly DadThrowTuner tuner;
+    public int Ease {get;private set;} public int Heat {get;private set;}
+    // Balls keep stopping on trays and hardly a shoe has been thrown: the screen keeps pointing at the shoe.
+    public bool ShoeShy {get{return tuner!=null&&DadThrowTuner.ShoeShy(Save);}}
 
     // story: null plays no opening or ending. savePath: null keeps progress in memory only (checks, captures).
-    public DadThrowFlow(IList<DadThrowStage> stages,DadThrowField field,DadThrowStory story=null,DadThrowSave save=null,string savePath=null)
+    // tuner: null plays every stage exactly as it is listed (checks, captures of a fixed stage).
+    public DadThrowFlow(IList<DadThrowStage> stages,DadThrowField field,DadThrowStory story=null,DadThrowSave save=null,string savePath=null,DadThrowTuner tuner=null)
     {
+        this.tuner=tuner;
         if(stages==null||stages.Count==0)throw new ArgumentException("the flow needs at least one stage");
         if(field==null)throw new ArgumentNullException("field");
         this.stages=stages;this.field=field;this.savePath=savePath;Story=story;Save=save??new DadThrowSave();
@@ -75,7 +83,9 @@ public sealed class DadThrowFlow
     // The throws are the plain ones with everything bought in the shop added.
     void Load(int index,bool wait=false)
     {
-        StageIndex=index;Model=new DadThrowModel(field,stages[index]){Rules=DadThrowShop.Rules(Save)};
+        StageIndex=index;DadThrowStage plain=stages[index];
+        Ease=tuner!=null?DadThrowTuner.Ease(Save,plain.id):0;Heat=tuner!=null?DadThrowTuner.Heat(Save):0;
+        Model=new DadThrowModel(field,tuner!=null?tuner.Table(plain,index+1,Save):plain){Rules=DadThrowShop.Rules(Save)};
         Runs++;Word=null;WaitingForAim=wait;primed=false;banked=false;Now=Screen.Playing;
         // Whoever in this stage has an entrance to make and has not made it: on the first stage he is in, and
         // for a save that is already past that stage, on the next stage he turns up in.
@@ -87,8 +97,9 @@ public sealed class DadThrowFlow
     void Bank(bool persist=true)
     {
         if(Model==null||banked)return;
-        banked=true;if(Model.Killed<=0)return;
-        Save.coins+=Model.Killed*DadThrowShop.WonPerFelled;if(persist)Persist();
+        int pay=Earned;banked=true;
+        if(tuner!=null)DadThrowTuner.Watched(Save,Model.BlockSerial,Model.ShoesThrown);
+        Save.coins+=pay;if(persist)Persist();
     }
     // The shop opens from the title or from a result, and closes back onto the same screen.
     public bool OpenShop(){if(Now!=Screen.Title&&Now!=Screen.Clear&&Now!=Screen.Defeat)return false;shopFrom=Now;Now=Screen.Shop;return true;}
@@ -121,6 +132,7 @@ public sealed class DadThrowFlow
     {
         DadThrowStage stage=Stage;bool first=!Save.cleared.Contains(stage.id);
         Bank(false);
+        if(tuner!=null)DadThrowTuner.Cleared(Save,Model.Health<stage.health);
         if(first)Save.cleared.Add(stage.id);
         if(HasNext)Furthest=Math.Max(Furthest,StageIndex+1);
         Save.furthest=Furthest;Persist();
@@ -148,7 +160,7 @@ public sealed class DadThrowFlow
             return;
         }
         Model.Tick(dt);
-        if(Model.phase==DadThrowModel.Phase.Lost){Bank();Now=Screen.Defeat;}
+        if(Model.phase==DadThrowModel.Phase.Lost){if(tuner!=null)DadThrowTuner.Lost(Save,Stage.id);Bank();Now=Screen.Defeat;}
         else if(Model.phase==DadThrowModel.Phase.WaveClear)Cleared();
     }
 }

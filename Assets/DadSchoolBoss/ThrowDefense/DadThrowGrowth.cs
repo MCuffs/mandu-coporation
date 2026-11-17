@@ -103,15 +103,18 @@ public static class DadThrowCurve
     // Stage `number` as a table in the form the stage file uses, so the fight and the picture need nothing new.
     // kinds: the opponents the stage file declares. "normal" is needed; a missing "tough", "fast" or "guard"
     // is played by the normal one (and without a guard kind there are no trays).
-    public static DadThrowStage Stage(int number,IDictionary<string,DadThrowStage.Kind> kinds,string background)
+    // crowd, tempo: 1 for the stage as the curve has it. The tuner bends them a little (DadThrowTuner): every
+    // kind of opponent grows or shrinks by the same share, so the stage stays the same stage.
+    public static DadThrowStage Stage(int number,IDictionary<string,DadThrowStage.Kind> kinds,string background,float crowd=1,float tempo=1)
     {
         DadThrowStage.Kind normal,tough,fast,guard;
         if(kinds==null||!kinds.TryGetValue("normal",out normal))throw new ArgumentException("the stage curve needs the normal opponent");
         if(!kinds.TryGetValue("tough",out tough))tough=normal;if(!kinds.TryGetValue("fast",out fast))fast=normal;
         if(!kinds.TryGetValue("guard",out guard)||!guard.guards)guard=null;
         var stage=new DadThrowStage{id=Id(number),backgroundKey=background,health=MaxHealth,baseReward=People(number)};
-        int hard=Tough(number),quick=Fast(number),trays=guard!=null?Guards(number):0,plain=People(number)-hard-quick-trays;
-        float pace=Pace(number),gap=Gap(number);
+        int people=Math.Min(MaxPeople,Math.Max(PackSize,Mathf.RoundToInt(People(number)*crowd)));
+        int hard=Mathf.RoundToInt(Tough(number)*crowd),quick=Mathf.RoundToInt(Fast(number)*crowd),trays=guard!=null?Mathf.RoundToInt(Guards(number)*crowd):0,plain=people-hard-quick-trays;
+        float pace=Math.Min(MaxPace,Pace(number)*tempo),gap=Gap(number);
         // Ordinary runners, about fourteen to a pack: one pack already close, one at the far end of the street,
         // the rest from off screen, a pack every `gap` seconds. Later packs run a little faster and closer together.
         int packs=Math.Max(2,(plain+PackSize-1)/PackSize),left=plain;float at=0;
@@ -160,5 +163,56 @@ public static class DadThrowCurve
             stages.Add(stage);
         }
         return stages;
+    }
+}
+
+// The difficulty a player meets bends a little toward how they are doing (2026-11-18, the owner: "difficulty
+// that changes little by little with how the player plays"). Nothing here is shown to the player.
+//  - Lose the same stage twice and it eases: from the second defeat each one takes 6% of the people and 4% of
+//    the pace away, four steps at most. The first defeat changes nothing; a clear puts the stage back.
+//  - Clear two stages running without the gate being touched and the next one heats up: 5% more people and
+//    3% more pace a step, three steps at most, and each step pays a tenth more won. A clear with a touch on
+//    the gate cools one step; a defeat cools it all.
+//  - Someone whose balls keep stopping on trays and who hardly throws a shoe is not given fewer trays: the
+//    shoe button asks for attention for as long as a tray is in view.
+// The bends are small on purpose: a lost stage still pays, and a stage that fell away under the player would
+// leave the shop with nothing to sell.
+public sealed class DadThrowTuner
+{
+    public const int MaxEase=4,MaxHeat=3,ShyBlocks=4,ShyShare=3;
+    public const float EasePeople=.06f,EasePace=.04f,HeatPeople=.05f,HeatPace=.03f;
+    // A heated stage pays this many won more for every ten sent back, per step.
+    public const int HeatPayPerTen=1;
+    readonly IDictionary<string,DadThrowStage.Kind> kinds;readonly string background;
+    public DadThrowTuner(IDictionary<string,DadThrowStage.Kind> kinds,string background)
+    {if(kinds==null)throw new ArgumentNullException("kinds");this.kinds=kinds;this.background=background;}
+
+    // Steps of easing stage `id` is owed: the defeats on it beyond the first.
+    public static int Ease(DadThrowSave save,string id){return save.tunedStage==id?Mathf.Clamp(save.defeats-1,0,MaxEase):0;}
+    // Steps of heat the next stage starts with: flawless clears in a row beyond the first.
+    public static int Heat(DadThrowSave save){return Mathf.Clamp(save.flawless-1,0,MaxHeat);}
+    public static float Crowd(int ease,int heat){return 1-EasePeople*ease+HeatPeople*heat;}
+    public static float Tempo(int ease,int heat){return 1-EasePace*ease+HeatPace*heat;}
+    // What a fight pays: one won for each sent back, and on a heated stage a tenth more for each step.
+    public static int Pay(int felled,int heat){return felled*DadThrowShop.WonPerFelled+felled*heat*HeatPayPerTen/10;}
+    // A defeat on stage `id`: counted on that stage, and whatever streak there was is over.
+    public static void Lost(DadThrowSave save,string id)
+    {if(save.tunedStage!=id){save.tunedStage=id;save.defeats=0;}save.defeats++;save.flawless=0;}
+    // A clear: the stage owes nothing more. An untouched gate adds to the streak; a touched one takes one off.
+    public static void Cleared(DadThrowSave save,bool touched)
+    {save.tunedStage=null;save.defeats=0;save.flawless=touched?Math.Max(0,save.flawless-1):Math.Min(MaxHeat+1,save.flawless+1);}
+    // Balls stopped on trays and shoes thrown, added up over the fights so far.
+    public static void Watched(DadThrowSave save,int blocked,int shoes){save.blocked+=blocked;save.shoes+=shoes;}
+    public static bool ShoeShy(DadThrowSave save){return save.blocked>=ShyBlocks&&save.shoes*ShyShare<save.blocked;}
+
+    // The table stage `number` is fought on: the plain one when nothing is owed, otherwise the curve's own table
+    // with the crowd and the pace bent. What the stage says and shows (its name, hint, lines, entrance) stays.
+    public DadThrowStage Table(DadThrowStage plain,int number,DadThrowSave save)
+    {
+        int ease=Ease(save,plain.id),heat=Heat(save);
+        if(ease==0&&heat==0)return plain;
+        DadThrowStage bent=DadThrowCurve.Stage(number,kinds,background,Crowd(ease,heat),Tempo(ease,heat));
+        bent.hint=plain.hint;bent.after=plain.after;bent.ending=plain.ending;bent.entrance=plain.entrance;
+        return bent;
     }
 }

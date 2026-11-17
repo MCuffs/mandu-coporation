@@ -419,6 +419,28 @@ PASS leaving before he has been seen through means he comes on again next time
 PASS a player whose save is already past 1-4 meets him on the next stage he is in
 PASS and then not again
 PASS who has been met is saved and read back; a save from before has met nobody
+PASS a new player meets every stage exactly as the curve has it
+PASS one defeat changes nothing
+PASS a second defeat on the same stage takes 6% of its people away and leaves its name, its gate and its words alone
+PASS and 4% of its pace
+PASS however often a stage is lost it eases four steps and no further: three quarters of its people are always there
+PASS what one stage is owed is not owed on another
+PASS a clear puts the stage back as it was
+PASS one flawless clear changes nothing
+PASS two flawless clears running heat the next stage by 5% of its people and 3% of its pace, and it pays a tenth more
+PASS heat stops at three steps
+PASS a clear with a touch on the gate cools one step
+PASS a defeat cools it all, and eases nothing yet
+PASS heat never puts more people on the street or more pace into them than the game allows
+PASS a new player is not nagged about the shoe
+PASS five balls stopped on trays against one shoe thrown: the shoe button keeps asking
+PASS once the shoes keep up with the trays it stops asking
+PASS the fight counts the shoes thrown, not the balls
+PASS through the flow a stage starts plain when nothing is owed
+PASS lost twice through the flow, the third try is eased one step, and the stage the screen names is the same stage
+PASS what the tuner keeps is saved and read back; a save from before has nothing owed
+PASS a heated stage through the flow has more people and pays its bonus once
+PASS a flow without a tuner plays every stage as it is listed, whatever the save says
 PASS every shop item has a picture of its own, named after the item, and the coin, the shop sign and the bought-out mark are there
 PASS the entrance's band lines, rays and balloon, each entrance picture the stage file names, and the frames of the two effects are there
 PASS an entrance picture is placed by its own canvas and feet point: the soles of the 2048 picture land on the entrance's feet point
@@ -516,4 +538,4 @@ LAYOUT painted_gate 145.41 570 0 0
 LAYOUT road_edge 0 622.41 0 0
 LAYOUT sand_top 0 522.13 0 0
 
-TOTAL PASS: 415
+TOTAL PASS: 437
