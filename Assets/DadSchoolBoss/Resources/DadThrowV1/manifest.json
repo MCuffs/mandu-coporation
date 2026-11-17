@@ -1,0 +1,190 @@
+{
+  "version": 1,
+  "logicalCanvas": [
+    1280,
+    720
+  ],
+  "intendedFloor": 570,
+  "assets": [
+    {
+      "id": "bg_street",
+      "width": 1672,
+      "height": 941,
+      "transparent": false,
+      "bounds": [
+        0,
+        0,
+        1672,
+        941
+      ],
+      "uv": {
+        "x": 0.0,
+        "y": 0.0,
+        "w": 1.0,
+        "h": 1.0
+      },
+      "pivotPixels": {
+        "x": 836.0,
+        "y": 470.5
+      },
+      "groundNormalizedY": 0.831,
+      "gateFrontNormalizedX": 0.168,
+      "resource": "DadThrowV1/bg_street",
+      "sandTopNormalizedY": 0.655
+    },
+    {
+      "id": "dad_ready",
+      "width": 1254,
+      "height": 1254,
+      "transparent": true,
+      "bounds": [
+        356,
+        260,
+        876,
+        1179
+      ],
+      "uv": {
+        "x": 0.2838915470494418,
+        "y": 0.05980861244019142,
+        "w": 0.41467304625199364,
+        "h": 0.7328548644338118
+      },
+      "pivotPixels": {
+        "x": 613.0,
+        "y": 1179
+      },
+      "standPixels": 919,
+      "pivotMethod": "alpha foot band; must verify in motion",
+      "resource": "DadThrowV1/dad_ready"
+    },
+    {
+      "id": "dad_windup",
+      "width": 1254,
+      "height": 1254,
+      "transparent": true,
+      "bounds": [
+        266,
+        202,
+        1019,
+        1175
+      ],
+      "uv": {
+        "x": 0.21212121212121213,
+        "y": 0.06299840510366828,
+        "w": 0.6004784688995215,
+        "h": 0.7759170653907496
+      },
+      "pivotPixels": {
+        "x": 618.0,
+        "y": 1175
+      },
+      "standPixels": 973,
+      "pivotMethod": "alpha foot band; must verify in motion",
+      "resource": "DadThrowV1/dad_windup",
+      "handPixels": {
+        "x": 335.0,
+        "y": 346.0
+      },
+      "handMethod": "centroid of the raised throwing hand (alpha); item is held here while pulling"
+    },
+    {
+      "id": "dad_release",
+      "width": 1254,
+      "height": 1254,
+      "transparent": true,
+      "bounds": [
+        122,
+        163,
+        1100,
+        1176
+      ],
+      "uv": {
+        "x": 0.09728867623604466,
+        "y": 0.062200956937799035,
+        "w": 0.7799043062200957,
+        "h": 0.8078149920255183
+      },
+      "pivotPixels": {
+        "x": 450.5,
+        "y": 1176
+      },
+      "standPixels": 1013,
+      "pivotMethod": "alpha foot band; must verify in motion",
+      "resource": "DadThrowV1/dad_release",
+      "handPixels": {
+        "x": 1052.0,
+        "y": 457.0
+      },
+      "handMethod": "centroid of the extended throwing hand (alpha); projectiles leave here"
+    },
+    {
+      "id": "projectile_golf",
+      "width": 1254,
+      "height": 1254,
+      "transparent": true,
+      "bounds": [
+        152,
+        160,
+        1086,
+        1116
+      ],
+      "uv": {
+        "x": 0.12121212121212122,
+        "y": 0.11004784688995217,
+        "w": 0.74481658692185,
+        "h": 0.7623604465709729
+      },
+      "pivotPixels": {
+        "x": 619.0,
+        "y": 638.0
+      },
+      "resource": "DadThrowV1/projectile_golf"
+    },
+    {
+      "id": "projectile_shoe",
+      "width": 1774,
+      "height": 887,
+      "transparent": true,
+      "bounds": [
+        156,
+        220,
+        1617,
+        710
+      ],
+      "uv": {
+        "x": 0.08793686583990981,
+        "y": 0.19954904171364152,
+        "w": 0.8235625704622322,
+        "h": 0.552423900789177
+      },
+      "pivotPixels": {
+        "x": 886.5,
+        "y": 465.0
+      },
+      "resource": "DadThrowV1/projectile_shoe"
+    },
+    {
+      "id": "title_keyart",
+      "width": 1672,
+      "height": 941,
+      "transparent": false,
+      "bounds": [
+        0,
+        0,
+        1672,
+        941
+      ],
+      "uv": {
+        "x": 0.0,
+        "y": 0.0,
+        "w": 1.0,
+        "h": 1.0
+      },
+      "pivotPixels": {
+        "x": 836.0,
+        "y": 470.5
+      },
+      "resource": "DadThrowV1/title_keyart"
+    }
+  ]
+}

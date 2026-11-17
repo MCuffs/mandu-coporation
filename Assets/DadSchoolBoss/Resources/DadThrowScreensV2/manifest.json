@@ -1,0 +1,38 @@
+{
+  "assets": [
+    {
+      "id": "title_wide",
+      "width": 1672,
+      "height": 941,
+      "resource": "DadThrowScreensV2/title_wide"
+    },
+    {
+      "id": "street_wide",
+      "width": 1672,
+      "height": 941,
+      "resource": "DadThrowScreensV2/street_wide",
+      "sandTopNormalizedY": 0.7248,
+      "groundNormalizedY": 0.864,
+      "gateFrontNormalizedX": 0.1136,
+      "anchorMethod": "colour edges read from the picture: sand begins at row 682 under the wall base, road edge line at row 813, outer edge of the right gate post at column 190; the green gate door spans columns 138-179 and rows 606-720",
+      "field": {
+        "feetLineY": 570,
+        "failLineX": 170,
+        "dadFeetX": 187,
+        "dadFeetY": 575,
+        "dadHeight": 115,
+        "note": "canvas units (1280x720). dadFeetX follows the wide v2 battle placement. dadHeight: 183 until 2026-11-17, then 135, then 115 the same day so that everyone on the street is about one size (opponents are 102-112). failLineX: since the gate-touch contest (Design/dad-throw-story-animation-v2.md) the line that costs a touch is the painted gate itself: a challenger is counted when the front of their body reaches the gate post, which is 25 after the post for their middle. They run past dad to get there. The throwing hand is not written here: it is computed from dad_release handPixels."
+      },
+      "gateDoorPixels": [
+        138,
+        606,
+        179,
+        720
+      ]
+    }
+  ],
+  "logicalCanvas": [
+    1280,
+    720
+  ]
+}

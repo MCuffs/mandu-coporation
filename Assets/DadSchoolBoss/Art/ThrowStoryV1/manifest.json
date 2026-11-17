@@ -1,0 +1,187 @@
+{
+  "version": 1,
+  "runtimeApplied": false,
+  "assets": [
+    {
+      "file": "bg_home.png",
+      "size": [
+        1672,
+        941
+      ],
+      "mode": "RGB",
+      "alphaBounds": null,
+      "status": "key_art_not_rigged"
+    },
+    {
+      "file": "family_actors.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "alphaBounds": [
+        0,
+        0,
+        1254,
+        1254
+      ],
+      "status": "rejected_opaque_gutters"
+    },
+    {
+      "file": "family_actors_clean.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "alphaBounds": [
+        0,
+        7,
+        1218,
+        1254
+      ],
+      "status": "key_art_not_rigged",
+      "cellsPixelsTopLeft": [
+        [
+          0,
+          0,
+          627,
+          627
+        ],
+        [
+          627,
+          0,
+          1254,
+          627
+        ],
+        [
+          0,
+          627,
+          627,
+          1254
+        ],
+        [
+          627,
+          627,
+          1254,
+          1254
+        ]
+      ],
+      "order": [
+        "mansu",
+        "chilsuk",
+        "cheolsu",
+        "sujin"
+      ]
+    },
+    {
+      "file": "family_reactions.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "alphaBounds": [
+        0,
+        0,
+        1231,
+        1254
+      ],
+      "status": "key_art_not_rigged",
+      "cellsPixelsTopLeft": [
+        [
+          0,
+          0,
+          627,
+          627
+        ],
+        [
+          627,
+          0,
+          1254,
+          627
+        ],
+        [
+          0,
+          627,
+          627,
+          1254
+        ],
+        [
+          627,
+          627,
+          1254,
+          1254
+        ]
+      ],
+      "order": [
+        "mansu_prank",
+        "chilsuk_alert",
+        "mansu_panic",
+        "sujin_dry"
+      ]
+    },
+    {
+      "file": "rival_challenge.png",
+      "size": [
+        1086,
+        1448
+      ],
+      "mode": "RGBA",
+      "alphaBounds": [
+        0,
+        29,
+        1021,
+        1414
+      ],
+      "status": "key_art_not_rigged"
+    },
+    {
+      "file": "family_reactions_clean.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "alphaBounds": [
+        67,
+        18,
+        1230,
+        1240
+      ],
+      "cellsPixelsTopLeft": [
+        [
+          0,
+          0,
+          627,
+          627
+        ],
+        [
+          627,
+          0,
+          1254,
+          627
+        ],
+        [
+          0,
+          627,
+          627,
+          1254
+        ],
+        [
+          627,
+          627,
+          1254,
+          1254
+        ]
+      ],
+      "order": [
+        "mansu_prank",
+        "chilsuk_alert",
+        "mansu_panic",
+        "sujin_dry"
+      ],
+      "status": "cleaned_key_art_not_rigged"
+    }
+  ]
+}

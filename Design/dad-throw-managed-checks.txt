@@ -1,0 +1,405 @@
+Window-free managed simulation checks
+Unity Editor and standalone player were not launched.
+These checks do not validate rendering, touch gestures, native serialization or Android devices.
+
+Prototype B (slingshot dad) rule checks
+PASS prediction fixture launches
+PASS predicted landing matches flight size=0.72 boost=1 retention=0.88 rage=False pull=(24.00, 0.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=0.72 boost=1 retention=0.88 rage=False pull=(150.00, -40.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=0.72 boost=1 retention=0.88 rage=False pull=(-100.00, -150.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=0.72 boost=1 retention=0.88 rage=True pull=(24.00, 0.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=0.72 boost=1 retention=0.88 rage=True pull=(150.00, -40.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=0.72 boost=1 retention=0.88 rage=True pull=(-100.00, -150.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=0.72 boost=1 retention=0.979 rage=False pull=(24.00, 0.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=0.72 boost=1 retention=0.979 rage=False pull=(150.00, -40.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=0.72 boost=1 retention=0.979 rage=False pull=(-100.00, -150.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=0.72 boost=1 retention=0.979 rage=True pull=(24.00, 0.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=0.72 boost=1 retention=0.979 rage=True pull=(150.00, -40.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=0.72 boost=1 retention=0.979 rage=True pull=(-100.00, -150.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=0.72 boost=1.35 retention=0.88 rage=False pull=(24.00, 0.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=0.72 boost=1.35 retention=0.88 rage=False pull=(150.00, -40.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=0.72 boost=1.35 retention=0.88 rage=False pull=(-100.00, -150.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=0.72 boost=1.35 retention=0.88 rage=True pull=(24.00, 0.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=0.72 boost=1.35 retention=0.88 rage=True pull=(150.00, -40.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=0.72 boost=1.35 retention=0.88 rage=True pull=(-100.00, -150.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=0.72 boost=1.35 retention=0.979 rage=False pull=(24.00, 0.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=0.72 boost=1.35 retention=0.979 rage=False pull=(150.00, -40.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=0.72 boost=1.35 retention=0.979 rage=False pull=(-100.00, -150.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=0.72 boost=1.35 retention=0.979 rage=True pull=(24.00, 0.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=0.72 boost=1.35 retention=0.979 rage=True pull=(150.00, -40.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=0.72 boost=1.35 retention=0.979 rage=True pull=(-100.00, -150.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=1 boost=1 retention=0.88 rage=False pull=(24.00, 0.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=1 boost=1 retention=0.88 rage=False pull=(150.00, -40.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=1 boost=1 retention=0.88 rage=False pull=(-100.00, -150.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=1 boost=1 retention=0.88 rage=True pull=(24.00, 0.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=1 boost=1 retention=0.88 rage=True pull=(150.00, -40.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=1 boost=1 retention=0.88 rage=True pull=(-100.00, -150.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=1 boost=1 retention=0.979 rage=False pull=(24.00, 0.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=1 boost=1 retention=0.979 rage=False pull=(150.00, -40.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=1 boost=1 retention=0.979 rage=False pull=(-100.00, -150.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=1 boost=1 retention=0.979 rage=True pull=(24.00, 0.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=1 boost=1 retention=0.979 rage=True pull=(150.00, -40.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=1 boost=1 retention=0.979 rage=True pull=(-100.00, -150.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=1 boost=1.35 retention=0.88 rage=False pull=(24.00, 0.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=1 boost=1.35 retention=0.88 rage=False pull=(150.00, -40.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=1 boost=1.35 retention=0.88 rage=False pull=(-100.00, -150.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=1 boost=1.35 retention=0.88 rage=True pull=(24.00, 0.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=1 boost=1.35 retention=0.88 rage=True pull=(150.00, -40.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=1 boost=1.35 retention=0.88 rage=True pull=(-100.00, -150.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=1 boost=1.35 retention=0.979 rage=False pull=(24.00, 0.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=1 boost=1.35 retention=0.979 rage=False pull=(150.00, -40.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=1 boost=1.35 retention=0.979 rage=False pull=(-100.00, -150.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=1 boost=1.35 retention=0.979 rage=True pull=(24.00, 0.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=1 boost=1.35 retention=0.979 rage=True pull=(150.00, -40.00)
+PASS prediction fixture launches
+PASS predicted landing matches flight size=1 boost=1.35 retention=0.979 rage=True pull=(-100.00, -150.00)
+PASS aim prediction reuses buffer without consuming rage or launching
+PASS dead-zone preview has no flight segment
+PASS a pull inside the dead zone does not launch
+PASS letting go flies dad along the pull at full speed for a full pull
+PASS a half pull flies slower than a full one
+PASS dad bounces off the side lockers and keeps flying
+PASS dad comes to rest on his own and the next shot is ready
+PASS flying dad knocks a dad away and ploughs on
+PASS a knocked dad slams the lockers for two damage (a gum dad goes down)
+PASS a side-wall slam reports which locker side to dent
+PASS a knocked dad bowls over the next one (chain)
+PASS a straight shot into the tray bounces dad back without damage
+PASS coming in from the side gets past the tray and knocks it out of his hands
+PASS a fresh boss bounces dad off for a chip of damage
+PASS a dad thrown into the boss makes him groggy
+PASS while groggy, dad sends the boss into the wall for a big hit
+PASS a dad who reaches grounded dad swings and hurts him
+PASS clearing every dad wins, three stars with full health and few shots
+PASS too many shots drops the third star
+PASS losing all health loses
+PASS the aiming guide bends at the first wall
+PASS wide view: bodies shrink with the art and dad starts at the bottom of the corridor
+PASS dad touches the painted floor edge before bouncing
+PASS a bank shot off two lockers hits harder and for more damage
+PASS a five-chain shot earns the next shot as a rage shot
+PASS the rage shot flies faster and is used up
+PASS a rage shot goes straight through a tray's front
+PASS the dodgeball dad keeps his distance and hits a dad who stands still
+PASS a flying dad bats the ball back the way he is going
+PASS a returned ball knocks a dad over
+PASS a big-dad only staggers on the first hit and flies on a second hit within three seconds
+PASS main game: all 60 stages have dads and a par, each floor's 10th has a big-dad and its 20th the boss with escorts
+PASS main game 1-1..1-10 follow the first-ten order: pull, chair at 1-4, tray at 1-7, dodgeball at 1-9
+PASS growth: 도움닫기 speeds the launch and 체력 sets dad's health
+PASS growth: 멀리 날리기 adds wall damage (a tray dad goes down in one slam)
+PASS six prototype stages, the last one a boss with escorts
+Difficulty, rematch and one-time reward checks
+PASS tutorial stays unrestricted; campaign budget begins at 1-10
+PASS campaign losing-streak assist also adds up to five shots
+PASS rematch shot cap is fixed rather than silently eased
+PASS all 60 stages have escalating rematches without inflated HP
+PASS tutorial rematches never introduce unlearned roles
+PASS last allowed shot launches
+PASS budget does not end a flight or permit an extra shot
+PASS survivors after final settling produce explicit shot-budget loss
+PASS budget waits for a returned dodgeball to finish its chain
+PASS clearing on final budget shot wins before the budget loss check
+PASS landing cannot be skipped by rapid release
+PASS launch is available after landing recovery
+PASS uncleared campaign stage locks rematch
+PASS only the next uncompleted rank unlocks
+PASS rematch failure pays nothing and loses no inventory
+PASS first rematch win pays and unlocks next rank
+PASS repeat rank win cannot duplicate first-win rewards
+PASS cannot skip a rank through result processing
+PASS rematch never overwrites campaign stars or onward progress
+PASS first three-star clear adds explicit mastery bonus
+PASS three-star mastery bonus cannot repeat
+PASS all three ranks complete; final rank stays replayable
+PASS rightward flight stays upright
+PASS leftward flight mirrors rather than turning upside down
+PASS up-right flight tilt follows travel
+PASS up-left flight tilt follows mirrored travel
+PASS vertical down flight cannot invert the body
+PASS vertical up flight stays within the readable tilt limit
+PASS near-vertical travel preserves right facing
+PASS near-vertical travel preserves left facing
+PASS clear leftward movement changes facing
+PASS clear rightward movement changes facing
+PASS old defeated bodies disappear before the next live crowd
+PASS defeated bodies are subdued and fade monotonically
+PASS flight body uses the same standing half-height reference
+PASS battle HUD reserves readable mobile label and pause target space
+PASS held phone and newspaper have separate compact sizes
+PASS throw prototype starts isolated and ready
+PASS short taps do not fire
+PASS golf pull launches a projectile
+PASS reload prevents rapid-fire spam
+PASS one golf ball pierces a line of three enemies
+PASS a golf ball cannot damage the same target twice
+PASS shoe pushes and slows a leading group to compress the line
+PASS shoe is spent on its first group impact
+PASS fast swept golf segment cannot tunnel through a target
+PASS a high arc does not hit ground enemies by x alone
+PASS prediction and projectile share the fixed-step free-flight trajectory
+PASS breach loses one health and updates remaining count once
+PASS five breaches end the wave and clamp at zero health
+PASS loss cannot launch or skip to the next wave
+PASS wave population and arrival rate escalate
+PASS difficulty tuning has finite population and spawn-rate caps
+PASS cannot buy growth or skip a live wave
+PASS wave completes after all scheduled enemies are resolved
+PASS kill and wave bonuses pay once
+PASS clear state cannot duplicate wave rewards
+PASS single upgrade spends coins between waves
+PASS next wave resets combat counts and preserves earned growth
+PASS first wave has a winning golf-only path without moving enemies in the fixture
+PASS ignoring the advancing crowd eventually loses instead of stalling forever
+PASS street art covers the canvas at its own aspect ratio, not stretched
+PASS battle and title use the wide v2 pictures, and only a measured street can be named by a stage
+PASS feet line and dad's feet lie on the painted sand strip between the wall and the road
+PASS the fight's ground, house line and throwing point are the layout's own numbers, not a second copy
+PASS a challenger is counted when the front of their body reaches the painted gate post
+PASS the gate door they run for stands on the street's ground line, just left of its post
+PASS once past dad's hand a challenger cannot be stopped: that last run to the gate is under 100
+PASS ready, wind-up and release poses share one foot point
+PASS every pose is drawn at the same standing height
+PASS no pose is cut by the screen edge or hidden under the top bar
+PASS dad stands beside the gate in every pose and never covers the door the challengers must touch
+PASS a thrown thing starts in the painted throwing hand
+PASS the held item is drawn in the raised hand, behind the release point and on screen
+PASS dad winds up while aiming, follows through after a throw, then returns to ready
+PASS golf ball picture is centred on the projectile, round and drawn at the stated size
+PASS shoe picture is centred on the projectile so it spins in place
+PASS a thrown thing is drawn no smaller than its hit circle and at most half as large again
+PASS the ball and the shoe are in scale with dad: at most a fifth and two fifths of his height
+PASS weapon buttons sit on the road below the play field without overlapping
+PASS weapon pictures fit inside their buttons beside the label
+PASS stage, house health, people left and pause all sit inside the thin top bar without touching
+PASS house health is five separate cells beside its label
+PASS the pause mark is drawn inside a button at least 64 wide and tall
+PASS a drag can start anywhere on the open street and never on a button
+PASS title art covers the screen; lettering and a 72-tall start button stay on screen and apart
+PASS clear card stacks its heading, one line from the story and two full-height buttons that do not touch
+PASS defeat card stacks heading, one line, a large retry and a smaller way back to the title
+PASS pause card stacks its heading, resume and title without overlap
+PASS the clear and retry poses stand on one spot, whole, to the left of the card
+PASS a 16:9 screen is filled exactly
+PASS a longer screen keeps the canvas whole inside the safe area with the notch on either side or a bar below
+PASS a longer screen shows no more of the street than 16:9: people are not seen earlier
+PASS a squarer or upright screen still fits the whole canvas
+PASS an unreadable manifest is refused by name instead of placing pictures at zero
+PASS chapter 1 file holds stage 1-1 with 100 people and 1-3 with 160, both on five gate touches
+PASS chapter 1 uses one kind of opponent with one health, and nobody strolls: only the placing and the running pace change
+PASS 1-1 is a stampede from its first second: twenty or more already running, a new pack at least every two seconds, everyone on the street within ten
+PASS an opponent's picture is placed with its feet on its position and on the feet line
+PASS opponents are painted facing left, the way they walk, so their picture is not mirrored
+PASS opponents are drawn between 100 and 115 tall
+PASS everyone on the street is about one size: dad is no shorter than the tallest opponent and at most a tenth taller
+PASS a well-formed stage file is accepted
+PASS a stage id listed twice is refused
+PASS a group before time zero is refused
+PASS a group with no health is refused
+PASS an opponent the file does not define is refused
+PASS a background without measured anchors is refused
+PASS more people than the ceiling is refused
+PASS a group that starts at or behind the house line is refused
+PASS an empty group, a group that does not walk, people stacked on one spot and a stage with no groups are refused
+PASS house health outside one to five, an unknown hint and a file with no stages are refused
+PASS a repeated key or a cut-off file is refused rather than half read
+PASS groups are walked in arrival order whatever order they were written in
+PASS 1-1 opens with its first crowd already on the street and the rest still to come
+PASS the second group walks in at its time, spaced as written, while the first keeps walking
+PASS an empty street is not a clear while people are still on the schedule
+PASS the stage clears when everyone on its table has been dealt with, and never spawns more than the table
+PASS a stage neither pays nor grows through the wave prototype's economy
+PASS the last person walking in at one health is a defeat, not a clear
+PASS leaving 1-3 alone ends in defeat
+PASS 1-1 gives no time to look around: six seconds without a throw and the gate has been touched five times
+PASS a pull of 17 throws nothing and costs no reload; 18 throws
+PASS a ball that crosses six people in one step hits the five nearest along its flight, not the last five listed
+PASS a shoe pushes people closer than 85 to where it lands, and nobody at 85 or beyond
+PASS a shoe hurts nobody: the person it lands on and those pushed with them are slowed, and still there to be hit
+PASS a second shoe renews the slow to 2.5 seconds instead of adding to it
+PASS in a comparison run where the shoe hurts, the people around a target it takes out are still pushed
+PASS the game's throw numbers: a ball ends at its first landing and goes through twelve, a shoe pushes 105 within 85 without hurting, hands reload in 0.3 and 0.7 seconds, and the street keeps full speed while the player aims
+PASS a golf ball ends at its first landing, where the aim dots end
+PASS the aim dots run from the hand to the first landing and stop there
+PASS the same throw gives the same result at 60, 30 and 10 frames a second
+PASS the game opens on the logo and nothing can be started behind it
+PASS the logo is fully shown mid-way
+PASS after 1.2 seconds the title is up, offering a new game
+PASS the title accepts nothing but start
+PASS start opens 1-1 once; a second tap starts nothing more
+PASS pause stops a live fight
+PASS nothing moves while paused
+PASS resume returns to the same fight
+PASS leaving the app pauses a live fight
+PASS back from the pause goes to the title and drops the stage in progress
+PASS back during a fight pauses it
+PASS clearing 1-1 opens the next stage
+PASS a result stays a result: nothing keeps flying behind the card, and time or leaving the app does not restart the fight
+PASS next opens 1-3 clean, and only once
+PASS letting everyone in ends in defeat, takes back nothing already opened and offers no next stage
+PASS retry starts the same stage clean: full house health, empty street, nothing in the air, no reload
+PASS the title offers to continue, and continuing starts the furthest opened stage from its beginning
+PASS after the last stage there is no next stage to step into
+PASS the last stage can be played again from its clear card
+PASS an aim cannot start on a button, nor while the hand is not ready
+PASS the first finger down on the street owns the aim
+PASS another finger can neither move the aim nor let it go
+PASS the owner letting go hands back the pull once
+PASS after a pause, lost focus or a turn of the screen, lifting the finger throws nothing
+PASS the opening is seven cuts over 24 seconds and the ending four cuts over 12
+PASS only the last cut of the opening is the fight's own camera, with nobody but dad in it
+PASS the children stand indoors only, never on the street where the contest is
+PASS every cut has a speaker, a line and at least two seconds to read it
+PASS each cut shows for its own seconds, and the last stays once the time has run out
+PASS the dialogue box, the skip button and every cutout sit on the screen; skip is at least 64 tall and clear of the dialogue
+PASS a story file with an unknown person, an unknown backdrop, a cut of no length or nothing in it is refused
+PASS a new player's first start plays the opening, not the fight
+PASS the opening moves on by itself and accepts nothing but skip
+PASS leaving the app during the opening changes nothing: its clock only runs while the game does
+PASS when the opening runs out the first stage starts once, and the opening is remembered as seen
+PASS after the opening the first crowd stands in view and nothing moves until the first pull
+PASS the first pull lets the street move
+PASS skip starts the same first stage exactly once however often it is pressed
+PASS the back key during the opening skips it
+PASS a player who has seen the opening goes straight to the fight
+PASS the first clear of 1-1 brings one line from the story and is remembered
+PASS a stage cleared before brings no line a second time
+PASS the first clear of the chapter's last stage plays the ending before the clear card
+PASS the ending leads to the clear card, which adds no second line
+PASS the ending plays once: clearing the last stage again goes straight to the card
+PASS a remembered player continues at the furthest stage they opened
+PASS skip on the ending goes to the clear card once
+PASS a save that points past the stages this build has is held to the last one
+PASS what is remembered survives being written and read
+PASS an empty, foreign or unreadable save is refused rather than guessed at
+PASS no save file means a new player, with nothing to report
+PASS a save is written beside the file and swapped in, keeping the one before as a backup
+PASS a broken save falls back to the backup and says so
+PASS when the backup is broken too the player starts new and the reason is reported
+PASS finishing the opening is saved to disk at once
+PASS a save that cannot be written is reported and play goes on
+PASS 1-1 is lost if nothing is thrown
+PASS 1-1 can be cleared with golf balls alone by a bot that never misses
+PASS 1-3 is lost if nothing is thrown
+PASS 1-3 can be cleared with golf balls alone by a bot that never misses
+STAGE 1-1 no throws: defeat at 5.4s, house 0/5, golf 0, shoe 0, most people one ball reached 0, got in 5
+STAGE 1-1 golf thrown at once: clear at 11.8s, house 5/5, golf 40, shoe 0, most people one ball reached 7, got in 0
+STAGE 1-1 golf held for three: clear at 11.8s, house 5/5, golf 39, shoe 0, most people one ball reached 7, got in 0
+STAGE 1-1 shoe on the lead, then golf: clear at 15.4s, house 5/5, golf 20, shoe 9, most people one ball reached 12, got in 0
+NOTE 1-1 steady bot players (aim takes 0.45s, good 65% of the time): cleared 27 of 30, gate touched 1.4 times on average
+NOTE 1-1 hurried bot players (aim takes 0.7s, good 50% of the time): cleared 13 of 30, gate touched 3.8 times on average
+STAGE 1-3 no throws: defeat at 4.5s, house 0/5, golf 0, shoe 0, most people one ball reached 0, got in 5
+STAGE 1-3 golf thrown at once: clear at 11.7s, house 4/5, golf 39, shoe 0, most people one ball reached 11, got in 1
+STAGE 1-3 golf held for three: clear at 11.7s, house 4/5, golf 39, shoe 0, most people one ball reached 11, got in 1
+STAGE 1-3 shoe on the lead, then golf: clear at 12.3s, house 5/5, golf 31, shoe 4, most people one ball reached 12, got in 0
+NOTE 1-3 steady bot players (aim takes 0.45s, good 65% of the time): cleared 14 of 30, gate touched 3.1 times on average
+NOTE 1-3 hurried bot players (aim takes 0.7s, good 50% of the time): cleared 0 of 30, gate touched 5.0 times on average
+LAYOUT background 0 0 1280 720.38
+LAYOUT dad_ready 110.29 427.46 156.92 156.92
+LAYOUT dad_windup 113.96 436.13 148.21 148.21
+LAYOUT dad_release 135.86 441.5 142.36 142.36
+LAYOUT release_hand 255.28 493.38 0 0
+LAYOUT windup_hand 153.55 477.02 0 0
+LAYOUT muzzle 255.28 493.38 0 0
+LAYOUT golf_at_muzzle 240.7 478.35 29.54 29.54
+LAYOUT shoe_at_muzzle 228.59 479.37 53.43 26.71
+LAYOUT golf_in_hand 138.97 461.99 29.54 29.54
+LAYOUT shoe_in_hand 126.85 463.02 53.43 26.71
+LAYOUT golf_button 24 625 210 65
+LAYOUT shoe_button 250 625 210 65
+LAYOUT pause_button 1160 16 72 64
+LAYOUT pause_bar_0 1182 34 10 28
+LAYOUT pause_bar_1 1200 34 10 28
+LAYOUT golf_icon 30.51 626.08 61.76 61.76
+LAYOUT shoe_icon 259.09 642.86 55.85 27.93
+LAYOUT golf_label 90 625 134 65
+LAYOUT shoe_label 316 625 134 65
+LAYOUT top_bar 0 0 1280 86
+LAYOUT stage_label 32 20 180 48
+LAYOUT health_label 230 20 62 48
+LAYOUT health_cell_0 302 30 28 28
+LAYOUT health_cell_1 338 30 28 28
+LAYOUT health_cell_2 374 30 28 28
+LAYOUT health_cell_3 410 30 28 28
+LAYOUT health_cell_4 446 30 28 28
+LAYOUT remaining_label 880 20 200 48
+LAYOUT hint 470 100 340 50
+LAYOUT aim_area 25 100 1230 505
+LAYOUT title_art 0 0 1280 720.38
+LAYOUT title_text 290 75 700 165
+LAYOUT start_button 490 600 300 72
+LAYOUT result_card 650 218 460 330
+LAYOUT pause_card 445 145 390 430
+LAYOUT hero_clear 153.76 204.52 410 410
+LAYOUT hero_retry 147.38 212.04 410 410
+LAYOUT clear_heading 650 258 460 64
+LAYOUT clear_left 678 448 194 72
+LAYOUT clear_right 888 448 194 72
+LAYOUT clear_word_name 678 336 404 26
+LAYOUT clear_word_line 678 364 404 70
+LAYOUT gate_door 105.65 463.92 31.39 87.27
+LAYOUT story_dialogue 77 596 1126 102
+LAYOUT story_name 101 606 1078 26
+LAYOUT story_line 101 634 1078 56
+LAYOUT story_skip 1084 20 164 64
+LAYOUT story_rival 866 216 324 432
+LAYOUT story_prop 314 371 51 51
+LAYOUT defeat_heading 650 250 460 64
+LAYOUT defeat_line 674 316 412 36
+LAYOUT defeat_retry 678 366 404 72
+LAYOUT defeat_title 780 454 200 56
+LAYOUT pause_heading 445 233 390 64
+LAYOUT pause_resume 473 327 334 72
+LAYOUT pause_title 473 417 334 72
+LAYOUT gate 170 570 0 0
+LAYOUT painted_gate 145.41 570 0 0
+LAYOUT road_edge 0 622.41 0 0
+LAYOUT sand_top 0 522.13 0 0
+
+TOTAL PASS: 324

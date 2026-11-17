@@ -1,0 +1,467 @@
+THROW NUMBER COMPARISON
+Bots with perfect aim, not people. Unity was not opened. The game's numbers and files are unchanged.
+Field: feet line 570, house line 170, throwing hand (255.3, 493.4).
+Stage tables: 1-1 game, 1-2 plan, 1-3 game, 1-4 plan, 1-5 plan. 'plan' = the plan's table (section 13.1), used for calculation only.
+Players: 'golf at once' throws as soon as a ball reaches anyone; 'golf held' waits for three or for the lead to come within 220 of the house line;
+'shoe first' throws a shoe at the lead group while others are within 520 behind it and the lead is at least 300 out, otherwise plays like 'golf held'.
+'most' = most people one ball reached. 'closest' = how near anyone came to the house line (0 = someone got in).
+
+A. The gentle game's numbers, as they were before the stampede (bounce 0 pierce 5 shoe-dmg 0), five stages
+stage 1-1 (100 people)             golf at once  clear   house 5/5  golf 22  shoe  0  most 5  closest  353   14.2s
+stage 1-1 (100 people)             golf held     clear   house 5/5  golf 22  shoe  0  most 5  closest  353   14.2s
+stage 1-1 (100 people)             shoe first    defeat  house 0/5  golf 16  shoe  4  most 5  closest    0   14.0s
+                                   shoe first vs golf held: house -5, most 0, golf -6, all throws -2, closest -353, seconds -0.2
+stage 1-2 (8 people)               golf at once  clear   house 5/5  golf 10  shoe  0  most 3  closest  724   13.0s
+stage 1-2 (8 people)               golf held     clear   house 5/5  golf  6  shoe  0  most 3  closest  213   30.5s
+stage 1-2 (8 people)               shoe first    clear   house 5/5  golf  6  shoe  0  most 3  closest  213   30.5s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws 0, closest 0, seconds 0.0
+stage 1-3 (160 people)             golf at once  defeat  house 0/5  golf 17  shoe  0  most 5  closest    0   11.0s
+stage 1-3 (160 people)             golf held     defeat  house 0/5  golf 17  shoe  0  most 5  closest    0   11.0s
+stage 1-3 (160 people)             shoe first    defeat  house 0/5  golf 17  shoe  0  most 5  closest    0   11.0s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws 0, closest 0, seconds 0.0
+stage 1-4 (16 people)              golf at once  clear   house 5/5  golf 14  shoe  0  most 2  closest  459   21.0s
+stage 1-4 (16 people)              golf held     clear   house 5/5  golf  9  shoe  0  most 4  closest  212   38.5s
+stage 1-4 (16 people)              shoe first    clear   house 5/5  golf  7  shoe  7  most 5  closest  460   21.9s
+                                   shoe first vs golf held: house 0, most +1, golf -2, all throws +5, closest +248, seconds -16.6
+stage 1-5 (22 people)              golf at once  clear   house 5/5  golf 20  shoe  0  most 3  closest  650   34.4s
+stage 1-5 (22 people)              golf held     clear   house 5/5  golf 11  shoe  0  most 4  closest  211   52.0s
+stage 1-5 (22 people)              shoe first    clear   house 5/5  golf 11  shoe  4  most 4  closest  214   51.9s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +4, closest +3, seconds -0.1
+
+B. Ball bounces x pierce x shoe damage, stages 1-3 and 1-5
+bounce 2 pierce 5 shoe-dmg 1, 1-3  golf at once  defeat  house 0/5  golf 17  shoe  0  most 5  closest    0   11.0s
+bounce 2 pierce 5 shoe-dmg 1, 1-3  golf held     defeat  house 0/5  golf 17  shoe  0  most 5  closest    0   11.0s
+bounce 2 pierce 5 shoe-dmg 1, 1-3  shoe first    defeat  house 0/5  golf 17  shoe  0  most 5  closest    0   11.0s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws 0, closest 0, seconds 0.0
+bounce 2 pierce 5 shoe-dmg 1, 1-5  golf at once  clear   house 5/5  golf 12  shoe  0  most 5  closest  650   35.1s
+bounce 2 pierce 5 shoe-dmg 1, 1-5  golf held     clear   house 5/5  golf  8  shoe  0  most 5  closest  512   33.4s
+bounce 2 pierce 5 shoe-dmg 1, 1-5  shoe first    clear   house 5/5  golf  8  shoe  2  most 5  closest  601   33.4s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +2, closest +89, seconds 0.0
+bounce 2 pierce 5 shoe-dmg 0, 1-3  golf at once  defeat  house 0/5  golf 17  shoe  0  most 5  closest    0   11.0s
+bounce 2 pierce 5 shoe-dmg 0, 1-3  golf held     defeat  house 0/5  golf 17  shoe  0  most 5  closest    0   11.0s
+bounce 2 pierce 5 shoe-dmg 0, 1-3  shoe first    defeat  house 0/5  golf 17  shoe  0  most 5  closest    0   11.0s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws 0, closest 0, seconds 0.0
+bounce 2 pierce 5 shoe-dmg 0, 1-5  golf at once  clear   house 5/5  golf 12  shoe  0  most 5  closest  650   35.1s
+bounce 2 pierce 5 shoe-dmg 0, 1-5  golf held     clear   house 5/5  golf  8  shoe  0  most 5  closest  512   33.4s
+bounce 2 pierce 5 shoe-dmg 0, 1-5  shoe first    clear   house 5/5  golf  9  shoe  4  most 5  closest  601   33.4s
+                                   shoe first vs golf held: house 0, most 0, golf +1, all throws +5, closest +89, seconds 0.0
+bounce 2 pierce 3 shoe-dmg 1, 1-3  golf at once  defeat  house 0/5  golf 14  shoe  0  most 3  closest    0    8.9s
+bounce 2 pierce 3 shoe-dmg 1, 1-3  golf held     defeat  house 0/5  golf 14  shoe  0  most 3  closest    0    8.9s
+bounce 2 pierce 3 shoe-dmg 1, 1-3  shoe first    defeat  house 0/5  golf 14  shoe  0  most 3  closest    0    8.9s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws 0, closest 0, seconds 0.0
+bounce 2 pierce 3 shoe-dmg 1, 1-5  golf at once  clear   house 5/5  golf 15  shoe  0  most 3  closest  649   35.1s
+bounce 2 pierce 3 shoe-dmg 1, 1-5  golf held     clear   house 5/5  golf  9  shoe  0  most 3  closest  510   33.4s
+bounce 2 pierce 3 shoe-dmg 1, 1-5  shoe first    clear   house 5/5  golf  8  shoe  2  most 3  closest  605   33.4s
+                                   shoe first vs golf held: house 0, most 0, golf -1, all throws +1, closest +95, seconds 0.0
+bounce 2 pierce 3 shoe-dmg 0, 1-3  golf at once  defeat  house 0/5  golf 14  shoe  0  most 3  closest    0    8.9s
+bounce 2 pierce 3 shoe-dmg 0, 1-3  golf held     defeat  house 0/5  golf 14  shoe  0  most 3  closest    0    8.9s
+bounce 2 pierce 3 shoe-dmg 0, 1-3  shoe first    defeat  house 0/5  golf 14  shoe  0  most 3  closest    0    8.9s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws 0, closest 0, seconds 0.0
+bounce 2 pierce 3 shoe-dmg 0, 1-5  golf at once  clear   house 5/5  golf 15  shoe  0  most 3  closest  649   35.1s
+bounce 2 pierce 3 shoe-dmg 0, 1-5  golf held     clear   house 5/5  golf  9  shoe  0  most 3  closest  510   33.4s
+bounce 2 pierce 3 shoe-dmg 0, 1-5  shoe first    clear   house 5/5  golf  9  shoe  4  most 3  closest  605   33.4s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +4, closest +95, seconds 0.0
+bounce 1 pierce 5 shoe-dmg 1, 1-3  golf at once  defeat  house 0/5  golf 17  shoe  0  most 5  closest    0   11.0s
+bounce 1 pierce 5 shoe-dmg 1, 1-3  golf held     defeat  house 0/5  golf 17  shoe  0  most 5  closest    0   11.0s
+bounce 1 pierce 5 shoe-dmg 1, 1-3  shoe first    defeat  house 0/5  golf 17  shoe  0  most 5  closest    0   11.0s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws 0, closest 0, seconds 0.0
+bounce 1 pierce 5 shoe-dmg 1, 1-5  golf at once  clear   house 5/5  golf 18  shoe  0  most 4  closest  650   34.3s
+bounce 1 pierce 5 shoe-dmg 1, 1-5  golf held     clear   house 5/5  golf  9  shoe  0  most 5  closest  215   51.9s
+bounce 1 pierce 5 shoe-dmg 1, 1-5  shoe first    clear   house 5/5  golf  9  shoe  3  most 5  closest  211   52.0s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +3, closest -4, seconds +0.1
+bounce 1 pierce 5 shoe-dmg 0, 1-3  golf at once  defeat  house 0/5  golf 17  shoe  0  most 5  closest    0   11.0s
+bounce 1 pierce 5 shoe-dmg 0, 1-3  golf held     defeat  house 0/5  golf 17  shoe  0  most 5  closest    0   11.0s
+bounce 1 pierce 5 shoe-dmg 0, 1-3  shoe first    defeat  house 0/5  golf 17  shoe  0  most 5  closest    0   11.0s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws 0, closest 0, seconds 0.0
+bounce 1 pierce 5 shoe-dmg 0, 1-5  golf at once  clear   house 5/5  golf 18  shoe  0  most 4  closest  650   34.3s
+bounce 1 pierce 5 shoe-dmg 0, 1-5  golf held     clear   house 5/5  golf  9  shoe  0  most 5  closest  215   51.9s
+bounce 1 pierce 5 shoe-dmg 0, 1-5  shoe first    clear   house 5/5  golf 10  shoe  4  most 5  closest  215   52.7s
+                                   shoe first vs golf held: house 0, most 0, golf +1, all throws +5, closest 0, seconds +0.8
+bounce 1 pierce 3 shoe-dmg 1, 1-3  golf at once  defeat  house 0/5  golf 14  shoe  0  most 3  closest    0    8.9s
+bounce 1 pierce 3 shoe-dmg 1, 1-3  golf held     defeat  house 0/5  golf 14  shoe  0  most 3  closest    0    8.9s
+bounce 1 pierce 3 shoe-dmg 1, 1-3  shoe first    defeat  house 0/5  golf 14  shoe  0  most 3  closest    0    8.9s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws 0, closest 0, seconds 0.0
+bounce 1 pierce 3 shoe-dmg 1, 1-5  golf at once  clear   house 5/5  golf 21  shoe  0  most 3  closest  648   34.3s
+bounce 1 pierce 3 shoe-dmg 1, 1-5  golf held     clear   house 5/5  golf 13  shoe  0  most 3  closest  537   35.1s
+bounce 1 pierce 3 shoe-dmg 1, 1-5  shoe first    clear   house 5/5  golf 12  shoe  3  most 3  closest  538   35.1s
+                                   shoe first vs golf held: house 0, most 0, golf -1, all throws +2, closest +2, seconds 0.0
+bounce 1 pierce 3 shoe-dmg 0, 1-3  golf at once  defeat  house 0/5  golf 14  shoe  0  most 3  closest    0    8.9s
+bounce 1 pierce 3 shoe-dmg 0, 1-3  golf held     defeat  house 0/5  golf 14  shoe  0  most 3  closest    0    8.9s
+bounce 1 pierce 3 shoe-dmg 0, 1-3  shoe first    defeat  house 0/5  golf 14  shoe  0  most 3  closest    0    8.9s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws 0, closest 0, seconds 0.0
+bounce 1 pierce 3 shoe-dmg 0, 1-5  golf at once  clear   house 5/5  golf 21  shoe  0  most 3  closest  648   34.3s
+bounce 1 pierce 3 shoe-dmg 0, 1-5  golf held     clear   house 5/5  golf 13  shoe  0  most 3  closest  537   35.1s
+bounce 1 pierce 3 shoe-dmg 0, 1-5  shoe first    clear   house 5/5  golf 14  shoe  2  most 3  closest  538   35.2s
+                                   shoe first vs golf held: house 0, most 0, golf +1, all throws +3, closest +2, seconds +0.1
+bounce 0 pierce 5 shoe-dmg 1, 1-3  golf at once  defeat  house 0/5  golf 17  shoe  0  most 5  closest    0   11.0s
+bounce 0 pierce 5 shoe-dmg 1, 1-3  golf held     defeat  house 0/5  golf 17  shoe  0  most 5  closest    0   11.0s
+bounce 0 pierce 5 shoe-dmg 1, 1-3  shoe first    defeat  house 0/5  golf 17  shoe  0  most 5  closest    0   11.0s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws 0, closest 0, seconds 0.0
+bounce 0 pierce 5 shoe-dmg 1, 1-5  golf at once  clear   house 5/5  golf 20  shoe  0  most 3  closest  650   34.4s
+bounce 0 pierce 5 shoe-dmg 1, 1-5  golf held     clear   house 5/5  golf 11  shoe  0  most 4  closest  211   52.0s
+bounce 0 pierce 5 shoe-dmg 1, 1-5  shoe first    clear   house 5/5  golf  9  shoe  4  most 4  closest  214   51.9s
+                                   shoe first vs golf held: house 0, most 0, golf -2, all throws +2, closest +3, seconds -0.1
+bounce 0 pierce 5 shoe-dmg 0, 1-3  golf at once  defeat  house 0/5  golf 17  shoe  0  most 5  closest    0   11.0s
+bounce 0 pierce 5 shoe-dmg 0, 1-3  golf held     defeat  house 0/5  golf 17  shoe  0  most 5  closest    0   11.0s
+bounce 0 pierce 5 shoe-dmg 0, 1-3  shoe first    defeat  house 0/5  golf 17  shoe  0  most 5  closest    0   11.0s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws 0, closest 0, seconds 0.0
+bounce 0 pierce 5 shoe-dmg 0, 1-5  golf at once  clear   house 5/5  golf 20  shoe  0  most 3  closest  650   34.4s
+bounce 0 pierce 5 shoe-dmg 0, 1-5  golf held     clear   house 5/5  golf 11  shoe  0  most 4  closest  211   52.0s
+bounce 0 pierce 5 shoe-dmg 0, 1-5  shoe first    clear   house 5/5  golf 11  shoe  4  most 4  closest  214   51.9s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +4, closest +3, seconds -0.1
+bounce 0 pierce 3 shoe-dmg 1, 1-3  golf at once  defeat  house 0/5  golf 14  shoe  0  most 3  closest    0    8.9s
+bounce 0 pierce 3 shoe-dmg 1, 1-3  golf held     defeat  house 0/5  golf 14  shoe  0  most 3  closest    0    8.9s
+bounce 0 pierce 3 shoe-dmg 1, 1-3  shoe first    defeat  house 0/5  golf 14  shoe  0  most 3  closest    0    8.9s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws 0, closest 0, seconds 0.0
+bounce 0 pierce 3 shoe-dmg 1, 1-5  golf at once  clear   house 5/5  golf 20  shoe  0  most 3  closest  650   34.4s
+bounce 0 pierce 3 shoe-dmg 1, 1-5  golf held     clear   house 5/5  golf 13  shoe  0  most 3  closest  213   35.3s
+bounce 0 pierce 3 shoe-dmg 1, 1-5  shoe first    clear   house 5/5  golf 12  shoe  2  most 3  closest  605   35.2s
+                                   shoe first vs golf held: house 0, most 0, golf -1, all throws +1, closest +392, seconds -0.1
+bounce 0 pierce 3 shoe-dmg 0, 1-3  golf at once  defeat  house 0/5  golf 14  shoe  0  most 3  closest    0    8.9s
+bounce 0 pierce 3 shoe-dmg 0, 1-3  golf held     defeat  house 0/5  golf 14  shoe  0  most 3  closest    0    8.9s
+bounce 0 pierce 3 shoe-dmg 0, 1-3  shoe first    defeat  house 0/5  golf 14  shoe  0  most 3  closest    0    8.9s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws 0, closest 0, seconds 0.0
+bounce 0 pierce 3 shoe-dmg 0, 1-5  golf at once  clear   house 5/5  golf 20  shoe  0  most 3  closest  650   34.4s
+bounce 0 pierce 3 shoe-dmg 0, 1-5  golf held     clear   house 5/5  golf 13  shoe  0  most 3  closest  213   35.3s
+bounce 0 pierce 3 shoe-dmg 0, 1-5  shoe first    clear   house 5/5  golf 12  shoe  4  most 3  closest  605   35.2s
+                                   shoe first vs golf held: house 0, most 0, golf -1, all throws +3, closest +392, seconds -0.1
+
+C. Spacing: how far the four walk in behind the front pair (1-3's first two groups; the plan's table has 434, the game's 180)
+gap  shoe-dmg  shoes  result                       at     most one well-timed ball reaches: bounce 2 / bounce 0 (no shoe)   gap after each shoe
+434  1         2      front pair gone, never joined  4.9s  -                                                                 434 312 gone
+434  0         3      joined                        5.8s  5 of 6 / 5 of 6 (5 / 4)                                           434 312 179 46
+350  1         2      front pair gone, never joined  4.9s  -                                                                 350 228 gone
+350  0         3      joined                        5.8s  5 of 6 / 5 of 6 (5 / 4)                                           350 228 95 -38
+250  1         2      front pair gone, never joined  4.9s  -                                                                 250 128 gone
+250  0         2      joined                        4.9s  5 of 6 / 5 of 6 (5 / 4)                                           250 128 -5
+180  1         1      joined                        4.0s  5 of 5 / 5 of 5 (5 / 4)                                           180 58
+180  0         1      joined                        4.0s  5 of 6 / 5 of 6 (5 / 4)                                           180 58
+120  1         1      joined                        4.0s  5 of 5 / 5 of 5 (5 / 5)                                           120 -2
+120  0         1      joined                        4.0s  5 of 6 / 5 of 6 (5 / 5)                                           120 -2
+
+D. Shoe numbers at the ends of the plan's ranges (shoe damage 0): shoes needed to join the pair with the four
+push  radius  slow          gap 434              gap 250
+80    70      1.5s x0.60   5 shoe(s), 7.6s      3 shoe(s), 5.8s
+80    70      2.5s x0.35   4 shoe(s), 6.7s      3 shoe(s), 5.8s
+80    70      3.0s x0.30   4 shoe(s), 6.7s      3 shoe(s), 5.8s
+80    85      1.5s x0.60   4 shoe(s), 6.7s      2 shoe(s), 4.9s
+80    85      2.5s x0.35   4 shoe(s), 6.7s      2 shoe(s), 4.9s
+80    85      3.0s x0.30   4 shoe(s), 6.7s      2 shoe(s), 4.9s
+80    110     1.5s x0.60   4 shoe(s), 6.7s      2 shoe(s), 4.9s
+80    110     2.5s x0.35   4 shoe(s), 6.7s      2 shoe(s), 4.9s
+80    110     3.0s x0.30   4 shoe(s), 6.7s      2 shoe(s), 4.9s
+105   70      1.5s x0.60   4 shoe(s), 6.7s      2 shoe(s), 4.9s
+105   70      2.5s x0.35   4 shoe(s), 6.7s      2 shoe(s), 4.9s
+105   70      3.0s x0.30   4 shoe(s), 6.7s      2 shoe(s), 4.9s
+105   85      1.5s x0.60   3 shoe(s), 5.8s      2 shoe(s), 4.9s
+105   85      2.5s x0.35   3 shoe(s), 5.8s      2 shoe(s), 4.9s
+105   85      3.0s x0.30   3 shoe(s), 5.8s      2 shoe(s), 4.9s
+105   110     1.5s x0.60   3 shoe(s), 5.8s      2 shoe(s), 4.9s
+105   110     2.5s x0.35   3 shoe(s), 5.8s      2 shoe(s), 4.9s
+105   110     3.0s x0.30   3 shoe(s), 5.8s      2 shoe(s), 4.9s
+140   70      1.5s x0.60   4 shoe(s), 6.7s      3 shoe(s), 5.8s
+140   70      2.5s x0.35   4 shoe(s), 6.7s      3 shoe(s), 5.8s
+140   70      3.0s x0.30   4 shoe(s), 6.7s      3 shoe(s), 5.8s
+140   85      1.5s x0.60   3 shoe(s), 5.8s      2 shoe(s), 4.9s
+140   85      2.5s x0.35   3 shoe(s), 5.8s      2 shoe(s), 4.9s
+140   85      3.0s x0.30   3 shoe(s), 5.8s      2 shoe(s), 4.9s
+140   110     1.5s x0.60   3 shoe(s), 5.8s      2 shoe(s), 4.9s
+140   110     2.5s x0.35   3 shoe(s), 5.8s      2 shoe(s), 4.9s
+140   110     3.0s x0.30   3 shoe(s), 5.8s      2 shoe(s), 4.9s
+
+E. More pressure on 1-5 (22 people): faster walking and a schedule squeezed to half its time
+-- bounce 2 pierce 5 shoe-dmg 1; walking 48, schedule x1.0
+                                   golf at once  clear   house 5/5  golf 12  shoe  0  most 5  closest  650   35.1s
+                                   golf held     clear   house 5/5  golf  8  shoe  0  most 5  closest  512   33.4s
+                                   shoe first    clear   house 5/5  golf  8  shoe  2  most 5  closest  601   33.4s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +2, closest +89, seconds 0.0
+-- bounce 2 pierce 5 shoe-dmg 1; walking 48, schedule x0.5
+                                   golf at once  clear   house 5/5  golf 13  shoe  0  most 4  closest  649   20.6s
+                                   golf held     clear   house 5/5  golf  8  shoe  0  most 5  closest  580   18.9s
+                                   shoe first    clear   house 5/5  golf  8  shoe  2  most 5  closest  650   18.9s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +2, closest +70, seconds 0.0
+-- bounce 2 pierce 5 shoe-dmg 1; walking 65, schedule x1.0
+                                   golf at once  clear   house 5/5  golf 10  shoe  0  most 5  closest  640   31.5s
+                                   golf held     clear   house 5/5  golf  8  shoe  0  most 5  closest  457   32.7s
+                                   shoe first    clear   house 5/5  golf  8  shoe  2  most 5  closest  544   32.7s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +2, closest +87, seconds -0.1
+-- bounce 2 pierce 5 shoe-dmg 1; walking 65, schedule x0.5
+                                   golf at once  clear   house 5/5  golf  9  shoe  0  most 5  closest  639   17.1s
+                                   golf held     clear   house 5/5  golf  8  shoe  0  most 5  closest  547   18.2s
+                                   shoe first    clear   house 5/5  golf  8  shoe  2  most 5  closest  635   18.2s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +2, closest +88, seconds +0.1
+-- bounce 0 pierce 5 shoe-dmg 0; walking 48, schedule x1.0
+                                   golf at once  clear   house 5/5  golf 20  shoe  0  most 3  closest  650   34.4s
+                                   golf held     clear   house 5/5  golf 11  shoe  0  most 4  closest  211   52.0s
+                                   shoe first    clear   house 5/5  golf 11  shoe  4  most 4  closest  214   51.9s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +4, closest +3, seconds -0.1
+-- bounce 0 pierce 5 shoe-dmg 0; walking 48, schedule x0.5
+                                   golf at once  clear   house 5/5  golf 20  shoe  0  most 3  closest  649   19.9s
+                                   golf held     clear   house 5/5  golf 11  shoe  0  most 5  closest  210   37.4s
+                                   shoe first    clear   house 5/5  golf 10  shoe  5  most 4  closest  215   37.4s
+                                   shoe first vs golf held: house 0, most -1, golf -1, all throws +4, closest +4, seconds -0.1
+-- bounce 0 pierce 5 shoe-dmg 0; walking 65, schedule x1.0
+                                   golf at once  clear   house 5/5  golf 17  shoe  0  most 4  closest  640   32.9s
+                                   golf held     clear   house 5/5  golf 11  shoe  0  most 4  closest  207   34.0s
+                                   shoe first    clear   house 5/5  golf 11  shoe  4  most 4  closest  211   46.0s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +4, closest +4, seconds +11.9
+-- bounce 0 pierce 5 shoe-dmg 0; walking 65, schedule x0.5
+                                   golf at once  clear   house 5/5  golf 18  shoe  0  most 4  closest  639   18.9s
+                                   golf held     clear   house 5/5  golf 11  shoe  0  most 4  closest  208   31.5s
+                                   shoe first    clear   house 5/5  golf 11  shoe  3  most 4  closest  212   31.4s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +3, closest +4, seconds -0.1
+-- bounce 0 pierce 3 shoe-dmg 0; walking 48, schedule x1.0
+                                   golf at once  clear   house 5/5  golf 20  shoe  0  most 3  closest  650   34.4s
+                                   golf held     clear   house 5/5  golf 13  shoe  0  most 3  closest  213   35.3s
+                                   shoe first    clear   house 5/5  golf 12  shoe  4  most 3  closest  605   35.2s
+                                   shoe first vs golf held: house 0, most 0, golf -1, all throws +3, closest +392, seconds -0.1
+-- bounce 0 pierce 3 shoe-dmg 0; walking 48, schedule x0.5
+                                   golf at once  clear   house 5/5  golf 20  shoe  0  most 3  closest  649   19.9s
+                                   golf held     clear   house 5/5  golf 13  shoe  0  most 3  closest  214   20.7s
+                                   shoe first    clear   house 5/5  golf 13  shoe  4  most 3  closest  213   37.4s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +4, closest -1, seconds +16.7
+-- bounce 0 pierce 3 shoe-dmg 0; walking 65, schedule x1.0
+                                   golf at once  clear   house 5/5  golf 20  shoe  0  most 3  closest  638   33.4s
+                                   golf held     clear   house 5/5  golf 12  shoe  0  most 3  closest  207   34.0s
+                                   shoe first    clear   house 5/5  golf 11  shoe  6  most 3  closest  213   45.9s
+                                   shoe first vs golf held: house 0, most 0, golf -1, all throws +5, closest +6, seconds +11.9
+-- bounce 0 pierce 3 shoe-dmg 0; walking 65, schedule x0.5
+                                   golf at once  clear   house 5/5  golf 19  shoe  0  most 3  closest  641   18.4s
+                                   golf held     clear   house 5/5  golf 12  shoe  0  most 3  closest  210   31.5s
+                                   shoe first    clear   house 5/5  golf 12  shoe  0  most 3  closest  210   31.5s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws 0, closest 0, seconds 0.0
+-- bounce 0 pierce 5 shoe-dmg 0 golf-reload 0.9; walking 48, schedule x1.0
+                                   golf at once  clear   house 5/5  golf 18  shoe  0  most 3  closest  650   34.7s
+                                   golf held     clear   house 5/5  golf 10  shoe  0  most 4  closest  198   51.9s
+                                   shoe first    clear   house 5/5  golf  9  shoe  7  most 5  closest  537   35.2s
+                                   shoe first vs golf held: house 0, most +1, golf -1, all throws +6, closest +339, seconds -16.7
+-- bounce 0 pierce 5 shoe-dmg 0 golf-reload 0.9; walking 48, schedule x0.5
+                                   golf at once  clear   house 5/5  golf 18  shoe  0  most 3  closest  649   20.2s
+                                   golf held     clear   house 5/5  golf 10  shoe  0  most 5  closest  210   37.5s
+                                   shoe first    clear   house 5/5  golf 10  shoe  3  most 5  closest  650   20.8s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +3, closest +439, seconds -16.7
+-- bounce 0 pierce 5 shoe-dmg 0 golf-reload 0.9; walking 65, schedule x1.0
+                                   golf at once  clear   house 5/5  golf 15  shoe  0  most 4  closest  638   34.4s
+                                   golf held     clear   house 5/5  golf 10  shoe  0  most 4  closest  207   34.1s
+                                   shoe first    clear   house 5/5  golf  9  shoe  4  most 4  closest  584   34.1s
+                                   shoe first vs golf held: house 0, most 0, golf -1, all throws +3, closest +377, seconds 0.0
+-- bounce 0 pierce 5 shoe-dmg 0 golf-reload 0.9; walking 65, schedule x0.5
+                                   golf at once  clear   house 5/5  golf 15  shoe  0  most 4  closest  641   19.8s
+                                   golf held     clear   house 5/5  golf 10  shoe  0  most 4  closest  213   19.6s
+                                   shoe first    clear   house 5/5  golf  9  shoe  3  most 4  closest  636   19.6s
+                                   shoe first vs golf held: house 0, most 0, golf -1, all throws +2, closest +423, seconds 0.0
+
+F. Stage 1-3: the plan's spacing (four walk in 434 behind the pair) against 180, under four sets of numbers
+bounce 2 pierce 5 shoe-dmg 1, 434  golf at once  clear   house 5/5  golf  7  shoe  0  most 4  closest  620   17.2s
+bounce 2 pierce 5 shoe-dmg 1, 434  golf held     clear   house 5/5  golf  4  shoe  0  most 5  closest  214   36.8s
+bounce 2 pierce 5 shoe-dmg 1, 434  shoe first    clear   house 5/5  golf  4  shoe  4  most 4  closest  483   19.0s
+                                   shoe first vs golf held: house 0, most -1, golf 0, all throws +4, closest +269, seconds -17.8
+bounce 2 pierce 5 shoe-dmg 1, 180  golf at once  clear   house 5/5  golf  7  shoe  0  most 4  closest  620   16.9s
+bounce 2 pierce 5 shoe-dmg 1, 180  golf held     clear   house 5/5  golf  4  shoe  0  most 5  closest  482   17.6s
+bounce 2 pierce 5 shoe-dmg 1, 180  shoe first    clear   house 5/5  golf  4  shoe  2  most 5  closest  483   17.8s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +2, closest +2, seconds +0.2
+bounce 2 pierce 5 shoe-dmg 0, 434  golf at once  clear   house 5/5  golf  7  shoe  0  most 4  closest  620   17.2s
+bounce 2 pierce 5 shoe-dmg 0, 434  golf held     clear   house 5/5  golf  4  shoe  0  most 5  closest  214   36.8s
+bounce 2 pierce 5 shoe-dmg 0, 434  shoe first    clear   house 5/5  golf  4  shoe  6  most 5  closest  483   20.5s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +6, closest +269, seconds -16.3
+bounce 2 pierce 5 shoe-dmg 0, 180  golf at once  clear   house 5/5  golf  7  shoe  0  most 4  closest  620   16.9s
+bounce 2 pierce 5 shoe-dmg 0, 180  golf held     clear   house 5/5  golf  4  shoe  0  most 5  closest  482   17.6s
+bounce 2 pierce 5 shoe-dmg 0, 180  shoe first    clear   house 5/5  golf  4  shoe  2  most 5  closest  483   18.4s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +2, closest +2, seconds +0.8
+bounce 1 pierce 5 shoe-dmg 0, 434  golf at once  clear   house 5/5  golf  7  shoe  0  most 4  closest  620   17.8s
+bounce 1 pierce 5 shoe-dmg 0, 434  golf held     clear   house 5/5  golf  4  shoe  0  most 5  closest  214   36.8s
+bounce 1 pierce 5 shoe-dmg 0, 434  shoe first    clear   house 5/5  golf  5  shoe  3  most 5  closest  483   18.4s
+                                   shoe first vs golf held: house 0, most 0, golf +1, all throws +4, closest +269, seconds -18.3
+bounce 1 pierce 5 shoe-dmg 0, 180  golf at once  clear   house 5/5  golf  7  shoe  0  most 4  closest  620   16.9s
+bounce 1 pierce 5 shoe-dmg 0, 180  golf held     clear   house 5/5  golf  4  shoe  0  most 5  closest  482   17.6s
+bounce 1 pierce 5 shoe-dmg 0, 180  shoe first    clear   house 5/5  golf  4  shoe  2  most 5  closest  483   18.4s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +2, closest +2, seconds +0.9
+bounce 0 pierce 5 shoe-dmg 0, 434  golf at once  clear   house 5/5  golf 11  shoe  0  most 2  closest  620   18.6s
+bounce 0 pierce 5 shoe-dmg 0, 434  golf held     clear   house 5/5  golf  6  shoe  0  most 4  closest  215   18.6s
+bounce 0 pierce 5 shoe-dmg 0, 434  shoe first    clear   house 5/5  golf  5  shoe  4  most 4  closest  483   18.6s
+                                   shoe first vs golf held: house 0, most 0, golf -1, all throws +3, closest +268, seconds 0.0
+bounce 0 pierce 5 shoe-dmg 0, 180  golf at once  clear   house 5/5  golf  7  shoe  0  most 4  closest  620   16.9s
+bounce 0 pierce 5 shoe-dmg 0, 180  golf held     clear   house 5/5  golf  6  shoe  0  most 4  closest  212   23.9s
+bounce 0 pierce 5 shoe-dmg 0, 180  shoe first    clear   house 5/5  golf  5  shoe  3  most 4  closest  211   31.3s
+                                   shoe first vs golf held: house 0, most 0, golf -1, all throws +2, closest -1, seconds +7.4
+
+G. Stage tables considered for the gentle game, with its numbers (bounce 0 pierce 5 shoe-dmg 0). 'nobody throws' shows how much a stage threatens.
+1-2 plan (8)                       nobody throws: defeat at 31.5s, 5 of 8 people reached the gate
+                                   golf at once  clear   house 5/5  golf 10  shoe  0  most 3  closest  724   13.0s
+                                   golf held     clear   house 5/5  golf  6  shoe  0  most 3  closest  213   30.5s
+                                   shoe first    clear   house 5/5  golf  6  shoe  0  most 3  closest  213   30.5s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws 0, closest 0, seconds 0.0
+1-4 plan (16)                      nobody throws: defeat at 25.4s, 5 of 16 people reached the gate
+                                   golf at once  clear   house 5/5  golf 14  shoe  0  most 2  closest  459   21.0s
+                                   golf held     clear   house 5/5  golf  9  shoe  0  most 4  closest  212   38.5s
+                                   shoe first    clear   house 5/5  golf  7  shoe  7  most 5  closest  460   21.9s
+                                   shoe first vs golf held: house 0, most +1, golf -2, all throws +5, closest +248, seconds -16.6
+1-5 plan (22)                      nobody throws: defeat at 23.2s, 5 of 22 people reached the gate
+                                   golf at once  clear   house 5/5  golf 20  shoe  0  most 3  closest  650   34.4s
+                                   golf held     clear   house 5/5  golf 11  shoe  0  most 4  closest  211   52.0s
+                                   shoe first    clear   house 5/5  golf 11  shoe  4  most 4  closest  214   51.9s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +4, closest +3, seconds -0.1
+1-5 packs 180 behind (22)          nobody throws: defeat at 23.2s, 5 of 22 people reached the gate
+                                   golf at once  clear   house 5/5  golf 17  shoe  0  most 4  closest  650   32.2s
+                                   golf held     clear   house 5/5  golf 10  shoe  0  most 4  closest  214   49.5s
+                                   shoe first    clear   house 5/5  golf 11  shoe  4  most 4  closest  214   49.5s
+                                   shoe first vs golf held: house 0, most 0, golf +1, all throws +5, closest 0, seconds 0.0
+2-1 runner ahead of a line (11)    nobody throws: defeat at 20.1s, 5 of 11 people reached the gate
+                                   golf at once  clear   house 5/5  golf  9  shoe  0  most 4  closest  605   15.6s
+                                   golf held     clear   house 5/5  golf  6  shoe  0  most 4  closest  208   21.6s
+                                   shoe first    clear   house 5/5  golf  5  shoe  5  most 5  closest  211   30.7s
+                                   shoe first vs golf held: house 0, most +1, golf -1, all throws +4, closest +3, seconds +9.2
+2-2 fast pair through a line (15)  nobody throws: defeat at 17.1s, 5 of 15 people reached the gate
+                                   golf at once  clear   house 5/5  golf  9  shoe  0  most 4  closest  694   16.1s
+                                   golf held     clear   house 5/5  golf  7  shoe  0  most 4  closest  694   16.1s
+                                   shoe first    clear   house 5/5  golf  7  shoe  0  most 4  closest  694   16.1s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws 0, closest 0, seconds 0.0
+2-3 fast three catch four (15)     nobody throws: defeat at 20.9s, 5 of 15 people reached the gate
+                                   golf at once  clear   house 5/5  golf 13  shoe  0  most 4  closest  881   21.1s
+                                   golf held     clear   house 5/5  golf  9  shoe  0  most 4  closest  207   34.5s
+                                   shoe first    clear   house 5/5  golf  9  shoe  0  most 4  closest  207   34.5s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws 0, closest 0, seconds 0.0
+2-4 tight line then loose line (17) nobody throws: defeat at 19.6s, 5 of 17 people reached the gate
+                                   golf at once  clear   house 5/5  golf 15  shoe  0  most 4  closest  712   26.4s
+                                   golf held     clear   house 5/5  golf  8  shoe  0  most 4  closest  210   43.1s
+                                   shoe first    clear   house 5/5  golf  8  shoe  3  most 4  closest  212   43.1s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +3, closest +2, seconds 0.0
+2-5 two-hit dads in front (15)     nobody throws: defeat at 22.1s, 5 of 15 people reached the gate
+                                   golf at once  clear   house 5/5  golf 15  shoe  0  most 4  closest  490   29.6s
+                                   golf held     clear   house 5/5  golf 11  shoe  0  most 4  closest  191   35.9s
+                                   shoe first    clear   house 5/5  golf  7  shoe  8  most 5  closest  445   30.5s
+                                   shoe first vs golf held: house 0, most +1, golf -4, all throws +4, closest +255, seconds -5.4
+
+H. Crowded tables, golf reload 0.45, shoe reload 0.70, no slow motion while aiming. 30 steady and 30 hurried bot players each.
+1-1 rush A (66 people): nobody throws -> defeat at 7.7s | perfect aim clear, gate touched 0, 20.8s, golf 46, in view 3 on average (most 13)
+   steady: cleared 30/30, gate touched 0.8 on average, 26 throws, 23.4s | in view 8 on average (most 22), nearest person 643 from the left edge on average
+   steady with shoes: cleared 30/30, gate touched 0.9 on average, 26 throws, 23.7s | in view 8 on average (most 27), nearest person 637 from the left edge on average
+   hurried: cleared 23/30, gate touched 2.5 on average, 21 throws, 24.4s | in view 11 on average (most 25), nearest person 566 from the left edge on average
+   hurried with shoes: cleared 17/30, gate touched 3.2 on average, 21 throws, 24.3s | in view 12 on average (most 39), nearest person 548 from the left edge on average
+1-1 rush B (78 people): nobody throws -> defeat at 7.7s | perfect aim clear, gate touched 0, 20.2s, golf 45, in view 5 on average (most 13)
+   steady: cleared 30/30, gate touched 0.9 on average, 25 throws, 22.3s | in view 10 on average (most 27), nearest person 696 from the left edge on average
+   steady with shoes: cleared 23/30, gate touched 1.7 on average, 25 throws, 22.7s | in view 11 on average (most 28), nearest person 676 from the left edge on average
+   hurried: cleared 8/30, gate touched 4.4 on average, 19 throws, 21.8s | in view 16 on average (most 34), nearest person 510 from the left edge on average
+   hurried with shoes: cleared 1/30, gate touched 4.9 on average, 17 throws, 20.4s | in view 17 on average (most 50), nearest person 501 from the left edge on average
+1-1 rush C (81 people): nobody throws -> defeat at 7.7s | perfect aim clear, gate touched 1, 17.5s, golf 38, in view 6 on average (most 13)
+   steady: cleared 29/30, gate touched 1.5 on average, 23 throws, 20.5s | in view 15 on average (most 36), nearest person 602 from the left edge on average
+   steady with shoes: cleared 15/30, gate touched 3.2 on average, 22 throws, 20.4s | in view 16 on average (most 42), nearest person 581 from the left edge on average
+   hurried: cleared 3/30, gate touched 4.9 on average, 15 throws, 17.4s | in view 21 on average (most 41), nearest person 494 from the left edge on average
+   hurried with shoes: cleared 0/30, gate touched 5.0 on average, 14 throws, 16.5s | in view 22 on average (most 54), nearest person 485 from the left edge on average
+1-3 rush A (84 people): nobody throws -> defeat at 7.4s | perfect aim clear, gate touched 0, 20.7s, golf 46, in view 5 on average (most 16)
+   steady: cleared 29/30, gate touched 1.1 on average, 25 throws, 23.0s | in view 12 on average (most 29), nearest person 632 from the left edge on average
+   steady with shoes: cleared 25/30, gate touched 1.5 on average, 25 throws, 22.8s | in view 12 on average (most 34), nearest person 627 from the left edge on average
+   hurried: cleared 5/30, gate touched 4.6 on average, 18 throws, 20.8s | in view 18 on average (most 38), nearest person 491 from the left edge on average
+   hurried with shoes: cleared 2/30, gate touched 4.8 on average, 16 throws, 18.6s | in view 19 on average (most 49), nearest person 483 from the left edge on average
+1-3 rush B (84 people): nobody throws -> defeat at 7.4s | perfect aim clear, gate touched 0, 15.2s, golf 34, in view 8 on average (most 16)
+   steady: cleared 21/30, gate touched 2.4 on average, 21 throws, 19.0s | in view 19 on average (most 44), nearest person 549 from the left edge on average
+   steady with shoes: cleared 8/30, gate touched 4.4 on average, 21 throws, 20.1s | in view 20 on average (most 48), nearest person 521 from the left edge on average
+   hurried: cleared 0/30, gate touched 5.0 on average, 14 throws, 15.9s | in view 25 on average (most 48), nearest person 476 from the left edge on average
+   hurried with shoes: cleared 0/30, gate touched 5.0 on average, 13 throws, 15.1s | in view 26 on average (most 58), nearest person 470 from the left edge on average
+1-1 flood D (114 people): nobody throws -> defeat at 7.6s | perfect aim clear, gate touched 1, 19.3s, golf 43, in view 9 on average (most 20)
+   steady: cleared 10/30, gate touched 4.0 on average, 23 throws, 21.1s | in view 27 on average (most 58), nearest person 514 from the left edge on average
+   steady with shoes: cleared 1/30, gate touched 4.8 on average, 22 throws, 20.7s | in view 31 on average (most 81), nearest person 498 from the left edge on average
+   hurried: cleared 0/30, gate touched 5.0 on average, 13 throws, 15.4s | in view 33 on average (most 60), nearest person 453 from the left edge on average
+   hurried with shoes: cleared 0/30, gate touched 5.0 on average, 12 throws, 14.7s | in view 36 on average (most 83), nearest person 444 from the left edge on average
+1-1 flood E (140 people): nobody throws -> defeat at 8.0s | perfect aim clear, gate touched 0, 19.2s, golf 42, in view 14 on average (most 24)
+   steady: cleared 0/30, gate touched 5.0 on average, 18 throws, 16.1s | in view 40 on average (most 74), nearest person 522 from the left edge on average
+   steady with shoes: cleared 0/30, gate touched 5.0 on average, 17 throws, 16.8s | in view 44 on average (most 95), nearest person 507 from the left edge on average
+   hurried: cleared 0/30, gate touched 5.0 on average, 11 throws, 13.2s | in view 42 on average (most 72), nearest person 439 from the left edge on average
+   hurried with shoes: cleared 0/30, gate touched 5.0 on average, 11 throws, 13.0s | in view 44 on average (most 94), nearest person 431 from the left edge on average
+1-1 flood F (160 people): nobody throws -> defeat at 7.8s | perfect aim clear, gate touched 0, 19.1s, golf 42, in view 19 on average (most 30)
+   steady: cleared 0/30, gate touched 5.0 on average, 15 throws, 13.9s | in view 49 on average (most 90), nearest person 510 from the left edge on average
+   steady with shoes: cleared 0/30, gate touched 5.0 on average, 15 throws, 14.9s | in view 54 on average (most 127), nearest person 492 from the left edge on average
+   hurried: cleared 0/30, gate touched 5.0 on average, 10 throws, 11.8s | in view 50 on average (most 91), nearest person 431 from the left edge on average
+   hurried with shoes: cleared 0/30, gate touched 5.0 on average, 10 throws, 11.6s | in view 51 on average (most 104), nearest person 429 from the left edge on average
+1-3 flood D (160 people): nobody throws -> defeat at 7.2s | perfect aim clear, gate touched 0, 19.0s, golf 42, in view 25 on average (most 39)
+   steady: cleared 0/30, gate touched 5.0 on average, 15 throws, 13.3s | in view 49 on average (most 88), nearest person 507 from the left edge on average
+   steady with shoes: cleared 0/30, gate touched 5.0 on average, 14 throws, 13.7s | in view 52 on average (most 113), nearest person 494 from the left edge on average
+   hurried: cleared 0/30, gate touched 5.0 on average, 9 throws, 10.9s | in view 48 on average (most 89), nearest person 425 from the left edge on average
+   hurried with shoes: cleared 0/30, gate touched 5.0 on average, 9 throws, 11.0s | in view 51 on average (most 111), nearest person 424 from the left edge on average
+1-3 flood E (160 people): nobody throws -> defeat at 6.8s | perfect aim clear, gate touched 0, 16.9s, golf 37, in view 31 on average (most 57)
+   steady: cleared 0/30, gate touched 5.0 on average, 13 throws, 12.0s | in view 57 on average (most 105), nearest person 466 from the left edge on average
+   steady with shoes: cleared 0/30, gate touched 5.0 on average, 12 throws, 11.6s | in view 65 on average (most 136), nearest person 422 from the left edge on average
+   hurried: cleared 0/30, gate touched 5.0 on average, 9 throws, 10.0s | in view 54 on average (most 106), nearest person 407 from the left edge on average
+   hurried with shoes: cleared 0/30, gate touched 5.0 on average, 8 throws, 9.7s | in view 60 on average (most 137), nearest person 382 from the left edge on average
+
+I. Stampedes: everyone runs. Each table with several hands (people a ball goes through / golf reload). 30 steady and 30 hurried bot players each, golf only.
+1-1 herd XS (80): nobody throws -> defeat at 5.4s
+  through 5, reload 0.45: perfect aim clear, gate touched 0, 12.9s, golf 28, in view 8 on average (most 18)
+     steady: cleared 15/30, gate touched 3.7 on average, 17 throws, 15.6s | in view 19 on average (most 37), nearest person 535 from the left edge on average
+     hurried: cleared 0/30, gate touched 5.0 on average, 9 throws, 10.6s | in view 24 on average (most 41), nearest person 449 from the left edge on average
+  through 12, reload 0.45: perfect aim clear, gate touched 0, 12.9s, golf 28, in view 7 on average (most 18)
+     steady: cleared 24/30, gate touched 2.4 on average, 16 throws, 14.3s | in view 15 on average (most 31), nearest person 554 from the left edge on average
+     hurried: cleared 10/30, gate touched 3.9 on average, 11 throws, 12.8s | in view 19 on average (most 38), nearest person 449 from the left edge on average
+  through 12, reload 0.30: perfect aim clear, gate touched 0, 12.7s, golf 43, in view 7 on average (most 18)
+     steady: cleared 25/30, gate touched 1.5 on average, 19 throws, 14.3s | in view 13 on average (most 27), nearest person 561 from the left edge on average
+     hurried: cleared 15/30, gate touched 3.4 on average, 14 throws, 14.4s | in view 17 on average (most 38), nearest person 495 from the left edge on average
+  through 12, reload 0.20: perfect aim clear, gate touched 0, 12.6s, golf 63, in view 7 on average (most 18)
+     steady: cleared 30/30, gate touched 0.4 on average, 22 throws, 14.4s | in view 12 on average (most 26), nearest person 637 from the left edge on average
+     hurried: cleared 20/30, gate touched 2.9 on average, 15 throws, 13.9s | in view 16 on average (most 31), nearest person 517 from the left edge on average
+  through 20, reload 0.30: perfect aim clear, gate touched 0, 12.7s, golf 43, in view 7 on average (most 18)
+     steady: cleared 25/30, gate touched 1.5 on average, 19 throws, 14.3s | in view 13 on average (most 27), nearest person 561 from the left edge on average
+     hurried: cleared 16/30, gate touched 3.4 on average, 14 throws, 14.4s | in view 17 on average (most 38), nearest person 496 from the left edge on average
+1-3 herd K (130): nobody throws -> defeat at 4.9s
+  through 5, reload 0.45: perfect aim clear, gate touched 0, 14.6s, golf 32, in view 23 on average (most 43)
+     steady: cleared 0/30, gate touched 5.0 on average, 11 throws, 10.2s | in view 38 on average (most 75), nearest person 487 from the left edge on average
+     hurried: cleared 0/30, gate touched 5.0 on average, 7 throws, 7.9s | in view 35 on average (most 75), nearest person 421 from the left edge on average
+  through 12, reload 0.45: perfect aim clear, gate touched 1, 12.0s, golf 27, in view 12 on average (most 21)
+     steady: cleared 16/30, gate touched 2.9 on average, 14 throws, 13.0s | in view 27 on average (most 63), nearest person 514 from the left edge on average
+     hurried: cleared 0/30, gate touched 5.0 on average, 8 throws, 9.6s | in view 30 on average (most 70), nearest person 428 from the left edge on average
+  through 12, reload 0.30: perfect aim clear, gate touched 1, 12.1s, golf 41, in view 12 on average (most 21)
+     steady: cleared 27/30, gate touched 1.2 on average, 19 throws, 14.2s | in view 24 on average (most 59), nearest person 558 from the left edge on average
+     hurried: cleared 5/30, gate touched 4.7 on average, 11 throws, 11.5s | in view 30 on average (most 71), nearest person 434 from the left edge on average
+  through 12, reload 0.20: perfect aim clear, gate touched 1, 12.0s, golf 60, in view 11 on average (most 21)
+     steady: cleared 29/30, gate touched 0.8 on average, 21 throws, 14.0s | in view 22 on average (most 53), nearest person 600 from the left edge on average
+     hurried: cleared 10/30, gate touched 3.7 on average, 14 throws, 12.6s | in view 28 on average (most 68), nearest person 480 from the left edge on average
+  through 20, reload 0.30: perfect aim clear, gate touched 1, 12.1s, golf 41, in view 12 on average (most 21)
+     steady: cleared 25/30, gate touched 1.7 on average, 18 throws, 13.8s | in view 24 on average (most 59), nearest person 541 from the left edge on average
+     hurried: cleared 9/30, gate touched 4.3 on average, 12 throws, 11.8s | in view 28 on average (most 63), nearest person 440 from the left edge on average
+1-1 herd S (100): nobody throws -> defeat at 5.4s
+  through 5, reload 0.45: perfect aim clear, gate touched 0, 12.7s, golf 28, in view 15 on average (most 23)
+     steady: cleared 0/30, gate touched 5.0 on average, 13 throws, 11.5s | in view 31 on average (most 58), nearest person 528 from the left edge on average
+     hurried: cleared 0/30, gate touched 5.0 on average, 8 throws, 9.3s | in view 32 on average (most 61), nearest person 444 from the left edge on average
+  through 12, reload 0.45: perfect aim clear, gate touched 0, 12.3s, golf 27, in view 10 on average (most 18)
+     steady: cleared 18/30, gate touched 2.6 on average, 15 throws, 13.3s | in view 20 on average (most 46), nearest person 531 from the left edge on average
+     hurried: cleared 2/30, gate touched 4.8 on average, 10 throws, 11.3s | in view 26 on average (most 53), nearest person 418 from the left edge on average
+  through 12, reload 0.30: perfect aim clear, gate touched 0, 11.8s, golf 40, in view 9 on average (most 18)
+     steady: cleared 27/30, gate touched 1.4 on average, 18 throws, 13.6s | in view 18 on average (most 43), nearest person 576 from the left edge on average
+     hurried: cleared 13/30, gate touched 3.8 on average, 12 throws, 12.6s | in view 24 on average (most 56), nearest person 462 from the left edge on average
+  through 12, reload 0.20: perfect aim clear, gate touched 1, 11.6s, golf 58, in view 9 on average (most 18)
+     steady: cleared 30/30, gate touched 0.6 on average, 20 throws, 13.3s | in view 17 on average (most 39), nearest person 594 from the left edge on average
+     hurried: cleared 17/30, gate touched 3.2 on average, 14 throws, 12.7s | in view 21 on average (most 51), nearest person 504 from the left edge on average
+  through 20, reload 0.30: perfect aim clear, gate touched 0, 11.8s, golf 40, in view 9 on average (most 18)
+     steady: cleared 29/30, gate touched 1.3 on average, 18 throws, 13.7s | in view 18 on average (most 43), nearest person 581 from the left edge on average
+     hurried: cleared 14/30, gate touched 3.6 on average, 12 throws, 12.2s | in view 23 on average (most 56), nearest person 466 from the left edge on average
+1-1 herd M (124): nobody throws -> defeat at 5.1s
+  through 5, reload 0.45: perfect aim clear, gate touched 0, 14.2s, golf 31, in view 23 on average (most 39)
+     steady: cleared 0/30, gate touched 5.0 on average, 12 throws, 10.5s | in view 38 on average (most 72), nearest person 493 from the left edge on average
+     hurried: cleared 0/30, gate touched 5.0 on average, 7 throws, 8.6s | in view 37 on average (most 74), nearest person 419 from the left edge on average
+  through 12, reload 0.45: perfect aim clear, gate touched 1, 12.0s, golf 27, in view 12 on average (most 21)
+     steady: cleared 14/30, gate touched 3.3 on average, 14 throws, 12.6s | in view 26 on average (most 56), nearest person 512 from the left edge on average
+     hurried: cleared 0/30, gate touched 5.0 on average, 9 throws, 10.5s | in view 31 on average (most 69), nearest person 452 from the left edge on average
+  through 12, reload 0.30: perfect aim clear, gate touched 1, 12.1s, golf 41, in view 11 on average (most 21)
+     steady: cleared 27/30, gate touched 0.9 on average, 19 throws, 14.0s | in view 24 on average (most 60), nearest person 566 from the left edge on average
+     hurried: cleared 6/30, gate touched 4.3 on average, 12 throws, 12.5s | in view 29 on average (most 67), nearest person 462 from the left edge on average
+  through 12, reload 0.20: perfect aim clear, gate touched 1, 12.0s, golf 60, in view 11 on average (most 21)
+     steady: cleared 28/30, gate touched 1.1 on average, 21 throws, 13.9s | in view 20 on average (most 50), nearest person 597 from the left edge on average
+     hurried: cleared 7/30, gate touched 4.1 on average, 13 throws, 12.2s | in view 28 on average (most 63), nearest person 489 from the left edge on average
+  through 20, reload 0.30: perfect aim clear, gate touched 1, 12.1s, golf 41, in view 11 on average (most 21)
+     steady: cleared 28/30, gate touched 1.2 on average, 18 throws, 13.8s | in view 22 on average (most 55), nearest person 561 from the left edge on average
+     hurried: cleared 7/30, gate touched 4.5 on average, 12 throws, 12.2s | in view 27 on average (most 60), nearest person 471 from the left edge on average
+1-3 herd L (160): nobody throws -> defeat at 4.5s
+  through 5, reload 0.45: perfect aim defeat, gate touched 5, 12.8s, golf 28, in view 45 on average (most 71)
+     steady: cleared 0/30, gate touched 5.0 on average, 10 throws, 8.8s | in view 50 on average (most 99), nearest person 469 from the left edge on average
+     hurried: cleared 0/30, gate touched 5.0 on average, 6 throws, 7.2s | in view 46 on average (most 97), nearest person 411 from the left edge on average
+  through 12, reload 0.45: perfect aim defeat, gate touched 5, 6.9s, golf 15, in view 19 on average (most 24)
+     steady: cleared 1/30, gate touched 4.8 on average, 13 throws, 11.4s | in view 41 on average (most 89), nearest person 486 from the left edge on average
+     hurried: cleared 0/30, gate touched 5.0 on average, 7 throws, 8.7s | in view 44 on average (most 98), nearest person 457 from the left edge on average
+  through 12, reload 0.30: perfect aim clear, gate touched 1, 11.7s, golf 39, in view 15 on average (most 22)
+     steady: cleared 14/30, gate touched 3.1 on average, 18 throws, 13.3s | in view 37 on average (most 81), nearest person 510 from the left edge on average
+     hurried: cleared 0/30, gate touched 5.0 on average, 10 throws, 9.6s | in view 44 on average (most 93), nearest person 439 from the left edge on average
+  through 12, reload 0.20: perfect aim clear, gate touched 0, 11.2s, golf 56, in view 14 on average (most 22)
+     steady: cleared 25/30, gate touched 1.4 on average, 20 throws, 13.2s | in view 32 on average (most 83), nearest person 579 from the left edge on average
+     hurried: cleared 0/30, gate touched 5.0 on average, 11 throws, 10.2s | in view 42 on average (most 96), nearest person 446 from the left edge on average
+  through 20, reload 0.30: perfect aim clear, gate touched 1, 11.7s, golf 39, in view 15 on average (most 22)
+     steady: cleared 24/30, gate touched 1.8 on average, 17 throws, 13.1s | in view 30 on average (most 76), nearest person 534 from the left edge on average
+     hurried: cleared 6/30, gate touched 4.4 on average, 10 throws, 10.3s | in view 37 on average (most 86), nearest person 443 from the left edge on average
