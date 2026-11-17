@@ -259,6 +259,8 @@ colour: orange to pink evening sky, sunlit clouds, a warm lit window, slightly w
 no new objects. 16:9, same size as the input.
 ```
 
+> **2026-11-18 사용자 결정: F-2와 F-3은 만들지 않는다.** 빠른 상대는 피구 아저씨, 단단한 상대는 의자 아저씨로 확정했다. 그 그림은 [요청서 v3](dad-throw-asset-request-v3.md)의 I, L 묶음에 있다. 아래 내용은 기록으로만 둔다.
+
 ### F-2. 성급한 아빠 `hasty` (7장)
 
 A 묶음과 같은 규격(768 캔버스, 발 (384,720), 키 560, 왼쪽)과 같은 전투 화풍. 마르고 다리가 긴 체형, 머리띠, 형광 연두 바람막이, 검은 반바지, 주황 러닝화. 걷는 게 아니라 **뛴다**.
