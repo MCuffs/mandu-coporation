@@ -75,27 +75,35 @@ public static class DadThrowShop
 
 // How hard stage n is. The first stage is lighter than the hand-made stampede it replaces (60 people against
 // 100); every stage adds people, pace and closer packs, and from stage 2, 3 and 4 the quick, the tough and the
-// tray-holding ones join. From stage 11 the street holds as many as the game allows at once, and what goes on
-// growing is pace, the tough ones' health and the trays.
+// tray-holding ones join. The first chapter climbs steeply, because that is where the player learns the three
+// of them and has a whole shop still to buy. From the second chapter on every number grows at a little over
+// half that slope: a bot that had bought the shop out stood still on stages 9 to 12 of the steep curve, with
+// nothing left to buy its way past them. The street is full (160) from stage 15; after that it is pace, the
+// tough ones' health and the trays that go on growing.
 public static class DadThrowCurve
 {
     public const int Stages=30,PerChapter=5,MaxPeople=DadThrowStageSet.MaxTotal,MaxHealth=DadThrowStageSet.MaxHealth;
     public const float MaxPace=250;
     // "2-3" is the third stage of the second chapter.
     public static string Id(int number){return ((number-1)/PerChapter+1)+"-"+((number-1)%PerChapter+1);}
-    public static int People(int stage){return Math.Min(MaxPeople,60+10*(stage-1));}
-    public static float Pace(int stage){return Math.Min(MaxPace,112+6*(stage-1));}
+    // The last stage of the steep climb. Up to here a stage is what it was before the curve was laid flatter.
+    public const int Knee=PerChapter;
+    // Steep steps taken since stage `from`, and gentle steps taken since the knee.
+    static int Steep(int stage,int from){return Math.Max(0,Math.Min(stage,Knee)-from);}
+    static int Gentle(int stage){return Math.Max(0,stage-Knee);}
+    public static int People(int stage){return Math.Min(MaxPeople,60+10*Steep(stage,1)+6*Gentle(stage));}
+    public static float Pace(int stage){return Math.Min(MaxPace,112+6*Steep(stage,1)+4*Gentle(stage));}
     // Seconds between packs.
-    public static float Gap(int stage){return Math.Max(.8f,1.6f-.05f*(stage-1));}
+    public static float Gap(int stage){return Math.Max(.8f,1.6f-.05f*Steep(stage,1)-.03f*Gentle(stage));}
     // Chair dads: slow, and one plain ball does not put them down.
-    public static int Tough(int stage){return stage<3?0:Math.Min(30,3+2*(stage-3));}
-    public static int ToughHealth(int stage){return stage<3?3:3+(stage-3)/3;}
+    public static int Tough(int stage){return stage<3?0:Math.Min(30,3+2*Steep(stage,3)+Gentle(stage));}
+    public static int ToughHealth(int stage){return stage<3?3:3+(stage-3)/4;}
     // Dodge-ball dads: a small pack that outruns the pack in front of it.
-    public static int Fast(int stage){return stage<2?0:Math.Min(30,4+2*(stage-2));}
+    public static int Fast(int stage){return stage<2?0:Math.Min(30,4+2*Steep(stage,2)+Gentle(stage));}
     // Tray dads run at the front of a pack. A ball stops on the tray and reaches nobody behind it, however much
     // the ball has been upgraded; a shoe knocks the tray out of every hand it pushes. They are why buying balls
     // alone does not carry a player through.
-    public static int Guards(int stage){return stage<4?0:Math.Min(24,2*(stage-3));}
+    public static int Guards(int stage){return stage<4?0:Math.Min(24,2*Steep(stage,3)+Gentle(stage));}
     public const int PackSize=14,FastPack=6;public const float FastLead=70,ToughPace=.55f,TraySpacing=38;
 
     static DadThrowStage.Group Pack(float at,int count,float firstX,float spacing,float speed,int hp,DadThrowStage.Kind kind)

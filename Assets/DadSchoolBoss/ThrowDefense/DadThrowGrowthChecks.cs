@@ -169,6 +169,14 @@ public static class DadThrowGrowthChecks
         check(game.Count==DadThrowCurve.Stages&&sound,"all thirty stage tables hold the people they promise, inside the ceiling, each pack starting in front of the gate");
         check(ordered&&grows,"packs come in the order of their times, and no stage is smaller, slower, sparser or softer than the one before");
         check(firstFast==2&&firstTough==3&&firstGuard==4&&led,"quick ones join from stage 2, tough ones from stage 3, trays from stage 4, each tray group at the front of a pack");
+        check(DadThrowCurve.People(5)==100&&DadThrowCurve.Pace(5)==136&&DadThrowCurve.Tough(5)==7&&DadThrowCurve.ToughHealth(5)==3&&DadThrowCurve.Fast(5)==10&&DadThrowCurve.Guards(5)==4&&Mathf.Abs(DadThrowCurve.Gap(5)-1.4f)<.001f,
+            "the first chapter is the climb it always was");
+        check(DadThrowCurve.People(6)-DadThrowCurve.People(5)<DadThrowCurve.People(5)-DadThrowCurve.People(4)&&DadThrowCurve.Pace(6)-DadThrowCurve.Pace(5)<DadThrowCurve.Pace(5)-DadThrowCurve.Pace(4)
+            &&DadThrowCurve.Guards(6)-DadThrowCurve.Guards(5)<DadThrowCurve.Guards(5)-DadThrowCurve.Guards(4)&&DadThrowCurve.Tough(6)-DadThrowCurve.Tough(5)<DadThrowCurve.Tough(5)-DadThrowCurve.Tough(4)
+            &&DadThrowCurve.Fast(6)-DadThrowCurve.Fast(5)<DadThrowCurve.Fast(5)-DadThrowCurve.Fast(4),
+            "from the second chapter every stage adds less than a stage of the first chapter did");
+        check(DadThrowCurve.People(12)==142&&DadThrowCurve.Guards(12)==11&&DadThrowCurve.Tough(12)==14&&DadThrowCurve.ToughHealth(12)==5&&DadThrowCurve.People(14)<DadThrowStageSet.MaxTotal&&DadThrowCurve.People(15)==DadThrowStageSet.MaxTotal,
+            "the twelfth stage is lighter than a full street, which comes at the fifteenth");
         check(game[0].Total==60&&game[0].Total<set.stages[0].Total&&DadThrowCurve.People(30)==DadThrowStageSet.MaxTotal&&DadThrowCurve.Pace(30)<=DadThrowCurve.MaxPace,
             "the first stage is lighter than the hand-made stampede; the last fills the street at a pace inside the ceiling");
         bool hints=game[0].hint=="pull"&&game[3].hint=="shoe",endings=game[4].ending;
@@ -425,6 +433,8 @@ public static class DadThrowGrowthChecks
     // ── a bot through the stages and the shop ──
     static readonly CultureInfo PlainNumbers=CultureInfo.InvariantCulture;
     public const int Reach=20,Tries=36,Seeds=2;
+    static int Owned(DadThrowSave save){int sum=0;foreach(DadThrowShop.Card card in DadThrowShop.Cards)sum+=DadThrowShop.Level(save,card.item);return sum;}
+    static int Shelf(){int sum=0;foreach(DadThrowShop.Card card in DadThrowShop.Cards)sum+=card.most;return sum;}
     static string Bought(DadThrowSave save)
     {
         var text=new StringBuilder();
@@ -458,15 +468,15 @@ public static class DadThrowGrowthChecks
             r.AppendLine();r.AppendLine("Player: "+players[p]);
             for(int w=0;w<ways.Length;w++)for(int seed=1;seed<=Seeds;seed++)
             {
-                var save=new DadThrowSave();int stage=0,fights=0,again=0;var perStage=new StringBuilder();
+                var save=new DadThrowSave();int stage=0,fights=0,again=0,lastBuy=0;var perStage=new StringBuilder();
                 while(stage<Reach&&fights<Tries)
                 {
                     DadThrowModel fought=Fight(game[stage],field,save,Hand(seed*31+fights*7+p,p==0));fights++;again++;
-                    save.coins+=fought.Killed*DadThrowShop.WonPerFelled;buyers[w](save);
+                    int had=Owned(save);save.coins+=fought.Killed*DadThrowShop.WonPerFelled;buyers[w](save);if(Owned(save)>had)lastBuy=stage+1;
                     if(fought.phase==Cleared){perStage.Append(again).Append(' ');stage++;again=0;}
                 }
-                r.AppendLine(string.Format(PlainNumbers,"  {0,-15} seed {1}: cleared {2,2} of {3} stages in {4} fights{5} | fights per stage: {6}| bought: {7} | purse {8}",
-                    ways[w],seed,stage,Reach,fights,stage<Reach?", stuck on "+DadThrowCurve.Id(stage+1)+" ("+again+" tries)":"",perStage,Bought(save),save.coins));
+                r.AppendLine(string.Format(PlainNumbers,"  {0,-15} seed {1}: cleared {2,2} of {3} stages in {4} fights{5} | fights per stage: {6}| bought: {7} | {9} of {10} bought, the last after a fight on {11} | purse {8}",
+                    ways[w],seed,stage,Reach,fights,stage<Reach?", stuck on "+DadThrowCurve.Id(stage+1)+" ("+again+" tries)":"",perStage,Bought(save),save.coins,Owned(save),Shelf(),lastBuy>0?DadThrowCurve.Id(lastBuy):"-"));
             }
         }
         // The same player and the same ways of spending, with the tuner bending the stages.
@@ -474,19 +484,19 @@ public static class DadThrowGrowthChecks
         r.AppendLine();r.AppendLine("Player: "+players[0]+", WITH the difficulty tuner (compare with the first block)");
         for(int w=0;w<ways.Length;w++)for(int seed=1;seed<=Seeds;seed++)
         {
-            var save=new DadThrowSave();int stage=0,fights=0,again=0,easedFights=0,heatedFights=0,worst=0;var perStage=new StringBuilder();
+            var save=new DadThrowSave();int stage=0,fights=0,again=0,easedFights=0,heatedFights=0,worst=0,lastBuy=0;var perStage=new StringBuilder();
             while(stage<Reach&&fights<Tries)
             {
-                DadThrowStage listed=game[stage];int ease=DadThrowTuner.Ease(save,listed.id),heat=DadThrowTuner.Heat(save);
+                DadThrowStage listed=game[stage];int ease=DadThrowTuner.Ease(save,listed.id),heat=DadThrowTuner.Heat(save),on=stage+1,had=Owned(save);
                 if(ease>0)easedFights++;if(heat>0)heatedFights++;
                 DadThrowModel fought=Fight(tuner.Table(listed,stage+1,save),field,save,Hand(seed*31+fights*7,true));fights++;again++;
                 save.coins+=DadThrowTuner.Pay(fought.Killed,heat);DadThrowTuner.Watched(save,fought.BlockSerial,fought.ShoesThrown);
                 if(fought.phase==Cleared){DadThrowTuner.Cleared(save,fought.Health<listed.health);perStage.Append(again).Append(' ');worst=Math.Max(worst,again);stage++;again=0;}
                 else DadThrowTuner.Lost(save,listed.id);
-                buyers[w](save);
+                buyers[w](save);if(Owned(save)>had)lastBuy=on;
             }
-            r.AppendLine(string.Format(PlainNumbers,"  {0,-15} seed {1}: cleared {2,2} of {3} stages in {4} fights{5} | fights per stage: {6}| most on one stage {7} | eased fights {8}, heated fights {9} | purse {10}",
-                ways[w],seed,stage,Reach,fights,stage<Reach?", stuck on "+DadThrowCurve.Id(stage+1)+" ("+again+" tries)":"",perStage,Math.Max(worst,again),easedFights,heatedFights,save.coins));
+            r.AppendLine(string.Format(PlainNumbers,"  {0,-15} seed {1}: cleared {2,2} of {3} stages in {4} fights{5} | fights per stage: {6}| most on one stage {7} | eased fights {8}, heated fights {9} | {11} of {12} bought, the last after a fight on {13} | purse {10}",
+                ways[w],seed,stage,Reach,fights,stage<Reach?", stuck on "+DadThrowCurve.Id(stage+1)+" ("+again+" tries)":"",perStage,Math.Max(worst,again),easedFights,heatedFights,save.coins,Owned(save),Shelf(),lastBuy>0?DadThrowCurve.Id(lastBuy):"-"));
         }
         return r.ToString();
     }

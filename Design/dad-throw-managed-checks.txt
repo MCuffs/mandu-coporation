@@ -362,6 +362,9 @@ PASS stages are named by chapter and place, five to a chapter
 PASS all thirty stage tables hold the people they promise, inside the ceiling, each pack starting in front of the gate
 PASS packs come in the order of their times, and no stage is smaller, slower, sparser or softer than the one before
 PASS quick ones join from stage 2, tough ones from stage 3, trays from stage 4, each tray group at the front of a pack
+PASS the first chapter is the climb it always was
+PASS from the second chapter every stage adds less than a stage of the first chapter did
+PASS the twelfth stage is lighter than a full street, which comes at the fifteenth
 PASS the first stage is lighter than the hand-made stampede; the last fills the street at a pace inside the ceiling
 PASS the first stage teaches the pull, the first with trays points at the shoe, the ending follows 1-5, and the lines people say come from the stage file
 PASS a stage file with only the normal face still gives every stage, with no trays; without that face it is refused by name
@@ -538,4 +541,4 @@ LAYOUT painted_gate 145.41 570 0 0
 LAYOUT road_edge 0 622.41 0 0
 LAYOUT sand_top 0 522.13 0 0
 
-TOTAL PASS: 437
+TOTAL PASS: 440
