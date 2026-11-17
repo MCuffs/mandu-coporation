@@ -77,8 +77,11 @@ public sealed class DadThrowFlow
     {
         StageIndex=index;Model=new DadThrowModel(field,stages[index]){Rules=DadThrowShop.Rules(Save)};
         Runs++;Word=null;WaitingForAim=wait;primed=false;banked=false;Now=Screen.Playing;
-        DadThrowStage.Kind entrant=stages[index].entrance;EnterClock=0;
-        Entering=entrant!=null&&entrant.entrance!=null&&!Save.met.Contains(entrant.id)?entrant:null;
+        // Whoever in this stage has an entrance to make and has not made it: on the first stage he is in, and
+        // for a save that is already past that stage, on the next stage he turns up in.
+        Entering=null;EnterClock=0;
+        foreach(DadThrowStage.Group g in stages[index].groups)
+            if(g.kind!=null&&g.kind.entrance!=null&&!Save.met.Contains(g.kind.id)){Entering=g.kind;break;}
     }
     // One won for each challenger sent back, once per stage start, whether the stage was won, lost or left.
     void Bank(bool persist=true)

@@ -409,6 +409,8 @@ PASS after the entrance the street runs
 PASS trying the stage again does not bring him on a second time
 PASS left alone the entrance ends by itself
 PASS leaving before he has been seen through means he comes on again next time
+PASS a player whose save is already past 1-4 meets him on the next stage he is in
+PASS and then not again
 PASS who has been met is saved and read back; a save from before has met nobody
 PASS the shop button sits on the title beside start, inside the canvas, tall enough for a thumb
 PASS the purse in the top bar sits between the gate's cells and the count of those still to come
@@ -500,4 +502,4 @@ LAYOUT painted_gate 145.41 570 0 0
 LAYOUT road_edge 0 622.41 0 0
 LAYOUT sand_top 0 522.13 0 0
 
-TOTAL PASS: 399
+TOTAL PASS: 401

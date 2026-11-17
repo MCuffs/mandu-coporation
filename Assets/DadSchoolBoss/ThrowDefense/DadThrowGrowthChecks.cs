@@ -275,6 +275,10 @@ public static class DadThrowGrowthChecks
         check(still&&waits.Entering==null&&patient.met.Contains("guard"),"left alone the entrance ends by itself");
         var leaver=new DadThrowSave{introSeen=true,furthest=3};var leaves=new DadThrowFlow(game,field,null,leaver,null);leaves.Tick(2);leaves.Start();leaves.Tick(.2f);
         check(leaves.Pause()&&leaves.ToTitle()&&leaves.Entering==null&&!leaver.met.Contains("guard")&&leaves.Start()&&leaves.Entering==trayKind,"leaving before he has been seen through means he comes on again next time");
+        var veteran=new DadThrowSave{introSeen=true,furthest=6};var late=new DadThrowFlow(game,field,null,veteran,null);late.Tick(2);
+        check(late.Start()&&late.Stage.id=="2-2"&&late.Entering==trayKind,"a player whose save is already past 1-4 meets him on the next stage he is in");
+        late.Tick(DadThrowFlow.EnterTime+.1f);for(int i=0;i<120*60&&late.Now==OnFight;i++)late.Tick(1/120f);
+        check(veteran.met.Contains("guard")&&late.Retry()&&late.Entering==null,"and then not again");
         DadThrowSave remembered=DadThrowSave.Parse(newcomer.ToJson());
         check(remembered.met.Count==1&&remembered.met[0]=="guard"&&old.met.Count==0,"who has been met is saved and read back; a save from before has met nobody");
 
