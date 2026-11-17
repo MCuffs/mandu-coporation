@@ -66,10 +66,20 @@ public sealed class DadThrowLayout
 
     // ── an opponent's entrance: a slanted band across the street, his name and his line on its left, the man
     // himself large on the right, and under the band what to do about him ──
-    public static readonly Rect EntranceBand=new Rect(-120,196,W+240,292),EntranceName=new Rect(56,214,700,104),EntranceShout=new Rect(64,326,650,88);
+    public static readonly Rect EntranceBand=new Rect(-120,196,W+240,292),EntranceName=new Rect(56,214,700,104),EntranceShout=new Rect(44,318,690,160);
     public static readonly Rect EntranceHint=new Rect(64,504,740,88),EntranceSkip=new Rect(476,646,330,44);
     public const float EntranceTilt=-4,EntranceTall=520,EntranceSlide=560,EntranceIn=.28f;
     public static readonly Vector2 EntranceFeet=new Vector2(1010,696);
+    // The shouted line stands in a balloon drawn in nine pieces: its 96-pixel corners keep their spikes and the
+    // tail, and only the middle stretches. The words go in the art's safe box, (110,96) to (914,224) of 1024x320.
+    public const float BalloonTall=320,BalloonCorner=96;
+    public static float BalloonScale {get{return EntranceShout.height/BalloonTall;}}
+    public static Rect EntranceShoutText {get{float k=BalloonScale;return Rect.MinMaxRect(EntranceShout.x+110*k,EntranceShout.y+96*k,EntranceShout.xMax-110*k,EntranceShout.y+224*k);}}
+    // The rays behind the man, and how many times a second the speed lines cross their own length.
+    public const float EntranceBurst=660,EntranceBurstTurn=10,EntranceLinesPace=.45f,EntranceLinesShape=4;
+    public static Vector2 EntranceBurstCentre {get{return new Vector2(EntranceFeet.x,EntranceFeet.y-EntranceTall*.56f);}}
+    // Small pictures: an item on its shop card, a coin leaving someone sent back, a ball stopped on a tray.
+    public const float ShopIconSize=84,CoinPopSize=46,ClangSize=84;
     public static Vector2 EntranceHintIcon {get{return new Vector2(EntranceHint.x+62,EntranceHint.center.y);}}
     public static Rect EntranceHintText {get{return Rect.MinMaxRect(EntranceHint.x+122,EntranceHint.y,EntranceHint.xMax-16,EntranceHint.yMax);}}
 

@@ -417,11 +417,18 @@ PASS leaving before he has been seen through means he comes on again next time
 PASS a player whose save is already past 1-4 meets him on the next stage he is in
 PASS and then not again
 PASS who has been met is saved and read back; a save from before has met nobody
+PASS every shop item has a picture of its own, named after the item, and the coin, the shop sign and the bought-out mark are there
+PASS the entrance's band lines, rays and balloon, each entrance picture the stage file names, and the frames of the two effects are there
+PASS an entrance picture is placed by its own canvas and feet point: the soles of the 2048 picture land on the entrance's feet point
+PASS the large picture is drawn smaller than it was painted, on a phone that doubles the canvas too
+PASS an entrance that names no canvas of its own uses the walking frames' canvas and feet line; a canvas of nothing is refused
 PASS the shop button sits on the title beside start, inside the canvas, tall enough for a thumb
 PASS the purse in the top bar sits between the gate's cells and the count of those still to come
 PASS the defeat card offers the shop and the title side by side under the retry, and what the stage paid stands over the card
 PASS the shop's heading, purse and way out share the top; nine cards stand three by three under them, each with its picture, name, line, cells and price in order
 PASS an entrance puts the name, the line and the advice one under the other on the left, clear of the top bar and the buttons, and stands the man inside the canvas on the right
+PASS the shouted line has room inside its balloon, whose corners fit without meeting, and the rays sit behind the man's body
+PASS an item's picture sits in its card clear of the name, the line, the cells and the price, and is drawn smaller than it was painted
 LAYOUT background 0 0 1280 720.38
 LAYOUT dad_ready 110.29 427.46 156.92 156.92
 LAYOUT dad_windup 113.96 436.13 148.21 148.21
@@ -466,7 +473,7 @@ LAYOUT shop_coins 640 20 380 56
 LAYOUT shop_close 1070 16 170 64
 LAYOUT entrance_band -120 196 1520 292
 LAYOUT entrance_name 56 214 700 104
-LAYOUT entrance_shout 64 326 650 88
+LAYOUT entrance_shout 44 318 690 160
 LAYOUT entrance_hint 64 504 740 88
 LAYOUT entrance_skip 476 646 330 44
 LAYOUT entrance_feet 1010 696 0 0
@@ -507,4 +514,4 @@ LAYOUT painted_gate 145.41 570 0 0
 LAYOUT road_edge 0 622.41 0 0
 LAYOUT sand_top 0 522.13 0 0
 
-TOTAL PASS: 406
+TOTAL PASS: 413

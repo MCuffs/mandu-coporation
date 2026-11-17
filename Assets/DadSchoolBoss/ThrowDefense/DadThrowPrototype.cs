@@ -29,6 +29,10 @@ public sealed class DadThrowPrototype:MonoBehaviour
     readonly Dictionary<DadThrowStage.Kind,Texture2D[]> bare=new Dictionary<DadThrowStage.Kind,Texture2D[]>();
     // The big picture an opponent comes on with.
     readonly Dictionary<DadThrowStage.Kind,Texture2D> entranceArt=new Dictionary<DadThrowStage.Kind,Texture2D>();
+    // What an entrance is dressed with, the shop's own pictures, and the two small effects (asset request v3: I, J, K, M).
+    Texture2D bandLines,burstArt,balloonArt,coinArt,shopSign,soldOut;GUIStyle balloon;
+    readonly Texture2D[] shopArt=new Texture2D[DadThrowShop.Cards.Length],clang=new Texture2D[3],coinPop=new Texture2D[3];
+    const float CoinPopTime=.3f;
     // A ball stopped by a tray: a clang where it stopped, and the shoe button asks to be used for a few seconds.
     const float BlockTime=.3f,NudgeTime=4;float blockClock,shoeNudge;int seenBlock;Vector2 blockAt;
     // Words with a number in them, rebuilt only when the number changes.
@@ -112,6 +116,10 @@ public sealed class DadThrowPrototype:MonoBehaviour
             if(kind.bare==null)continue;
             var without=new Texture2D[kind.frames];for(int i=0;i<without.Length;i++)without[i]=Need<Texture2D>(kind.BareFrame(i));bare[kind]=without;
         }
+        bandLines=Need<Texture2D>("DadThrowEntranceV1/entrance_band_lines");burstArt=Need<Texture2D>("DadThrowEntranceV1/entrance_burst");balloonArt=Need<Texture2D>("DadThrowEntranceV1/entrance_balloon");
+        foreach(DadThrowShop.Card card in DadThrowShop.Cards)shopArt[(int)card.item]=Need<Texture2D>(DadThrowShop.IconKey(card.item));
+        coinArt=Need<Texture2D>(DadThrowShop.CoinKey);shopSign=Need<Texture2D>(DadThrowShop.ShopKey);soldOut=Need<Texture2D>(DadThrowShop.SoldOutKey);
+        for(int i=0;i<3;i++){clang[i]=Need<Texture2D>("DadThrowFxV2/fx_tray_clang_"+i);coinPop[i]=Need<Texture2D>("DadThrowFxV2/fx_coin_pop_"+i);}
         actorSheet=Need<Texture2D>(story.actorSheet);rivalArt=Need<Texture2D>(story.rivalResource);propArt=Need<Texture2D>(story.propResource);
         foreach(var backdrop in story.backdrops)backdropArt[backdrop.Key]=Need<Texture2D>(backdrop.Value);
     }
@@ -406,6 +414,15 @@ public sealed class DadThrowPrototype:MonoBehaviour
             Person(e.kind,e.id,e.x,m.Field.Ground,e.kind.Mirror,e.speed,false,e.kind.guards&&!e.guard);
         }
         GUI.color=Color.white;
+        // One won leaves each of them: a coin pops over where the head was. The picture is only a picture; the
+        // purse is paid from the fight's own count. The coin moves inside its frames, so every frame is placed
+        // by the same foot point (64,108 of 128).
+        foreach(Leaving gone in leaving)
+        {
+            if(gone.age>=CoinPopTime)continue;
+            float k=DadThrowLayout.CoinPopSize/128;Vector2 head=new Vector2(gone.x,m.Field.Ground+Lane(gone.id)-gone.kind.Height(gone.id)-4);
+            GUI.DrawTexture(new Rect(head.x-64*k,head.y-108*k,DadThrowLayout.CoinPopSize,DadThrowLayout.CoinPopSize),coinPop[Mathf.Min(2,(int)(gone.age/CoinPopTime*3))]);
+        }
     }
     void DrawDad()
     {
@@ -424,12 +441,12 @@ public sealed class DadThrowPrototype:MonoBehaviour
             Outlined(new Rect(at.x-90,at.y-96-rise,180,70),ChainText[Mathf.Min(m.ChainCount,ChainText.Length-1)],size,Gold,Ink,3,display);
         }
     }
-    // Where a tray stopped a ball: a ring of pale sparks, smaller and quicker than the ones a hit throws up.
+    // Where a tray stopped a ball: a small star and a few dashes, three frames over BlockTime, centred on the spot.
     void DrawBlock()
     {
         if(blockClock<=0)return;
-        float t=1-blockClock/BlockTime;
-        for(int i=0;i<8;i++){Vector2 spark=blockAt+new Vector2(Mathf.Cos(i*.785f),Mathf.Sin(i*.785f))*(10+46*t);Dot(spark,10,Ink);Dot(spark,6,Color.white);}
+        float t=1-blockClock/BlockTime,size=DadThrowLayout.ClangSize;
+        GUI.DrawTexture(new Rect(blockAt.x-size/2,blockAt.y-size/2,size,size),clang[Mathf.Min(2,(int)(t*3))]);
     }
     void DrawAim(DadThrowModel m)
     {
@@ -462,8 +479,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
     void DrawPurse(Rect r,int size,Color color,Font font)
     {
         if(Flow.Coins!=shownCoins){shownCoins=Flow.Coins;coinText=shownCoins+"원";}
-        Vector2 coin=new Vector2(r.x+r.height/2,r.center.y);float wide=r.height*.62f;
-        Dot(coin,wide+6,Ink);Dot(coin,wide,Gold);
+        float wide=r.height*.86f;GUI.DrawTexture(new Rect(r.x+(r.height-wide)/2,r.center.y-wide/2,wide,wide),coinArt);
         Text(new Rect(r.x+r.height+4,r.y,r.width-r.height-4,r.height),coinText,size,color,font,TextAnchor.MiddleLeft);
     }
     // What this stage paid, over the top edge of the result card.
@@ -524,14 +540,29 @@ public sealed class DadThrowPrototype:MonoBehaviour
         Veil(PauseVeil);
         Matrix4x4 old=GUI.matrix;Vector3 middle=new Vector3(DadThrowLayout.W/2,DadThrowLayout.H/2,0);
         GUI.matrix=old*Matrix4x4.TRS(middle,Quaternion.Euler(0,0,DadThrowLayout.EntranceTilt),new Vector3(1,Mathf.Max(.02f,arrive),1))*Matrix4x4.TRS(-middle,Quaternion.identity,Vector3.one);
-        Rect band=DadThrowLayout.EntranceBand;Box(band,Ink);Box(new Rect(band.x,band.y+8,band.width,band.height-16),Gold);
+        Rect band=DadThrowLayout.EntranceBand,inner=new Rect(band.x,band.y+8,band.width,band.height-16);Box(band,Ink);Box(inner,Gold);
+        // Speed lines run along the band, repeating end to end and never stretched.
+        float repeats=inner.width/(inner.height*DadThrowLayout.EntranceLinesShape);
+        GUI.DrawTextureWithTexCoords(inner,bandLines,new Rect(clock*DadThrowLayout.EntranceLinesPace,0,repeats,1));
         GUI.matrix=old;
+        // Rays turn slowly behind him and come in with him.
+        Vector2 rays=DadThrowLayout.EntranceBurstCentre+new Vector2((1-arrive)*DadThrowLayout.EntranceSlide,0);float spread=DadThrowLayout.EntranceBurst;
+        Spun(burstArt,new Rect(rays.x-spread/2,rays.y-spread/2,spread,spread),rays,clock*DadThrowLayout.EntranceBurstTurn);
         // He lands with a small jolt: a touch too large for a moment, then his own size.
         float pop=1+.06f*Mathf.Clamp01(1-(t-DadThrowLayout.EntranceIn)/.18f)*(t>=DadThrowLayout.EntranceIn?1:0);
         GUI.DrawTexture(kind.EntrancePlace(DadThrowLayout.EntranceFeet.x+(1-arrive)*DadThrowLayout.EntranceSlide,DadThrowLayout.EntranceFeet.y,DadThrowLayout.EntranceTall*pop),entranceArt[kind]);
         if(t<DadThrowLayout.EntranceIn)return;
         Outlined(DadThrowLayout.EntranceName,words.name,76,Paper,Ink,4,display);
-        DadUi.Panel(DadThrowLayout.EntranceShout,Paper,Ink);Text(DadThrowLayout.EntranceShout,words.shout,34,Ink,display);
+        // The balloon is drawn at its own scale so the corners stay the size they were painted.
+        if(balloon==null){balloon=new GUIStyle();balloon.normal.background=balloonArt;int corner=(int)DadThrowLayout.BalloonCorner;balloon.border=new RectOffset(corner,corner,corner,corner);}
+        if(Event.current.type==EventType.Repaint)
+        {
+            Rect shout=DadThrowLayout.EntranceShout;float k=DadThrowLayout.BalloonScale;
+            GUI.matrix=old*Matrix4x4.TRS(new Vector3(shout.x,shout.y,0),Quaternion.identity,new Vector3(k,k,1));
+            balloon.Draw(new Rect(0,0,shout.width/k,shout.height/k),GUIContent.none,false,false,false,false);
+            GUI.matrix=old;
+        }
+        Text(DadThrowLayout.EntranceShoutText,words.shout,34,Ink,display);
         // What to do about him, with the thing to do it with.
         DadUi.Panel(DadThrowLayout.EntranceHint,Gold,Ink);
         if(words.shoe)GUI.DrawTexture(layout.ItemRect(layout.Shoe,DadThrowLayout.EntranceHintIcon,92),shoe);
@@ -614,7 +645,9 @@ public sealed class DadThrowPrototype:MonoBehaviour
         Outlined(DadThrowLayout.TitleText,"아빠 전쟁",94,Gold,Ink,4,display);
         if(Button(DadThrowLayout.StartButton,Flow.Continuing?"계속하기":"게임 시작",true,30)){Flow.Start();return;}
         DrawPurse(DadThrowLayout.ShopPurse,22,Paper,bold);
-        if(Button(DadThrowLayout.ShopButton,"상점",false,26))Flow.OpenShop();
+        bool open=Button(DadThrowLayout.ShopButton,"상점",false,26);
+        Rect sign=DadThrowLayout.ShopButton;GUI.DrawTexture(new Rect(sign.x+14,sign.center.y-22,44,44),shopSign);
+        if(open)Flow.OpenShop();
     }
     // The shop: nine things, each with a cell for every time it can be bought and the price of the next one.
     void DrawShop()
@@ -627,12 +660,17 @@ public sealed class DadThrowPrototype:MonoBehaviour
         {
             DadThrowShop.Card card=DadThrowShop.Cards[i];Rect slot=DadThrowLayout.ShopCard(i);
             DadUi.Panel(slot,Paper,Ink);Vector2 icon=DadThrowLayout.ShopIcon(slot);
-            if(card.shoe)GUI.DrawTexture(layout.ItemRect(layout.Shoe,icon,80),shoe);else GUI.DrawTexture(layout.ItemRect(layout.Golf,icon,56),golf);
+            float side=DadThrowLayout.ShopIconSize;GUI.DrawTexture(new Rect(icon.x-side/2,icon.y-side/2,side,side),shopArt[(int)card.item]);
             Text(DadThrowLayout.ShopName(slot),card.name,28,Ink,display,TextAnchor.MiddleLeft);
             Text(DadThrowLayout.ShopLine(slot),card.line,19,Ink,body,TextAnchor.UpperLeft);
             int level=DadThrowShop.Level(Flow.Save,card.item);
             for(int pip=0;pip<card.most;pip++)DadUi.Panel(DadThrowLayout.ShopPip(slot,pip),pip<level?Gold:PaperDown,Ink);
-            if(level>=card.most){Text(DadThrowLayout.ShopBuy(slot),"다 샀다",22,Olive,bold);continue;}
+            if(level>=card.most)
+            {
+                // Bought out: the mark beside the words, so it is not told by color alone.
+                Rect done=DadThrowLayout.ShopBuy(slot);GUI.DrawTexture(new Rect(done.x,done.center.y-22,44,44),soldOut);
+                Text(Rect.MinMaxRect(done.x+48,done.y,done.xMax,done.yMax),"다 샀다",22,Olive,bold,TextAnchor.MiddleLeft);continue;
+            }
             int price=DadThrowShop.Price(Flow.Save,card.item);
             if(price!=shownPrice[i]){shownPrice[i]=price;priceText[i]=price+"원";}
             // A price out of reach is shown greyed and cannot be pressed.

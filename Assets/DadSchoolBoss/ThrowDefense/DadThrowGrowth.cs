@@ -34,6 +34,10 @@ public static class DadThrowShop
         new Card(Item.Sticky,"끈끈이 신발","맞은 무리가 더 오래 느려진다",2,50,true),
         new Card(Item.Flow,"신바람","한 공에 열 명 맞히면 바로 또 던진다",1,150,false)};
     public static Card Of(Item item){return Cards[(int)item];}
+    // The picture an item is shown with, by its own name: Resources/DadThrowShopV1/shop_pierce and so on.
+    public const string ArtFolder="DadThrowShopV1/";
+    public static string IconKey(Item item){return ArtFolder+"shop_"+item.ToString().ToLowerInvariant();}
+    public const string CoinKey=ArtFolder+"icon_won",ShopKey=ArtFolder+"icon_shop",SoldOutKey=ArtFolder+"mark_soldout";
 
     // One won for every challenger sent back.
     public const int WonPerFelled=1;

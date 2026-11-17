@@ -14,12 +14,15 @@ public sealed class DadThrowStage
         public bool guards;public string bare;
         public string BareFrame(int index){return bare+"_"+index;}
         // The big picture, the line he shouts and the advice shown the first time this opponent comes on
-        // (DadThrowFlow.Entering). The picture sits on the same canvas as the walking frames.
+        // (DadThrowFlow.Entering). The picture has a canvas and a feet point of its own: the large ones drawn for
+        // the entrance are 2048 square with the soles at (1024, 1900). A stage file that gives neither is taken to
+        // use the walking frames' canvas and feet line, as the first entrances did.
         // shoe: the advice is about the shoe (the card shows it); otherwise it is about the ball.
-        public sealed class Entrance { public string resource,name,shout,hint;public float pivotX,stand;public bool shoe; }
+        public sealed class Entrance { public string resource,name,shout,hint;public float pivotX,pivotY,stand,canvas;public bool shoe; }
         public Entrance entrance;
-        // Whole-canvas rectangle that stands the entrance picture `height` tall with its feet on (x, ground).
-        public Rect EntrancePlace(float x,float ground,float height){float k=height/entrance.stand;return new Rect(x-entrance.pivotX*k,ground-pivotY*k,canvas*k,canvas*k);}
+        // Whole-canvas rectangle that stands the entrance picture's body `height` tall with its feet on (x, ground).
+        public Rect EntrancePlace(float x,float ground,float height)
+        {float k=height/entrance.stand;return new Rect(x-entrance.pivotX*k,ground-entrance.pivotY*k,entrance.canvas*k,entrance.canvas*k);}
         public float canvas,pivotX,pivotY,stand;public readonly List<float> heights=new List<float>();
         public string Frame(int index){return resource+"_"+index;}
         // Sizes differ a little so a crowd reads as people, while every one keeps the same feet line and hit circle.
@@ -74,8 +77,9 @@ public sealed class DadThrowStageSet
             {
                 string own=owner+" entrance";var word=DadThrowJson.Map(map["entrance"],own);
                 kind.entrance=new DadThrowStage.Kind.Entrance{resource=DadThrowJson.Text(word,"resource",own),name=DadThrowJson.Text(word,"name",own),
-                    shout=DadThrowJson.Text(word,"shout",own),hint=DadThrowJson.Text(word,"hint",own),pivotX=DadThrowJson.Number(word,"pivotX",own),stand=DadThrowJson.Number(word,"standPixels",own)};
-                if(kind.entrance.stand<=0)throw new ArgumentException(own+" needs a standing height above zero");
+                    shout=DadThrowJson.Text(word,"shout",own),hint=DadThrowJson.Text(word,"hint",own),pivotX=DadThrowJson.Number(word,"pivotX",own),stand=DadThrowJson.Number(word,"standPixels",own),
+                    pivotY=DadThrowJson.NumberOr(word,"pivotY",kind.pivotY,own),canvas=DadThrowJson.NumberOr(word,"canvas",kind.canvas,own)};
+                if(kind.entrance.stand<=0||kind.entrance.canvas<=0)throw new ArgumentException(own+" needs a standing height and a canvas above zero");
                 string with=DadThrowJson.TextOr(word,"with","shoe",own);
                 if(with!="shoe"&&with!="golf")throw new ArgumentException(own+" is done with the shoe or with golf, not with "+with);
                 kind.entrance.shoe=with=="shoe";

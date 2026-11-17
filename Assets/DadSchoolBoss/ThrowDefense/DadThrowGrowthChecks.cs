@@ -296,6 +296,27 @@ public static class DadThrowGrowthChecks
         DadThrowSave remembered=DadThrowSave.Parse(newcomer.ToJson());
         check(remembered.met.Count==2&&remembered.met.Contains("guard")&&remembered.met.Contains("tough")&&old.met.Count==0,"who has been met is saved and read back; a save from before has met nobody");
 
+        // ── the pictures the game loads for the shop, the entrances and the two small effects (asset request v3) ──
+        Func<string,bool> onDisk=key=>System.IO.File.Exists("Assets/DadSchoolBoss/Resources/"+key+".png")&&System.IO.File.Exists("Assets/DadSchoolBoss/Resources/"+key+".png.meta");
+        bool icons=onDisk(DadThrowShop.CoinKey)&&onDisk(DadThrowShop.ShopKey)&&onDisk(DadThrowShop.SoldOutKey);var keys=new HashSet<string>();
+        foreach(DadThrowShop.Card card in DadThrowShop.Cards){icons&=onDisk(DadThrowShop.IconKey(card.item))&&keys.Add(DadThrowShop.IconKey(card.item));}
+        check(icons&&DadThrowShop.IconKey(DadThrowShop.Item.Pierce)=="DadThrowShopV1/shop_pierce","every shop item has a picture of its own, named after the item, and the coin, the shop sign and the bought-out mark are there");
+        bool dressed=onDisk("DadThrowEntranceV1/entrance_band_lines")&&onDisk("DadThrowEntranceV1/entrance_burst")&&onDisk("DadThrowEntranceV1/entrance_balloon");
+        for(int i=0;i<3;i++)dressed&=onDisk("DadThrowFxV2/fx_tray_clang_"+i)&&onDisk("DadThrowFxV2/fx_coin_pop_"+i);
+        foreach(DadThrowStage.Kind kind in set.kinds.Values)if(kind.entrance!=null)dressed&=onDisk(kind.entrance.resource);
+        check(dressed,"the entrance's band lines, rays and balloon, each entrance picture the stage file names, and the frames of the two effects are there");
+        DadThrowStage.Kind.Entrance big=trayKind.entrance;Rect stood=trayKind.EntrancePlace(DadThrowLayout.EntranceFeet.x,DadThrowLayout.EntranceFeet.y,DadThrowLayout.EntranceTall);float grown=DadThrowLayout.EntranceTall/big.stand;
+        check(big.canvas==2048&&big.pivotX==1024&&big.pivotY==1900&&big.stand==1400&&chairKind.entrance.canvas==2048
+            &&Mathf.Abs(stood.x+big.pivotX*grown-DadThrowLayout.EntranceFeet.x)<.01f&&Mathf.Abs(stood.y+big.pivotY*grown-DadThrowLayout.EntranceFeet.y)<.01f&&Mathf.Abs(stood.width-2048*grown)<.01f&&stood.width==stood.height,
+            "an entrance picture is placed by its own canvas and feet point: the soles of the 2048 picture land on the entrance's feet point");
+        check(big.canvas*grown<big.canvas&&DadThrowLayout.EntranceTall*2<=big.stand,"the large picture is drawn smaller than it was painted, on a phone that doubles the canvas too");
+        string small="{\"enemies\":{\"normal\":{\"resource\":\"x/walk\",\"frames\":2,\"facesLeft\":true,\"canvas\":768,\"pivotX\":384,\"pivotY\":720,\"standPixels\":560,\"heights\":[102],"
+            +"\"entrance\":{\"resource\":\"x/big\",\"pivotX\":300,\"standPixels\":500,\"name\":\"n\",\"shout\":\"s\",\"hint\":\"h\"}}},"
+            +"\"stages\":[{\"id\":\"1-1\",\"backgroundKey\":\"bg\",\"health\":5,\"baseReward\":1,\"groups\":[{\"at\":0,\"count\":1,\"firstX\":800,\"enemy\":\"normal\",\"speed\":48,\"hp\":1}]}]}";
+        DadThrowStage.Kind.Entrance plainOne=DadThrowStageSet.Parse(small,new[]{"bg"},215).kinds["normal"].entrance;
+        check(plainOne.canvas==768&&plainOne.pivotY==720&&refused(small.Replace("\"standPixels\":500","\"standPixels\":500,\"canvas\":0")),
+            "an entrance that names no canvas of its own uses the walking frames' canvas and feet line; a canvas of nothing is refused");
+
         // ── where the shop's screens sit ──
         Rect canvas=new Rect(0,0,DadThrowLayout.W,DadThrowLayout.H),resultCard=DadThrowLayout.ResultCard;
         Func<Rect,Rect,bool> inside=(inner,outer)=>inner.xMin>=outer.xMin&&inner.xMax<=outer.xMax&&inner.yMin>=outer.yMin&&inner.yMax<=outer.yMax;
@@ -323,6 +344,17 @@ public static class DadThrowGrowthChecks
             &&DadThrowLayout.EntranceHint.yMax<=DadThrowLayout.GolfButton.yMin&&DadThrowLayout.EntranceHint.Contains(DadThrowLayout.EntranceHintIcon)&&inside(DadThrowLayout.EntranceHintText,DadThrowLayout.EntranceHint)
             &&canvas.Contains(DadThrowLayout.EntranceFeet)&&DadThrowLayout.EntranceFeet.y-DadThrowLayout.EntranceTall>=DadThrowLayout.TopBar&&!DadThrowLayout.EntranceSkip.Overlaps(DadThrowLayout.EntranceHint),
             "an entrance puts the name, the line and the advice one under the other on the left, clear of the top bar and the buttons, and stands the man inside the canvas on the right");
+        Rect words=DadThrowLayout.EntranceShoutText;float corner=DadThrowLayout.BalloonCorner*DadThrowLayout.BalloonScale;
+        check(inside(words,DadThrowLayout.EntranceShout)&&words.height>=48&&words.width>=400&&corner*2<DadThrowLayout.EntranceShout.height&&corner*2<DadThrowLayout.EntranceShout.width
+            &&canvas.Contains(DadThrowLayout.EntranceBurstCentre)&&DadThrowLayout.EntranceBurstCentre.y<DadThrowLayout.EntranceFeet.y,
+            "the shouted line has room inside its balloon, whose corners fit without meeting, and the rays sit behind the man's body");
+        bool pictured=true;
+        for(int i=0;i<DadThrowShop.Cards.Length;i++)
+        {
+            Rect card=DadThrowLayout.ShopCard(i);Vector2 at=DadThrowLayout.ShopIcon(card);float half=DadThrowLayout.ShopIconSize/2;Rect icon=new Rect(at.x-half,at.y-half,half*2,half*2);
+            pictured&=inside(icon,card)&&!icon.Overlaps(DadThrowLayout.ShopName(card))&&!icon.Overlaps(DadThrowLayout.ShopLine(card))&&!icon.Overlaps(DadThrowLayout.ShopBuy(card))&&!icon.Overlaps(DadThrowLayout.ShopPip(card,0));
+        }
+        check(pictured&&DadThrowLayout.ShopIconSize*2<=512,"an item's picture sits in its card clear of the name, the line, the cells and the price, and is drawn smaller than it was painted");
         return r.ToString();
     }
 
