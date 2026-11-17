@@ -35,6 +35,17 @@
     },
     "fast": {
       "resource": "DadV5/chars/dodge/dodge_walk",
+      "entrance": {
+        "resource": "DadThrowEntranceV1/dodge_entrance",
+        "canvas": 2048,
+        "pivotX": 1024,
+        "pivotY": 1900,
+        "standPixels": 1400,
+        "name": "피구 아저씨",
+        "shout": "눈 깜빡하면 대문이다!",
+        "hint": "제일 빨리 옵니다. 먼저 맞히세요",
+        "with": "golf"
+      },
       "frames": 2,
       "facesLeft": true,
       "canvas": 768,

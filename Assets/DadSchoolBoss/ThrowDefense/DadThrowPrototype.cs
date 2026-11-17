@@ -207,9 +207,13 @@ public sealed class DadThrowPrototype:MonoBehaviour
     public void DebugScripted(bool on){scripted=on;aim.Cancel();heldForCapture=false;}
     // A new player in memory only: captures never read or write the real save.
     public void DebugRestart(){aim.Cancel();heldForCapture=false;seenRun=-1;Flow=new DadThrowFlow(game,layout.Field,story,new DadThrowSave(),null);}
-    // A player in memory only who has opened stage `index` (from 0) and has `coins` in the purse.
-    public void DebugStartAt(int index,int coins)
-    {aim.Cancel();heldForCapture=false;seenRun=-1;Flow=new DadThrowFlow(game,layout.Field,story,new DadThrowSave{introSeen=true,furthest=index,coins=coins},null);}
+    // A player in memory only who has opened stage `index` (from 0), has `coins` in the purse and has already
+    // seen the entrances of the opponents named in `met`.
+    public void DebugStartAt(int index,int coins,params string[] met)
+    {
+        var save=new DadThrowSave{introSeen=true,furthest=index,coins=coins};save.met.AddRange(met);
+        aim.Cancel();heldForCapture=false;seenRun=-1;Flow=new DadThrowFlow(game,layout.Field,story,save,null);
+    }
     // Back to the player's own save, from the logo, when a capture run is over.
     public void DebugReal(){heldForCapture=false;if(Flow!=null)Begin();}
     public string DebugSavePath {get{return savePath;}}

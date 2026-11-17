@@ -258,22 +258,29 @@ public static class DadThrowGrowthChecks
             &&refused(kindJson.Replace("GUARDS",",\"entrance\":{\"resource\":\"x/big\",\"pivotX\":300,\"standPixels\":0,\"name\":\"n\",\"shout\":\"s\",\"hint\":\"h\"}")),
             "an entrance in the stage file needs all its words and a standing height; one without is refused");
         DadThrowStage.Kind chairKind=set.kinds["tough"];
-        check(chairKind.entrance!=null&&!chairKind.entrance.shoe&&trayKind.entrance.shoe&&chairKind.entrance.name!=trayKind.entrance.name&&set.kinds["fast"].entrance==null,
-            "the chair-holder has an entrance too, with advice about the ball where the tray-holder's is about the shoe");
+        DadThrowStage.Kind quickKind=set.kinds["fast"];
+        check(chairKind.entrance!=null&&!chairKind.entrance.shoe&&trayKind.entrance.shoe&&chairKind.entrance.name!=trayKind.entrance.name
+            &&quickKind.entrance!=null&&!quickKind.entrance.shoe&&quickKind.entrance.name!=chairKind.entrance.name&&quickKind.entrance.canvas==2048,
+            "the chair-holder and the quick one have entrances too, with advice about the ball where the tray-holder's is about the shoe");
         check(refused(kindJson.Replace("GUARDS",",\"entrance\":{\"resource\":\"x/big\",\"pivotX\":300,\"standPixels\":500,\"name\":\"n\",\"shout\":\"s\",\"hint\":\"h\",\"with\":\"car\"}")),
             "advice can be about the ball or the shoe and nothing else");
-        bool onlyOne=game[2].entrance==chairKind&&game[3].entrance==trayKind;for(int i=0;i<game.Count;i++)if(i!=2&&i!=3)onlyOne&=game[i].entrance==null;
-        check(onlyOne,"the chair-holder makes his entrance on 1-3 and the tray-holder on 1-4, the first stage each is in, and on no other");
-        var first3=new DadThrowSave{introSeen=true,furthest=2};var chairs=new DadThrowFlow(game,field,null,first3,null);chairs.Tick(2);
+        bool onlyOne=game[1].entrance==quickKind&&game[2].entrance==chairKind&&game[3].entrance==trayKind;for(int i=0;i<game.Count;i++)if(i<1||i>3)onlyOne&=game[i].entrance==null;
+        check(onlyOne,"the quick one makes his entrance on 1-2, the chair-holder on 1-3 and the tray-holder on 1-4, the first stage each is in, and on no other");
+        var first2=new DadThrowSave{introSeen=true,furthest=1};var quick=new DadThrowFlow(game,field,null,first2,null);quick.Tick(2);
+        check(quick.Start()&&quick.Stage.id=="1-2"&&quick.Entering==quickKind,"starting 1-2 for the first time brings the quick one on");
+        quick.Tick(DadThrowFlow.EnterTime+.1f);
+        check(quick.Entering==null&&first2.met.Count==1&&first2.met[0]=="fast","and he is the one remembered");
+        var first3=new DadThrowSave{introSeen=true,furthest=2};first3.met.Add("fast");var chairs=new DadThrowFlow(game,field,null,first3,null);chairs.Tick(2);
         check(chairs.Start()&&chairs.Stage.id=="1-3"&&chairs.Entering==chairKind,"starting 1-3 for the first time brings the chair-holder on");
         chairs.Tick(DadThrowFlow.EnterTime+.1f);
-        check(chairs.Entering==null&&first3.met.Contains("tough")&&!first3.met.Contains("guard"),"and when he has been seen through he is the one remembered");
+        check(chairs.Entering==null&&first3.met.Contains("tough")&&!first3.met.Contains("guard"),"and when he has been seen through he is remembered");
         var both=new DadThrowSave{introSeen=true,furthest=3};var two=new DadThrowFlow(game,field,null,both,null);two.Tick(2);two.Start();
         DadThrowStage.Kind opened=two.Entering;two.Tick(DadThrowFlow.EnterTime+.1f);for(int i=0;i<120*60&&two.Now==OnFight;i++)two.Tick(1/120f);
         two.Retry();DadThrowStage.Kind second=two.Entering;two.Tick(DadThrowFlow.EnterTime+.1f);for(int i=0;i<120*60&&two.Now==OnFight;i++)two.Tick(1/120f);
-        check(opened==trayKind&&second==chairKind&&two.Retry()&&two.Entering==null&&both.met.Count==2,
-            "a stage with two strangers in it brings on one each time it starts, never two in a row, and then nobody");
-        var newcomer=new DadThrowSave{introSeen=true,furthest=3};newcomer.met.Add("tough");var enter=new DadThrowFlow(game,field,null,newcomer,null);enter.Tick(2);
+        two.Retry();DadThrowStage.Kind third=two.Entering;two.Tick(DadThrowFlow.EnterTime+.1f);for(int i=0;i<120*60&&two.Now==OnFight;i++)two.Tick(1/120f);
+        check(opened==trayKind&&second==quickKind&&third==chairKind&&two.Retry()&&two.Entering==null&&both.met.Count==3,
+            "a stage with three strangers in it brings on one each time it starts, in the order they arrive, never two in a row, and then nobody");
+        var newcomer=new DadThrowSave{introSeen=true,furthest=3};newcomer.met.Add("tough");newcomer.met.Add("fast");var enter=new DadThrowFlow(game,field,null,newcomer,null);enter.Tick(2);
         check(enter.Start()&&enter.Stage.id=="1-4"&&enter.Entering==trayKind&&enter.EnterClock==0,"starting 1-4 for the first time brings him on");
         enter.Tick(.3f);
         check(enter.Model.enemies.Count>0&&enter.Model.Clock<.02f&&enter.Model.Health==5&&enter.EnterClock>=.29f&&!enter.SkipEntrance()&&enter.Entering!=null,
@@ -284,17 +291,17 @@ public static class DadThrowGrowthChecks
         check(enter.Model.Clock>held0+.3f,"after the entrance the street runs");
         for(int i=0;i<120*60&&enter.Now==OnFight;i++)enter.Tick(1/120f);
         check(enter.Now==OnDefeat&&enter.Retry()&&enter.Entering==null,"trying the stage again does not bring him on a second time");
-        var patient=new DadThrowSave{introSeen=true,furthest=3};patient.met.Add("tough");var waits=new DadThrowFlow(game,field,null,patient,null);waits.Tick(2);waits.Start();
+        var patient=new DadThrowSave{introSeen=true,furthest=3};patient.met.Add("tough");patient.met.Add("fast");var waits=new DadThrowFlow(game,field,null,patient,null);waits.Tick(2);waits.Start();
         waits.Tick(DadThrowFlow.EnterTime-.1f);bool still=waits.Entering!=null;waits.Tick(.2f);
         check(still&&waits.Entering==null&&patient.met.Contains("guard"),"left alone the entrance ends by itself");
-        var leaver=new DadThrowSave{introSeen=true,furthest=3};leaver.met.Add("tough");var leaves=new DadThrowFlow(game,field,null,leaver,null);leaves.Tick(2);leaves.Start();leaves.Tick(.2f);
+        var leaver=new DadThrowSave{introSeen=true,furthest=3};leaver.met.Add("tough");leaver.met.Add("fast");var leaves=new DadThrowFlow(game,field,null,leaver,null);leaves.Tick(2);leaves.Start();leaves.Tick(.2f);
         check(leaves.Pause()&&leaves.ToTitle()&&leaves.Entering==null&&!leaver.met.Contains("guard")&&leaves.Start()&&leaves.Entering==trayKind,"leaving before he has been seen through means he comes on again next time");
-        var veteran=new DadThrowSave{introSeen=true,furthest=6};veteran.met.Add("tough");var late=new DadThrowFlow(game,field,null,veteran,null);late.Tick(2);
+        var veteran=new DadThrowSave{introSeen=true,furthest=6};veteran.met.Add("tough");veteran.met.Add("fast");var late=new DadThrowFlow(game,field,null,veteran,null);late.Tick(2);
         check(late.Start()&&late.Stage.id=="2-2"&&late.Entering==trayKind,"a player whose save is already past 1-4 meets him on the next stage he is in");
         late.Tick(DadThrowFlow.EnterTime+.1f);for(int i=0;i<120*60&&late.Now==OnFight;i++)late.Tick(1/120f);
         check(veteran.met.Contains("guard")&&late.Retry()&&late.Entering==null,"and then not again");
         DadThrowSave remembered=DadThrowSave.Parse(newcomer.ToJson());
-        check(remembered.met.Count==2&&remembered.met.Contains("guard")&&remembered.met.Contains("tough")&&old.met.Count==0,"who has been met is saved and read back; a save from before has met nobody");
+        check(remembered.met.Count==3&&remembered.met.Contains("guard")&&remembered.met.Contains("tough")&&remembered.met.Contains("fast")&&old.met.Count==0,"who has been met is saved and read back; a save from before has met nobody");
 
         // ── the pictures the game loads for the shop, the entrances and the two small effects (asset request v3) ──
         Func<string,bool> onDisk=key=>System.IO.File.Exists("Assets/DadSchoolBoss/Resources/"+key+".png")&&System.IO.File.Exists("Assets/DadSchoolBoss/Resources/"+key+".png.meta");
