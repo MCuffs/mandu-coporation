@@ -234,6 +234,8 @@ the sole; (9) a golf ball with two or three swirling wind lines around it.
 
 ## 14. S 묶음 — 스토어 등록 그림 (P3, 6장)
 
+**2026-11-18 밤: 이 절은 [스토어 그림 요청서 v1](dad-store-art-request-v1.md)이 대신한다.** 계정과 빌드가 준비돼 지금 필요해졌다. 파일 이름은 같다.
+
 Google Play에 올릴 때 필요하다. 계정과 빌드가 준비된 뒤에 만든다. 크기는 Play Console의 요구 규격이다.
 
 | 파일 | 크기 | 내용 |
