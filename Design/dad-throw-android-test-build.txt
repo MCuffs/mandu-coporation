@@ -6,11 +6,11 @@ Backend: IL2CPP
 Architectures: ARM64
 Minimum SDK: AndroidApiLevel24
 Target SDK: AndroidApiLevel36
-Android dependency resolution: False
+Android dependency resolution: True
 Result: Succeeded
 Errors: 0
 Warnings: 14
 Package: 30.4 MB
-Duration: 00:04:38.6704392
+Duration: 00:03:08.1367957
 Artifact: Builds/ThrowAndroid/DadThrow-arm64-test.apk
 Signing: local DEBUG key, not the store upload key

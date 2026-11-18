@@ -1,7 +1,7 @@
 {
   "artifact": "C:\\Users\\user\\DadWarWebGL\\Builds\\ThrowAndroid\\DadThrow-arm64-test.apk",
-  "sha256": "07542c34ec66b6bc3fc2b167803eb8b060ed9d26f9f10e03c6f47edb7bc131a9",
-  "bytes": 31838777,
+  "sha256": "882fc1b369f8708170573cd819d26becc66a9486859567458957ae449fad5f4f",
+  "bytes": 31839913,
   "status": "ARTIFACT_CHECKS_PASS",
   "checks": [
     {
