@@ -12,6 +12,7 @@ the store icon itself:
                         launcher's motion effects. A launcher's circle or rounded square then cuts the store
                         icon the way the Play Store cuts it.
   icon_adaptive_bg.png  the delivered background layer; it only shows if a launcher moves the layers apart.
+  icon_round.png        the store icon cut to a circle, for the round slot Android 7.1 launchers ask for.
 
 They go to Assets/DadSchoolBoss/Art/ThrowStoreV1/ with a .meta each: the import settings of the icon the project
 already had (Art/V5/app_icon.png), uncompressed, and a GUID made from the file's path, so running this again
@@ -21,7 +22,7 @@ import hashlib
 from pathlib import Path
 import re
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parents[1]
 DELIVERED = ROOT / 'Design/store-art-v1'
@@ -69,6 +70,16 @@ def fitted(icon: Image.Image) -> Image.Image:
     return canvas
 
 
+def rounded(icon: Image.Image) -> Image.Image:
+    """The icon inside a circle, drawn four times larger first so the edge comes out smooth."""
+    side = icon.width
+    mask = Image.new('L', (side * 4, side * 4), 0)
+    ImageDraw.Draw(mask).ellipse((0, 0, side * 4 - 1, side * 4 - 1), fill=255)
+    cut = icon.copy()
+    cut.putalpha(mask.resize((side, side), Image.LANCZOS))
+    return cut
+
+
 icon = Image.open(DELIVERED / 'store_icon_512.png').convert('RGBA')
 back = Image.open(DELIVERED / 'store_icon_bg.png').convert('RGB')
 if icon.size != (512, 512) or icon.getchannel('A').getextrema()[0] < 255:
@@ -79,7 +90,7 @@ TARGET.mkdir(parents=True, exist_ok=True)
 folder_meta = TARGET.with_name(TARGET.name + '.meta')
 if not folder_meta.exists():
     folder_meta.write_text(FOLDER_META.format(guid=guid_for(TARGET)), encoding='utf-8', newline='\n')
-for name, picture in (('icon_512.png', icon), ('icon_adaptive_fg.png', fitted(icon)), ('icon_adaptive_bg.png', back)):
+for name, picture in (('icon_512.png', icon), ('icon_adaptive_fg.png', fitted(icon)), ('icon_adaptive_bg.png', back), ('icon_round.png', rounded(icon))):
     picture.save(TARGET / name, optimize=True)
     meta(TARGET / name)
-print('Made icon_512, icon_adaptive_fg and icon_adaptive_bg in Art/ThrowStoreV1 from the delivered store icon.')
+print('Made icon_512, icon_adaptive_fg, icon_adaptive_bg and icon_round in Art/ThrowStoreV1 from the delivered store icon.')

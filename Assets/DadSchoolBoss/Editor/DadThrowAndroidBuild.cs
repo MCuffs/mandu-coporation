@@ -47,22 +47,23 @@ public static class DadThrowAndroidBuild
         PlayerSettings.Android.bundleVersionCode=number;
     }
 
-    // Adaptive slots take the background and the foreground, the plain slots the 512 picture. Round slots are
-    // left alone: only Android 7.1 asks for them, and a square picture in a round slot is worse than none.
+    // Adaptive slots take the background and the foreground, the plain slots the 512 picture, the round slots
+    // (Android 7.1 only) the same picture cut to a circle. A slot left empty falls back to the project's own
+    // icon, which is the old picture: the first trial build still carried it in the round slots.
     const string IconFolder="Assets/DadSchoolBoss/Art/ThrowStoreV1/";
     static string Icons()
     {
         Texture2D plain=AssetDatabase.LoadAssetAtPath<Texture2D>(IconFolder+"icon_512.png"),fore=AssetDatabase.LoadAssetAtPath<Texture2D>(IconFolder+"icon_adaptive_fg.png"),
-            back=AssetDatabase.LoadAssetAtPath<Texture2D>(IconFolder+"icon_adaptive_bg.png");
-        if(plain==null||fore==null||back==null)throw new InvalidOperationException("The app icon pictures are missing from "+IconFolder+": run Tools/install_store_icon.py");
+            back=AssetDatabase.LoadAssetAtPath<Texture2D>(IconFolder+"icon_adaptive_bg.png"),round=AssetDatabase.LoadAssetAtPath<Texture2D>(IconFolder+"icon_round.png");
+        if(plain==null||fore==null||back==null||round==null)throw new InvalidOperationException("The app icon pictures are missing from "+IconFolder+": run Tools/install_store_icon.py");
         var android=UnityEditor.Build.NamedBuildTarget.Android;int layered=0,single=0;
         foreach(PlatformIconKind kind in PlayerSettings.GetSupportedIconKinds(android))
         {
             PlatformIcon[] slots=PlayerSettings.GetPlatformIcons(android,kind);
             if(slots.Length==0)continue;
             bool adaptive=slots[0].maxLayerCount>=2;
-            if(!adaptive&&kind.ToString().IndexOf("Round",StringComparison.OrdinalIgnoreCase)>=0)continue;
-            foreach(PlatformIcon slot in slots){if(adaptive){slot.SetTexture(back,0);slot.SetTexture(fore,1);}else slot.SetTexture(plain,0);}
+            Texture2D one=kind.ToString().IndexOf("Round",StringComparison.OrdinalIgnoreCase)>=0?round:plain;
+            foreach(PlatformIcon slot in slots){if(adaptive){slot.SetTexture(back,0);slot.SetTexture(fore,1);}else slot.SetTexture(one,0);}
             PlayerSettings.SetPlatformIcons(android,kind,slots);
             if(adaptive)layered+=slots.Length;else single+=slots.Length;
         }
