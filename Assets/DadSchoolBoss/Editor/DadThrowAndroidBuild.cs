@@ -25,6 +25,8 @@ using UnityEngine.Rendering;
 // player sees, such as 1.0.0) and DAD_VERSION_CODE (a whole number; Play refuses a code an earlier upload used, so
 // each upload counts one up). The build puts the project's own version back when it ends, so a later build that
 // names none does not inherit this one's.
+// Every build carries the store's icon as the phone's icon (the owner, 2026-11-18: "yes, fix it", once the store
+// art had arrived): Tools/install_store_icon.py makes the pictures and Icons() below puts them into the slots.
 // StoreId was decided by the owner on 2026-11-18 ("yes, that one"). Play never lets an app change it after the
 // first upload.
 public static class DadThrowAndroidBuild
@@ -43,6 +45,29 @@ public static class DadThrowAndroidBuild
         int number;
         if(!int.TryParse(code.Trim(),out number)||number<1)throw new InvalidOperationException("DAD_VERSION_CODE must be a whole number from 1 up, not \""+code+"\"");
         PlayerSettings.Android.bundleVersionCode=number;
+    }
+
+    // Adaptive slots take the background and the foreground, the plain slots the 512 picture. Round slots are
+    // left alone: only Android 7.1 asks for them, and a square picture in a round slot is worse than none.
+    const string IconFolder="Assets/DadSchoolBoss/Art/ThrowStoreV1/";
+    static string Icons()
+    {
+        Texture2D plain=AssetDatabase.LoadAssetAtPath<Texture2D>(IconFolder+"icon_512.png"),fore=AssetDatabase.LoadAssetAtPath<Texture2D>(IconFolder+"icon_adaptive_fg.png"),
+            back=AssetDatabase.LoadAssetAtPath<Texture2D>(IconFolder+"icon_adaptive_bg.png");
+        if(plain==null||fore==null||back==null)throw new InvalidOperationException("The app icon pictures are missing from "+IconFolder+": run Tools/install_store_icon.py");
+        var android=UnityEditor.Build.NamedBuildTarget.Android;int layered=0,single=0;
+        foreach(PlatformIconKind kind in PlayerSettings.GetSupportedIconKinds(android))
+        {
+            PlatformIcon[] slots=PlayerSettings.GetPlatformIcons(android,kind);
+            if(slots.Length==0)continue;
+            bool adaptive=slots[0].maxLayerCount>=2;
+            if(!adaptive&&kind.ToString().IndexOf("Round",StringComparison.OrdinalIgnoreCase)>=0)continue;
+            foreach(PlatformIcon slot in slots){if(adaptive){slot.SetTexture(back,0);slot.SetTexture(fore,1);}else slot.SetTexture(plain,0);}
+            PlayerSettings.SetPlatformIcons(android,kind,slots);
+            if(adaptive)layered+=slots.Length;else single+=slots.Length;
+        }
+        if(layered==0||single==0)throw new InvalidOperationException("Android offered "+layered+" adaptive and "+single+" plain icon slots; the build needs both kinds");
+        return "Icon: the store icon ("+layered+" adaptive sizes, "+single+" plain sizes)";
     }
 
     static void Run(bool bundle,string id,bool store,string output,string reportPath)
@@ -82,6 +107,7 @@ public static class DadThrowAndroidBuild
             EditorUserBuildSettings.buildAppBundle=bundle;
             report.AppendLine("Unity: "+Application.unityVersion+"\nVersion: "+PlayerSettings.bundleVersion+" ("+PlayerSettings.Android.bundleVersionCode+")\nApplication ID: "+id
                 +"\nBackend: IL2CPP\nArchitectures: "+PlayerSettings.Android.targetArchitectures+"\nMinimum SDK: "+PlayerSettings.Android.minSdkVersion+"\nTarget SDK: "+PlayerSettings.Android.targetSdkVersion);
+            report.AppendLine(Icons());
             report.AppendLine(Resolve());
             DadThrowWebBuild.Lighten("Android");
             Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(output)));
