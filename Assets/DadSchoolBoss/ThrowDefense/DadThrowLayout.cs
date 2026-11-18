@@ -85,6 +85,18 @@ public sealed class DadThrowLayout
     public static Vector2 EntranceHintIcon {get{return new Vector2(EntranceHint.x+62,EntranceHint.center.y);}}
     public static Rect EntranceHintText {get{return Rect.MinMaxRect(EntranceHint.x+122,EntranceHint.y,EntranceHint.xMax-16,EntranceHint.yMax);}}
 
+    // ── today's challenge (DadThrowDaily): its button on the title with the dot that says tries are left, the
+    // letter (heading, the stage, two rule cards, three tiers, the tries, the way out and the start), and in a
+    // fight the names of the day's cards under the top bar and where the fog of 안개 begins and thickens ──
+    public static readonly Rect DailyButton=new Rect(230,606,230,60),DailyDot=new Rect(444,598,22,22);
+    public static readonly Rect DailyCard=new Rect(260,100,760,520),DailyHeading=new Rect(300,112,420,60),DailyStage=new Rect(740,112,240,60);
+    public static Rect DailyRule(int index){return new Rect(300+index*220,190,200,250);}
+    public static Rect DailyTier(int index){return new Rect(760,190+index*84,236,74);}
+    public static readonly Rect DailyTries=new Rect(300,456,420,56),DailyClose=new Rect(300,534,170,64),DailyGo=new Rect(690,526,300,76);
+    public static Rect DailyTry(int index){return new Rect(DailyTries.x+150+index*46,DailyTries.center.y-17,34,34);}
+    public static readonly Rect DailyChips=new Rect(32,92,390,34);
+    public const float FogFrom=700,FogStep=44;
+
     // ── clear / defeat / pause cards (plan §6.3-6.5, sizes from the wide v2 screens) ──
     public static readonly Rect ResultCard=new Rect(650,218,460,330),PauseCard=new Rect(445,145,390,430);
     // The result pose stands left of the card. Feet point and scale come from the v2 screen (a 410-wide box for a 1254 picture).

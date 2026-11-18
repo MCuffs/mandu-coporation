@@ -15,6 +15,11 @@ public sealed class DadThrowPrototype:MonoBehaviour
     // The game's stages, built off the curve from the opponents the stage file declares, and the tuner that
     // bends them a little toward how the player is doing.
     List<DadThrowStage> game;DadThrowTuner tuner;
+    // Today's challenge (DadThrowDaily), and its words, rebuilt only when what they say changes.
+    DadThrowDaily daily;int shownDailyDay=-1,shownDailyStage=-1,shownDailyCards=-1,shownDailyRun=-1,shownTries=-1;
+    string dailyStageText="",dailyChipText="",dailyResultText="",dailyTriesText="";
+    static readonly string[] TierName={"깨기","대문 한 번 이하","한 공에 "+DadThrowDaily.ChainGoal+"명"},
+        TierPay={"+"+DadThrowDaily.ClearWon+"원","+"+DadThrowDaily.GateWon+"원","+"+DadThrowDaily.ChainWon+"원"};
     Font body,bold,display;Texture2D dot;
     Texture2D dodgeball, sportsCar;
     bool UsesCar { get { return Model!=null && Model.Rules.SportsCar; } }
@@ -96,7 +101,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
     {
         string problem;DadThrowSave save=DadThrowSave.Load(savePath,out problem);
         if(problem!=null)Debug.LogWarning("Throw prototype save: "+problem);
-        aim.Cancel();seenRun=-1;Flow=new DadThrowFlow(game,layout.Field,story,save,savePath,tuner);
+        aim.Cancel();seenRun=-1;Flow=new DadThrowFlow(game,layout.Field,story,save,savePath,tuner,daily);
     }
     // Only what this scene draws is loaded, by the keys the manifests and the stage file name.
     T Need<T>(string key) where T:Object{T asset=Resources.Load<T>(key);if(asset==null)missing.Add(key);return asset;}
@@ -112,6 +117,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
             stages=DadThrowStageSet.Parse(table,layout.Backgrounds,layout.Field.Gate);
             game=DadThrowCurve.Build(stages.kinds,stages.stages[0].backgroundKey,stages.stages);
             tuner=new DadThrowTuner(stages.kinds,stages.stages[0].backgroundKey);
+            daily=new DadThrowDaily(stages.kinds,stages.stages[0].backgroundKey);
             story=DadThrowStory.Parse(tale);
         }
         catch(System.ArgumentException error){missing.Add(error.Message);return;}
@@ -177,7 +183,8 @@ public sealed class DadThrowPrototype:MonoBehaviour
 #endif
         if(back){aim.Cancel();Flow.Back();}
         Fresh();
-        if(Flow.Now!=DadThrowFlow.Screen.Playing){aim.Cancel();Flow.Tick(dt);return;}
+        // The title is where a new day is noticed: the rules keep no clock, so the screen tells them the date.
+        if(Flow.Now!=DadThrowFlow.Screen.Playing){aim.Cancel();if(Flow.Now==DadThrowFlow.Screen.Title)Flow.Day(DadThrowDaily.Key(System.DateTime.Now));Flow.Tick(dt);return;}
         // An entrance holds the street still: nothing is aimed, and a tap anywhere lets the fight begin.
         if(Flow.Entering!=null){aim.Cancel();if(Tapped())Flow.SkipEntrance();Flow.Tick(dt);Fresh();return;}
         Pointer();Keys();
@@ -211,6 +218,8 @@ public sealed class DadThrowPrototype:MonoBehaviour
         if(Flow.Model==null||Flow.Runs==seenRun)return;
         seenRun=Flow.Runs;seenHealth=Flow.Model.Health;seenChain=Flow.Model.ChainSerial;seenBlock=Flow.Model.BlockSerial;seenDaze=Flow.Model.DazeSerial;blockClock=shoeNudge=0;
         thrown=false;hintClock=throwPose=palm=chainClock=shake=0;shownRemaining=-1;aim.Cancel();seen.Clear();leaving.Clear();
+        // 공만: there is no shoe to have been left selected.
+        if(Flow.Model.Rules.NoShoe)selected=DadThrowModel.Weapon.Golf;
     }
     // Someone who is no longer on the street either touched the gate or was hit. A hit knocks them back the way
     // they came, off their feet for a moment: out of this turn, nothing worse. A ball can clear five at once and
@@ -303,7 +312,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
         return Input.GetMouseButtonDown(0);
     }
     void Select(DadThrowModel.Weapon weapon)
-    {if(selected==weapon)return;selected=weapon;aim.Cancel();if(weapon==DadThrowModel.Weapon.Shoe)shoeHintDone=true;}
+    {if(selected==weapon||weapon==DadThrowModel.Weapon.Shoe&&Flow.Model!=null&&Flow.Model.Rules.NoShoe)return;selected=weapon;aim.Cancel();if(weapon==DadThrowModel.Weapon.Shoe)shoeHintDone=true;}
     // With a keyboard: 1 the ball, 2 the shoe, space or tab the other one. A phone has only the two buttons.
     void Keys()
     {
@@ -380,7 +389,16 @@ public sealed class DadThrowPrototype:MonoBehaviour
         GUI.matrix=old*Matrix4x4.TRS(new Vector3(center.x,center.y,0),Quaternion.Euler(0,0,degrees),Vector3.one)*Matrix4x4.TRS(new Vector3(-center.x,-center.y,0),Quaternion.identity,Vector3.one);
         GUI.DrawTexture(rect,picture);GUI.matrix=old;
     }
+    // 큰 손 (DadThrowDaily) draws the ball as many times its size as the hit test takes it to be.
     void Thing(DadThrowModel.Weapon weapon,Vector2 center,float degrees)
+    {
+        float big=weapon==DadThrowModel.Weapon.Golf&&Model!=null?Model.Rules.BallScale:1;
+        if(big==1){PlainThing(weapon,center,degrees);return;}
+        Matrix4x4 old=GUI.matrix;
+        GUI.matrix=old*Matrix4x4.TRS(new Vector3(center.x,center.y,0),Quaternion.identity,new Vector3(big,big,1))*Matrix4x4.TRS(new Vector3(-center.x,-center.y,0),Quaternion.identity,Vector3.one);
+        PlainThing(weapon,center,degrees);GUI.matrix=old;
+    }
+    void PlainThing(DadThrowModel.Weapon weapon,Vector2 center,float degrees)
     {
         if(weapon==DadThrowModel.Weapon.Golf && UsesCar)
             Spun(sportsCar,new Rect(center.x-68,center.y-34,136,68),center,degrees*.25f);
@@ -596,7 +614,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
         bool nudge=(stage.hint=="shoe"&&!shoeHintDone&&hintClock<6||shoeNudge>0)&&GUI.enabled;
         // Switching things while aiming drops the aim and changes only the choice.
         if(WeaponButton(DadThrowLayout.GolfButton,UsesCar?"스포츠카":UsesDodgeball?"피구공":"골프공",UsesCar?sportsCar:UsesDodgeball?dodgeball:golf,layout.Golf,chosen==DadThrowModel.Weapon.Golf,reload,false))Select(DadThrowModel.Weapon.Golf);
-        if(WeaponButton(DadThrowLayout.ShoeButton,"신발",shoe,layout.Shoe,chosen==DadThrowModel.Weapon.Shoe,reload,nudge))Select(DadThrowModel.Weapon.Shoe);
+        if(!Flow.Model.Rules.NoShoe&&WeaponButton(DadThrowLayout.ShoeButton,"신발",shoe,layout.Shoe,chosen==DadThrowModel.Weapon.Shoe,reload,nudge))Select(DadThrowModel.Weapon.Shoe);
         if(stage.hint=="shoe"&&hintClock>=6)shoeHintDone=true;
         // First stage only: gone after the first real throw, or after six seconds of the fight either way.
         if(stage.hint=="pull"&&!thrown&&hintClock<6&&GUI.enabled)Outlined(DadThrowLayout.Hint,"당겨서 놓으세요",30,Paper,Ink,3,display);
@@ -616,6 +634,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
         }
         GUI.DrawTexture(layout.Background(),street);
         DrawGate();DrawPeople(m);
+        if(Flow.InDaily&&DadThrowDaily.Has(Flow.Save.dailyCards,DadThrowDaily.Card.Fog))DrawFog();
         // On a result the big pose beside the card stands in for dad, so the small one is left out.
         if(!result){DrawDad();DrawFlight(m);DrawBlock();}
         GUI.matrix=still;
@@ -624,6 +643,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
         bool was=GUI.enabled;GUI.enabled=was&&live;
         DrawTopBar(Flow.Stage,m.Health,m.Remaining);DrawPurse(DadThrowLayout.CoinLabel,26,Ink,bold);DrawControls(Flow.Stage,m.ReloadTotal>0?Mathf.Clamp01(m.Reload/m.ReloadTotal):0,selected);GUI.enabled=was;
         if(!result)DrawBossBar(m);
+        if(Flow.InDaily&&!result){DailyWords();if(dailyChipText.Length>0)Outlined(DadThrowLayout.DailyChips,dailyChipText,24,Paper,Ink,3,display);}
         if(entering)DrawEntrance();
         if(now==DadThrowFlow.Screen.Paused)DrawPause();
         else if(now==DadThrowFlow.Screen.Clear)DrawClear();
@@ -688,6 +708,21 @@ public sealed class DadThrowPrototype:MonoBehaviour
     void DrawClear()
     {
         Veil(ResultVeil);GUI.DrawTexture(layout.HeroRect(layout.Clear),clearArt);DadUi.Panel(DadThrowLayout.ResultCard,Paper,Ink);DrawEarned();
+        if(Flow.InDaily)
+        {
+            // A try of the day: what it reached and what that paid, then back to the letter.
+            if(shownDailyRun!=Flow.Runs)
+            {
+                shownDailyRun=Flow.Runs;var said=new System.Text.StringBuilder();
+                for(int i=0;i<TierName.Length;i++)if((Flow.DailyTiers&(1<<i))!=0)said.Append(said.Length>0?" · ":"").Append(TierName[i]);
+                dailyResultText=said+"\n"+(Flow.DailyPaid>0?"보너스 +"+Flow.DailyPaid+"원":"이미 받은 보상이에요");
+            }
+            Text(DadThrowLayout.ClearHeading,"도전 성공!",46,Ink,display);
+            Text(DadThrowLayout.ClearWordLine,dailyResultText,24,Ink,body,TextAnchor.UpperCenter);
+            if(Button(DadThrowLayout.ClearLeft,"상점",false)){Flow.OpenShop();return;}
+            if(Button(DadThrowLayout.ClearRight,"도전장",true))Flow.ToDaily();
+            return;
+        }
         // A stage is one group of challengers. After the last one that exists there is nowhere further to go, and the card says so.
         Text(DadThrowLayout.ClearHeading,Flow.HasNext?"이번 조 끝!":"여기까지 막았다!",46,Ink,display);
         if(Flow.Word!=null)
@@ -703,6 +738,17 @@ public sealed class DadThrowPrototype:MonoBehaviour
     void DrawDefeat()
     {
         Veil(ResultVeil);GUI.DrawTexture(layout.HeroRect(layout.Retry),retryArt);DadUi.Panel(DadThrowLayout.ResultCard,Paper,Ink);DrawEarned();
+        if(Flow.InDaily)
+        {
+            // A lost try goes back to the letter, which holds the tries that are left.
+            if(Flow.Save.dailyLeft!=shownTries){shownTries=Flow.Save.dailyLeft;dailyTriesText="오늘 남은 기회 "+shownTries+"번";}
+            Text(DadThrowLayout.DefeatHeading,"다시 해볼까?",46,Ink,display);
+            Text(DadThrowLayout.DefeatLine,dailyTriesText,24,Ink,body);
+            if(Button(DadThrowLayout.DefeatRetry,"도전장",true,30)){Flow.ToDaily();return;}
+            if(Button(DadThrowLayout.DefeatShop,"상점",false,24)){Flow.OpenShop();return;}
+            if(Button(DadThrowLayout.DefeatTitle,"타이틀",false,24))Flow.ToTitle();
+            return;
+        }
         Text(DadThrowLayout.DefeatHeading,"다시 해볼까?",46,Ink,display);
         int touches=Flow.Stage.health;
         Text(DadThrowLayout.DefeatLine,"대문을 "+(touches<Times.Length?Times[touches]:touches.ToString())+" 번 만졌어요",24,Ink,body);
@@ -752,6 +798,13 @@ public sealed class DadThrowPrototype:MonoBehaviour
         GUI.DrawTexture(layout.TitleArt(),titleArt);
         Outlined(DadThrowLayout.TitleText,"아빠 전쟁",94,Gold,Ink,4,display);
         if(Button(DadThrowLayout.StartButton,Flow.Continuing?"계속하기":"게임 시작",true,30)){Flow.Start();return;}
+        // The letter of the day, from the second day on. A dot says tries are left.
+        if(Flow.DailyReady)
+        {
+            bool letter=Button(DadThrowLayout.DailyButton,"오늘의 도전조",false,24);
+            if(Flow.Save.dailyLeft>0)DadUi.Fill(DadThrowLayout.DailyDot,Warn,11);
+            if(letter){Flow.OpenDaily();return;}
+        }
         DrawPurse(DadThrowLayout.ShopPurse,22,Paper,bold);
         bool open=Button(DadThrowLayout.ShopButton,"상점",false,26);
         Rect sign=DadThrowLayout.ShopButton;GUI.DrawTexture(new Rect(sign.x+14,sign.center.y-22,44,44),shopSign);
@@ -795,6 +848,51 @@ public sealed class DadThrowPrototype:MonoBehaviour
             if(Button(DadThrowLayout.ShopBuy(slot),priceText[i],true,24,DadThrowShop.CanBuy(Flow.Save,card.item)))Flow.Buy(card.item);
         }
     }
+    // ── today's challenge ──
+    void DailyWords()
+    {
+        DadThrowSave s=Flow.Save;if(s.dailyDay==shownDailyDay&&s.dailyStage==shownDailyStage&&s.dailyCards==shownDailyCards)return;
+        shownDailyDay=s.dailyDay;shownDailyStage=s.dailyStage;shownDailyCards=s.dailyCards;
+        dailyStageText=DadThrowCurve.Id(Mathf.Max(1,s.dailyStage))+" 판에서";
+        var names=new System.Text.StringBuilder();
+        foreach(DadThrowDaily.Face face in DadThrowDaily.Faces)if(DadThrowDaily.Has(s.dailyCards,face.card))names.Append(names.Length>0?" · ":"").Append(face.name);
+        dailyChipText=names.ToString();
+    }
+    // 안개: the far half of the street stands behind a veil that thickens to the right. It is drawn over the
+    // people and under dad and everything thrown, so a ball can be followed into it.
+    void DrawFog()
+    {
+        float top=DadThrowLayout.TopBar,tall=DadThrowLayout.H-top,x=DadThrowLayout.FogFrom;
+        for(int i=1;i<=4;i++,x+=DadThrowLayout.FogStep)Box(new Rect(x,top,DadThrowLayout.FogStep,tall),new Color(Paper.r,Paper.g,Paper.b,.2f*i));
+        Box(new Rect(x,top,DadThrowLayout.W-x,tall),new Color(Paper.r,Paper.g,Paper.b,.86f));
+    }
+    // The letter: the stage it is played on, the day's cards, what a cleared try pays and has paid, the tries left.
+    void DrawDaily()
+    {
+        DailyWords();DadThrowSave s=Flow.Save;
+        GUI.DrawTexture(layout.TitleArt(),titleArt);Veil(ResultVeil);DadUi.Panel(DadThrowLayout.DailyCard,Paper,Ink);
+        Text(DadThrowLayout.DailyHeading,"오늘의 도전장",44,Ink,display,TextAnchor.MiddleLeft);
+        Text(DadThrowLayout.DailyStage,dailyStageText,26,Olive,bold,TextAnchor.MiddleRight);
+        int slot=0;
+        foreach(DadThrowDaily.Face face in DadThrowDaily.Faces)
+        {
+            if(!DadThrowDaily.Has(s.dailyCards,face.card)||slot>=DadThrowDaily.MostCards)continue;
+            Rect rule=DadThrowLayout.DailyRule(slot++),band=new Rect(rule.x,rule.y,rule.width,64);
+            DadUi.Panel(rule,PaperDown,Ink);DadUi.Panel(band,Gold,Ink);
+            Text(band,face.name,30,Ink,display);
+            Text(new Rect(rule.x+14,band.yMax+14,rule.width-28,rule.height-band.height-28),face.line,22,Ink,body,TextAnchor.UpperCenter);
+        }
+        for(int i=0;i<TierName.Length;i++)
+        {
+            Rect row=DadThrowLayout.DailyTier(i);bool won=(s.dailyWon&(1<<i))!=0;DadUi.Panel(row,won?Gold:Paper,Ink);
+            Text(new Rect(row.x+14,row.y+6,row.width-28,34),TierName[i],22,Ink,bold,TextAnchor.MiddleLeft);
+            Text(new Rect(row.x+14,row.y+38,row.width-28,30),won?"받았다":TierPay[i],20,won?Ink:Olive,body,TextAnchor.MiddleLeft);
+        }
+        Rect tries=DadThrowLayout.DailyTries;Text(new Rect(tries.x,tries.y,140,tries.height),"남은 기회",24,Ink,bold,TextAnchor.MiddleLeft);
+        for(int i=0;i<DadThrowDaily.Tries;i++)DadUi.Panel(DadThrowLayout.DailyTry(i),i<s.dailyLeft?Gold:PaperDown,Ink);
+        if(Button(DadThrowLayout.DailyClose,"닫기",false,26)){Flow.CloseDaily();return;}
+        if(Button(DadThrowLayout.DailyGo,s.dailyLeft>0?"도전":"내일 또 와요",true,s.dailyLeft>0?34:26,s.dailyLeft>0))Flow.StartDaily();
+    }
     void DrawMissing()
     {
         Box(new Rect(0,0,DadThrowLayout.W,DadThrowLayout.H),Color.black);
@@ -818,6 +916,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
             else if(Flow.Now==DadThrowFlow.Screen.Boot){DrawBoot();bars=Color.black;}
             else if(Flow.Now==DadThrowFlow.Screen.Title)DrawTitle();
             else if(Flow.Now==DadThrowFlow.Screen.Shop)DrawShop();
+            else if(Flow.Now==DadThrowFlow.Screen.Daily)DrawDaily();
             else if(Flow.Now==DadThrowFlow.Screen.Intro||Flow.Now==DadThrowFlow.Screen.Ending)DrawStory(Flow.Cut);
             else DrawBattle();
             Letterbox(bars);

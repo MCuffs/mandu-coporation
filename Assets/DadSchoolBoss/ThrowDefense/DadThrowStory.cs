@@ -103,6 +103,9 @@ public sealed class DadThrowSave
     // What the difficulty tuner keeps (DadThrowTuner): the stage defeats are being counted on and how many,
     // flawless clears in a row, and balls stopped on trays against shoes thrown. Optional when read.
     public string tunedStage;public int defeats,flawless,blocked,shoes;
+    // Today's challenge (DadThrowDaily): the first day played, the day the letter in hand was dealt for, its
+    // stage and cards, the tries left and the tiers already paid. Optional when read.
+    public int firstDay,dailyDay,dailyStage,dailyCards,dailyLeft,dailyWon;
     public string ToJson()
     {
         var text=new StringBuilder("{\"schemaVersion\":"+Schema+",\"introSeen\":"+(introSeen?"true":"false")+",\"furthest\":"+furthest+",\"cleared\":[");
@@ -115,6 +118,7 @@ public sealed class DadThrowSave
         text.Append("],\"tuning\":{");
         if(!string.IsNullOrEmpty(tunedStage))text.Append("\"stage\":\"").Append(tunedStage.Replace("\\","\\\\").Replace("\"","\\\"")).Append("\",");
         text.Append("\"defeats\":"+defeats+",\"flawless\":"+flawless+",\"blocked\":"+blocked+",\"shoes\":"+shoes);
+        text.Append("},\"daily\":{\"first\":"+firstDay+",\"day\":"+dailyDay+",\"stage\":"+dailyStage+",\"cards\":"+dailyCards+",\"left\":"+dailyLeft+",\"won\":"+dailyWon);
         return text.Append("}}").ToString();
     }
     public static DadThrowSave Parse(string json)
@@ -139,6 +143,18 @@ public sealed class DadThrowSave
             if(DadThrowJson.Has(tuning,"flawless"))save.flawless=Mathf.Clamp(DadThrowJson.Whole(tuning,"flawless","save tuning"),0,DadThrowTuner.MaxHeat+1);
             if(DadThrowJson.Has(tuning,"blocked"))save.blocked=Math.Max(0,DadThrowJson.Whole(tuning,"blocked","save tuning"));
             if(DadThrowJson.Has(tuning,"shoes"))save.shoes=Math.Max(0,DadThrowJson.Whole(tuning,"shoes","save tuning"));
+        }
+        if(DadThrowJson.Has(map,"daily"))
+        {
+            var day=DadThrowJson.Map(map["daily"],"save daily");
+            if(DadThrowJson.Has(day,"first"))save.firstDay=Math.Max(0,DadThrowJson.Whole(day,"first","save daily"));
+            if(DadThrowJson.Has(day,"day"))save.dailyDay=Math.Max(0,DadThrowJson.Whole(day,"day","save daily"));
+            if(DadThrowJson.Has(day,"stage"))save.dailyStage=Mathf.Clamp(DadThrowJson.Whole(day,"stage","save daily"),0,DadThrowCurve.Stages);
+            if(DadThrowJson.Has(day,"cards"))save.dailyCards=DadThrowJson.Whole(day,"cards","save daily")&((1<<DadThrowDaily.Faces.Length)-1);
+            if(DadThrowJson.Has(day,"left"))save.dailyLeft=Mathf.Clamp(DadThrowJson.Whole(day,"left","save daily"),0,DadThrowDaily.Tries);
+            if(DadThrowJson.Has(day,"won"))save.dailyWon=DadThrowJson.Whole(day,"won","save daily")&(DadThrowDaily.Cleared|DadThrowDaily.Guarded|DadThrowDaily.Chained);
+            // A letter without a stage to play it on is no letter: the next day on the title deals a new one.
+            if(save.dailyStage==0)save.dailyDay=0;
         }
         if(DadThrowJson.Has(map,"met"))foreach(object who in DadThrowJson.List(map["met"],"save met"))if(who is string&&!save.met.Contains((string)who))save.met.Add((string)who);
         object list;if(!map.TryGetValue("cleared",out list))throw new ArgumentException("save needs cleared");

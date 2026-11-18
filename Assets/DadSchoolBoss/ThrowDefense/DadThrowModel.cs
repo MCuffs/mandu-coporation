@@ -32,6 +32,9 @@ public sealed class DadThrowRules
     // GolfCount: balls leaving the hand together. ShoeBlast: hurt done to everyone a shoe gathers.
     // ChainReload: a ball that reaches this many people readies the hand at once (0 = never).
     public int GolfDamage=1,GolfCount=1,ShoeBlast=0,ChainReload=0;
+    // What a rule card of today's challenge can change (DadThrowDaily): no shoe may be thrown, and the ball is
+    // this many times its size.
+    public bool NoShoe;public float BallScale=1;
     public DadThrowRules Copy(){return (DadThrowRules)MemberwiseClone();}
 }
 
@@ -43,7 +46,7 @@ public sealed class DadThrowModel
     public const float Width=1280,Height=720;
     // Radius of the thrown thing itself in the hit test (a person adds 25).
     public const float GolfHit=11,ShoeHit=22;
-    public float BallRadius { get { return Rules.SportsCar ? 26 : Rules.Dodgeball ? 20 : GolfHit; } }
+    public float BallRadius { get { return (Rules.SportsCar ? 26 : Rules.Dodgeball ? 20 : GolfHit)*Rules.BallScale; } }
     // Degrees between the balls of a fan when more than one leaves the hand.
     public const float FanDegrees=7;
     public enum Weapon { Golf, Shoe }
@@ -127,7 +130,7 @@ public sealed class DadThrowModel
     }
     public bool Fire(Weapon weapon,Vector2 pull)
     {
-        if(!CanFire||pull.magnitude<18)return false;
+        if(!CanFire||pull.magnitude<18||weapon==Weapon.Shoe&&Rules.NoShoe)return false;
         Vector2 launch=LaunchVelocity(pull);
         projectiles.Add(new Projectile{weapon=weapon,pos=Field.Muzzle,vel=launch,remaining=weapon==Weapon.Golf?Rules.Pierce+Level:1});
         // Extra balls (bought in the shop) leave with the aimed one, fanned a little above and below it: 7 degrees up, 7 down, 14 up...

@@ -9,11 +9,13 @@ using UnityEngine;
 //   The chapter's last stage, first time cleared: Playing -> Ending -> Clear
 //   Title, Clear or Defeat -> Shop -> back to where it was opened from. What is bought there is in the throws
 //   of the next stage that starts. Every challenger sent back is one won, banked when a stage ends or is left.
+//   Title -> Daily (the letter of the day) -> Playing -> Clear or Defeat -> Daily. A try of the day opens no
+//   stage, is not counted by the tuner, and cannot be retried from its result: the letter holds the tries.
 // A request that does not belong to the current screen is refused, which is also what stops a double tap
 // from starting two stages.
 public sealed class DadThrowFlow
 {
-    public enum Screen { Boot, Title, Intro, Playing, Paused, Clear, Defeat, Ending, Shop }
+    public enum Screen { Boot, Title, Intro, Playing, Paused, Clear, Defeat, Ending, Shop, Daily }
     // Logo: 0.2 in, 0.8 held, 0.2 out (plan §6.1).
     public const float BootTime=1.2f,BootFade=.2f;
     public Screen Now {get;private set;}
@@ -47,27 +49,35 @@ public sealed class DadThrowFlow
     // The purse as the player sees it: what is saved, plus those sent back in the fight still going on.
     public int Coins {get{return Save.coins+(Model!=null&&!banked?Earned:0);}}
     // What the stage in hand has earned so far (it stays readable on the result card).
-    public int Earned {get{return Model!=null?DadThrowTuner.Pay(Model.Killed,Heat)+Model.Bounty:0;}}
+    public int Earned {get{return Model!=null?(DadThrowTuner.Pay(Model.Killed,Heat)+Model.Bounty)*(InDaily?DadThrowDaily.PayTimes(Save.dailyCards):1):0;}}
     // The difficulty tuner, when the game has one, and how far the stage in hand was eased or heated when it
     // started (0 when nothing was owed). The player is never shown these.
     readonly DadThrowTuner tuner;
     public int Ease {get;private set;} public int Heat {get;private set;}
     // Balls keep stopping on trays and hardly a shoe has been thrown: the screen keeps pointing at the shoe.
     public bool ShoeShy {get{return tuner!=null&&DadThrowTuner.ShoeShy(Save);}}
+    // Today's challenge, when the game has one (DadThrowDaily). InDaily: the fight or the result in hand is a try
+    // of the day. DailyTiers: what that try reached once it was cleared; DailyPaid: what of it had not been paid
+    // before today and was added to the purse.
+    readonly DadThrowDaily daily;int today;DadThrowStage dailyTable;
+    public bool InDaily {get;private set;} public int DailyTiers {get;private set;} public int DailyPaid {get;private set;}
+    // The letter is there to open: the game has one, the day is known, and today's has been dealt.
+    public bool DailyReady {get{return daily!=null&&today>0&&Save.dailyDay==today&&DadThrowDaily.Open(Save,today);}}
 
     // story: null plays no opening or ending. savePath: null keeps progress in memory only (checks, captures).
     // tuner: null plays every stage exactly as it is listed (checks, captures of a fixed stage).
-    public DadThrowFlow(IList<DadThrowStage> stages,DadThrowField field,DadThrowStory story=null,DadThrowSave save=null,string savePath=null,DadThrowTuner tuner=null)
+    // daily: null plays without the letter of the day.
+    public DadThrowFlow(IList<DadThrowStage> stages,DadThrowField field,DadThrowStory story=null,DadThrowSave save=null,string savePath=null,DadThrowTuner tuner=null,DadThrowDaily daily=null)
     {
-        this.tuner=tuner;
+        this.tuner=tuner;this.daily=daily;
         if(stages==null||stages.Count==0)throw new ArgumentException("the flow needs at least one stage");
         if(field==null)throw new ArgumentNullException("field");
         this.stages=stages;this.field=field;this.savePath=savePath;Story=story;Save=save??new DadThrowSave();
         // A save from a longer build may point past the stages this one has.
         Furthest=Mathf.Clamp(Save.furthest,0,stages.Count-1);Now=Screen.Boot;
     }
-    public DadThrowStage Stage {get{return stages[StageIndex];}}
-    public bool HasNext {get{return StageIndex+1<stages.Count;}}
+    public DadThrowStage Stage {get{return InDaily?dailyTable:stages[StageIndex];}}
+    public bool HasNext {get{return !InDaily&&StageIndex+1<stages.Count;}}
     // The title offers 계속하기 once a later stage has been opened.
     public bool Continuing {get{return Furthest>0;}}
     public float BootAlpha {get{return Mathf.Clamp01(Mathf.Min(boot,BootTime-boot)/BootFade);}}
@@ -85,7 +95,7 @@ public sealed class DadThrowFlow
     // The throws are the plain ones with everything bought in the shop added.
     void Load(int index,bool wait=false)
     {
-        StageIndex=index;DadThrowStage plain=stages[index];
+        InDaily=false;StageIndex=index;DadThrowStage plain=stages[index];
         Ease=tuner!=null?DadThrowTuner.Ease(Save,plain.id):0;Heat=tuner!=null?DadThrowTuner.Heat(Save):0;
         Model=new DadThrowModel(field,tuner!=null?tuner.Table(plain,index+1,Save):plain){Rules=DadThrowShop.Rules(Save)};
         Runs++;Word=null;WaitingForAim=wait;primed=false;banked=false;Now=Screen.Playing;
@@ -100,13 +110,44 @@ public sealed class DadThrowFlow
     {
         if(Model==null||banked)return;
         int pay=Earned;banked=true;
-        if(tuner!=null)DadThrowTuner.Watched(Save,Model.BlockSerial,Model.ShoesThrown);
+        if(tuner!=null&&!InDaily)DadThrowTuner.Watched(Save,Model.BlockSerial,Model.ShoesThrown);
         Save.coins+=pay;if(persist)Persist();
     }
     // The shop opens from the title or from a result, and closes back onto the same screen.
     public bool OpenShop(){if(Now!=Screen.Title&&Now!=Screen.Clear&&Now!=Screen.Defeat)return false;shopFrom=Now;Now=Screen.Shop;return true;}
     public bool CloseShop(){if(Now!=Screen.Shop)return false;Now=shopFrom;return true;}
     public bool Buy(DadThrowShop.Item item){if(Now!=Screen.Shop||!DadThrowShop.Buy(Save,item))return false;Persist();return true;}
+    // The screen says what day it is; the rules keep no clock. On the title a new day deals a new letter.
+    public void Day(int key){today=key;if(daily!=null&&Now==Screen.Title&&daily.Day(Save,key))Persist();}
+    public bool OpenDaily(){if(Now!=Screen.Title||!DailyReady)return false;Now=Screen.Daily;return true;}
+    public bool CloseDaily(){if(Now!=Screen.Daily)return false;Now=Screen.Title;return true;}
+    // A try of the day: it is spent the moment it starts, so leaving a fight that goes badly does not give it back.
+    // The throws are the bought ones with the day's cards on top; the tuner neither eases nor heats it.
+    public bool StartDaily()
+    {
+        if(Now!=Screen.Daily||!DailyReady||Save.dailyLeft<=0)return false;
+        Save.dailyLeft--;Persist();
+        dailyTable=daily.Table(Save.dailyStage,Save.dailyCards);InDaily=true;DailyTiers=DailyPaid=0;Ease=Heat=0;
+        StageIndex=Mathf.Clamp(Save.dailyStage-1,0,stages.Count-1);
+        DadThrowRules rules=DadThrowShop.Rules(Save);DadThrowDaily.Bend(rules,Save.dailyCards);
+        Model=new DadThrowModel(field,dailyTable){Rules=rules};
+        Runs++;Word=null;WaitingForAim=false;primed=false;banked=false;Now=Screen.Playing;
+        // A card can bring on someone the player has not met yet; he makes his entrance here as he would on a stage.
+        Entering=null;EnterClock=0;
+        foreach(DadThrowStage.Group g in dailyTable.groups)
+            if(g.kind!=null&&g.kind.entrance!=null&&g.kind.boss==null&&!Save.met.Contains(g.kind.id)){Entering=g.kind;break;}
+        return true;
+    }
+    // From the result of a try back to the letter.
+    public bool ToDaily(){if(!InDaily||Now!=Screen.Clear&&Now!=Screen.Defeat)return false;Bank();Model=null;Entering=null;InDaily=false;Now=Screen.Daily;return true;}
+    // A cleared try pays each tier it reached once a day, on top of the won for everyone sent back.
+    void DailyCleared()
+    {
+        Bank(false);
+        DailyTiers=DadThrowDaily.Tiers(dailyTable.health-Model.Health,Model.BestChain);
+        DailyPaid=DadThrowDaily.Worth(DailyTiers&~Save.dailyWon);Save.dailyWon|=DailyTiers;Save.coins+=DailyPaid;
+        Persist();Now=Screen.Clear;
+    }
     public bool Start()
     {
         if(Now!=Screen.Title)return false;
@@ -121,13 +162,13 @@ public sealed class DadThrowFlow
     public void AimStarted(){WaitingForAim=false;}
     public bool Pause(){if(Now!=Screen.Playing)return false;Now=Screen.Paused;return true;}
     public bool Resume(){if(Now!=Screen.Paused)return false;Now=Screen.Playing;return true;}
-    public bool Retry(){if(Now!=Screen.Defeat&&Now!=Screen.Clear)return false;Load(StageIndex);return true;}
+    public bool Retry(){if(InDaily||Now!=Screen.Defeat&&Now!=Screen.Clear)return false;Load(StageIndex);return true;}
     // There is no stage after the last one to move to.
     public bool Next(){if(Now!=Screen.Clear||!HasNext)return false;Load(StageIndex+1);return true;}
     // Leaving drops the stage in progress; what was opened stays opened.
-    public bool ToTitle(){if(Now!=Screen.Paused&&Now!=Screen.Clear&&Now!=Screen.Defeat)return false;Bank();Model=null;Entering=null;Now=Screen.Title;return true;}
-    // Android back: pause a fight; skip a story; close the shop; from the pause or a result, go to the title.
-    public bool Back(){return Now==Screen.Playing?Pause():Now==Screen.Intro||Now==Screen.Ending?Skip():Now==Screen.Shop?CloseShop():ToTitle();}
+    public bool ToTitle(){if(Now!=Screen.Paused&&Now!=Screen.Clear&&Now!=Screen.Defeat)return false;Bank();Model=null;Entering=null;InDaily=false;Now=Screen.Title;return true;}
+    // Android back: pause a fight; skip a story; close the shop or the letter; from the pause or a result, go to the title.
+    public bool Back(){return Now==Screen.Playing?Pause():Now==Screen.Intro||Now==Screen.Ending?Skip():Now==Screen.Shop?CloseShop():Now==Screen.Daily?CloseDaily():ToTitle();}
     // The app went to the background or lost focus. Only a live fight changes; a result never turns back into a fight.
     public void Interrupted(){Pause();}
     void Cleared()
@@ -164,8 +205,8 @@ public sealed class DadThrowFlow
         Model.Tick(dt);
         DadThrowModel.Enemy chief=Model.phase==DadThrowModel.Phase.Playing?Model.Chief:null;
         if(chief!=null&&chief.kind.entrance!=null&&chief.x<=DadThrowModel.Width-BossShown&&!Save.met.Contains(chief.kind.id)){Entering=chief.kind;EnterClock=0;primed=true;return;}
-        if(Model.phase==DadThrowModel.Phase.Lost){if(tuner!=null)DadThrowTuner.Lost(Save,Stage.id);Bank();Now=Screen.Defeat;}
-        else if(Model.phase==DadThrowModel.Phase.WaveClear)Cleared();
+        if(Model.phase==DadThrowModel.Phase.Lost){if(tuner!=null&&!InDaily)DadThrowTuner.Lost(Save,Stage.id);Bank();Now=Screen.Defeat;}
+        else if(Model.phase==DadThrowModel.Phase.WaveClear){if(InDaily)DailyCleared();else Cleared();}
     }
 }
 
