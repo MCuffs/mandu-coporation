@@ -107,9 +107,52 @@ public sealed class DadThrowPrototype:MonoBehaviour
         {
             // One small file beside the game's other data.
             savePath=System.IO.Path.Combine(Application.persistentDataPath,"dad-throw-save.json");Begin();
+#if DAD_THROW_WEBTEST
+            WebTestBegin();
+#endif
         }
         seenOrientation=Screen.orientation;screenWidth=Screen.width;screenHeight=Screen.height;
     }
+#if DAD_THROW_WEBTEST
+    // WebGL test build only (DadThrowWebBuild): the page's address may say ?stage=15 to open that stage with a
+    // player held in memory, and &auto=1 to have the game throw by itself and start the stage again whenever it
+    // ends, so the frame rate under a full street can be read without hands. The frame rate and the number of
+    // people on the street are written at the bottom of the screen. None of this is in any other build.
+    int webStage=-1,webThrows,webFrames;bool webAuto;float webClock,webRate;string webText="";
+    static readonly float[] WebAngles={16,8,0,-8,-16,-24};
+    void WebTestBegin()
+    {
+        string url=Application.absoluteURL??"";int mark=url.IndexOf('?');if(mark<0)return;
+        foreach(string part in url.Substring(mark+1).Split('&'))
+        {
+            string[] pair=part.Split('=');if(pair.Length!=2)continue;
+            if(pair[0]=="stage")int.TryParse(pair[1],out webStage);else if(pair[0]=="auto")webAuto=pair[1]=="1";
+        }
+        if(webStage<1)return;
+        var save=new DadThrowSave{introSeen=true,furthest=Mathf.Clamp(webStage-1,0,game.Count-1)};
+        foreach(DadThrowStage.Kind kind in stages.kinds.Values)save.met.Add(kind.id);
+        aim.Cancel();seenRun=-1;Flow=new DadThrowFlow(game,layout.Field,story,save,null);
+    }
+    void WebTestTick()
+    {
+        webFrames++;webClock+=Time.unscaledDeltaTime;
+        if(webClock>=.5f)
+        {
+            webRate=webFrames/webClock;webFrames=0;webClock=0;
+            webText="fps "+Mathf.RoundToInt(webRate)+" · "+(Flow.Model!=null?Flow.Model.enemies.Count:0)+"명 · "+Screen.width+"×"+Screen.height;
+        }
+        if(!webAuto)return;
+        if(Flow.Now==DadThrowFlow.Screen.Title)Flow.Start();
+        else if(Flow.Now==DadThrowFlow.Screen.Clear||Flow.Now==DadThrowFlow.Screen.Defeat)Flow.Retry();
+        else if(Flow.Now==DadThrowFlow.Screen.Ending)Flow.Skip();
+        else if(Flow.Now==DadThrowFlow.Screen.Playing&&Flow.Entering==null&&Flow.Model.CanFire)
+        {
+            // Five balls at different heights, then a shoe, over and over.
+            bool shoe=webThrows%6==5;float turn=WebAngles[webThrows%WebAngles.Length]*Mathf.Deg2Rad;webThrows++;
+            if(Flow.Model.Fire(shoe?DadThrowModel.Weapon.Shoe:DadThrowModel.Weapon.Golf,new Vector2(Mathf.Cos(turn),Mathf.Sin(turn))*150))throwPose=DadThrowLayout.ReleaseTime;
+        }
+    }
+#endif
     // From the logo, with what the player's save remembers. A broken save is reported, never silently replaced.
     void Begin()
     {
@@ -227,6 +270,9 @@ public sealed class DadThrowPrototype:MonoBehaviour
     {
         fit=DadThrowLayout.FitTo(Screen.safeArea,Screen.height);
         if(Flow==null)return;
+#if DAD_THROW_WEBTEST
+        WebTestTick();
+#endif
         float dt=Mathf.Min(Time.unscaledDeltaTime,.1f);clock+=dt;
         for(int i=0;i<cueClip.Length;i++)if(cueClip[i]!=null&&clock>=cueAt[i]){speaker.PlayOneShot(cueClip[i]);cueClip[i]=null;}throwPose=Mathf.Max(0,throwPose-dt);
         palm=Mathf.Max(0,palm-dt);chainClock=Mathf.Max(0,chainClock-dt);shake=Mathf.Max(0,shake-dt/ShakeTime);
@@ -1054,6 +1100,9 @@ public sealed class DadThrowPrototype:MonoBehaviour
             else if(Flow.Now==DadThrowFlow.Screen.Intro||Flow.Now==DadThrowFlow.Screen.Ending)DrawStory(Flow.Cut);
             else DrawBattle();
             Letterbox(bars);
+#if DAD_THROW_WEBTEST
+            Outlined(new Rect(DadThrowLayout.W/2-200,DadThrowLayout.H-40,400,36),webText,22,Paper,Ink,2,bold);
+#endif
         }
         finally{GUI.color=tint;GUI.matrix=old;}
     }
