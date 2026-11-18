@@ -13,6 +13,8 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('artifact', type=Path)
 parser.add_argument('--android-player', type=Path, required=True)
 parser.add_argument('--report', type=Path, required=True)
+# The upright game's id unless told otherwise: the throw game's test builds carry an id of their own.
+parser.add_argument('--application-id', default='com.manducorporation.dadwar')
 args = parser.parse_args()
 checks = []
 
@@ -61,7 +63,7 @@ if is_apk:
     manifest = run([tools / 'aapt2.exe', 'dump', 'badging', artifact])
     package = re.search(r"package: name='([^']+)'", manifest)
     target = re.search(r"targetSdkVersion:'(\d+)'", manifest)
-    check('Final manifest has expected application ID', package and package[1] == 'com.manducorporation.dadwar', package[1] if package else manifest)
+    check('Final manifest has expected application ID', package and package[1] == args.application_id, package[1] if package else manifest)
     check('Final manifest targets API36+', target and int(target[1]) >= 36, int(target[1]) if target else manifest)
     aligned = run([tools / 'zipalign.exe', '-c', '-P', '16', '-v', '4', artifact])
     check('APK zip alignment verifies for 16KB pages', 'Verification successful' in aligned, aligned.splitlines()[-1:])
@@ -70,7 +72,7 @@ if is_apk:
 else:
     bundletool = next((args.android_player / 'Tools').glob('bundletool-all-*.jar'))
     manifest = run([java, '-jar', bundletool, 'dump', 'manifest', '--bundle=' + str(artifact), '--module=base'])
-    check('Bundle manifest has expected application ID', 'package="com.manducorporation.dadwar"' in manifest, manifest)
+    check('Bundle manifest has expected application ID', ('package="' + args.application_id + '"') in manifest, manifest)
     target = re.search(r'android:targetSdkVersion="(\d+)"', manifest)
     check('Bundle manifest targets API36+', target and int(target[1]) >= 36, int(target[1]) if target else manifest)
     validated = run([java, '-jar', bundletool, 'validate', '--bundle=' + str(artifact)])

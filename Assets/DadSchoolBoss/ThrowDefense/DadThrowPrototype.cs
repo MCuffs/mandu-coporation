@@ -118,7 +118,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
     // player held in memory, and &auto=1 to have the game throw by itself and start the stage again whenever it
     // ends, so the frame rate under a full street can be read without hands. The frame rate and the number of
     // people on the street are written at the bottom of the screen. None of this is in any other build.
-    int webStage=-1,webThrows,webFrames;bool webAuto;float webClock,webRate;string webText="";
+    int webStage=-1,webThrows,webFrames;bool webAuto,webCuts;float webClock,webRate;string webText="";
     static readonly float[] WebAngles={16,8,0,-8,-16,-24};
     void WebTestBegin()
     {
@@ -126,11 +126,12 @@ public sealed class DadThrowPrototype:MonoBehaviour
         foreach(string part in url.Substring(mark+1).Split('&'))
         {
             string[] pair=part.Split('=');if(pair.Length!=2)continue;
-            if(pair[0]=="stage")int.TryParse(pair[1],out webStage);else if(pair[0]=="auto")webAuto=pair[1]=="1";
+            if(pair[0]=="stage")int.TryParse(pair[1],out webStage);else if(pair[0]=="auto")webAuto=pair[1]=="1";else if(pair[0]=="cut")webCuts=pair[1]=="1";
         }
         if(webStage<1)return;
         var save=new DadThrowSave{introSeen=true,furthest=Mathf.Clamp(webStage-1,0,game.Count-1)};
-        foreach(DadThrowStage.Kind kind in stages.kinds.Values)save.met.Add(kind.id);
+        // &cut=1 leaves the entrances unseen, so the big pictures can be looked at.
+        if(!webCuts)foreach(DadThrowStage.Kind kind in stages.kinds.Values)save.met.Add(kind.id);
         aim.Cancel();seenRun=-1;Flow=new DadThrowFlow(game,layout.Field,story,save,null);
     }
     void WebTestTick()
