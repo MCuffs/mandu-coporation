@@ -170,6 +170,20 @@ public static class DadThrowDailyChecks
         check(odd.dailyDay==0&&odd.dailyLeft==Tries&&odd.dailyWon==0&&odd.dailyCards<(1<<DadThrowDaily.Faces.Length),"a letter the file holds without a stage, or with more tries and cards than exist, is held to what the game has");
 
         // ── where the letter stands on the screen ──
+        Func<string,string,bool> stored=(key,kind)=>System.IO.File.Exists("Assets/DadSchoolBoss/Resources/"+key+kind)&&System.IO.File.Exists("Assets/DadSchoolBoss/Resources/"+key+kind+".meta");
+        bool drawn=true;var seenKeys=new HashSet<string>();
+        foreach(DadThrowDaily.Face shown in DadThrowDaily.Faces)drawn&=stored(DadThrowDaily.IconKey(shown.card),".png")&&seenKeys.Add(DadThrowDaily.IconKey(shown.card));
+        check(drawn&&seenKeys.Count==12&&DadThrowDaily.IconKey(DadThrowDaily.Card.ShoeFeast)=="DadThrowDailyV1/rule_shoefeast","every rule card has a picture of its own, named after the card");
+        bool kept=DadThrowDaily.Chests.Length==3&&DadThrowDaily.TierIcons.Length==3;
+        foreach(string name in DadThrowDaily.Pictures)kept&=stored(DadThrowDaily.Art+name,".png");
+        foreach(string name in DadThrowDaily.TierIcons)kept&=stored(DadThrowDaily.Art+name,".png");
+        foreach(string name in DadThrowDaily.Chests)kept&=stored(DadThrowDaily.Art+name+"_closed",".png")&&stored(DadThrowDaily.Art+name+"_open",".png");
+        check(kept,"the letter's paper, card frame, palms, stamp and tick, a goal picture and a chest shut and open for each tier, the fog and the crossed-out mark are there");
+        bool heard=DadThrowDaily.Sounds.Length==6;foreach(string name in DadThrowDaily.Sounds)heard&=stored(DadThrowDaily.Audio+name,".wav");
+        check(heard,"the six sounds of the day are there");
+        Rect paper=DadThrowLayout.DailyPaper,within=DadThrowLayout.DailyCard;
+        check(paper.xMin<within.xMin&&paper.yMin<within.yMin&&paper.xMax>within.xMax&&paper.yMax>within.yMax&&paper.xMin>=0&&paper.yMin>=0&&paper.xMax<=DadThrowLayout.W&&paper.yMax<=DadThrowLayout.H,
+            "the sheet of paper is larger than what is laid out on it and still on the screen");
         Rect letter=DadThrowLayout.DailyCard;bool inside=true,apart=true;
         Rect[] parts={DadThrowLayout.DailyHeading,DadThrowLayout.DailyStage,DadThrowLayout.DailyRule(0),DadThrowLayout.DailyRule(1),DadThrowLayout.DailyTier(0),DadThrowLayout.DailyTier(1),DadThrowLayout.DailyTier(2),
             DadThrowLayout.DailyTries,DadThrowLayout.DailyGo,DadThrowLayout.DailyClose};

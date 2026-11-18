@@ -33,6 +33,15 @@ public sealed class DadThrowDaily
         new Face(Card.OneWay,"외길","공이 끝까지 뚫는다. 쌍둥이 공은 쉰다"),
         new Face(Card.BossIn,"대장 난입","이긴 대장이 중간에 끼어든다")};
     public static Face Of(Card card){return Faces[(int)card];}
+    // The pictures and sounds of today's challenge, as the game loads them (Tools/install_daily_runtime.py copies
+    // them in; Design/dad-throw-daily-asset-request-v1.md says what each is). A rule card's picture is named after
+    // the card. Chests and TierIcons are in the order of the three tiers: cleared, the gate kept, fifteen with one ball.
+    public const string Art="DadThrowDailyV1/",Audio="DadThrowAudioV1/";
+    public static string IconKey(Card card){return Art+"rule_"+card.ToString().ToLowerInvariant();}
+    public static readonly string[] Chests={"chest_wood","chest_silver","chest_gold"},TierIcons={"tier_clear","tier_gate","tier_chain"};
+    public static readonly string[] Pictures={"paper_note","rule_card_frame","rule_chip","envelope_open","icon_letter","badge_alert","stamp_done","icon_check",
+        "chance_on","chance_off","fog_veil","fog_puff_0","fog_puff_1","fog_puff_2","mark_ban","fx_chest_coins_0","fx_chest_coins_1","fx_chest_coins_2"};
+    public static readonly string[] Sounds={"sfx_envelope","sfx_stamp","sfx_chest_open","sfx_card_deal","sfx_try_spent","jingle_daily_clear"};
     public static int Bit(Card card){return 1<<(int)card;}
     public static bool Has(int cards,Card card){return (cards&Bit(card))!=0;}
     public static int Count(int cards){int n=0;foreach(Face face in Faces)if(Has(cards,face.card))n++;return n;}

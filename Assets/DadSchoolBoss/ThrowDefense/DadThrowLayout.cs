@@ -88,14 +88,21 @@ public sealed class DadThrowLayout
     // ── today's challenge (DadThrowDaily): its button on the title with the dot that says tries are left, the
     // letter (heading, the stage, two rule cards, three tiers, the tries, the way out and the start), and in a
     // fight the names of the day's cards under the top bar and where the fog of 안개 begins and thickens ──
-    public static readonly Rect DailyButton=new Rect(230,606,230,60),DailyDot=new Rect(444,598,22,22);
+    // The button holds a small envelope left of its words, so it is wider than its words alone needed.
+    public static readonly Rect DailyButton=new Rect(196,606,264,60),DailyDot=new Rect(440,594,28,28);
+    // DailyPaper: the sheet of paper itself. It is larger than the card its contents are laid out in, so the heading
+    // stands clear of the paper's slanted top edge and the piece of tape on its corner.
+    public static readonly Rect DailyPaper=new Rect(236,66,808,578);
     public static readonly Rect DailyCard=new Rect(260,100,760,520),DailyHeading=new Rect(300,112,420,60),DailyStage=new Rect(740,112,240,60);
     public static Rect DailyRule(int index){return new Rect(300+index*220,190,200,250);}
-    public static Rect DailyTier(int index){return new Rect(760,190+index*84,236,74);}
+    // A tier's row holds a small picture of the goal on the left and its chest on the right, with the words between.
+    public static Rect DailyTier(int index){return new Rect(744,190+index*84,256,74);}
     public static readonly Rect DailyTries=new Rect(300,456,420,56),DailyClose=new Rect(300,534,170,64),DailyGo=new Rect(690,526,300,76);
     public static Rect DailyTry(int index){return new Rect(DailyTries.x+150+index*46,DailyTries.center.y-17,34,34);}
     public static readonly Rect DailyChips=new Rect(32,92,390,34);
     public const float FogFrom=700,FogStep=11;public const int FogSteps=16;
+    // The fog picture starts this far left of FogFrom: its left edge is a row of soft lobes that only begin to hide anything there.
+    public const float FogLobes=50;
 
     // ── clear / defeat / pause cards (plan §6.3-6.5, sizes from the wide v2 screens) ──
     public static readonly Rect ResultCard=new Rect(650,218,460,330),PauseCard=new Rect(445,145,390,430);

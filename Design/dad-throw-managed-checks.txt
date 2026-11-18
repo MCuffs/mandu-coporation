@@ -525,6 +525,10 @@ PASS and is remembered as met
 PASS the letter comes back from the save file whole: the days, the stage, the cards, the tries left and what was paid
 PASS a save written before the letter existed reads as never having had one
 PASS a letter the file holds without a stage, or with more tries and cards than exist, is held to what the game has
+PASS every rule card has a picture of its own, named after the card
+PASS the letter's paper, card frame, palms, stamp and tick, a goal picture and a chest shut and open for each tier, the fog and the crossed-out mark are there
+PASS the six sounds of the day are there
+PASS the sheet of paper is larger than what is laid out on it and still on the screen
 PASS the letter's heading, two cards, three tiers, tries and two buttons sit inside it and none covers another
 PASS on the title the letter's button stands clear of start, the shop and the purse, and is tall enough for a thumb
 PASS in a fight the day's cards are named under the top bar, clear of a boss's name and the hint; the fog covers only the far half of the street
@@ -616,4 +620,4 @@ LAYOUT painted_gate 145.41 570 0 0
 LAYOUT road_edge 0 622.41 0 0
 LAYOUT sand_top 0 522.13 0 0
 
-TOTAL PASS: 512
+TOTAL PASS: 516
