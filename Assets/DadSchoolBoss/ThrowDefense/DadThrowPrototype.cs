@@ -675,7 +675,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
         Rect bar=DadThrowLayout.BossBar;DadUi.Panel(bar,PaperDown,Ink);
         float share=Mathf.Clamp01((float)chief.hp/Mathf.Max(1,chief.full));
         if(share>0)DadUi.Fill(new Rect(bar.x+4,bar.y+4,Mathf.Max(8,(bar.width-8)*share),bar.height-8),chief.raged?Warn:Gold,4);
-        Outlined(DadThrowLayout.BossName,chief.kind.entrance!=null?chief.kind.entrance.name:"대장",26,Paper,Ink,3,display);
+        Outlined(DadThrowLayout.BossName,chief.kind.entrance!=null?chief.kind.entrance.name:"대장",30,Paper,Ink,3,display);
     }
     void Veil(Color color){Box(new Rect(0,0,DadThrowLayout.W,DadThrowLayout.H),color);}
     // A new opponent comes on: the street dims, a slanted band crosses it, the man himself slides in large from

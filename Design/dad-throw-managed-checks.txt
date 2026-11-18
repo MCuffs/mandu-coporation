@@ -333,12 +333,12 @@ STAGE 1-1 golf thrown at once: clear at 11.8s, house 5/5, golf 40, shoe 0, most 
 STAGE 1-1 golf held for three: clear at 11.8s, house 5/5, golf 39, shoe 0, most people one ball reached 12, got in 0
 STAGE 1-1 shoe on the lead, then golf: clear at 11.6s, house 5/5, golf 36, shoe 1, most people one ball reached 12, got in 0
 NOTE 1-1 steady bot players (aim takes 0.45s, good 65% of the time): cleared 30 of 30, gate touched 0.0 times on average
-NOTE 1-1 hurried bot players (aim takes 0.7s, good 50% of the time): cleared 30 of 30, gate touched 0.4 times on average
+NOTE 1-1 hurried bot players (aim takes 0.7s, good 50% of the time): cleared 30 of 30, gate touched 0.2 times on average
 STAGE 1-3 no throws: defeat at 4.5s, house 0/5, golf 0, shoe 0, most people one ball reached 0, got in 5
 STAGE 1-3 golf thrown at once: clear at 11.2s, house 5/5, golf 38, shoe 0, most people one ball reached 12, got in 0
 STAGE 1-3 golf held for three: clear at 11.2s, house 5/5, golf 38, shoe 0, most people one ball reached 12, got in 0
 STAGE 1-3 shoe on the lead, then golf: clear at 11.2s, house 5/5, golf 38, shoe 0, most people one ball reached 12, got in 0
-NOTE 1-3 steady bot players (aim takes 0.45s, good 65% of the time): cleared 29 of 30, gate touched 0.4 times on average
+NOTE 1-3 steady bot players (aim takes 0.45s, good 65% of the time): cleared 29 of 30, gate touched 0.3 times on average
 NOTE 1-3 hurried bot players (aim takes 0.7s, good 50% of the time): cleared 3 of 30, gate touched 4.6 times on average
 PASS a ball at head height, at the belly or along the shins meets the body
 PASS a ball that clears the head misses
@@ -422,6 +422,28 @@ PASS leaving before he has been seen through means he comes on again next time
 PASS a player whose save is already past 1-4 meets him on the next stage he is in
 PASS and then not again
 PASS who has been met is saved and read back; a save from before has met nobody
+PASS the stage file says who the boss is: his pictures, a body wider than anyone's, what he pays, and advice about the shoe
+PASS a boss needs all six of his pictures, may not be narrower than anyone and may not carry a tray
+PASS 1-5 ends with its boss: one man, behind everyone else, at half the stage's pace, and one of the stage's hundred; no other stage has one yet
+PASS an eased 1-5 still has its one boss, with a little less health
+PASS a boss walks in like anyone, at his own pace
+PASS every four seconds he stops and braces
+PASS a ball stops on a braced boss as it does on a tray, and he does not budge
+PASS then he dashes for a second at five times his walk, still proof against a ball, and walks on
+PASS a shoe that reaches him braced takes his feet from under him, and pushes him half as far as it pushes anyone
+PASS while he stands dazed a ball hurts him twice over
+PASS and two and a half seconds later he is on his way again
+PASS a shoe on a walking boss only shoves and slows him, half as far as the man beside him
+PASS brought to half his health he loses his temper
+PASS and from then on he braces sooner than he used to
+PASS a boss who touches the gate costs a touch and is not out of it
+PASS he trots back out and comes again
+PASS and his touch on the last of the gate loses the stage like anyone's
+PASS sending him back pays his bounty on top of the one won everyone pays
+PASS his body is wider to a ball than anyone's
+PASS a boss makes no entrance when the stage starts: he makes it in the middle of the fight, as he steps onto the street, and the street holds still for it
+PASS the entrance is made once; a boss sent back through the flow pays one won and his bounty
+PASS and he does not make it again on the next try
 PASS a new player meets every stage exactly as the curve has it
 PASS one defeat changes nothing
 PASS a second defeat on the same stage takes 6% of its people away and leaves its name, its gate and its words alone
@@ -507,8 +529,8 @@ PASS the letter's heading, two cards, three tiers, tries and two buttons sit ins
 PASS on the title the letter's button stands clear of start, the shop and the purse, and is tall enough for a thumb
 PASS in a fight the day's cards are named under the top bar, clear of a boss's name and the hint; the fog covers only the far half of the street
 DAILY bot (aims well 2 in 3, shoe at trays, owns Pierce 2 Reload 1 Blast 1 Wide 1, cleared to 2-2): thirty days, three tries a day
-DAILY   cleared 24 of 30 days, 22 at the first try | tries per day (x = not cleared): 11xx111x11311x11111111111xx211
-DAILY   days cleared / days dealt, by card: Dodge 3/4  Trays 2/5  BallOnly 1/1  ShoeFeast 5/9  BigBall 3/3  Bouncy 5/7  OneGate 3/3  Reverse 3/3  GoldRush 3/4  Fog 6/6  OneWay 4/5  BossIn 3/3  
+DAILY   cleared 25 of 30 days, 20 at the first try | tries per day (x = not cleared): 13xx111211211x11112111111xx211
+DAILY   days cleared / days dealt, by card: Dodge 3/4  Trays 3/5  BallOnly 1/1  ShoeFeast 6/9  BigBall 3/3  Bouncy 5/7  OneGate 3/3  Reverse 3/3  GoldRush 3/4  Fog 6/6  OneWay 4/5  BossIn 3/3  
 LAYOUT background 0 0 1280 720.38
 LAYOUT dad_ready 110.29 427.46 156.92 156.92
 LAYOUT dad_windup 113.96 436.13 148.21 148.21
@@ -594,4 +616,4 @@ LAYOUT painted_gate 145.41 570 0 0
 LAYOUT road_edge 0 622.41 0 0
 LAYOUT sand_top 0 522.13 0 0
 
-TOTAL PASS: 490
+TOTAL PASS: 512

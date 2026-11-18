@@ -314,6 +314,89 @@ public static class DadThrowGrowthChecks
         DadThrowSave remembered=DadThrowSave.Parse(newcomer.ToJson());
         check(remembered.met.Count==3&&remembered.met.Contains("guard")&&remembered.met.Contains("tough")&&remembered.met.Contains("fast")&&old.met.Count==0,"who has been met is saved and read back; a save from before has met nobody");
 
+        // ── the boss at the end of the first chapter ──
+        {
+            const DadThrowModel.Mood Walks=DadThrowModel.Mood.Walk,Braces=DadThrowModel.Mood.Brace,Dashes=DadThrowModel.Mood.Dash,Stunned=DadThrowModel.Mood.Dazed,Roars=DadThrowModel.Mood.Roar,GoesBack=DadThrowModel.Mood.Back;
+            check(bossKind.boss!=null&&bossKind.boss.bounty==30&&bossKind.boss.half>DadThrowModel.BodyHalf&&!bossKind.guards&&bossKind.entrance!=null&&bossKind.entrance.shoe&&set.kinds["normal"].boss==null,
+                "the stage file says who the boss is: his pictures, a body wider than anyone's, what he pays, and advice about the shoe");
+            string cfWords=",\"boss\":{\"brace\":\"x/a\",\"dash\":\"x/b\",\"hit\":\"x/c\",\"dazed\":\"x/d\",\"roar\":\"x/e\",\"fly\":\"x/f\"BODY}";
+            check(!refused(kindJson.Replace("GUARDS",cfWords.Replace("BODY","")))&&refused(kindJson.Replace("GUARDS",cfWords.Replace("BODY",",\"bodyHalf\":10")))
+                &&refused(kindJson.Replace("GUARDS",cfWords.Replace("BODY","")+",\"guards\":true,\"bareResource\":\"x/bare\""))&&refused(kindJson.Replace("GUARDS",",\"boss\":{\"brace\":\"x/a\"}")),
+                "a boss needs all six of his pictures, may not be narrower than anyone and may not carry a tray");
+            bool cfOnly=true;for(int i=0;i<game.Count;i++)cfOnly&=game[i].groups.Exists(cfG=>cfG.kind==bossKind)==(i==DadThrowCurve.PerChapter-1);
+            DadThrowStage.Group cfHim=game[4].groups.Find(cfG=>cfG.kind==bossKind);float cfLast=0;foreach(DadThrowStage.Group cfEach in game[4].groups)if(cfEach.kind!=bossKind)cfLast=Mathf.Max(cfLast,cfEach.at);
+            check(cfOnly&&cfHim.count==1&&cfHim.hp==DadThrowCurve.BossHealth(5)&&cfHim.at>cfLast&&Mathf.Abs(cfHim.speed-DadThrowCurve.Pace(5)*DadThrowCurve.BossPace)<.01f&&game[4].Total==DadThrowCurve.People(5),
+                "1-5 ends with its boss: one man, behind everyone else, at half the stage's pace, and one of the stage's hundred; no other stage has one yet");
+            var cfTuner=new DadThrowTuner(set.kinds,street);var cfOwed=new DadThrowSave();DadThrowTuner.Lost(cfOwed,"1-5");DadThrowTuner.Lost(cfOwed,"1-5");
+            DadThrowStage.Group cfSoft=cfTuner.Table(game[4],5,cfOwed).groups.Find(cfG=>cfG.kind==bossKind);
+            check(cfSoft!=null&&cfSoft.count==1&&cfSoft.hp==Mathf.RoundToInt(DadThrowCurve.BossHealth(5)*.94f)&&cfSoft.hp<cfHim.hp,"an eased 1-5 still has its one boss, with a little less health");
+
+            // Where a flat throw comes down: a boss standing a little short of it is in the way of the ball.
+            var cfPath=new List<Vector2>();Quiet(field).Predict(Golf,Flat,cfPath);float cfLand=cfPath[cfPath.Count-1].x-10;
+            Func<float,int,float,DadThrowModel> cfRing=(cfX,cfHealth,cfPace)=>{DadThrowModel cfStreet=Quiet(field);DadThrowModel.Enemy cfMan=cfStreet.AddEnemy(cfX,cfHealth,cfPace);cfMan.kind=bossKind;return cfStreet;};
+
+            DadThrowModel cfA=cfRing(cfLand+240,40,60);DadThrowModel.Enemy cfBossA=cfA.Chief;DadThrowChecks.Advance(cfA,1);
+            check(cfBossA.mood==Walks&&!cfBossA.guard&&Mathf.Abs(cfBossA.x-(cfLand+180))<1,"a boss walks in like anyone, at his own pace");
+            DadThrowChecks.Advance(cfA,DadThrowModel.BossEvery-1+.05f);float cfStood=cfBossA.x;
+            check(cfBossA.mood==Braces&&cfBossA.guard&&Mathf.Abs(cfStood-cfLand)<2,"every four seconds he stops and braces");
+            cfA.Fire(Golf,Flat);DadThrowChecks.Advance(cfA,.6f);
+            check(cfA.BlockSerial==1&&cfBossA.hp==40&&cfBossA.mood==Braces&&cfBossA.x==cfStood,"a ball stops on a braced boss as it does on a tray, and he does not budge");
+
+            DadThrowModel cfB=cfRing(1100,40,60);DadThrowModel.Enemy cfBossB=cfB.Chief;DadThrowChecks.Advance(cfB,DadThrowModel.BossEvery+DadThrowModel.BossBrace+.5f);
+            bool cfMid=cfBossB.mood==Dashes&&cfBossB.guard;DadThrowChecks.Advance(cfB,.6f);
+            check(cfMid&&cfBossB.mood==Walks&&!cfBossB.guard&&Mathf.Abs(cfBossB.x-(1100-60*DadThrowModel.BossEvery-60*DadThrowModel.BossDashPace*DadThrowModel.BossDash))<10,
+                "then he dashes for a second at five times his walk, still proof against a ball, and walks on");
+
+            DadThrowModel cfC=cfRing(cfLand+240-plain.ShoePush*DadThrowModel.BossShove,40,60);DadThrowModel.Enemy cfBossC=cfC.Chief;DadThrowChecks.Advance(cfC,DadThrowModel.BossEvery+.05f);float cfAt=cfBossC.x;
+            cfC.Fire(Shoe,Flat);DadThrowChecks.Advance(cfC,.6f);
+            check(cfC.DazeSerial==1&&cfBossC.mood==Stunned&&!cfBossC.guard&&Mathf.Abs(cfBossC.x-(cfAt+plain.ShoePush*DadThrowModel.BossShove))<.01f,
+                "a shoe that reaches him braced takes his feet from under him, and pushes him half as far as it pushes anyone");
+            DadThrowChecks.Advance(cfC,.3f);cfC.Fire(Golf,Flat);DadThrowChecks.Advance(cfC,.6f);
+            check(cfBossC.hp==40-DadThrowModel.BossDazedHurt*plain.GolfDamage&&cfBossC.mood==Stunned,"while he stands dazed a ball hurts him twice over");
+            DadThrowChecks.Advance(cfC,DadThrowModel.BossDazed);
+            check(cfBossC.mood==Walks&&cfBossC.x<cfAt+plain.ShoePush*DadThrowModel.BossShove,"and two and a half seconds later he is on his way again");
+
+            DadThrowModel cfD=cfRing(cfLand-30,40,1);DadThrowModel.Enemy cfBossD=cfD.Chief,cfBeside=cfD.AddEnemy(cfLand,1,1);float cfWas=cfBossD.x,cfWasBeside=cfBeside.x;
+            cfD.Fire(Shoe,Flat);DadThrowChecks.Advance(cfD,.6f);
+            check(cfD.DazeSerial==0&&cfBossD.mood==Walks&&cfBossD.slow>0&&cfBossD.x-cfWas>45&&cfBossD.x-cfWas<55&&cfBeside.x-cfWasBeside>95,
+                "a shoe on a walking boss only shoves and slows him, half as far as the man beside him");
+
+            DadThrowModel cfE=cfRing(cfLand,4,1);DadThrowModel.Enemy cfBossE=cfE.Chief;
+            cfE.Fire(Golf,Flat);DadThrowChecks.Advance(cfE,.5f);bool cfCalm=cfBossE.hp==3&&!cfBossE.raged&&cfBossE.mood==Walks;
+            cfE.Fire(Golf,Flat);DadThrowChecks.Advance(cfE,.5f);
+            check(cfCalm&&cfBossE.hp==2&&cfBossE.raged&&cfBossE.mood==Roars,"brought to half his health he loses his temper");
+            DadThrowChecks.Advance(cfE,DadThrowModel.BossRoar);bool cfUp=cfBossE.mood==Walks;DadThrowChecks.Advance(cfE,DadThrowModel.BossEveryRaged+.1f);
+            check(cfUp&&cfBossE.mood==Braces&&DadThrowModel.BossEveryRaged<DadThrowModel.BossEvery,"and from then on he braces sooner than he used to");
+
+            DadThrowModel cfF=cfRing(field.Gate+6,40,60);DadThrowModel.Enemy cfBossF=cfF.Chief;DadThrowChecks.Advance(cfF,.2f);
+            check(cfF.Health==4&&cfF.Escaped==0&&cfF.enemies.Contains(cfBossF)&&cfBossF.mood==GoesBack&&cfF.phase==Playing,"a boss who touches the gate costs a touch and is not out of it");
+            DadThrowChecks.Advance(cfF,DadThrowModel.BossBack/(60*DadThrowModel.BossBackPace)+.1f);
+            check(cfBossF.mood==Walks&&cfBossF.x>field.Gate+DadThrowModel.BossBack-30&&cfF.Health==4,"he trots back out and comes again");
+            var cfThin=new DadThrowStage{id="thin",health=1};cfThin.groups.Add(new DadThrowStage.Group{at=9999,count=1,firstX=1300,speed=1,hp=1});
+            var cfOne=new DadThrowModel(field,cfThin);DadThrowModel.Enemy cfBossG=cfOne.AddEnemy(field.Gate+6,40,60);cfBossG.kind=bossKind;DadThrowChecks.Advance(cfOne,.3f);
+            check(cfOne.phase==DadThrowModel.Phase.Lost,"and his touch on the last of the gate loses the stage like anyone's");
+
+            DadThrowModel cfH=cfRing(cfLand,1,1);cfH.Fire(Golf,Flat);DadThrowChecks.Advance(cfH,.5f);
+            check(cfH.Killed==1&&cfH.Bounty==bossKind.boss.bounty&&cfH.Chief==null,"sending him back pays his bounty on top of the one won everyone pays");
+            Vector2 cfTop=new Vector2(540,300),cfBottom=new Vector2(540,560);
+            check(DadThrowModel.SweptBody(cfTop,cfBottom,500,570,160,DadThrowModel.GolfHit,bossKind.boss.half)&&!DadThrowModel.SweptBody(cfTop,cfBottom,500,570,160,DadThrowModel.GolfHit),
+                "his body is wider to a ball than anyone's");
+
+            var cfSolo=new DadThrowStage{id="solo",health=5,backgroundKey=street};cfSolo.groups.Add(new DadThrowStage.Group{at=.5f,count=1,firstX=1300,speed=120,hp=1,kind=bossKind});
+            var cfSave=new DadThrowSave{introSeen=true};var cfFlow=new DadThrowFlow(new List<DadThrowStage>{cfSolo},field,null,cfSave,null);cfFlow.Tick(2);cfFlow.Start();
+            bool cfQuiet=cfFlow.Now==OnFight&&cfFlow.Entering==null;
+            for(int i=0;i<120*3&&cfFlow.Entering==null;i++)cfFlow.Tick(1/120f);
+            DadThrowModel.Enemy cfIn=cfFlow.Model.Chief;float cfStop=cfIn!=null?cfIn.x:0;cfFlow.Tick(1);
+            check(cfQuiet&&cfFlow.Entering==bossKind&&cfIn!=null&&cfStop<=DadThrowModel.Width-DadThrowFlow.BossShown&&cfStop>DadThrowModel.Width-DadThrowFlow.BossShown-5&&cfIn.x==cfStop,
+                "a boss makes no entrance when the stage starts: he makes it in the middle of the fight, as he steps onto the street, and the street holds still for it");
+            bool cfSkipped=cfFlow.SkipEntrance()&&cfFlow.Entering==null&&cfSave.met.Contains("boss");
+            var cfThrower=new DadThrowBots.Run();for(int i=0;i<120*60&&cfFlow.Now==OnFight;i++){DadThrowBots.Spam(cfFlow.Model,cfThrower);cfFlow.Tick(1/120f);}
+            check(cfSkipped&&cfFlow.Now==OnClear&&cfFlow.Entering==null&&cfFlow.Earned==DadThrowShop.WonPerFelled+bossKind.boss.bounty&&cfSave.coins==cfFlow.Earned,
+                "the entrance is made once; a boss sent back through the flow pays one won and his bounty");
+            cfFlow.Retry();for(int i=0;i<120*2;i++)cfFlow.Tick(1/120f);
+            check(cfFlow.Now==OnFight&&cfFlow.Model.Chief!=null&&cfFlow.Entering==null,"and he does not make it again on the next try");
+        }
+
         // ── difficulty that bends a little toward how the player is doing ──
         var tuner=new DadThrowTuner(set.kinds,street);var note=new DadThrowSave();
         check(DadThrowTuner.Ease(note,"2-1")==0&&DadThrowTuner.Heat(note)==0&&tuner.Table(game[5],6,note)==game[5],"a new player meets every stage exactly as the curve has it");
@@ -456,7 +539,8 @@ public static class DadThrowGrowthChecks
         r.AppendLine("Stage tables");
         for(int number=1;number<=Reach;number++)
             r.AppendLine(string.Format(PlainNumbers,"  {0,-4} {1,3} people ({2,2} tough x{3} health, {4,2} quick, {5,2} trays), pace {6:0}, a pack every {7:0.00}s",
-                DadThrowCurve.Id(number),DadThrowCurve.People(number),DadThrowCurve.Tough(number),DadThrowCurve.ToughHealth(number),DadThrowCurve.Fast(number),DadThrowCurve.Guards(number),DadThrowCurve.Pace(number),DadThrowCurve.Gap(number)));
+                DadThrowCurve.Id(number),DadThrowCurve.People(number),DadThrowCurve.Tough(number),DadThrowCurve.ToughHealth(number),DadThrowCurve.Fast(number),DadThrowCurve.Guards(number),DadThrowCurve.Pace(number),DadThrowCurve.Gap(number))
+                +(DadThrowCurve.BossHealth(number)>0?", and last the boss with "+DadThrowCurve.BossHealth(number)+" health":""));
         r.AppendLine();
         r.AppendLine("Shop");
         foreach(DadThrowShop.Card card in DadThrowShop.Cards)r.AppendLine(string.Format(PlainNumbers,"  {0,-7} first {1,3} won, up to {2} times",card.item,card.price,card.most));

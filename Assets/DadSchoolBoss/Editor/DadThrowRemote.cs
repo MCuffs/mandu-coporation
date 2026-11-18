@@ -224,7 +224,12 @@ public static class DadThrowRemote
         Step(.3f,()=>{Note("start: "+g.Flow.Start()+" "+g.Flow.Stage.id);Play(DadThrowGrowthChecks.Hand(7,true,.2f,.9f));});
         Until(()=>g.Flow.Entering!=null&&g.Flow.Entering.boss!=null&&g.Flow.EnterClock>=1.2f,40,()=>shot("boss-01-entrance-in-the-middle-of-the-fight"));
         Step(.2f,()=>Note("entrance skipped: "+g.Flow.SkipEntrance()));
-        Until(()=>chief()!=null&&chief().x<1170,8,()=>shot("boss-02-walking-in-under-his-bar"));
+        Until(()=>chief()!=null&&chief().x<1170,8,()=>
+        {
+            shot("boss-02-walking-in-under-his-bar");bot=null;
+            // Nobody throws while he is stood up in each pose, so everyone else is sent to the far end of the street to walk in again.
+            if(fighting())foreach(DadThrowModel.Enemy other in g.Model.enemies)if(!other.IsChief)other.x=1190+other.id%9*12;
+        });
         Step(.1f,()=>pose(DadThrowModel.Mood.Brace,900));
         Step(.4f,()=>shot("boss-03-braced-ball-stops-shoe-button-lit"));
         Step(.05f,()=>pose(DadThrowModel.Mood.Dash,0));
@@ -235,7 +240,7 @@ public static class DadThrowRemote
         Step(.35f,()=>shot("boss-06-losing-his-temper"));
         Step(.05f,()=>pose(DadThrowModel.Mood.Back,g.Model!=null?g.Model.Field.Gate+90:0));
         Step(.3f,()=>shot("boss-07-trotting-back-out-from-the-gate"));
-        Step(.05f,()=>{DadThrowModel.Enemy c=chief();if(c!=null){c.hp=1;pose(DadThrowModel.Mood.Walk,700);}});
+        Step(.05f,()=>{DadThrowModel.Enemy c=chief();if(c!=null){c.hp=1;pose(DadThrowModel.Mood.Walk,700);}Play(DadThrowGrowthChecks.Hand(7,true,.2f,.9f));});
         Until(()=>!fighting()||chief()==null,12);
         Step(.3f,()=>shot("boss-08-sent-flying-with-his-bounty"));
         Until(()=>g.Flow.Now==DadThrowFlow.Screen.Clear||g.Flow.Now==DadThrowFlow.Screen.Defeat||g.Flow.Now==DadThrowFlow.Screen.Ending,90,()=>bot=null);
