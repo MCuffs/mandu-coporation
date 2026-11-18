@@ -23,7 +23,8 @@ using UnityEngine.Rendering;
 //                DAD_UPLOAD_KEYSTORE (path to the .jks), DAD_UPLOAD_KEYSTORE_PASS, DAD_UPLOAD_KEY_ALIAS, DAD_UPLOAD_KEY_PASS.
 // Every build carries the project's own version unless the same terminal names another: DAD_VERSION_NAME (what a
 // player sees, such as 1.0.0) and DAD_VERSION_CODE (a whole number; Play refuses a code an earlier upload used, so
-// each upload counts one up). The build copy's settings are never committed, so nothing here reaches the project.
+// each upload counts one up). The build puts the project's own version back when it ends, so a later build that
+// names none does not inherit this one's.
 // StoreId was decided by the owner on 2026-11-18 ("yes, that one"). Play never lets an app change it after the
 // first upload.
 public static class DadThrowAndroidBuild
@@ -46,6 +47,7 @@ public static class DadThrowAndroidBuild
 
     static void Run(bool bundle,string id,bool store,string output,string reportPath)
     {
+        string versionWas=PlayerSettings.bundleVersion;int codeWas=PlayerSettings.Android.bundleVersionCode;
         int exit=1;var report=new StringBuilder(store?"Throw game Android store bundle; signed with the owner's upload key.\n":"Throw game Android test build; debug-signed, not for store upload.\n");
         try
         {
@@ -96,6 +98,7 @@ public static class DadThrowAndroidBuild
             // Nothing about the key stays in the build copy's settings.
             PlayerSettings.Android.useCustomKeystore=false;PlayerSettings.Android.keystoreName="";PlayerSettings.Android.keystorePass="";
             PlayerSettings.Android.keyaliasName="";PlayerSettings.Android.keyaliasPass="";
+            PlayerSettings.bundleVersion=versionWas;PlayerSettings.Android.bundleVersionCode=codeWas;
             try{DadThrowWebBuild.Restore();}catch(Exception error){report.AppendLine("RESTORE FAILED "+error.Message);exit=1;}
             File.WriteAllText(reportPath,report.ToString());Debug.Log(report.ToString());EditorApplication.Exit(exit);
         }
