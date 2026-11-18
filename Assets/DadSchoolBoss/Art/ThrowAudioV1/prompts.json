@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "assets": [
+    {
+      "id": "sfx_envelope",
+      "method": "original procedural synthesis",
+      "source": "Tools/finish_daily_art.py"
+    },
+    {
+      "id": "sfx_stamp",
+      "method": "original procedural synthesis",
+      "source": "Tools/finish_daily_art.py"
+    },
+    {
+      "id": "sfx_chest_open",
+      "method": "original procedural synthesis",
+      "source": "Tools/finish_daily_art.py"
+    },
+    {
+      "id": "sfx_card_deal",
+      "method": "original procedural synthesis",
+      "source": "Tools/finish_daily_art.py"
+    },
+    {
+      "id": "sfx_try_spent",
+      "method": "original procedural synthesis",
+      "source": "Tools/finish_daily_art.py"
+    },
+    {
+      "id": "jingle_daily_clear",
+      "method": "original procedural synthesis",
+      "source": "Tools/finish_daily_art.py"
+    }
+  ]
+}

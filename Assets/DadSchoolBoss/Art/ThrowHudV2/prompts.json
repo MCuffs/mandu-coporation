@@ -1,0 +1,113 @@
+{
+  "version": 1,
+  "assets": [
+    {
+      "id": "rule_dodge",
+      "brief": "피구공과 속도선 셋",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "rule_trays",
+      "brief": "칸이 나뉜 급식판 세 장",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "rule_ballonly",
+      "brief": "골프공 옆 금지된 슬리퍼",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "rule_shoefeast",
+      "brief": "부채꼴 슬리퍼 세 짝",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "rule_bigball",
+      "brief": "작은 손에 받친 큰 공",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "rule_bouncy",
+      "brief": "점선 세 번 바운드",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "rule_onegate",
+      "brief": "초록 대문의 손바닥",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "rule_reverse",
+      "brief": "접이식 의자와 역방향 화살표",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "rule_goldrush",
+      "brief": "쏟아진 꽃 동전",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "rule_fog",
+      "brief": "안개 뒤 사람 그림자",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "rule_oneway",
+      "brief": "다섯 고리를 관통하는 화살표",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "rule_bossin",
+      "brief": "번개 난입 표식",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "rule_chip",
+      "brief": "규칙 표시판",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "mark_ban",
+      "brief": "빨간 금지",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "fog_veil",
+      "brief": "크림 안개 오른쪽으로 진해짐",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "fog_puff_0",
+      "brief": "흐르는 안개 0",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "fog_puff_1",
+      "brief": "흐르는 안개 1",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "fog_puff_2",
+      "brief": "흐르는 안개 2",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "assets": [
+    {
+      "id": "unlock_daily",
+      "file": "unlock_daily.png",
+      "width": 512,
+      "height": 512,
+      "pivotPixels": {
+        "x": 256,
+        "y": 256
+      },
+      "bounds": [
+        11,
+        20,
+        482,
+        472
+      ]
+    }
+  ]
+}

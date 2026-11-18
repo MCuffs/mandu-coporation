@@ -1,0 +1,385 @@
+{
+  "version": 1,
+  "assets": [
+    {
+      "id": "icon_letter",
+      "file": "icon_letter.png",
+      "width": 256,
+      "height": 256,
+      "pivotPixels": {
+        "x": 128,
+        "y": 128
+      },
+      "bounds": [
+        19,
+        57,
+        237,
+        204
+      ]
+    },
+    {
+      "id": "envelope_closed",
+      "file": "envelope_closed.png",
+      "width": 512,
+      "height": 512,
+      "pivotPixels": {
+        "x": 256,
+        "y": 256
+      },
+      "bounds": [
+        38,
+        115,
+        474,
+        408
+      ]
+    },
+    {
+      "id": "envelope_open",
+      "file": "envelope_open.png",
+      "width": 512,
+      "height": 512,
+      "pivotPixels": {
+        "x": 256,
+        "y": 256
+      },
+      "bounds": [
+        38,
+        53,
+        474,
+        418
+      ]
+    },
+    {
+      "id": "badge_alert",
+      "file": "badge_alert.png",
+      "width": 128,
+      "height": 128,
+      "pivotPixels": {
+        "x": 64,
+        "y": 64
+      },
+      "bounds": [
+        17,
+        17,
+        111,
+        111
+      ]
+    },
+    {
+      "id": "stamp_done",
+      "file": "stamp_done.png",
+      "width": 256,
+      "height": 256,
+      "pivotPixels": {
+        "x": 128,
+        "y": 128
+      },
+      "bounds": [
+        34,
+        34,
+        222,
+        222
+      ]
+    },
+    {
+      "id": "chance_on",
+      "file": "chance_on.png",
+      "width": 128,
+      "height": 128,
+      "pivotPixels": {
+        "x": 64,
+        "y": 64
+      },
+      "bounds": [
+        19,
+        12,
+        103,
+        110
+      ]
+    },
+    {
+      "id": "chance_off",
+      "file": "chance_off.png",
+      "width": 128,
+      "height": 128,
+      "pivotPixels": {
+        "x": 64,
+        "y": 64
+      },
+      "bounds": [
+        19,
+        12,
+        103,
+        110
+      ]
+    },
+    {
+      "id": "icon_check",
+      "file": "icon_check.png",
+      "width": 128,
+      "height": 128,
+      "pivotPixels": {
+        "x": 64,
+        "y": 64
+      },
+      "bounds": [
+        7,
+        24,
+        123,
+        116
+      ]
+    },
+    {
+      "id": "paper_note",
+      "file": "paper_note.png",
+      "width": 768,
+      "height": 768,
+      "pivotPixels": {
+        "x": 384,
+        "y": 384
+      },
+      "nineSlice": {
+        "top": 96,
+        "left": 96,
+        "bottom": 96,
+        "right": 96
+      },
+      "bounds": [
+        19,
+        21,
+        749,
+        741
+      ]
+    },
+    {
+      "id": "rule_card_frame",
+      "file": "rule_card_frame.png",
+      "width": 384,
+      "height": 512,
+      "pivotPixels": {
+        "x": 192,
+        "y": 256
+      },
+      "nineSlice": {
+        "top": 48,
+        "left": 48,
+        "bottom": 48,
+        "right": 48
+      },
+      "bounds": [
+        5,
+        7,
+        379,
+        505
+      ]
+    },
+    {
+      "id": "rule_card_back",
+      "file": "rule_card_back.png",
+      "width": 384,
+      "height": 512,
+      "pivotPixels": {
+        "x": 192,
+        "y": 256
+      },
+      "bounds": [
+        5,
+        7,
+        379,
+        505
+      ]
+    },
+    {
+      "id": "tier_clear",
+      "file": "tier_clear.png",
+      "width": 128,
+      "height": 128,
+      "pivotPixels": {
+        "x": 64,
+        "y": 64
+      },
+      "bounds": [
+        10,
+        17,
+        120,
+        102
+      ]
+    },
+    {
+      "id": "tier_gate",
+      "file": "tier_gate.png",
+      "width": 128,
+      "height": 128,
+      "pivotPixels": {
+        "x": 64,
+        "y": 64
+      },
+      "bounds": [
+        17,
+        22,
+        114,
+        111
+      ]
+    },
+    {
+      "id": "tier_chain",
+      "file": "tier_chain.png",
+      "width": 128,
+      "height": 128,
+      "pivotPixels": {
+        "x": 64,
+        "y": 64
+      },
+      "bounds": [
+        7,
+        45,
+        125,
+        90
+      ]
+    },
+    {
+      "id": "chest_wood_closed",
+      "file": "chest_wood_closed.png",
+      "width": 512,
+      "height": 512,
+      "pivotPixels": {
+        "x": 256,
+        "y": 256
+      },
+      "bounds": [
+        43,
+        166,
+        469,
+        418
+      ]
+    },
+    {
+      "id": "chest_wood_open",
+      "file": "chest_wood_open.png",
+      "width": 512,
+      "height": 512,
+      "pivotPixels": {
+        "x": 256,
+        "y": 256
+      },
+      "bounds": [
+        32,
+        11,
+        458,
+        418
+      ]
+    },
+    {
+      "id": "chest_silver_closed",
+      "file": "chest_silver_closed.png",
+      "width": 512,
+      "height": 512,
+      "pivotPixels": {
+        "x": 256,
+        "y": 256
+      },
+      "bounds": [
+        43,
+        166,
+        469,
+        418
+      ]
+    },
+    {
+      "id": "chest_silver_open",
+      "file": "chest_silver_open.png",
+      "width": 512,
+      "height": 512,
+      "pivotPixels": {
+        "x": 256,
+        "y": 256
+      },
+      "bounds": [
+        36,
+        15,
+        454,
+        418
+      ]
+    },
+    {
+      "id": "chest_gold_closed",
+      "file": "chest_gold_closed.png",
+      "width": 512,
+      "height": 512,
+      "pivotPixels": {
+        "x": 256,
+        "y": 256
+      },
+      "bounds": [
+        64,
+        71,
+        474,
+        445
+      ]
+    },
+    {
+      "id": "chest_gold_open",
+      "file": "chest_gold_open.png",
+      "width": 512,
+      "height": 512,
+      "pivotPixels": {
+        "x": 256,
+        "y": 256
+      },
+      "bounds": [
+        32,
+        11,
+        474,
+        445
+      ]
+    },
+    {
+      "id": "fx_chest_coins_0",
+      "file": "fx_chest_coins_0.png",
+      "width": 384,
+      "height": 384,
+      "pivotPixels": {
+        "x": 192,
+        "y": 192
+      },
+      "bounds": [
+        62,
+        113,
+        322,
+        356
+      ]
+    },
+    {
+      "id": "fx_chest_coins_1",
+      "file": "fx_chest_coins_1.png",
+      "width": 384,
+      "height": 384,
+      "pivotPixels": {
+        "x": 192,
+        "y": 192
+      },
+      "bounds": [
+        55,
+        87,
+        329,
+        305
+      ]
+    },
+    {
+      "id": "fx_chest_coins_2",
+      "file": "fx_chest_coins_2.png",
+      "width": 384,
+      "height": 384,
+      "pivotPixels": {
+        "x": 192,
+        "y": 192
+      },
+      "bounds": [
+        47,
+        60,
+        337,
+        253
+      ]
+    }
+  ]
+}
