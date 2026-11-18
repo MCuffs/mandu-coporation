@@ -10,6 +10,8 @@ using UnityEngine;
 public sealed class DadThrowPrototype:MonoBehaviour
 {
     public DadThrowFlow Flow {get;private set;}
+    // Set for the editor session while the remote's Play Mode runs (DadThrowRemote): the save on disk is not written.
+    public const string RemoteKey="DadThrowRemotePlay";
     public DadThrowModel Model {get{return Flow!=null?Flow.Model:null;}}
     DadThrowLayout layout;DadThrowStageSet stages;readonly DadThrowAim aim=new DadThrowAim();
     // The game's stages, built off the curve from the opponents the stage file declares, and the tuner that
@@ -101,7 +103,13 @@ public sealed class DadThrowPrototype:MonoBehaviour
     {
         string problem;DadThrowSave save=DadThrowSave.Load(savePath,out problem);
         if(problem!=null)Debug.LogWarning("Throw prototype save: "+problem);
-        aim.Cancel();seenRun=-1;Flow=new DadThrowFlow(game,layout.Field,story,save,savePath,tuner,daily);
+        string path=savePath;
+#if UNITY_EDITOR
+        // A Play Mode the remote started (captures, looking at a screen) reads the player's save and never writes it.
+        // It matters since the letter of the day: the title itself now writes what it dealt.
+        if(UnityEditor.SessionState.GetBool(RemoteKey,false))path=null;
+#endif
+        aim.Cancel();seenRun=-1;Flow=new DadThrowFlow(game,layout.Field,story,save,path,tuner,daily);
     }
     // Only what this scene draws is loaded, by the keys the manifests and the stage file name.
     T Need<T>(string key) where T:Object{T asset=Resources.Load<T>(key);if(asset==null)missing.Add(key);return asset;}
@@ -255,6 +263,17 @@ public sealed class DadThrowPrototype:MonoBehaviour
     {
         string problem;DadThrowSave save=DadThrowSave.Load(savePath,out problem);save.furthest=Mathf.Clamp(index,0,game.Count-1);
         aim.Cancel();heldForCapture=false;seenRun=-1;Flow=new DadThrowFlow(game,layout.Field,story,save,null,tuner);
+    }
+    // A player in memory only who has cleared stages 1 to `through` and holds today's letter: stage `stage` under
+    // `cards`, with `left` tries and the tiers in `won` already paid. Everyone's entrance has been seen, so a
+    // capture meets no cut-in it did not ask for.
+    public void DebugDaily(int through,int stage,int cards,int left=DadThrowDaily.Tries,int won=0)
+    {
+        var save=new DadThrowSave{introSeen=true,furthest=Mathf.Clamp(through,0,game.Count-1),coins=300,firstDay=1,
+            dailyDay=DadThrowDaily.Key(System.DateTime.Now),dailyStage=stage,dailyCards=cards,dailyLeft=left,dailyWon=won};
+        for(int number=1;number<=through;number++)save.cleared.Add(DadThrowCurve.Id(number));
+        foreach(string kind in stages.kinds.Keys)save.met.Add(kind);
+        aim.Cancel();heldForCapture=false;seenRun=-1;Flow=new DadThrowFlow(game,layout.Field,story,save,null,null,daily);
     }
     // Back to the player's own save, from the logo, when a capture run is over.
     public void DebugReal(){heldForCapture=false;if(Flow!=null)Begin();}
@@ -860,11 +879,13 @@ public sealed class DadThrowPrototype:MonoBehaviour
     }
     // 안개: the far half of the street stands behind a veil that thickens to the right. It is drawn over the
     // people and under dad and everything thrown, so a ball can be followed into it.
+    const float FogDepth=.86f;
     void DrawFog()
     {
         float top=DadThrowLayout.TopBar,tall=DadThrowLayout.H-top,x=DadThrowLayout.FogFrom;
-        for(int i=1;i<=4;i++,x+=DadThrowLayout.FogStep)Box(new Rect(x,top,DadThrowLayout.FogStep,tall),new Color(Paper.r,Paper.g,Paper.b,.2f*i));
-        Box(new Rect(x,top,DadThrowLayout.W-x,tall),new Color(Paper.r,Paper.g,Paper.b,.86f));
+        // Thin strips, each a little thicker than the last: four wide ones read as stripes, not as fog.
+        for(int i=1;i<=DadThrowLayout.FogSteps;i++,x+=DadThrowLayout.FogStep)Box(new Rect(x,top,DadThrowLayout.FogStep,tall),new Color(Paper.r,Paper.g,Paper.b,FogDepth*i/(DadThrowLayout.FogSteps+1)));
+        Box(new Rect(x,top,DadThrowLayout.W-x,tall),new Color(Paper.r,Paper.g,Paper.b,FogDepth));
     }
     // The letter: the stage it is played on, the day's cards, what a cleared try pays and has paid, the tries left.
     void DrawDaily()

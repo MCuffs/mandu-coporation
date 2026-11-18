@@ -15,6 +15,8 @@ using UnityEngine;
 //   capture:<png>   save the Game view
 //   audit:<folder>  walk every screen with scripted input and save a picture of each (needs play, then pump)
 //   shopaudit:<folder>  the stages and the shop: title, a stage paying out, the shop, trays stopping a ball, a shoe, defeat
+//   dailyaudit:<folder> today's challenge: its button, the letter, fights under cards, the results, a letter used up
+// A Play Mode started here never writes the player's save: `play` marks the editor session and `stop` clears it.
 //   stop            leave Play Mode
 //   refresh         pick up changed files (the editor does not look while it is in the background)
 // What happened is appended to Library/DadThrowRemote.log, errors and exceptions of the running game included.
@@ -243,6 +245,57 @@ public static class DadThrowRemote
         nextStep=EditorApplication.timeSinceStartup;
         Note("boss audit started: "+folder);
     }
+    // Today's challenge: its button on the title, the letter, a fight under two cards (trays and fog), the result,
+    // the letter after a try, a fight with the big ball and no shoe, a lost try, and a letter with no tries left.
+    // The player is one in memory; nothing is read from or written to the save on disk.
+    static void DailyAudit(string folder)
+    {
+        steps.Clear();bot=null;DadThrowPrototype g=Game;
+        if(g==null){Note("daily audit: no DadThrowPrototype in the open scene");return;}
+        Action<string> shot=name=>Shot(Path.Combine(folder,name+".png"));
+        Func<DadThrowFlow.Screen,Func<bool>> on=screen=>()=>g.Flow.Now==screen;
+        Func<bool> fighting=()=>g.Flow.Now==DadThrowFlow.Screen.Playing&&g.Model!=null;
+        int traysFog=DadThrowDaily.Bit(DadThrowDaily.Card.Trays)|DadThrowDaily.Bit(DadThrowDaily.Card.Fog);
+        int bigOnly=DadThrowDaily.Bit(DadThrowDaily.Card.BigBall)|DadThrowDaily.Bit(DadThrowDaily.Card.BallOnly);
+        Step(0,()=>{Size(1920,1080);g.DebugScripted(true);g.DebugDaily(9,8,traysFog);});
+        Until(on(DadThrowFlow.Screen.Title),3);
+        Step(.5f,()=>shot("daily-01-title-with-the-letter-button"));
+        Step(.2f,()=>Note("letter: "+g.Flow.OpenDaily()));
+        Step(.4f,()=>shot("daily-02-letter-two-cards"));
+        Step(.2f,()=>{Note("try: "+g.Flow.StartDaily());Play(DadThrowGrowthChecks.Hand(7,true,.2f,.9f));});
+        Until(()=>!fighting()||g.Model.Clock>=3,8,()=>shot("daily-03-fight-trays-and-fog"));
+        Until(()=>!fighting(),90,()=>bot=null);
+        Step(.6f,()=>{Note("first try ended on "+g.Flow.Now+", tiers "+g.Flow.DailyTiers+", paid "+g.Flow.DailyPaid);shot("daily-04-result-of-a-try");});
+        Step(.4f,()=>Note("back to the letter: "+g.Flow.ToDaily()));
+        Step(.4f,()=>shot("daily-05-letter-after-a-try"));
+        // The big ball and no shoe, on an early stage.
+        Step(.3f,()=>g.DebugDaily(9,3,bigOnly));
+        Until(on(DadThrowFlow.Screen.Title),3);
+        Step(.3f,()=>Note("letter: "+g.Flow.OpenDaily()+", try: "+g.Flow.StartDaily()));
+        Step(.1f,()=>Play(DadThrowBots.Spam));
+        Until(()=>!fighting()||g.Model.Clock>=2.5f,8,()=>shot("daily-06-fight-big-ball-no-shoe"));
+        // Nobody throws from here: the try is lost.
+        Step(.05f,()=>bot=null);
+        Until(on(DadThrowFlow.Screen.Defeat),60);
+        Step(.6f,()=>shot("daily-07-lost-try"));
+        // A letter whose tries are used up, with two tiers paid.
+        Step(.3f,()=>g.DebugDaily(9,6,DadThrowDaily.Bit(DadThrowDaily.Card.GoldRush),0,DadThrowDaily.Cleared|DadThrowDaily.Guarded));
+        Until(on(DadThrowFlow.Screen.Title),3);
+        Step(.4f,()=>shot("daily-08-title-no-dot"));
+        Step(.2f,()=>Note("letter: "+g.Flow.OpenDaily()));
+        Step(.4f,()=>shot("daily-09-letter-no-tries-left"));
+        // A try that is cleared: the card says what it reached, and the letter shows it paid.
+        Step(.3f,()=>g.DebugDaily(9,1,DadThrowDaily.Bit(DadThrowDaily.Card.Bouncy)));
+        Until(on(DadThrowFlow.Screen.Title),3);
+        Step(.3f,()=>{Note("letter: "+g.Flow.OpenDaily()+", try: "+g.Flow.StartDaily());Play(DadThrowBots.Spam);});
+        Until(()=>!fighting(),90,()=>bot=null);
+        Step(.6f,()=>{Note("the try ended on "+g.Flow.Now+", tiers "+g.Flow.DailyTiers+", paid "+g.Flow.DailyPaid);shot("daily-10-cleared-try");});
+        Step(.4f,()=>Note("back to the letter: "+g.Flow.ToDaily()));
+        Step(.4f,()=>shot("daily-11-letter-with-tiers-paid"));
+        Step(.6f,()=>{g.DebugScripted(false);g.DebugRestart();Note("daily audit done: "+folder);});
+        nextStep=EditorApplication.timeSinceStartup;
+        Note("daily audit started: "+folder);
+    }
     static void Poll()
     {
         if(EditorApplication.isPlaying)
@@ -272,9 +325,10 @@ public static class DadThrowRemote
             if(command=="play")
             {
                 if(EditorApplication.isPlaying){Note("already playing");return;}
+                SessionState.SetBool(DadThrowPrototype.RemoteKey,true);
                 EditorSceneManager.OpenScene(DadThrowBuild.ScenePath);Size(1920,1080);EditorApplication.isPlaying=true;
             }
-            else if(command=="stop"){pump=false;bot=null;steps.Clear();EditorApplication.isPlaying=false;}
+            else if(command=="stop"){pump=false;bot=null;steps.Clear();EditorApplication.isPlaying=false;SessionState.SetBool(DadThrowPrototype.RemoteKey,false);}
             else if(command=="refresh")AssetDatabase.Refresh();
             else if(!EditorApplication.isPlaying)Note("ignored: not in Play Mode");
             else if(command=="pump"){pump=true;Application.runInBackground=true;}
@@ -283,9 +337,11 @@ public static class DadThrowRemote
             else if(command.StartsWith("audit:"))Audit(command.Substring(6));
             else if(command.StartsWith("shopaudit:"))ShopAudit(command.Substring(10));
             else if(command.StartsWith("bossaudit:"))BossAudit(command.Substring(10));
+            else if(command.StartsWith("dailyaudit:"))DailyAudit(command.Substring(11));
             // at:5 opens the player's own save at the fifth stage, in memory only; real goes back to the save on disk.
             else if(command.StartsWith("at:")){int number=int.Parse(command.Substring(3));Game.DebugPlayAt(number-1);Note("the player's save, in memory only, opened at stage "+number+" ("+DadThrowCurve.Id(number)+")");}
-            else if(command=="real"){Game.DebugReal();Note("back on the player's own save");}
+            // From here on it is the player's own game again: the save on disk is read and written as in the app.
+            else if(command=="real"){SessionState.SetBool(DadThrowPrototype.RemoteKey,false);Game.DebugReal();Note("back on the player's own save, written to disk again");}
             else Note("unknown command");
         }
         catch(Exception error){Note("command failed: "+error);}
