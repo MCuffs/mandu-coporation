@@ -21,6 +21,7 @@ public sealed class DadThrowRules
     // A ball went through five and reloads took 0.65 and 0.9 seconds until the stampede (2026-11-17: "much harder,
     // hectic from 1-1", "they should just come running in a mad herd"). Against a hundred runners a ball has to
     // bowl through a whole pack and the hand has to be ready again at once.
+    public bool Dodgeball, SportsCar;
     public int Pierce=12,MaxBounces=0,ShoeDamage=0;
     public float GolfReload=.3f,ShoeReload=.7f,ShoeRadius=85,ShoePush=105,SlowTime=2.5f,SlowFactor=.35f;
     // How fast the street runs while the player is pulling back. 1 is full speed. The first prototype slowed to
@@ -42,6 +43,7 @@ public sealed class DadThrowModel
     public const float Width=1280,Height=720;
     // Radius of the thrown thing itself in the hit test (a person adds 25).
     public const float GolfHit=11,ShoeHit=22;
+    public float BallRadius { get { return Rules.SportsCar ? 26 : Rules.Dodgeball ? 20 : GolfHit; } }
     // Degrees between the balls of a fan when more than one leaves the hand.
     public const float FanDegrees=7;
     public enum Weapon { Golf, Shoe }
@@ -52,7 +54,9 @@ public sealed class DadThrowModel
     // full: the health he came with. mood, moodClock, raged: a boss's state (BossStep).
     public sealed class Enemy
     {
-        public int id,hp,full; public float x,speed,slow,flash,along,moodClock; public DadThrowStage.Kind kind; public bool guard,raged; public Mood mood;
+        public int id,hp,full; public float x,speed,slow,flash,along,moodClock; public DadThrowStage.Kind kind; public bool guard,raged;
+        public bool IsChair { get { return kind!=null && kind.id=="tough"; } }
+        public bool OffBalance { get { return IsChair && slow>0; } } public Mood mood;
         public bool IsChief {get{return kind!=null&&kind.boss!=null;}}
     }
     // A chapter's boss (2026-11-18, Design/dad-throw-content-strategy-v2.md). He walks in slowly. Every BossEvery
@@ -154,7 +158,7 @@ public sealed class DadThrowModel
     // so the dots never promise where a bounce will go.
     public List<Vector2> Predict(Weapon weapon,Vector2 pull,List<Vector2> path)
     {
-        path.Clear();Vector2 p=Field.Muzzle,v=LaunchVelocity(pull);float radius=weapon==Weapon.Golf?GolfHit:ShoeHit;
+        path.Clear();Vector2 p=Field.Muzzle,v=LaunchVelocity(pull);float radius=weapon==Weapon.Golf?BallRadius:ShoeHit;
         for(int i=0;i<240;i++)
         {
             if(i%3==0)path.Add(p);v.y+=760*(1/120f);p+=v*(1/120f);
@@ -220,7 +224,12 @@ public sealed class DadThrowModel
         for(int i=enemies.Count-1;i>=0;i--)
         {
             Enemy e=enemies[i];e.slow=Mathf.Max(0,e.slow-dt);e.flash=Mathf.Max(0,e.flash-dt);
-            if(e.IsChief)BossStep(e,dt);else e.x-=e.speed*(e.slow>0?Rules.SlowFactor:1)*dt;
+            if(e.IsChief)BossStep(e,dt);
+            else
+            {
+                bool charging=e.IsChair && e.hp<e.full && !e.OffBalance;
+                e.x-=e.speed*(e.slow>0?Rules.SlowFactor:charging?1.5f:1f)*dt;
+            }
             if(e.x>Field.Gate)continue;
             // A boss takes his touch and trots back out to come again; anyone else is done for this stage.
             if(e.IsChief){e.x=Field.Gate+.5f;e.mood=Mood.Back;e.moodClock=0;e.guard=false;}else{enemies.RemoveAt(i);Escaped++;}
@@ -230,7 +239,7 @@ public sealed class DadThrowModel
         for(int i=projectiles.Count-1;i>=0;i--)
         {
             Projectile p=projectiles[i];p.life+=dt;Vector2 from=p.pos;p.vel.y+=760*dt;p.pos+=p.vel*dt;
-            float radius=p.weapon==Weapon.Golf?GolfHit:ShoeHit;
+            float radius=p.weapon==Weapon.Golf?BallRadius:ShoeHit;
             if(p.pos.y>=Field.Ground-radius)
             {
                 p.pos.y=Field.Ground-radius;
@@ -270,7 +279,16 @@ public sealed class DadThrowModel
                 }
                 p.hit.Add(e.id);p.remaining--;e.flash=.16f;
                 // A ball hurts a dazed boss several times over.
-                if(Hurt(e,p.weapon==Weapon.Shoe?Rules.ShoeDamage+Rules.ShoeBlast:(Rules.GolfDamage+Level/3)*(e.mood==Mood.Dazed?BossDazedHurt:1))){enemies.Remove(e);if(Stage==null)Coins+=2;}
+                bool followUp=e.OffBalance && p.weapon==Weapon.Golf;
+                int damage=p.weapon==Weapon.Shoe?Rules.ShoeDamage+Rules.ShoeBlast:Rules.GolfDamage+Level/3;
+                if(followUp)damage*=2;
+                if(e.mood==Mood.Dazed && p.weapon==Weapon.Golf)damage*=BossDazedHurt;
+                if(Hurt(e,damage))
+                {
+                    enemies.Remove(e);
+                    if(followUp && Stage!=null)Bounty+=2;
+                    if(Stage==null)Coins+=2;
+                }
                 BestChain=Math.Max(BestChain,p.hit.Count);
                 // A ball through a whole pack readies the hand at once (bought in the shop): the reward for waiting for a pack.
                 if(p.weapon==Weapon.Golf&&Rules.ChainReload>0&&p.hit.Count==Rules.ChainReload)Reload=0;

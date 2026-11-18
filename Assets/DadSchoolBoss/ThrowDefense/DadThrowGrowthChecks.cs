@@ -269,9 +269,9 @@ public static class DadThrowGrowthChecks
             "an entrance in the stage file needs all its words and a standing height; one without is refused");
         DadThrowStage.Kind chairKind=set.kinds["tough"];
         DadThrowStage.Kind quickKind=set.kinds["fast"];
-        check(chairKind.entrance!=null&&!chairKind.entrance.shoe&&trayKind.entrance.shoe&&chairKind.entrance.name!=trayKind.entrance.name
+        check(chairKind.entrance!=null&&chairKind.entrance.shoe&&trayKind.entrance.shoe&&chairKind.entrance.name!=trayKind.entrance.name
             &&quickKind.entrance!=null&&!quickKind.entrance.shoe&&quickKind.entrance.name!=chairKind.entrance.name&&quickKind.entrance.canvas==2048,
-            "the chair-holder and the quick one have entrances too, with advice about the ball where the tray-holder's is about the shoe");
+            "the chair and tray entrances show a shoe while the quick challenger shows a ball");
         check(refused(kindJson.Replace("GUARDS",",\"entrance\":{\"resource\":\"x/big\",\"pivotX\":300,\"standPixels\":500,\"name\":\"n\",\"shout\":\"s\",\"hint\":\"h\",\"with\":\"car\"}")),
             "advice can be about the ball or the shoe and nothing else");
         DadThrowStage.Kind bossKind=set.kinds["boss"];

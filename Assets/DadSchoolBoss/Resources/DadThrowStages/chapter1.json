@@ -22,8 +22,8 @@
         "standPixels": 1400,
         "name": "의자 아저씨",
         "shout": "한 방? 간지럽지도 않다!",
-        "hint": "공을 여러 번 맞혀야 쓰러집니다",
-        "with": "golf"
+        "hint": "신발 먼저! 휘청일 때 공 위력 2배",
+        "with": "shoe"
       },
       "frames": 2,
       "facesLeft": true,

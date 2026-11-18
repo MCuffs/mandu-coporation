@@ -27,7 +27,7 @@ public static class DadThrowShop
         new Card(Item.Pierce,"묵직한 공","한 공이 여섯 명을 더 뚫고 간다",4,40,false),
         new Card(Item.Reload,"빠른 손","공을 더 빨리 다시 던진다",3,60,false),
         new Card(Item.Twin,"쌍둥이 공","공이 하나 더 같이 나간다",2,200,false),
-        new Card(Item.Heavy,"돌덩이 공","단단한 상대를 더 세게 때린다",4,80,false),
+        new Card(Item.Heavy,"스포츠카","피구공 → 스포츠카 · 2단계에 해금",4,80,false),
         new Card(Item.Bounce,"통통 공","공이 땅에서 한 번 더 튄다",2,80,false),
         new Card(Item.Blast,"폭탄 신발","신발이 모은 무리를 쓰러뜨린다",4,60,true),
         new Card(Item.Wide,"왕발 신발","신발이 더 넓게 밀어낸다",2,60,true),
@@ -47,7 +47,16 @@ public static class DadThrowShop
         if(item==Item.Pierce)rules.Pierce+=PierceStep;
         else if(item==Item.Reload)rules.GolfReload*=ReloadStep;
         else if(item==Item.Twin)rules.GolfCount++;
-        else if(item==Item.Heavy)rules.GolfDamage++;
+        else if(item==Item.Heavy)
+        {
+            if(rules.Dodgeball && !rules.SportsCar)
+            {
+                rules.SportsCar=true;
+                rules.Pierce+=8;
+            }
+            rules.Dodgeball=true;
+            rules.GolfDamage++;
+        }
         else if(item==Item.Bounce)rules.MaxBounces++;
         else if(item==Item.Blast)rules.ShoeBlast++;
         else if(item==Item.Wide)rules.ShoeRadius*=WideStep;

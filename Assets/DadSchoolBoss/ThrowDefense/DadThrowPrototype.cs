@@ -16,6 +16,9 @@ public sealed class DadThrowPrototype:MonoBehaviour
     // bends them a little toward how the player is doing.
     List<DadThrowStage> game;DadThrowTuner tuner;
     Font body,bold,display;Texture2D dot;
+    Texture2D dodgeball, sportsCar;
+    bool UsesCar { get { return Model!=null && Model.Rules.SportsCar; } }
+    bool UsesDodgeball { get { return Model!=null && Model.Rules.Dodgeball; } }
     Texture2D street,titleArt,golf,shoe,clearArt,retryArt;readonly Texture2D[] dad=new Texture2D[3];
     DadThrowStory story;Texture2D actorSheet,rivalArt,propArt;readonly Dictionary<string,Texture2D> backdropArt=new Dictionary<string,Texture2D>();
     string savePath;
@@ -113,6 +116,8 @@ public sealed class DadThrowPrototype:MonoBehaviour
         }
         catch(System.ArgumentException error){missing.Add(error.Message);return;}
         street=Need<Texture2D>(layout.Street.resource);titleArt=Need<Texture2D>(layout.Title.resource);
+        sportsCar=Need<Texture2D>("DadThrowV1/projectile_coupe");
+        dodgeball=Need<Texture2D>("DadV5/chars/dodge/prop_dodgeball");
         golf=Need<Texture2D>(layout.Golf.resource);shoe=Need<Texture2D>(layout.Shoe.resource);
         clearArt=Need<Texture2D>(layout.Clear.resource);retryArt=Need<Texture2D>(layout.Retry.resource);
         dad[(int)DadThrowLayout.Pose.Ready]=Need<Texture2D>(layout.Ready.resource);dad[(int)DadThrowLayout.Pose.Windup]=Need<Texture2D>(layout.Windup.resource);
@@ -357,7 +362,8 @@ public sealed class DadThrowPrototype:MonoBehaviour
         bool enabled=GUI.enabled;Rect face=Face(r,enabled);
         if(nudge){float grow=3+2*Mathf.Sin(clock*6);DadUi.Fill(new Rect(face.x-grow,face.y-grow,face.width+grow*2,face.height+grow*2),Gold,12);}
         DadUi.Panel(face,active?Gold:Paper,Ink);
-        GUI.DrawTexture(layout.ItemRect(sprite,DadThrowLayout.IconSlot(face).center,DadThrowLayout.IconSize),picture);
+        if(picture==sportsCar)GUI.DrawTexture(DadThrowLayout.IconSlot(face),picture,ScaleMode.ScaleToFit);
+        else GUI.DrawTexture(layout.ItemRect(sprite,DadThrowLayout.IconSlot(face).center,DadThrowLayout.IconSize),picture);
         Text(DadThrowLayout.LabelSlot(face),label,26,Ink,bold);
         if(reload>0)DadUi.Fill(new Rect(face.x,face.y,face.width*reload,face.height),new Color(Ink.r,Ink.g,Ink.b,.45f),10);
         return Click(r,enabled);
@@ -376,7 +382,11 @@ public sealed class DadThrowPrototype:MonoBehaviour
     }
     void Thing(DadThrowModel.Weapon weapon,Vector2 center,float degrees)
     {
-        if(weapon==DadThrowModel.Weapon.Golf)Spun(golf,layout.GolfRect(center),center,degrees);
+        if(weapon==DadThrowModel.Weapon.Golf && UsesCar)
+            Spun(sportsCar,new Rect(center.x-68,center.y-34,136,68),center,degrees*.25f);
+        else if(weapon==DadThrowModel.Weapon.Golf && UsesDodgeball)
+            Spun(dodgeball,new Rect(center.x-28,center.y-28,56,56),center,degrees);
+        else if(weapon==DadThrowModel.Weapon.Golf)Spun(golf,layout.GolfRect(center),center,degrees);
         else Spun(shoe,layout.ShoeRect(center),center,degrees);
     }
     void Dot(Vector2 p,float size,Color color){GUI.color=color;GUI.DrawTexture(new Rect(p.x-size/2,p.y-size/2,size,size),dot);GUI.color=Color.white;}
@@ -444,7 +454,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
         {
             if(e.kind==null)continue;
             if(e.IsChief){Chief(e,m.Field.Ground);continue;}
-            GUI.color=e.flash>0?new Color(1,.6f,.45f):Color.white;
+            GUI.color=e.flash>0?new Color(1,.6f,.45f):e.OffBalance?new Color(.65f,.9f,1f):e.IsChair && e.hp<e.full?new Color(1,.72f,.58f):Color.white;
             Person(e.kind,e.id,e.x,m.Field.Ground,e.kind.Mirror,e.speed,false,e.kind.guards&&!e.guard);
         }
         GUI.color=Color.white;
@@ -566,7 +576,15 @@ public sealed class DadThrowPrototype:MonoBehaviour
     void DrawEarned()
     {
         if(Flow.Earned!=shownEarned){shownEarned=Flow.Earned;earnedText="+"+shownEarned+"원";}
-        Outlined(DadThrowLayout.ResultEarned,earnedText,36,Gold,Ink,3,display);
+        string line=earnedText;
+        int heavy=DadThrowShop.Level(Flow.Save,DadThrowShop.Item.Heavy);
+        if(heavy<2)
+        {
+            int needed=DadThrowShop.Price(Flow.Save,DadThrowShop.Item.Heavy)-Flow.Coins;
+            string target=heavy==0?"피구공":"스포츠카";
+            line+=needed>0?"  ·  "+target+"까지 "+needed+"원":"  ·  "+target+" 구매 가능";
+        }
+        Outlined(DadThrowLayout.ResultEarned,line,28,Gold,Ink,3,display);
     }
     // Pause and the two things to throw. `chosen` is the thing shown as picked.
     void DrawControls(DadThrowStage stage,float reload,DadThrowModel.Weapon chosen)
@@ -577,7 +595,7 @@ public sealed class DadThrowPrototype:MonoBehaviour
         if(Click(DadThrowLayout.PauseButton,GUI.enabled)){aim.Cancel();Flow.Pause();}
         bool nudge=(stage.hint=="shoe"&&!shoeHintDone&&hintClock<6||shoeNudge>0)&&GUI.enabled;
         // Switching things while aiming drops the aim and changes only the choice.
-        if(WeaponButton(DadThrowLayout.GolfButton,"골프공",golf,layout.Golf,chosen==DadThrowModel.Weapon.Golf,reload,false))Select(DadThrowModel.Weapon.Golf);
+        if(WeaponButton(DadThrowLayout.GolfButton,UsesCar?"스포츠카":UsesDodgeball?"피구공":"골프공",UsesCar?sportsCar:UsesDodgeball?dodgeball:golf,layout.Golf,chosen==DadThrowModel.Weapon.Golf,reload,false))Select(DadThrowModel.Weapon.Golf);
         if(WeaponButton(DadThrowLayout.ShoeButton,"신발",shoe,layout.Shoe,chosen==DadThrowModel.Weapon.Shoe,reload,nudge))Select(DadThrowModel.Weapon.Shoe);
         if(stage.hint=="shoe"&&hintClock>=6)shoeHintDone=true;
         // First stage only: gone after the first real throw, or after six seconds of the fight either way.
@@ -750,10 +768,20 @@ public sealed class DadThrowPrototype:MonoBehaviour
         {
             DadThrowShop.Card card=DadThrowShop.Cards[i];Rect slot=DadThrowLayout.ShopCard(i);
             DadUi.Panel(slot,Paper,Ink);Vector2 icon=DadThrowLayout.ShopIcon(slot);
-            float side=DadThrowLayout.ShopIconSize;GUI.DrawTexture(new Rect(icon.x-side/2,icon.y-side/2,side,side),shopArt[(int)card.item]);
-            Text(DadThrowLayout.ShopName(slot),card.name,28,Ink,display,TextAnchor.MiddleLeft);
-            Text(DadThrowLayout.ShopLine(slot),card.line,19,Ink,body,TextAnchor.UpperLeft);
             int level=DadThrowShop.Level(Flow.Save,card.item);
+            Texture2D picture=shopArt[(int)card.item];
+            string name=card.name;
+            string description=card.line;
+            if(card.item==DadThrowShop.Item.Heavy)
+            {
+                picture=level==0?dodgeball:sportsCar;
+                name=level==0?"피구공":level==1?"스포츠카":"스포츠카 강화";
+                description=level==0?"다음 상품: 스포츠카":level==1?"한 번에 8명 더 관통":"차체 충돌 위력 +1";
+            }
+            float side=DadThrowLayout.ShopIconSize;
+            GUI.DrawTexture(new Rect(icon.x-side/2,icon.y-side/2,side,side),picture,ScaleMode.ScaleToFit);
+            Text(DadThrowLayout.ShopName(slot),name,28,Ink,display,TextAnchor.MiddleLeft);
+            Text(DadThrowLayout.ShopLine(slot),description,19,Ink,body,TextAnchor.UpperLeft);
             for(int pip=0;pip<card.most;pip++)DadUi.Panel(DadThrowLayout.ShopPip(slot,pip),pip<level?Gold:PaperDown,Ink);
             if(level>=card.most)
             {
