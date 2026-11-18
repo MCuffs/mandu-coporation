@@ -247,4 +247,7 @@ Get-Content C:\Users\user\DadWarWebGL\Design\dad-throw-android-store-bundle-buil
 | 버전 미리보기 및 확인 | 사용자 | 출시 버튼은 사용자가 누른다 |
 
 - 테스트 번들(`DadWar-test.aab`)은 디버그 키라 플레이가 받지 않는다. 올릴 수 있는 것은 7절의 스토어용 번들뿐이다.
+- **첫 스토어용 번들이 나왔다(11/18 22:46).** 사용자가 업로드 키를 만들고 7절의 명령으로 빌드했다. `DadWar-1.0.0-1.aab`, 30.1 MB, 버전 1.0.0(코드 1). [빌드 보고서](dad-throw-android-store-bundle-build.txt), [검사 결과](dad-throw-android-store-bundle-artifact.json). 검사: ARM64만, 16KB 페이지 정렬, 앱 ID, 타깃 API 36, bundletool 구조 검증 통과. 서명은 검증되고 디버그 키가 아니다(SHA256withRSA).
+- **올리는 것은 사용자가 한다.** PM의 브라우저 도구는 한 번에 10.4 MB까지만 올릴 수 있어서 30 MB 번들을 못 올린다. 사용자가 "내부 테스트 버전 만들기" 화면의 업로드 칸에 파일을 끌어다 놓는다. 그 뒤 출시명과 출시 노트는 PM이 넣는다.
+- 버전 코드 1은 이제 쓴 것으로 친다. 다음 번들은 2부터다.
 - 스토어 등록정보(아이콘, 대표 그림)는 내부 테스트를 막지 않는다. 공개 출시 전까지만 채우면 된다.
