@@ -6,57 +6,84 @@ using UnityEditor.Build.Reporting;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-// An Android build of the throw game in the shape Google Play asks of a new app (2026-11-18, the owner: "today
+// Android builds of the throw game in the shape Google Play asks of a new app (2026-11-18, the owner: "today
 // let's get ready to put it on the Play Store and Apps in Toss"): 64-bit only, IL2CPP, target API 36, landscape,
-// and light: like DadThrowWebBuild.BuildLight it leaves out everything the throw game does not load and gives
+// and light: like DadThrowWebBuild.BuildLight they leave out everything the throw game does not load and give
 // the pictures that stay an Android size and ASTC. Without that the package is several hundred megabytes.
-//   Unity -batchmode -nographics -quit -projectPath <copy> -buildTarget Android -executeMethod DadThrowAndroidBuild.TestApk
-// Run it in the Unity 6 build copy, never in the project's own folder: it changes player settings and writes
+//   Unity -batchmode -nographics -projectPath <copy> -buildTarget Android -executeMethod DadThrowAndroidBuild.TestApk
+// Run them in the Unity 6 build copy, never in the project's own folder: they change player settings and write
 // texture settings into .meta files, none of which is for committing.
-// TestApk is signed with the local debug key and carries the prototype's own app id, so it installs beside
-// anything else and cannot be uploaded to a store. The store build needs the owner's upload key and the app id
-// the owner decides on; neither is in this file.
+//   TestApk      an APK to put on a phone: the local debug key and the prototype's own app id, so it installs
+//                beside anything else and cannot be uploaded to a store.
+//   TestBundle   the bundle Play takes, with the store's app id, still debug-signed: for checking the bundle
+//                before the owner's key exists. Play will not accept it.
+//   StoreBundle  the bundle that goes to Play, signed with the owner's upload key. The key is the owner's to make
+//                and keep; this build is told where it is by four environment variables set in the terminal that
+//                starts it, and writes none of them anywhere:
+//                DAD_UPLOAD_KEYSTORE (path to the .jks), DAD_UPLOAD_KEYSTORE_PASS, DAD_UPLOAD_KEY_ALIAS, DAD_UPLOAD_KEY_PASS.
+// StoreId was decided by the owner on 2026-11-18 ("yes, that one"). Play never lets an app change it after the
+// first upload.
 public static class DadThrowAndroidBuild
 {
-    public const string Output="Builds/ThrowAndroid/DadThrow-arm64-test.apk",TestId="com.manducorporation.dadthrow.prototype";
-    const string ReportPath="Design/dad-throw-android-test-build.txt";
-    public static void TestApk()
+    public const string TestId="com.manducorporation.dadthrow.prototype",StoreId="com.bluemushroom.dadwar",Studio="Bluemushroom studio";
+    public const string Output="Builds/ThrowAndroid/DadThrow-arm64-test.apk";
+    public static void TestApk(){Run(false,TestId,false,Output,"Design/dad-throw-android-test-build.txt");}
+    public static void TestBundle(){Run(true,StoreId,false,"Builds/ThrowAndroid/DadWar-test.aab","Design/dad-throw-android-test-bundle-build.txt");}
+    public static void StoreBundle()
+    {Run(true,StoreId,true,"Builds/ThrowAndroid/DadWar-"+PlayerSettings.bundleVersion+"-"+PlayerSettings.Android.bundleVersionCode+".aab","Design/dad-throw-android-store-bundle-build.txt");}
+
+    static void Run(bool bundle,string id,bool store,string output,string reportPath)
     {
-        int exit=1;var report=new StringBuilder("Throw game Android test build; debug-signed, not for store upload.\n");
+        int exit=1;var report=new StringBuilder(store?"Throw game Android store bundle; signed with the owner's upload key.\n":"Throw game Android test build; debug-signed, not for store upload.\n");
         try
         {
             if(!Application.unityVersion.StartsWith("6000."))throw new InvalidOperationException("Build in the Unity 6 copy: Play asks for target API 36 and 16 KB pages");
             if(EditorUserBuildSettings.activeBuildTarget!=BuildTarget.Android)throw new InvalidOperationException("Launch Unity with -buildTarget Android");
+            string alias=null;
+            if(store)
+            {
+                string keystore=Environment.GetEnvironmentVariable("DAD_UPLOAD_KEYSTORE"),storePass=Environment.GetEnvironmentVariable("DAD_UPLOAD_KEYSTORE_PASS"),keyPass=Environment.GetEnvironmentVariable("DAD_UPLOAD_KEY_PASS");
+                alias=Environment.GetEnvironmentVariable("DAD_UPLOAD_KEY_ALIAS");
+                if(string.IsNullOrEmpty(keystore)||!File.Exists(keystore)||string.IsNullOrEmpty(storePass)||string.IsNullOrEmpty(alias)||string.IsNullOrEmpty(keyPass))
+                    throw new InvalidOperationException("The store bundle needs the owner's upload key: set DAD_UPLOAD_KEYSTORE (path to the .jks), DAD_UPLOAD_KEYSTORE_PASS, DAD_UPLOAD_KEY_ALIAS and DAD_UPLOAD_KEY_PASS in the terminal that starts the build");
+                PlayerSettings.Android.useCustomKeystore=true;PlayerSettings.Android.keystoreName=keystore;PlayerSettings.Android.keystorePass=storePass;
+                PlayerSettings.Android.keyaliasName=alias;PlayerSettings.Android.keyaliasPass=keyPass;
+            }
+            else PlayerSettings.Android.useCustomKeystore=false;
             DadThrowWebBuild.Restore();
 #if UNITY_6000_0_OR_NEWER
-            PlayerSettings.SetApplicationIdentifier(UnityEditor.Build.NamedBuildTarget.Android,TestId);
+            PlayerSettings.SetApplicationIdentifier(UnityEditor.Build.NamedBuildTarget.Android,id);
             PlayerSettings.SetScriptingBackend(UnityEditor.Build.NamedBuildTarget.Android,ScriptingImplementation.IL2CPP);
 #else
-            PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android,TestId);
+            PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android,id);
             PlayerSettings.SetScriptingBackend(BuildTargetGroup.Android,ScriptingImplementation.IL2CPP);
 #endif
+            if(id==StoreId)PlayerSettings.companyName=Studio;
             PlayerSettings.Android.targetArchitectures=AndroidArchitecture.ARM64;
             PlayerSettings.Android.minSdkVersion=(AndroidSdkVersions)24;PlayerSettings.Android.targetSdkVersion=(AndroidSdkVersions)36;
             PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.Android,false);PlayerSettings.SetGraphicsAPIs(BuildTarget.Android,new[]{GraphicsDeviceType.OpenGLES3});
             PlayerSettings.defaultInterfaceOrientation=UIOrientation.LandscapeLeft;
-            // A release credential is the owner's to make and keep; this build never asks for one.
-            PlayerSettings.Android.useCustomKeystore=false;EditorUserBuildSettings.buildAppBundle=false;
-            report.AppendLine("Unity: "+Application.unityVersion+"\nVersion: "+PlayerSettings.bundleVersion+" ("+PlayerSettings.Android.bundleVersionCode+")\nApplication ID: "+TestId
+            EditorUserBuildSettings.buildAppBundle=bundle;
+            report.AppendLine("Unity: "+Application.unityVersion+"\nVersion: "+PlayerSettings.bundleVersion+" ("+PlayerSettings.Android.bundleVersionCode+")\nApplication ID: "+id
                 +"\nBackend: IL2CPP\nArchitectures: "+PlayerSettings.Android.targetArchitectures+"\nMinimum SDK: "+PlayerSettings.Android.minSdkVersion+"\nTarget SDK: "+PlayerSettings.Android.targetSdkVersion);
             report.AppendLine(Resolve());
             DadThrowWebBuild.Lighten("Android");
-            Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(Output)));
-            BuildReport built=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{DadThrowBuild.ScenePath},locationPathName=Path.GetFullPath(Output),target=BuildTarget.Android,options=BuildOptions.None});
-            long bytes=File.Exists(Output)?new FileInfo(Output).Length:0;
+            Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(output)));
+            BuildReport built=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{DadThrowBuild.ScenePath},locationPathName=Path.GetFullPath(output),target=BuildTarget.Android,options=BuildOptions.None});
+            long bytes=File.Exists(output)?new FileInfo(output).Length:0;
             report.AppendLine("Result: "+built.summary.result+"\nErrors: "+built.summary.totalErrors+"\nWarnings: "+built.summary.totalWarnings
-                +"\nPackage: "+(bytes/1024f/1024f).ToString("0.0")+" MB\nDuration: "+built.summary.totalTime+"\nArtifact: "+Output+"\nSigning: local DEBUG key, not the store upload key");
+                +"\nPackage: "+(bytes/1024f/1024f).ToString("0.0")+" MB\nDuration: "+built.summary.totalTime+"\nArtifact: "+output
+                +"\nSigning: "+(store?"the owner's upload key, alias "+alias:"local DEBUG key, not the store upload key"));
             exit=built.summary.result==BuildResult.Succeeded?0:1;
         }
-        catch(Exception error){report.AppendLine("FAIL "+error);Debug.LogException(error);}
+        catch(Exception error){report.AppendLine("FAIL "+error.Message);Debug.LogError("DadThrowAndroidBuild: "+error.Message);}
         finally
         {
-            try{DadThrowWebBuild.Restore();}catch(Exception error){report.AppendLine("RESTORE FAILED "+error);exit=1;}
-            File.WriteAllText(ReportPath,report.ToString());Debug.Log(report.ToString());EditorApplication.Exit(exit);
+            // Nothing about the key stays in the build copy's settings.
+            PlayerSettings.Android.useCustomKeystore=false;PlayerSettings.Android.keystoreName="";PlayerSettings.Android.keystorePass="";
+            PlayerSettings.Android.keyaliasName="";PlayerSettings.Android.keyaliasPass="";
+            try{DadThrowWebBuild.Restore();}catch(Exception error){report.AppendLine("RESTORE FAILED "+error.Message);exit=1;}
+            File.WriteAllText(reportPath,report.ToString());Debug.Log(report.ToString());EditorApplication.Exit(exit);
         }
     }
     // The Android libraries of the ads package come through the External Dependency Manager; they are resolved

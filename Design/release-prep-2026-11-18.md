@@ -22,12 +22,12 @@
 | # | 결정 | PM 추천 | 이유 |
 | --- | --- | --- | --- |
 | 1 | 무엇을 올리나 | 가로 던지기 게임을 「아빠 전쟁」으로 올린다. 세로 본편은 올리지 않는다 | 11/17부터 만든 것도, 사용자가 해 보고 고친 것도 던지기 게임이다 |
-| 2 | 앱 ID | `com.bluemushroom.dadwar`로 바꾼다 | 지금 값은 `com.manducorporation.dadwar`다. 플레이에 한 번 올리면 바꿀 수 없고 스토어 주소에 그대로 보인다. 스튜디오 이름이 Bluemushroom studio로 정해졌다 |
+| 2 | 앱 ID | **정해짐(11/18, 사용자 "네, 그걸로"): `com.bluemushroom.dadwar`** | 플레이에 한 번 올리면 바꿀 수 없고 스토어 주소에 그대로 보인다. 스토어용 빌드(`DadThrowAndroidBuild.TestBundle`, `StoreBundle`)가 이 값을 쓴다. 프로젝트 설정의 예전 값(`com.manducorporation.dadwar`)은 세로 본편용으로 그대로 두었다 |
 | 3 | 첫 출시에 광고를 넣나 | 넣지 않는다 | 던지기 게임에는 광고를 부르는 코드가 없다. 광고 없이 올리면 데이터 보안 신고가 "수집 없음"으로 끝난다. 광고는 사람이 다시 켜는지 본 뒤에 붙인다 |
 | 4 | 어디에 먼저 | 플레이 먼저, 그 등급으로 앱인토스 | 플레이의 등급 설문은 무료이고, 앱인토스는 스토어에서 받은 등급을 쓸 수 있다. 앱인토스에 먼저 올리려면 게임물관리위원회 직접 신청이 필요하다 |
 | 5 | 첫 공개 범위 | 플레이 내부 테스트(지인 5~8명)부터 | 30일 기획의 1차 확인("사흘 동안 다시 켜는지")과 같은 사람들로 할 수 있다 |
 
-2번은 서명 빌드를 만들기 전에 정해야 한다. 나머지는 준비를 하면서 정해도 된다.
+2번은 정해졌다. 다음으로 급한 것은 3번(광고)이다. 광고 없이 올리려면 빌드에서 광고 패키지를 빼는 작업을 해야 하고, 광고를 넣어 올리려면 던지기 게임에 광고를 부르는 화면과 동의 절차를 새로 만들어야 한다.
 
 ## 2. 플레이스토어
 
@@ -36,8 +36,8 @@
 | D-U-N-S 번호 다시 넣기 | **오늘 밤부터 가능** | 사용자 | 발급 후 24~48시간 뒤부터 조회된다는 안내였고 시도 횟수에 제한이 있다. 번호 9자리와 법적 상호를 발급 메일 그대로 넣는다 |
 | 남은 가입 단계 | 대기 | 사용자 | 내 조직 → 공개 프로필 → 내 정보 → 앱 → 연락 방법 → 약관 → 등록비 25달러 → 본인·조직 인증. 영문 사업자 증명 서류를 올린다 |
 | 앱 만들기 | 가입 뒤 | 사용자 + PM | 이름, 기본 언어, 게임, 무료 |
-| 업로드 키(서명) | **없음** | 사용자 | 키와 비밀번호는 사용자가 만들고 보관한다. 잃으면 복구 절차가 번거롭다. Play 앱 서명을 켠다 |
-| 올릴 빌드(AAB) | 키와 앱 ID가 정해지면 | PM | Unity 6, 64비트, API 36, 16KB 정렬. 오늘의 시험 빌드와 같은 방식에 서명만 바꾼다 |
+| 업로드 키(서명) | **없음** | 사용자 | 키와 비밀번호는 사용자가 만들고 보관한다. 잃으면 복구 절차가 번거롭다. Play 앱 서명을 켠다. 만드는 법은 7절 |
+| 올릴 빌드(AAB) | 방법은 준비됨. 키가 생기면 만든다 | 사용자가 명령 실행 | `DadThrowAndroidBuild.StoreBundle`. 키의 위치와 비밀번호를 환경 변수로 받으므로 사용자가 자기 터미널에서 실행한다(7절). 같은 모양의 디버그 서명 번들은 5절에서 확인했다 |
 | 광고 패키지 빼기 | 해야 함 | PM | 프로젝트에 광고 패키지가 들어 있어 던지기 빌드에도 딸려 들어간다. 광고 없이 올리려면 빌드에서 빼야 "수집 없음"이 사실이 된다 |
 | 등록 문구 | 초안 있음 | 사용자 확정 | [문구 초안](store-listing-draft-v1.md) |
 | 스크린샷 | 후보 있음 | PM | 1920×1080 캡처에서 고른다 |
@@ -92,6 +92,14 @@
 - 빌드 기록의 "Android dependency resolution: False"는 광고 라이브러리 정리 도구가 템플릿 파일을 못 찾았다는 뜻이다. 빌드는 성공했지만, 광고 SDK가 반쯤 들어간 상태라 **기기에서 켜지는지는 확인되지 않았다.**
 - **기기에 설치하거나 실행해 보지 않았다.** 연결된 기기가 없다. 사용자의 휴대폰에 이 파일을 넣어 설치하면 첫 실기기 확인이 된다.
 
+**새 앱 ID로 만든 시험 번들(같은 날 밤).** 플레이가 받는 모양(AAB)에 `com.bluemushroom.dadwar`를 넣어 디버그 서명으로 만들었다(`DadThrowAndroidBuild.TestBundle`). [빌드 기록](dad-throw-android-test-bundle-build.txt), [산출물 검사](dad-throw-android-test-bundle-artifact.json).
+
+| 항목 | 값 |
+| --- | --- |
+| 크기, 빌드 시간 | 30.1MB, 1분 45초 |
+| 산출물 검사 | **6개 통과**: 64비트 단독, 16KB 정렬, 플레이어 데이터, 앱 ID, 타깃 API 36, bundletool의 번들 구조 검증 |
+| 서명 | 디버그 키. 플레이는 받지 않는다. 사용자의 업로드 키로 서명하면 올릴 수 있는 모양이 된다(7절) |
+
 ## 6. 순서 (날짜는 약속이 아니다)
 
 1. 사용자: D-U-N-S 다시 넣기 → 가입 마치기. 결정 2번(앱 ID).
@@ -100,3 +108,28 @@
 4. 사용자: 앱 만들기, 등록정보·설문 제출, 내부 테스트 시작. 그림 요청: 아이콘과 대표 그림.
 5. 사람 5~8명이 해 본 기록을 보고 공개 범위를 넓힐지 정한다.
 6. 앱인토스: 휴대폰 실측 → 콘솔 등록 → SDK → 등급 정보 → 심사.
+
+## 7. 업로드 키와 스토어용 번들 (사용자가 직접)
+
+키와 비밀번호는 사용자만 안다. PM은 만들지도, 보지도, 저장소에 적지도 않는다.
+
+**키 만들기(한 번만).** 저장소 밖의 폴더에 만든다. 비밀번호 두 개(키 저장소, 키)와 이름·조직을 묻는다. 만든 파일과 비밀번호는 따로 백업한다.
+
+```
+"C:\Program Files\Unity\Hub\Editor\6000.1.5f1\Editor\Data\PlaybackEngines\AndroidPlayer\OpenJDK\bin\keytool.exe" -genkeypair -v -keystore C:\Users\user\keys\bluemushroom-upload.jks -alias upload -keyalg RSA -keysize 2048 -validity 10000
+```
+
+**스토어용 번들 만들기.** 같은 터미널(PowerShell)에서 네 값을 넣고 빌드를 시작한다. 터미널을 닫으면 값은 사라진다.
+
+```
+$env:DAD_UPLOAD_KEYSTORE = "C:\Users\user\keys\bluemushroom-upload.jks"
+$env:DAD_UPLOAD_KEY_ALIAS = "upload"
+$env:DAD_UPLOAD_KEYSTORE_PASS = Read-Host "keystore password"
+$env:DAD_UPLOAD_KEY_PASS = Read-Host "key password"
+& "C:\Program Files\Unity\Hub\Editor\6000.1.5f1\Editor\Unity.exe" -batchmode -nographics -projectPath C:\Users\user\DadWarWebGL -buildTarget Android -executeMethod DadThrowAndroidBuild.StoreBundle -logFile C:\Users\user\DadWarWebGL\Logs\android-store-bundle.log
+```
+
+결과는 `C:\Users\user\DadWarWebGL\Builds\ThrowAndroid\DadWar-<버전>-<코드>.aab`와 `Design/dad-throw-android-store-bundle-build.txt`에 나온다. 값이 하나라도 빠지면 빌드는 시작하지 않고 무엇이 빠졌는지만 적는다.
+
+- 올리기 전에 광고 패키지를 뺄지(1절 결정 3)가 먼저 정해져야 한다. 지금 그대로 만들면 광고 SDK와 광고 ID 권한이 들어간다.
+- 버전은 프로젝트 설정의 값(0.3.1, 코드 3)을 쓴다. 첫 업로드 전에 올릴 버전 이름을 정해 바꾼다.
