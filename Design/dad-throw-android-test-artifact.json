@@ -1,7 +1,7 @@
 {
   "artifact": "C:\\Users\\user\\DadWarWebGL\\Builds\\ThrowAndroid\\DadThrow-arm64-test.apk",
-  "sha256": "882fc1b369f8708170573cd819d26becc66a9486859567458957ae449fad5f4f",
-  "bytes": 31839913,
+  "sha256": "822d97312bbd0430768d49516ad5067ec51f230614ed494dd9b1c127cc1bbeff",
+  "bytes": 31956445,
   "status": "ARTIFACT_CHECKS_PASS",
   "checks": [
     {
@@ -126,7 +126,7 @@
     {
       "name": "Player data exists",
       "passed": true,
-      "value": 746
+      "value": 760
     },
     {
       "name": "Final manifest has expected application ID",
