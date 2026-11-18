@@ -117,25 +117,34 @@
 
 키와 비밀번호는 사용자만 안다. PM은 만들지도, 보지도, 저장소에 적지도 않는다.
 
-**키 만들기(한 번만).** 저장소 밖의 폴더에 만든다. 비밀번호 두 개(키 저장소, 키)와 이름·조직을 묻는다. 만든 파일과 비밀번호는 따로 백업한다.
+**키 만들기(한 번만).** 저장소 밖의 폴더에 만든다. PowerShell에서 실행한다(맨 앞의 `&`가 있어야 한다). 만든 파일과 비밀번호는 따로 백업한다.
 
 ```
-"C:\Program Files\Unity\Hub\Editor\6000.1.5f1\Editor\Data\PlaybackEngines\AndroidPlayer\OpenJDK\bin\keytool.exe" -genkeypair -v -keystore C:\Users\user\keys\bluemushroom-upload.jks -alias upload -keyalg RSA -keysize 2048 -validity 10000
+New-Item -ItemType Directory -Force C:\Users\user\keys
+& "C:\Program Files\Unity\Hub\Editor\6000.1.5f1\Editor\Data\PlaybackEngines\AndroidPlayer\OpenJDK\bin\keytool.exe" -genkeypair -v -keystore C:\Users\user\keys\bluemushroom-upload.jks -alias upload -keyalg RSA -keysize 2048 -validity 10000
 ```
 
-**스토어용 번들 만들기.** 같은 터미널(PowerShell)에서 네 값을 넣고 빌드를 시작한다. 터미널을 닫으면 값은 사라진다.
+keytool을 쓸 때(11/18 밤에 겪은 것):
+
+- 비밀번호는 한 번만 묻는다(두 번 입력). 이 버전의 keytool은 키 비밀번호를 따로 묻지 않으므로 키 비밀번호도 같은 값이다.
+- 이름, 조직, 도시는 영문으로 넣는 편이 안전하다. 도시 칸에는 도시 이름만 넣는다. 국가 코드는 숫자가 아니라 두 글자 `KR`이다.
+- 마지막의 "…이(가) 맞습니까? [아니오]:"에는 **`예`** 또는 `y`를 넣는다. "네"는 알아듣지 못하고 처음 질문으로 돌아간다. 돌아갔을 때는 Enter만 누르면 앞서 넣은 값이 그대로 쓰인다.
+- 끝나면 `C:\Users\user\keys\bluemushroom-upload.jks` 파일이 생긴다.
+
+**스토어용 번들 만들기.** 같은 터미널(PowerShell)에서 값을 넣고 빌드를 시작한다. 비밀번호는 입력할 때 화면에 보이지 않는다. 터미널을 닫으면 값은 사라진다. 빌드는 3분쯤 걸리고, 끝나야 다음 줄을 입력할 수 있다.
 
 ```
 $env:DAD_UPLOAD_KEYSTORE = "C:\Users\user\keys\bluemushroom-upload.jks"
 $env:DAD_UPLOAD_KEY_ALIAS = "upload"
-$env:DAD_UPLOAD_KEYSTORE_PASS = Read-Host "keystore password"
-$env:DAD_UPLOAD_KEY_PASS = Read-Host "key password"
+$env:DAD_UPLOAD_KEYSTORE_PASS = [System.Net.NetworkCredential]::new("", (Read-Host "keystore password" -AsSecureString)).Password
+$env:DAD_UPLOAD_KEY_PASS = $env:DAD_UPLOAD_KEYSTORE_PASS
 $env:DAD_VERSION_NAME = "1.0.0"
 $env:DAD_VERSION_CODE = "1"
-& "C:\Program Files\Unity\Hub\Editor\6000.1.5f1\Editor\Unity.exe" -batchmode -nographics -projectPath C:\Users\user\DadWarWebGL -buildTarget Android -executeMethod DadThrowAndroidBuild.StoreBundle -logFile C:\Users\user\DadWarWebGL\Logs\android-store-bundle.log
+Start-Process -Wait -FilePath "C:\Program Files\Unity\Hub\Editor\6000.1.5f1\Editor\Unity.exe" -ArgumentList "-batchmode","-nographics","-projectPath","C:\Users\user\DadWarWebGL","-buildTarget","Android","-executeMethod","DadThrowAndroidBuild.StoreBundle","-logFile","C:\Users\user\DadWarWebGL\Logs\android-store-bundle.log"
+Get-Content C:\Users\user\DadWarWebGL\Design\dad-throw-android-store-bundle-build.txt
 ```
 
-결과는 `C:\Users\user\DadWarWebGL\Builds\ThrowAndroid\DadWar-<버전>-<코드>.aab`와 `Design/dad-throw-android-store-bundle-build.txt`에 나온다. 값이 하나라도 빠지면 빌드는 시작하지 않고 무엇이 빠졌는지만 적는다.
+결과는 `C:\Users\user\DadWarWebGL\Builds\ThrowAndroid\DadWar-<버전>-<코드>.aab`와 빌드 사본의 `Design/dad-throw-android-store-bundle-build.txt`에 나온다(마지막 줄이 그 보고서를 보여 준다). 값이 하나라도 빠지면 빌드는 시작하지 않고 무엇이 빠졌는지만 적는다.
 
 - 광고는 넣기로 정해졌다(1절 결정 3). 이 빌드에는 광고 SDK와 광고 ID 권한이 들어간다. 광고 ID는 아직 Google의 시험용이다.
 - **버전(11/18 밤에 추가):** `DAD_VERSION_NAME`(이용자에게 보이는 이름)과 `DAD_VERSION_CODE`(정수)를 같은 터미널에서 넣으면 그 값으로 만든다. 넣지 않으면 프로젝트 설정의 값(0.3.1, 코드 3)을 쓴다. **플레이는 한 번 쓴 코드를 다시 받지 않으므로 올릴 때마다 코드를 1씩 올린다.** 위의 1.0.0과 1은 예시이고 버전 이름은 사용자가 정한다. 11/18 밤에 테스트 번들로 확인했다: 0.3.2와 4를 넣어 만든 번들에 그 버전이 들어갔고(매니페스트 versionCode 4), 빌드가 끝난 뒤 빌드 사본의 설정은 0.3.1(3)로 돌아왔다.
