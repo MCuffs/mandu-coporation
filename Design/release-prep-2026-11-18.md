@@ -317,4 +317,6 @@ Get-Content C:\Users\user\DadWarWebGL\Design\dad-throw-android-store-bundle-buil
 - **확인:** 열려 있는 Unity 2021.3에서 컴파일 오류 0. Unity 6 빌드 사본에서 시험 APK를 두 번 만들었다. 보고서에 "Icon: the store icon (6 adaptive sizes, 12 plain sizes)". APK에서 아이콘 그림을 꺼내 봤다: 뒤층, 앞층, 일반, 둥근 아이콘이 모두 새 그림이고 옛 그림은 남지 않았다. 첫 시험에서는 둥근 칸에 옛 그림이 남아 있었다(비워 둔 칸은 프로젝트의 기본 아이콘으로 채워진다). [시험 APK 보고서](dad-throw-android-test-build.txt), [검사](dad-throw-android-test-artifact.json).
 - **보지 못한 것:** 실제 휴대폰의 홈 화면에서 어떻게 보이는지. 런처가 자르는 모양은 그림으로만 흉내 냈다(원, 둥근 네모).
 
-**다음 번들(코드 2):** 7절의 명령에서 `DAD_VERSION_CODE`만 `"2"`로 바꾼다. 결과는 `DadWar-1.0.0-2.aab`다. 내부 테스트에 먼저 올려 휴대폰에서 아이콘과 광고를 본 뒤 프로덕션으로 올려 보내는 순서를 추천한다.
+**코드 2 번들이 나왔다(11/18 23:25, 사용자가 서명 빌드).** `DadWar-1.0.0-2.aab`, 30.2 MB, 버전 1.0.0(코드 2). [빌드 보고서](dad-throw-android-store-bundle-build.txt), [검사 결과](dad-throw-android-store-bundle-artifact.json). 검사 통과(ARM64, 16KB, 앱 ID, API 36, 구조 검증), 서명 검증됨, 디버그 키 아님. 번들 안의 아이콘 넷(일반, 둥근, 적응형 앞층·뒤층)이 모두 새 그림이다. **코드 2는 쓴 것으로 친다. 다음은 3이다.**
+
+내부 테스트에 먼저 올려 휴대폰에서 아이콘과 광고를 본 뒤 프로덕션으로 올려 보내는 순서를 추천한다. 올리는 것은 파일이 커서 사용자가 한다.

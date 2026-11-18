@@ -1,16 +1,17 @@
 Throw game Android store bundle; signed with the owner's upload key.
 Unity: 6000.1.5f1
-Version: 1.0.0 (1)
+Version: 1.0.0 (2)
 Application ID: com.bluemushroom.dadwar
 Backend: IL2CPP
 Architectures: ARM64
 Minimum SDK: AndroidApiLevel24
 Target SDK: AndroidApiLevel36
+Icon: the store icon (6 adaptive sizes, 12 plain sizes)
 Android dependency resolution: True
 Result: Succeeded
 Errors: 0
-Warnings: 13
-Package: 30.1 MB
-Duration: 00:00:38.5052106
-Artifact: Builds/ThrowAndroid/DadWar-1.0.0-1.aab
+Warnings: 1
+Package: 30.2 MB
+Duration: 00:01:20.9040735
+Artifact: Builds/ThrowAndroid/DadWar-1.0.0-2.aab
 Signing: the owner's upload key, alias upload
