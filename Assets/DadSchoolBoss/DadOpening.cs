@@ -90,7 +90,7 @@ public sealed partial class DadSchoolPrototype
     void DrawSplash()
     {
         float t = openingClock, a = t < SplashIn ? t / SplashIn : t < SplashIn + SplashHold ? 1 : 1 - (t - SplashIn - SplashHold) / SplashOut;
-        Text(new Rect(0, 440, Width, 80), "Mandu Corporation", 34, new Color(1, 1, 1, Mathf.Clamp01(a)), false, TextAnchor.MiddleCenter);
+        Text(new Rect(0, 440, Width, 80), "파랑버섯 스튜디오", 34, new Color(1, 1, 1, Mathf.Clamp01(a)), false, TextAnchor.MiddleCenter);
         if (GUI.Button(new Rect(0, 0, Width, Height), GUIContent.none, GUIStyle.none)) ShowTitle();
     }
     void DrawTitle()
@@ -98,10 +98,10 @@ public sealed partial class DadSchoolPrototype
         if (TitleArt != null) GUI.DrawTexture(new Rect(0, 0, Width, Height), TitleArt, ScaleMode.ScaleAndCrop);
         Text(new Rect(0, 92, Width, 34), "아빠, 장난이라니까!", 21, Ink, true, TextAnchor.MiddleCenter);
         OutlinedText(new Rect(0, 120, Width, 120), Title, 86, Yellow, Ink, 4);
-        if (Button(new Rect(90, 806, 360, 84), "게임 시작", Yellow, true, 36)) StartGame();
+        if (Button(new Rect(90, 806, 360, 84), ReturningPlayer ? "계속하기" : "게임 시작", Yellow, true, 30)) StartGame();
         if (ReturningPlayer)
         {
-            Rect replay = new Rect(170, 906, 200, 38);
+            Rect replay = new Rect(170, 758, 200, 38);
             Box(replay, new Color(Paper.r, Paper.g, Paper.b, .85f));
             Text(replay, "이야기 다시 보기", 17, Ink, true, TextAnchor.MiddleCenter);
             if (GUI.Button(replay, GUIContent.none, GUIStyle.none)) { PlaySfx("sfx_button", .45f); PlayStory(true); }

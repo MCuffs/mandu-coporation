@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "assets": [
+    {
+      "id": "unlock_daily",
+      "brief": "봉랍과 반짝임",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "assets": [
+    {
+      "id": "fx_tray_clang_0",
+      "tool": "native SVG / sharp",
+      "brief": "v3 request: fx_tray_clang_0; exact native canvas, flat fills, black outline, no text.",
+      "source": "sources/fx_tray_clang_0.svg",
+      "recipe": "Tools/build_throw_v3_vectors.cjs"
+    },
+    {
+      "id": "fx_coin_pop_0",
+      "tool": "native SVG / sharp",
+      "brief": "v3 request: fx_coin_pop_0; exact native canvas, flat fills, black outline, no text.",
+      "source": "sources/fx_coin_pop_0.svg",
+      "recipe": "Tools/build_throw_v3_vectors.cjs"
+    },
+    {
+      "id": "fx_tray_clang_1",
+      "tool": "native SVG / sharp",
+      "brief": "v3 request: fx_tray_clang_1; exact native canvas, flat fills, black outline, no text.",
+      "source": "sources/fx_tray_clang_1.svg",
+      "recipe": "Tools/build_throw_v3_vectors.cjs"
+    },
+    {
+      "id": "fx_coin_pop_1",
+      "tool": "native SVG / sharp",
+      "brief": "v3 request: fx_coin_pop_1; exact native canvas, flat fills, black outline, no text.",
+      "source": "sources/fx_coin_pop_1.svg",
+      "recipe": "Tools/build_throw_v3_vectors.cjs"
+    },
+    {
+      "id": "fx_tray_clang_2",
+      "tool": "native SVG / sharp",
+      "brief": "v3 request: fx_tray_clang_2; exact native canvas, flat fills, black outline, no text.",
+      "source": "sources/fx_tray_clang_2.svg",
+      "recipe": "Tools/build_throw_v3_vectors.cjs"
+    },
+    {
+      "id": "fx_coin_pop_2",
+      "tool": "native SVG / sharp",
+      "brief": "v3 request: fx_coin_pop_2; exact native canvas, flat fills, black outline, no text.",
+      "source": "sources/fx_coin_pop_2.svg",
+      "recipe": "Tools/build_throw_v3_vectors.cjs"
+    }
+  ]
+}

@@ -18,7 +18,7 @@ public sealed partial class DadSlingshotPrototype : MonoBehaviour
     static readonly Color Ink = new Color(.12f, .13f, .12f), Paper = new Color(.94f, .89f, .72f), Yellow = new Color(1f, .78f, .15f);
     static readonly Color Green = new Color(.32f, .48f, .36f), Red = new Color(.78f, .22f, .15f), Night = new Color(.15f, .24f, .18f);
     const string StarsKey = "DadSlingshot.Stars.", ScaleKey = "DadSlingshot.Scale";
-    const float BarHeight = 44;
+    const float BarHeight = DadBattleViewRules.HudHeight;
 
     public SlingshotSim Sim { get; private set; }
     public int StageIndex { get; private set; } = -1;   // -1: the stage list
@@ -49,16 +49,15 @@ public sealed partial class DadSlingshotPrototype : MonoBehaviour
     Vector2 queuedPull;
     int finger = -1, shownChain;
     Vector2 aimStart, aimNow;
-    float clock, shake, chainChip, chainBig, bannerTime, endClock;
+    float clock, shake, chainChip, endClock;
+    bool flightFacingLeft;
+    float flightTilt;
     Vector2 flightDir = Vector2.up;   // kept while dad slows down so the pose does not spin at low speed
     public static bool DebugWalls;    // editor audits draw the bounce lines over the painting to check they meet the wall fronts
-    string banner = "";
     bool resultSaved;
-    sealed class Popup { public Vector2 pos; public string text; public float life = .75f; public int style; }
     sealed class Dent { public int side, spot, level; public float y; }
     readonly List<object> drawOrder=new List<object>(16);
     readonly List<Vector2> aimPath=new List<Vector2>(4);
-    readonly List<Popup> popups = new List<Popup>();
     readonly List<Dent> dents = new List<Dent>();
     // 1F corridor locker faces measured on bg_floor1_corridor (same numbers as DadSchoolRewards.WallFaces[0]).
     static readonly float[] LockerSpots = { 466f, 548f };
@@ -106,7 +105,7 @@ public sealed partial class DadSlingshotPrototype : MonoBehaviour
         stages = SlingshotSim.PrototypeStages(Arena);   // fresh spawn lists each try
         Sim = new SlingshotSim(stages[StageIndex], Arena, 7 + StageIndex, BodyScale);
         ResetFight(); firstLesson = StageIndex == 0;
-        banner = stages[StageIndex].label + "  " + stages[StageIndex].title + "  ·  상대 " + stages[StageIndex].spawns.Count + "명" + (stages[StageIndex].bossEscorts ? " +" : ""); bannerTime = 1.8f;PrepareOpponentLesson();
+        PrepareOpponentLesson();
     }
     // Main game: a stage built by the host (SlingshotSim.ForMain) with its growth applied in setup.
     public void StartEmbedded(SlingshotSim.Stage stage, System.Action<SlingshotSim> setup)
@@ -115,10 +114,10 @@ public sealed partial class DadSlingshotPrototype : MonoBehaviour
         Sim = new SlingshotSim(stage, Arena, 7 + stage.floor * 100 + stage.spawns.Count, BodyScale);
         if (setup != null) setup(Sim);
         ResetFight(); firstLesson = stage.label == "1-1" && stage.challengeLevel == 0;
-        banner = stage.label + "  " + stage.title + "  ·  상대 " + stage.spawns.Count + "명" + (stage.bossEscorts ? " +" : ""); bannerTime = 1.8f;PrepareOpponentLesson();
+        PrepareOpponentLesson();
     }
     public void StopEmbedded() { Sim = null; aiming = false; finger = -1; queuedLaunch = false; if (pullLoop != null) pullLoop.Stop(); }
-    void ResetFight() { ResetPresentation(); aiming = false; finger = -1; queuedLaunch = false; popups.Clear(); dents.Clear(); shownChain = 0; chainChip = chainBig = endClock = 0; resultSaved = false; finishedSent = false; }
+    void ResetFight() { ResetPresentation(); flightDir=Vector2.up;flightTilt=0;flightFacingLeft=false; aiming = false; finger = -1; queuedLaunch = false; dents.Clear(); shownChain = 0; chainChip = endClock = 0; resultSaved = false; finishedSent = false; }
     public void ShowMenu() { Sim = null; StageIndex = -1; aiming = false; }
     // Editor audits hold an aim on screen without a finger.
     public void DebugAim(Vector2 start, Vector2 now) { SetPaused(false); lessonKind=-1; aiming = true; finger = -2; aimStart = start; aimNow = now; }
@@ -131,14 +130,13 @@ public sealed partial class DadSlingshotPrototype : MonoBehaviour
     // On a phone taller than 9:16 the frame is centred with this much room (canvas units) above and below it inside the safe
     // area. The corridor painting fills it; the top bar and the bottom chips move out to the real screen edges.
     float Pad { get { return Mathf.Max(0, (Screen.safeArea.height / ViewScale - Height) / 2); } }
-    Rect ListButton { get { return new Rect(482, -Pad + 6, 50, 32); } }
+    Rect ListButton { get { return new Rect(464, -Pad + 8, 68, 48); } }
 
     void Update()
     {
         if (ResourcesLost) Load();
         float dt = Mathf.Min(Time.unscaledDeltaTime, .1f); clock += dt;
-        shake = Mathf.Max(0, shake - dt * 25); chainChip = Mathf.Max(0, chainChip - dt); chainBig = Mathf.Max(0, chainBig - dt); bannerTime = Mathf.Max(0, bannerTime - dt);
-        for (int i = popups.Count - 1; i >= 0; i--) { popups[i].life -= dt; popups[i].pos.y -= dt * 40; if (popups[i].life <= 0) popups.RemoveAt(i); }
+        shake = Mathf.Max(0, shake - dt * 25); chainChip = Mathf.Max(0, chainChip - dt);
         UpdateMusic();
         if (Sim == null) return;
         if(Input.GetKeyDown(KeyCode.Escape)&&!Sim.Over)SetPaused(!UserPaused);
@@ -151,14 +149,21 @@ public sealed partial class DadSlingshotPrototype : MonoBehaviour
         // Aiming is a calm moment: the walkers slow down while dad is pulled back. Once it is over, the last bodies keep
         // flying in slow motion for a moment (the finisher) before the result card.
         UpdatePullSound();
-        ObserveShot();
         if(impactPause>0)impactPause=Mathf.Max(0,impactPause-dt);
         else Sim.Tick(dt * (Sim.Over ? .3f : aiming ? Sim.aimSlow : 1));
         if (queuedLaunch && Sim.phase == SlingshotSim.Phase.Ready && Sim.dad.landed <= .01f)
         { Sim.Launch(queuedPull); queuedLaunch = false; }
         if (Sim.Over) queuedLaunch = false;
+        if(Sim.dad.flying)
+        {
+            if(Sim.dad.vel.sqrMagnitude>120*120)flightDir=Sim.dad.vel.normalized;
+            bool nextFacing=DadBattleViewRules.FacingLeft(flightDir,flightFacingLeft);
+            if(nextFacing!=flightFacingLeft)flightTilt=-flightTilt; // preserve upright pitch across a wall reflection
+            flightFacingLeft=nextFacing;
+            flightTilt=Mathf.MoveTowardsAngle(flightTilt,DadBattleViewRules.FlightTilt(flightDir,flightFacingLeft),540*dt);
+        }
+        else { flightTilt=0;flightFacingLeft=false; }
         ConsumeEvents();
-        CompleteShot();
         endClock = Mathf.Max(0, endClock - dt);
         if (Sim.Over && !resultSaved)
         {
@@ -202,8 +207,7 @@ public sealed partial class DadSlingshotPrototype : MonoBehaviour
             if (!string.IsNullOrEmpty(e.sound)) PlaySfx(e.sound, e.sound.StartsWith("jingle") ? .8f : .6f, e.sound == "sfx_chain" ? 1 + Mathf.Min(.5f, Sim.shotChain * .06f) : 1);
             if (e.dentSide >= 0) AddDent(e.dentSide, e.pos.y);
             if (string.IsNullOrEmpty(e.text) || e.text.EndsWith("연쇄!!")) continue;   // the chain count has its own chip
-            if (e.style >= 3) { banner = e.text; bannerTime = 2.2f; shake = Mathf.Max(shake, 5); continue; }
-            popups.Add(new Popup { pos = e.pos - new Vector2(0, 80 * S), text = e.text, style = e.style });
+            if (e.style >= 3) { shake = Mathf.Max(shake, 5); continue; }
             // Only wall slams and bigger shake the corridor; small knocks stay still so the crowd stays readable.
             shake = Mathf.Max(shake, e.style >= 2 ? 4 : e.style == 1 && e.text.StartsWith("벽꿍") ? 2.5f : 0);
         }
@@ -211,7 +215,6 @@ public sealed partial class DadSlingshotPrototype : MonoBehaviour
         if (Sim.shotChain >= 2 && Sim.shotChain != shownChain)
         {
             shownChain = Sim.shotChain; chainChip = 1.4f;
-            if (shownChain >= 5) chainBig = .6f;
         }
         if (Sim.shotChain < shownChain) shownChain = Sim.shotChain;
     }
@@ -336,10 +339,16 @@ public sealed partial class DadSlingshotPrototype : MonoBehaviour
         if (corridor != null) GUI.DrawTexture(new Rect(0, -105, Width, 1170), corridor, ScaleMode.StretchToFill);
         else if (bg != null) GUI.DrawTexture(new Rect(0, 0, Width, Height), bg, ScaleMode.StretchToFill);
         foreach (Dent d in dents) DrawDent(d);
-        foreach (SlingshotSim.Corpse c in Sim.corpses)
+        // Keep defeated bodies out of the live crowd: a short, subdued hurt pose rather than tumbling clones.
+        int fallenShown=0;
+        for(int i=Sim.corpses.Count-1;i>=0&&fallenShown<3;i--)
         {
-            float k = 1 - c.life / .6f;
-            DrawCharacter(c.kind == SlingshotSim.Kind.Boss ? BossArt : FoeId(c.kind), "fly", 0, c.pos - new Vector2(0, (30 + k * 40) * s), FoeStand(c.kind, c.elite) * s, c.facing > 0, (c.facing > 0 ? 1 : -1) * k * 70, false, null, Mathf.Clamp01(c.life / .25f));
+            SlingshotSim.Corpse c=Sim.corpses[i];float alpha=DadBattleViewRules.FallenOpacity(c.life);
+            if(alpha<=0)continue;
+            Vector2 at=c.pos+new Vector2((fallenShown-1)*12,10+fallenShown*8);
+            DrawCharacter(c.kind==SlingshotSim.Kind.Boss?BossArt:FoeId(c.kind),"hurt",0,at,
+                FoeStand(c.kind,c.elite)*s*.78f,c.facing>0,(c.facing>0?1:-1)*12,false,null,alpha);
+            fallenShown++;
         }
         // Telegraphs under the bodies: the charge line and the swing ring.
         foreach (SlingshotSim.Foe f in Sim.foes)
@@ -367,12 +376,8 @@ public sealed partial class DadSlingshotPrototype : MonoBehaviour
         }
         if (aiming && Sim.phase == SlingshotSim.Phase.Ready) DrawAim();
         else if (Sim.phase == SlingshotSim.Phase.Ready && Sim.shots == 0) DrawPullHint();
-        if (Sim.stage.shotLimit > 0 && Sim.shots >= Sim.stage.shotLimit && !Sim.Over) Text(new Rect(140, Height-90, 260, 32), "마지막 연쇄 판정 중…", 18, Ink, true, TextAnchor.MiddleCenter);
-        else if (Sim.dad.landed > .01f) Text(new Rect(155, Height-90, 230, 32), "착지 중…", 18, Ink, true, TextAnchor.MiddleCenter);
-        foreach (Popup p in popups) Text(new Rect(p.pos.x - 130, p.pos.y, 260, 40), p.text, p.style >= 2 ? 26 : p.style == 1 ? 20 : 16, p.style >= 1 ? Red : Ink, true, TextAnchor.MiddleCenter);
         GUI.matrix = stage;
         DrawHud();
-        DrawShotFeedback();
     }
     static Vector2 Feet(object o) { return o is SlingshotSim.Dad ? ((SlingshotSim.Dad)o).pos : ((SlingshotSim.Foe)o).pos; }
 
@@ -387,9 +392,8 @@ public sealed partial class DadSlingshotPrototype : MonoBehaviour
             if (rage != null) DrawFx(rage, d.pos - new Vector2(0, 50 * s), 230 * s * pulse, 230 * s * pulse, 0, Color.white);
             else { Ellipse(d.pos, 120 * s * pulse, 40 * s * pulse, new Color(Red.r, Red.g, Red.b, .35f)); Ellipse(d.pos, 90 * s, 28 * s, new Color(Yellow.r, Yellow.g, Yellow.b, .35f)); }
             Texture2D icon = V("rage_launch");
-            Rect label = new Rect(d.pos.x - 74, d.pos.y - 150 * s - 30, 160, 26);
-            if (icon != null) GUI.DrawTexture(new Rect(label.x - 30, label.y - 4, 32, 32), icon, ScaleMode.ScaleToFit);
-            Text(label, "분노 발사 준비!", 16, Red, true, TextAnchor.MiddleCenter);
+            if (icon != null) GUI.DrawTexture(new Rect(d.pos.x-50,d.pos.y-150*s-34,32,32), icon, ScaleMode.ScaleToFit);
+            // The flame is the ready-state cue; no extra sentence over the character.
         }
         Ellipse(d.pos, 60 * s, 16 * s, new Color(0, 0, 0, d.flying ? .14f : .24f));
         string action = "idle"; int index = Mathf.FloorToInt(clock / .6f); bool flip = false; float tilt = 0, lift = 0;
@@ -409,7 +413,7 @@ public sealed partial class DadSlingshotPrototype : MonoBehaviour
         else if (d.hurt > .35f) { action = "hurt"; index = 0; }
         else if (d.landed > 0) { action = "movestop"; index = 0; }
         bool blink = d.hurt > 0 && Mathf.Sin(clock * 35) > .3f || d.flying && d.rage;
-        DrawCharacter("dad", action, index, d.pos - new Vector2(0, lift), 150 * s, flip, tilt, blink);
+        DrawCharacter("dad", action, index, d.pos - new Vector2(0, lift), 150 * s * DadBattleViewRules.CharacterScale, flip, tilt, blink);
     }
     // V13 flight: two flight poses alternate, turned about the body centre (pivot 384,384) to the flight direction; at a
     // side-locker contact the wall-bounce pose stands with its back contact (canvas x 205) on the wall front. Wind behind
@@ -418,9 +422,8 @@ public sealed partial class DadSlingshotPrototype : MonoBehaviour
     {
         Texture2D a = V("dad_flight_0"), b = V("dad_flight_1"), bounce = V("dad_bounce_0");
         if (a == null || b == null) return false;
-        float scale = 150 * s / 560f, speed = d.vel.magnitude, k = Mathf.Clamp01(speed / SlingshotSim.LaunchMax);
-        if (speed > 120) flightDir = d.vel / speed;
-        Vector2 dir = flightDir, body = d.pos - new Vector2(0, 55 * s);
+        float scale = 150 * s * DadBattleViewRules.CharacterScale / 560f, speed = d.vel.magnitude, k = Mathf.Clamp01(speed / SlingshotSim.LaunchMax);
+        Vector2 dir = flightDir, body = DadBattleViewRules.BodyCenter(d.pos,s);
         float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
         Color tint = d.rage ? new Color(1, .45f, .35f, .5f + .45f * k) : d.bounces > 0 ? new Color(1, .85f, .3f, .5f + .45f * k) : new Color(1, 1, 1, .35f + .5f * k);
         Texture2D wind = V("wind"), swoosh = V("swoosh");
@@ -435,15 +438,15 @@ public sealed partial class DadSlingshotPrototype : MonoBehaviour
         }
         else
         {
-            bool flip = dir.x < 0;
-            float tilt = flip ? -Mathf.Atan2(dir.y, -dir.x) * Mathf.Rad2Deg : angle;
+            bool flip = flightFacingLeft;
+            float tilt = flightTilt;
             bool variant = d.flightTime < .12f || Mathf.Repeat(d.flightTime, .9f) < .1f;   // pose 1 mixed in briefly, never flickering
             DrawPose(variant ? b : a, body, new Vector2(384, 384), scale, flip, tilt, d.rage);
         }
         if (d.bounces > 0)
         {
             Texture2D icon = V("wall_launch");
-            if (icon != null) { GUI.DrawTexture(new Rect(body.x + 34 * s, body.y - 70 * s, 34, 34), icon, ScaleMode.ScaleToFit); Text(new Rect(body.x + 34 * s + 30, body.y - 70 * s, 50, 34), "x" + d.bounces, 18, Red, true); }
+            if (icon != null) GUI.DrawTexture(new Rect(body.x + 34 * s, body.y - 70 * s, 34, 34), icon, ScaleMode.ScaleToFit);
         }
         return true;
     }
@@ -456,7 +459,7 @@ public sealed partial class DadSlingshotPrototype : MonoBehaviour
         if (pose == null) return false;
         Ellipse(d.pos, 64 * s, 17 * s, new Color(0, 0, 0, .24f));
         bool flip = pose == pull ? (aimStart - aimNow).x < 0 : false;
-        DrawPose(pose, d.pos, new Vector2(384, 720), 150 * s / 560f, flip, 0, d.hurt > 0 && Mathf.Sin(clock * 35) > .3f);
+        DrawPose(pose, d.pos, new Vector2(384, 720), 150 * s * DadBattleViewRules.CharacterScale / 560f, flip, 0, d.hurt > 0 && Mathf.Sin(clock * 35) > .3f);
         return true;
     }
     void DrawPose(Texture2D tex, Vector2 at, Vector2 pivot, float scale, bool flip, float tilt, bool flash)
@@ -477,12 +480,12 @@ public sealed partial class DadSlingshotPrototype : MonoBehaviour
     }
     void DrawFoe(SlingshotSim.Foe f)
     {
-        float s = S, stand = FoeStand(f.kind, f.elite) * s, lift = f.Lift;
+        float s = S, stand = FoeStand(f.kind, f.elite) * s * DadBattleViewRules.CharacterScale, lift = Mathf.Min(f.Lift,FoeStand(f.kind,f.elite)*s*.65f);
         string id = f.Boss ? BossArt : FoeId(f.kind);
         Ellipse(f.pos, (f.Boss ? 92 : 52) * (f.elite ? 1.4f : 1) * s, 14 * s, new Color(0, 0, 0, .22f));
         string action; int index = 0; float tilt = 0;
         bool broken = f.kind == SlingshotSim.Kind.Tray && f.trayBroken;
-        if (f.Flying) { action = "fly"; tilt = Mathf.Clamp(-f.vel.x * .03f, -25, 25); }
+        if (f.Flying) { action = "fly"; tilt = Mathf.Clamp(-f.vel.x * .012f, -12, 12); }
         else if (f.Boss && f.groggy > 0) action = "groggy";
         else if (f.dash > 0) action = "dash";
         else if (f.kind == SlingshotSim.Kind.Dodge && (f.windup > 0 || f.attackPose > 0)) { action = "throw"; index = f.windup > 0 ? 0 : 1; }
@@ -506,7 +509,6 @@ public sealed partial class DadSlingshotPrototype : MonoBehaviour
         {
             // The second-hit window: hit him again before the yellow bar runs out.
             Bar(new Rect(f.pos.x - 34 * s, f.pos.y - stand - 26, 68 * s, 8), f.heavyClock / 3f, Yellow);
-            Text(new Rect(f.pos.x - 70, f.pos.y - stand - 50, 140, 22), "한 번 더!", 15, Red, true, TextAnchor.MiddleCenter);
         }
         if (f.hp < f.maxHp && !f.Boss) Bar(new Rect(f.pos.x - 22 * s, f.pos.y - stand - 8, 44 * s, 6), f.hp / (float)f.maxHp, Red);
         if (f.Boss && f.groggy > 0)
@@ -535,34 +537,25 @@ public sealed partial class DadSlingshotPrototype : MonoBehaviour
         Vector2 chest = d.pos - new Vector2(0, 60 * s);
         Line(chest, chest - pull.normalized * Mathf.Min(pull.magnitude, SlingshotSim.PullMax) * .7f, 7 * s, new Color(Ink.r, Ink.g, Ink.b, .55f));
         if (!live) return;
-        List<Vector2> path = SlingshotSim.Predict(d.pos, pull, Arena, Sim.DadRadius,aimPath);
+        List<Vector2> path = Sim.PredictShot(pull, aimPath);
         for (int i = 0; i + 1 < path.Count; i++)
         {
             Vector2 a = path[i], b = path[i + 1]; float len = (b - a).magnitude;
             for (float t = 0; t < len; t += 16) Ellipse(Vector2.Lerp(a, b, t / Mathf.Max(1, len)) - new Vector2(0, 30 * s), i == 0 ? 9 : 7, i == 0 ? 9 : 7, new Color(1, 1, 1, i == 0 ? .95f : .6f));
         }
-        Rect tag = new Rect(chest.x - 38, chest.y - 100 * s - 30, 76, 28);
-        Box(tag, new Color(Ink.r, Ink.g, Ink.b, .75f)); Text(tag, Mathf.RoundToInt(power * 100) + "%", 17, power > .95f ? Yellow : Color.white, true, TextAnchor.MiddleCenter);
     }
     void DrawPullHint()
     {
-        // Before the first shot: the stage's lesson above dad, and a ghost finger pressing above him and pulling back down.
-        Vector2 dad = Sim.dad.pos; float s = S;
-        float t = Mathf.Repeat(clock, 1.6f) / 1.2f; Vector2 start = dad + new Vector2(0, -230), end = dad + new Vector2(26, -110 * s);
-        Vector2 p = Vector2.Lerp(start, end, Mathf.Clamp01(t)); float a = t <= 1 ? 1 : 0;
-        if (firstLesson)
-        {
-            Line(start, p, 6, new Color(Ink.r, Ink.g, Ink.b, .35f * a));
-            Texture2D hand = V("drag_hand");
-            // The V13 hand points down-left; its fingertip (about 12%, 94% of the image) rides on the pull path.
-            if (hand != null) { GUI.color = new Color(1, 1, 1, a); GUI.DrawTexture(new Rect(p.x - .12f * 72, p.y - .94f * 72, 72, 72), hand, ScaleMode.ScaleToFit); GUI.color = Color.white; }
-            else { Ellipse(p, 46, 46, new Color(1, 1, 1, .55f * a)); Ellipse(p, 22, 22, new Color(Ink.r, Ink.g, Ink.b, .5f * a)); }
-        }
-        // Under the bar, over the back wall: the walkers enter below it, so the lesson never sits on top of them.
-        bool bossBar = Sim.Boss != null || Sim.foes.Exists(x => x.elite && x.hp > 0);   // the big-dad gets the same bar
-        Rect pill = new Rect(24, BarHeight - Pad + 6 + (bossBar ? 28 : 0) + (bannerTime > 0 ? 32 : 0), 492, 34);
-        Box(pill, new Color(Paper.r, Paper.g, Paper.b, .92f));
-        Text(pill, firstLesson ? "누르고 아래로 당겼다 놓으면 위로 날아가요" : Sim.stage.lesson, 16, Ink, true, TextAnchor.MiddleCenter);
+        // One short first-stage instruction; normal play is explained by the aiming line and hand animation.
+        if(!firstLesson||Sim.shots>0||clock>8)return;
+        Vector2 dad=Sim.dad.pos;
+        float t=Mathf.Repeat(clock,1.6f)/1.2f;
+        Vector2 start=dad+new Vector2(0,-180),end=dad+new Vector2(0,-85);
+        Vector2 point=Vector2.Lerp(start,end,Mathf.Clamp01(t));
+        Texture2D hand=V("drag_hand");
+        if(hand!=null)GUI.DrawTexture(new Rect(point.x-10,point.y-63,70,70),hand,ScaleMode.ScaleToFit);
+        Rect hint=new Rect(70,BarHeight-Pad+8,400,34);
+        Text(hint,"아래로 당겼다 놓으세요",20,Ink,true,TextAnchor.MiddleCenter);
     }
     void DrawHud()
     {
@@ -570,12 +563,12 @@ public sealed partial class DadSlingshotPrototype : MonoBehaviour
         float pad = Pad, y0 = -pad, bottom = Height + pad;
         // One thin bar at the top of the screen: stage, health, shots against the target, and the way out.
         Box(new Rect(0, y0, Width, BarHeight), Night);
-        Text(new Rect(12, y0, 196, BarHeight), st.label + "  " + st.title, 16, Paper, true);
-        Bar(new Rect(210, y0 + 15, 150, 14), d.health / d.maxHealth, d.health < d.maxHealth*.3f ? Red : new Color(.45f, .75f, .45f));
-        Box(new Rect(285,y0+12,1,20),new Color(1,1,1,.7f));
-        Text(new Rect(211,y0+12,148,20),"체력 "+Mathf.CeilToInt(100*d.health/d.maxHealth)+"%",11,Ink,false,TextAnchor.MiddleCenter);
-        Text(new Rect(366, y0, 112, BarHeight), (st.shotLimit > 0 ? "남은 " + Mathf.Max(0, st.shotLimit - Sim.shots) + "발" : "발사 " + Sim.shots + " / " + st.par), 16, Sim.shots > st.par ? new Color(1, .6f, .5f) : Paper, true, TextAnchor.MiddleCenter);
-        if (Button(ListButton, "정지", Color.white, !Sim.Over, 15)) SetPaused(true);
+        Text(new Rect(12, y0, 184, BarHeight), st.label, 20, Paper, true);
+        Bar(new Rect(204, y0 + 34, 142, 18), d.health / d.maxHealth, d.health < d.maxHealth*.3f ? Red : new Color(.45f, .75f, .45f));
+
+        Text(new Rect(204,y0+5,142,26),"체력 "+Mathf.CeilToInt(100*d.health/d.maxHealth)+"%",18,Paper,false,TextAnchor.MiddleCenter);
+        Text(new Rect(350, y0, 108, BarHeight), (st.shotLimit > 0 ? "남은 " + Mathf.Max(0, st.shotLimit - Sim.shots) + "발" : "발사 " + Sim.shots + " / " + st.par), 20, Sim.shots > st.par ? new Color(1, .6f, .5f) : Paper, true, TextAnchor.MiddleCenter);
+        if (Button(ListButton, "정지", Color.white, !Sim.Over, 20)) SetPaused(true);
         float top = y0 + BarHeight;
         SlingshotSim.Foe boss = Sim.Boss ?? Sim.foes.Find(x => x.elite && x.hp > 0);
         if (boss != null)
@@ -584,30 +577,20 @@ public sealed partial class DadSlingshotPrototype : MonoBehaviour
             int fl = Mathf.Clamp(Sim.stage.floor, 1, 3) - 1;
             Text(new Rect(12, top, 100, 28), boss.Boss ? BossShort[fl] : EliteShort[fl], 15, Paper, true);
             Bar(new Rect(104, top + 6, 424, 16), boss.hp / (float)boss.maxHp, boss.groggy > 0 ? Yellow : Red);
-            if (boss.groggy > 0) Text(new Rect(104, top + 4, 424, 20), "그로기!  아빠로 들이받아요", 13, Ink, true, TextAnchor.MiddleCenter);
-            else if (boss.heavyHits > 0) Text(new Rect(104, top + 4, 424, 20), "휘청!  3초 안에 한 번 더", 13, Ink, true, TextAnchor.MiddleCenter);
+            if (boss.groggy > 0) Text(new Rect(104, top + 4, 424, 20), "지금 공격!", 13, Ink, true, TextAnchor.MiddleCenter);
+            else if (boss.heavyHits > 0) Text(new Rect(104, top + 4, 424, 20), "한 번 더!", 13, Ink, true, TextAnchor.MiddleCenter);
             top += 28;
         }
-        if (bannerTime > 0) { Box(new Rect(0, top, Width, 32), new Color(Yellow.r, Yellow.g, Yellow.b, .95f)); Text(new Rect(10, top, Width - 20, 32), banner, 17, Ink, true, TextAnchor.MiddleCenter); }
-        // Bottom corners stay clear of dad (he starts in the middle): the chain chip on the left, what is left on the right.
-        if (chainChip > 0 && Sim.shotChain >= 2)
+        // A single compact count replaces the center headline and the duplicate impact commentary.
+        if(chainChip>0&&Sim.shotChain>=2)
         {
-            string titleText = ChainTitle(Sim.shotChain); Texture2D icon = V("chain_launch");
-            Rect chip = new Rect(12, bottom - 54, (titleText.Length > 0 ? 260 : 132) + (icon != null ? 30 : 0), 40); Panel(chip, Yellow);
-            if (icon != null) GUI.DrawTexture(new Rect(chip.x + 6, chip.y + 4, 32, 32), icon, ScaleMode.ScaleToFit);
-            Text(new Rect(chip.x + (icon != null ? 30 : 0), chip.y, chip.width - (icon != null ? 30 : 0), chip.height), Sim.shotChain + "연쇄!" + (titleText.Length > 0 ? "  " + titleText : ""), titleText.Length > 0 ? 18 : 22, Red, true, TextAnchor.MiddleCenter);
+            Rect chip=new Rect(12,bottom-54,124,40);Panel(chip,Yellow);
+            Text(chip,"연쇄 "+Sim.shotChain,22,Ink,true,TextAnchor.MiddleCenter);
         }
         if (!st.bossEscorts)
         {
             Rect left = new Rect(Width - 132, bottom - 54, 120, 40); Box(left, new Color(Paper.r, Paper.g, Paper.b, .9f));
             Text(left, "남은 " + Sim.Remaining + "명", 17, Ink, true, TextAnchor.MiddleCenter);
-        }
-        if (chainBig > 0)
-        {
-            float a = Mathf.Clamp01(chainBig / .2f);
-            Text(new Rect(0, 402, Width, 70), Sim.shotChain + "연쇄!!", 52, new Color(Ink.r, Ink.g, Ink.b, .6f * a), true, TextAnchor.MiddleCenter);
-            Text(new Rect(0, 398, Width, 70), Sim.shotChain + "연쇄!!", 52, new Color(Red.r, Red.g, Red.b, a), true, TextAnchor.MiddleCenter);
-            Text(new Rect(0, 462, Width, 40), ChainTitle(Sim.shotChain), 26, new Color(Ink.r, Ink.g, Ink.b, a), true, TextAnchor.MiddleCenter);
         }
     }
     void DrawResult()

@@ -1,0 +1,15 @@
+{
+  "date": "2026-11-09",
+  "tool": "image_gen",
+  "transparent_background": true,
+  "prompts": [
+    [
+      "cart",
+      "Use case: stylized-concept. Create a single production 2D game sprite of a Korean school cafeteria stainless steel lunch trolley, on truly transparent background. Slightly elevated three-quarter front view, compact broad horizontal silhouette, two shelves with stacked shallow steel meal trays, sturdy rail handle, exactly four chunky caster wheels with two clearly visible at front. Friendly comic slapstick prop, hand-drawn dark ink outlines, flat muted teal gray metal, warm cream highlights, restrained cel shading. Match an expressive Korean middle-aged-dad cartoon casual game, readable at 90 pixels wide, no text, letters, logos, characters, food spill, motion trail or background. One centered complete trolley with generous transparent margin, crisp clean silhouette. Canvas square."
+    ],
+    [
+      "pad",
+      "Use case: stylized-concept. Create one production 2D game sprite, a thick school gym rebound crash mat used as a pinball bumper in a Korean slapstick dad game. Truly transparent background. Square padded cushion viewed from slightly above with shallow visible front edge, rounded corners, mustard yellow rim, desaturated dark teal center, hand-drawn bold dark ink outline and restrained flat cel shading. A single large simple cream upward chevron stitched on center indicating rebound; no letters, numbers, labels, typography or additional symbols. Compact friendly physical prop, tiny scuffs, readable at 90 pixels wide. No scene, no characters, no motion trail, no shadow outside the object. One centered complete object with generous transparent margin, square canvas."
+    ]
+  ]
+}

@@ -17,7 +17,7 @@ public static class DadEyewear
     public static void Draw(Vector2 bridge,float angle,bool sunglasses)
     {
         Matrix4x4 old=GUI.matrix;Color tint=GUI.color;
-        GUI.matrix=old*Matrix4x4.TRS(new Vector3(bridge.x,bridge.y,0),Quaternion.Euler(0,0,angle),Vector3.one);
+        GUI.matrix=old*Matrix4x4.TRS(new Vector3(bridge.x,bridge.y,0),Quaternion.Euler(0,0,angle),new Vector3(.9f,.9f,1));
         Color frame=sunglasses?new Color(.10f,.11f,.10f,tint.a):new Color(.25f,.19f,.15f,tint.a);
         // Clear reading lenses deliberately have no fill or painted highlights.
         if(sunglasses)

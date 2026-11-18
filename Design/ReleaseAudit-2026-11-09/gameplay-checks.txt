@@ -1,0 +1,62 @@
+Second Fist v8 - stages, arcade, economy, fever, coins and motion checks
+PASS  movement respects arena bounds
+PASS  attack anticipation precedes damage
+PASS  automatic attack deals damage and knockback
+PASS  wall impact damages and contains enemy
+PASS  moving enemy transfers impact to another enemy
+PASS  special requires full charge
+PASS  special damages, triggers fever and launches nearby targets
+PASS  skill selection pauses simulation
+PASS  skill choice changes build and resumes combat
+PASS  jackpot skill choice grants all three skills
+PASS  enemy telegraph resolves into defeat at zero health
+PASS  revive restores health, triggers fever and resumes combat
+PASS  basic attack cannot permanently interrupt boss
+PASS  boss defeat ends the run and vacuums dropped coins
+PASS  bruiser telegraphs charge outside basic attack range
+PASS  standing still can be punished by a charge
+PASS  moving out of a telegraphed charge avoids damage
+PASS  four stages have increasing wave targets
+PASS  school and market use different enemy archetypes
+PASS  stage unlock survives profile persistence
+PASS  stage lookup safely bounds invalid indices
+PASS  each stage has a distinct boss silhouette
+PASS  wave completion spawns the stage boss
+PASS  20 FPS and 120 FPS produce the same travel distance
+PASS  retreat does not trigger an automatic backwards punch
+PASS  retreat input cancels attack anticipation
+PASS  ultimate is not immediately overwritten by an auto attack
+PASS  knockback starts on the ground without a vertical pop
+PASS  knockback rises along a timed airborne arc
+PASS  knockback returns to the ground before walking resumes
+PASS  player recoil applies an impulse instead of teleporting
+PASS  steering and soft separation keep approaching enemies apart
+PASS  charge has a braking and recovery phase
+PASS  bruisers take turns telegraphing a charge
+PASS  large enemies reserve space appropriate to their bodies
+PASS  first input reveals dialogue before advancing
+PASS  next input advances exactly one dialogue beat
+PASS  dialogue duration respects longer voice recording
+PASS  prologue ends and hands over combat exactly once
+PASS  skip completes prologue only once
+PASS  key story dialogue preserved
+PASS  arena and movement adapt to a wide fullscreen viewport
+PASS  insufficient funds cannot unlock a style
+PASS  run settlement credits rewards exactly once
+PASS  unlock consumes coins and equips the style
+PASS  owned styles cannot be charged again and locked styles cannot equip
+PASS  stat upgrade consumes coins and increases permanent stat level
+PASS  invalid saved values are normalized
+PASS  profile survives JSON persistence
+PASS  opening round uses a shorter enemy wave and boss
+PASS  combat achievements determine score and coins
+PASS  standing on punching bag pad drains coins, builds station and spawns trainee
+PASS  trainees generate passive cash stack at the gym safe desk
+PASS  walking over cash desk collects all stacked trainee fees
+PASS  completing sparring ring unlocks partner fighter for combat
+PASS  partner fighter automatically engages nearby enemies in combat
+PASS  fame rank title updates based on gym and combat growth
+PASS  standing on unlocked station pad upgrades it to level 2
+PASS  forging gear levels up and promotes glove tier at threshold
+PASS  knocked enemy detonates alley hazard barrel for AoE damage and coins
+PASS  awakened level 3 wall skill blasts nearby enemies on wall impact

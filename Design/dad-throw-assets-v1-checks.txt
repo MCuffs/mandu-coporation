@@ -1,0 +1,7 @@
+PASS bg_street source parity / bounds / UV / importer / GUID
+PASS dad_ready source parity / bounds / UV / importer / GUID
+PASS dad_windup source parity / bounds / UV / importer / GUID
+PASS dad_release source parity / bounds / UV / importer / GUID
+PASS projectile_golf source parity / bounds / UV / importer / GUID
+PASS projectile_shoe source parity / bounds / UV / importer / GUID
+PASS title_keyart source parity / bounds / UV / importer / GUID

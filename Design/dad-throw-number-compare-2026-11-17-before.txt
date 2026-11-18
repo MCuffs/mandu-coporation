@@ -1,0 +1,270 @@
+THROW NUMBER COMPARISON
+Bots with perfect aim, not people. Unity was not opened. The game's numbers and files are unchanged.
+Field: feet line 570, house line 268, throwing hand (295.7, 445.1).
+Stages 1-1 and 1-3 are the game's tables. 1-2, 1-4 and 1-5 are the plan's tables (section 13.1), used for calculation only.
+Players: 'golf at once' throws as soon as a ball reaches anyone; 'golf held' waits for three or for the lead to come within 220 of the house line;
+'shoe first' throws a shoe at the lead group while others are within 520 behind it and the lead is at least 300 out, otherwise plays like 'golf held'.
+'most' = most people one ball reached. 'closest' = how near anyone came to the house line (0 = someone got in).
+
+A. Current numbers (bounce 2, pierce 5, shoe damage 1), the plan's five stages
+stage 1-1 (4 people)               golf at once  clear   house 5/5  golf  3  shoe  0  most 3  closest  363    4.0s
+stage 1-1 (4 people)               golf held     clear   house 5/5  golf  2  shoe  0  most 4  closest  224    4.1s
+stage 1-1 (4 people)               shoe first    clear   house 5/5  golf  1  shoe  1  most 4  closest  224    4.1s
+                                   shoe first vs golf held: house 0, most 0, golf -1, all throws 0, closest 0, seconds 0.0
+stage 1-2 (8 people)               golf at once  clear   house 5/5  golf  4  shoe  0  most 4  closest  627    9.7s
+stage 1-2 (8 people)               golf held     clear   house 5/5  golf  4  shoe  0  most 4  closest  627   11.8s
+stage 1-2 (8 people)               shoe first    clear   house 5/5  golf  4  shoe  0  most 4  closest  627   11.8s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws 0, closest 0, seconds 0.0
+stage 1-3 (12 people)              golf at once  clear   house 5/5  golf  7  shoe  0  most 4  closest  523   17.2s
+stage 1-3 (12 people)              golf held     clear   house 5/5  golf  4  shoe  0  most 5  closest  211   34.8s
+stage 1-3 (12 people)              shoe first    clear   house 5/5  golf  4  shoe  4  most 4  closest  387   18.9s
+                                   shoe first vs golf held: house 0, most -1, golf 0, all throws +4, closest +176, seconds -15.8
+stage 1-4 (16 people)              golf at once  clear   house 5/5  golf  7  shoe  0  most 5  closest  363   19.1s
+stage 1-4 (16 people)              golf held     clear   house 5/5  golf  6  shoe  0  most 5  closest  318   21.9s
+stage 1-4 (16 people)              shoe first    clear   house 5/5  golf  4  shoe  3  most 5  closest  364   19.8s
+                                   shoe first vs golf held: house 0, most 0, golf -2, all throws +1, closest +46, seconds -2.0
+stage 1-5 (22 people)              golf at once  clear   house 5/5  golf 10  shoe  0  most 5  closest  554   31.8s
+stage 1-5 (22 people)              golf held     clear   house 5/5  golf  8  shoe  0  most 5  closest  416   33.4s
+stage 1-5 (22 people)              shoe first    clear   house 5/5  golf  8  shoe  2  most 5  closest  506   33.4s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +2, closest +89, seconds 0.0
+
+B. Ball bounces x pierce x shoe damage, stages 1-3 and 1-5
+bounce 2 pierce 5 shoe-dmg 1, 1-3  golf at once  clear   house 5/5  golf  7  shoe  0  most 4  closest  523   17.2s
+bounce 2 pierce 5 shoe-dmg 1, 1-3  golf held     clear   house 5/5  golf  4  shoe  0  most 5  closest  211   34.8s
+bounce 2 pierce 5 shoe-dmg 1, 1-3  shoe first    clear   house 5/5  golf  4  shoe  4  most 4  closest  387   18.9s
+                                   shoe first vs golf held: house 0, most -1, golf 0, all throws +4, closest +176, seconds -15.8
+bounce 2 pierce 5 shoe-dmg 1, 1-5  golf at once  clear   house 5/5  golf 10  shoe  0  most 5  closest  554   31.8s
+bounce 2 pierce 5 shoe-dmg 1, 1-5  golf held     clear   house 5/5  golf  8  shoe  0  most 5  closest  416   33.4s
+bounce 2 pierce 5 shoe-dmg 1, 1-5  shoe first    clear   house 5/5  golf  8  shoe  2  most 5  closest  506   33.4s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +2, closest +89, seconds 0.0
+bounce 2 pierce 5 shoe-dmg 0, 1-3  golf at once  clear   house 5/5  golf  7  shoe  0  most 4  closest  523   17.2s
+bounce 2 pierce 5 shoe-dmg 0, 1-3  golf held     clear   house 5/5  golf  4  shoe  0  most 5  closest  211   34.8s
+bounce 2 pierce 5 shoe-dmg 0, 1-3  shoe first    clear   house 5/5  golf  4  shoe  6  most 5  closest  387   20.4s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +6, closest +176, seconds -14.3
+bounce 2 pierce 5 shoe-dmg 0, 1-5  golf at once  clear   house 5/5  golf 10  shoe  0  most 5  closest  554   31.8s
+bounce 2 pierce 5 shoe-dmg 0, 1-5  golf held     clear   house 5/5  golf  8  shoe  0  most 5  closest  416   33.4s
+bounce 2 pierce 5 shoe-dmg 0, 1-5  shoe first    clear   house 5/5  golf  9  shoe  4  most 5  closest  511   33.4s
+                                   shoe first vs golf held: house 0, most 0, golf +1, all throws +5, closest +94, seconds 0.0
+bounce 2 pierce 3 shoe-dmg 1, 1-3  golf at once  clear   house 5/5  golf  8  shoe  0  most 3  closest  523   17.8s
+bounce 2 pierce 3 shoe-dmg 1, 1-3  golf held     clear   house 5/5  golf  6  shoe  0  most 3  closest  386   19.2s
+bounce 2 pierce 3 shoe-dmg 1, 1-3  shoe first    clear   house 5/5  golf  4  shoe  4  most 3  closest  387   19.5s
+                                   shoe first vs golf held: house 0, most 0, golf -2, all throws +2, closest +1, seconds +0.3
+bounce 2 pierce 3 shoe-dmg 1, 1-5  golf at once  clear   house 5/5  golf 13  shoe  0  most 3  closest  553   31.8s
+bounce 2 pierce 3 shoe-dmg 1, 1-5  golf held     clear   house 5/5  golf  9  shoe  0  most 3  closest  415   33.3s
+bounce 2 pierce 3 shoe-dmg 1, 1-5  shoe first    clear   house 5/5  golf  8  shoe  2  most 3  closest  509   33.4s
+                                   shoe first vs golf held: house 0, most 0, golf -1, all throws +1, closest +95, seconds +0.1
+bounce 2 pierce 3 shoe-dmg 0, 1-3  golf at once  clear   house 5/5  golf  8  shoe  0  most 3  closest  523   17.8s
+bounce 2 pierce 3 shoe-dmg 0, 1-3  golf held     clear   house 5/5  golf  6  shoe  0  most 3  closest  386   19.2s
+bounce 2 pierce 3 shoe-dmg 0, 1-3  shoe first    clear   house 5/5  golf  6  shoe  6  most 3  closest  387   20.4s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +6, closest +1, seconds +1.2
+bounce 2 pierce 3 shoe-dmg 0, 1-5  golf at once  clear   house 5/5  golf 13  shoe  0  most 3  closest  553   31.8s
+bounce 2 pierce 3 shoe-dmg 0, 1-5  golf held     clear   house 5/5  golf  9  shoe  0  most 3  closest  415   33.3s
+bounce 2 pierce 3 shoe-dmg 0, 1-5  shoe first    clear   house 5/5  golf  9  shoe  4  most 3  closest  509   33.4s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +4, closest +95, seconds +0.1
+bounce 1 pierce 5 shoe-dmg 1, 1-3  golf at once  clear   house 5/5  golf  9  shoe  0  most 4  closest  523   18.4s
+bounce 1 pierce 5 shoe-dmg 1, 1-3  golf held     clear   house 5/5  golf  4  shoe  0  most 5  closest  208   34.0s
+bounce 1 pierce 5 shoe-dmg 1, 1-3  shoe first    clear   house 5/5  golf  4  shoe  4  most 4  closest  387   18.9s
+                                   shoe first vs golf held: house 0, most -1, golf 0, all throws +4, closest +179, seconds -15.1
+bounce 1 pierce 5 shoe-dmg 1, 1-5  golf at once  clear   house 5/5  golf 17  shoe  0  most 4  closest  554   34.3s
+bounce 1 pierce 5 shoe-dmg 1, 1-5  golf held     clear   house 5/5  golf  9  shoe  0  most 5  closest  208   50.8s
+bounce 1 pierce 5 shoe-dmg 1, 1-5  shoe first    clear   house 5/5  golf  9  shoe  3  most 4  closest  208   50.8s
+                                   shoe first vs golf held: house 0, most -1, golf 0, all throws +3, closest 0, seconds 0.0
+bounce 1 pierce 5 shoe-dmg 0, 1-3  golf at once  clear   house 5/5  golf  9  shoe  0  most 4  closest  523   18.4s
+bounce 1 pierce 5 shoe-dmg 0, 1-3  golf held     clear   house 5/5  golf  4  shoe  0  most 5  closest  208   34.0s
+bounce 1 pierce 5 shoe-dmg 0, 1-3  shoe first    clear   house 5/5  golf  4  shoe  6  most 5  closest  387   20.4s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +6, closest +179, seconds -13.6
+bounce 1 pierce 5 shoe-dmg 0, 1-5  golf at once  clear   house 5/5  golf 17  shoe  0  most 4  closest  554   34.3s
+bounce 1 pierce 5 shoe-dmg 0, 1-5  golf held     clear   house 5/5  golf  9  shoe  0  most 5  closest  208   50.8s
+bounce 1 pierce 5 shoe-dmg 0, 1-5  shoe first    clear   house 5/5  golf 10  shoe  4  most 5  closest  211   50.7s
+                                   shoe first vs golf held: house 0, most 0, golf +1, all throws +5, closest +3, seconds -0.1
+bounce 1 pierce 3 shoe-dmg 1, 1-3  golf at once  clear   house 5/5  golf 10  shoe  0  most 3  closest  523   18.4s
+bounce 1 pierce 3 shoe-dmg 1, 1-3  golf held     clear   house 5/5  golf  6  shoe  0  most 3  closest  386   19.2s
+bounce 1 pierce 3 shoe-dmg 1, 1-3  shoe first    clear   house 5/5  golf  4  shoe  4  most 3  closest  387   19.5s
+                                   shoe first vs golf held: house 0, most 0, golf -2, all throws +2, closest +1, seconds +0.3
+bounce 1 pierce 3 shoe-dmg 1, 1-5  golf at once  clear   house 5/5  golf 19  shoe  0  most 3  closest  553   34.3s
+bounce 1 pierce 3 shoe-dmg 1, 1-5  golf held     clear   house 5/5  golf 10  shoe  0  most 3  closest  206   50.8s
+bounce 1 pierce 3 shoe-dmg 1, 1-5  shoe first    clear   house 5/5  golf  9  shoe  3  most 3  closest  206   50.8s
+                                   shoe first vs golf held: house 0, most 0, golf -1, all throws +2, closest 0, seconds 0.0
+bounce 1 pierce 3 shoe-dmg 0, 1-3  golf at once  clear   house 5/5  golf 10  shoe  0  most 3  closest  523   18.4s
+bounce 1 pierce 3 shoe-dmg 0, 1-3  golf held     clear   house 5/5  golf  6  shoe  0  most 3  closest  386   19.2s
+bounce 1 pierce 3 shoe-dmg 0, 1-3  shoe first    clear   house 5/5  golf  6  shoe  6  most 3  closest  387   20.4s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +6, closest +1, seconds +1.2
+bounce 1 pierce 3 shoe-dmg 0, 1-5  golf at once  clear   house 5/5  golf 19  shoe  0  most 3  closest  553   34.3s
+bounce 1 pierce 3 shoe-dmg 0, 1-5  golf held     clear   house 5/5  golf 10  shoe  0  most 3  closest  206   50.8s
+bounce 1 pierce 3 shoe-dmg 0, 1-5  shoe first    clear   house 5/5  golf 10  shoe  4  most 3  closest  211   50.7s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +4, closest +4, seconds -0.1
+bounce 0 pierce 5 shoe-dmg 1, 1-3  golf at once  clear   house 5/5  golf 11  shoe  0  most 3  closest  524   19.1s
+bounce 0 pierce 5 shoe-dmg 1, 1-3  golf held     clear   house 5/5  golf  7  shoe  0  most 3  closest  207   34.8s
+bounce 0 pierce 5 shoe-dmg 1, 1-3  shoe first    clear   house 5/5  golf  4  shoe  4  most 3  closest  387   19.6s
+                                   shoe first vs golf held: house 0, most 0, golf -3, all throws +1, closest +180, seconds -15.2
+bounce 0 pierce 5 shoe-dmg 1, 1-5  golf at once  clear   house 5/5  golf 23  shoe  0  most 3  closest  553   35.5s
+bounce 0 pierce 5 shoe-dmg 1, 1-5  golf held     clear   house 5/5  golf 11  shoe  0  most 3  closest  208   49.9s
+bounce 0 pierce 5 shoe-dmg 1, 1-5  shoe first    clear   house 5/5  golf  9  shoe  4  most 3  closest  209   49.9s
+                                   shoe first vs golf held: house 0, most 0, golf -2, all throws +2, closest +1, seconds 0.0
+bounce 0 pierce 5 shoe-dmg 0, 1-3  golf at once  clear   house 5/5  golf 11  shoe  0  most 3  closest  524   19.1s
+bounce 0 pierce 5 shoe-dmg 0, 1-3  golf held     clear   house 5/5  golf  7  shoe  0  most 3  closest  207   34.8s
+bounce 0 pierce 5 shoe-dmg 0, 1-3  shoe first    clear   house 5/5  golf  6  shoe  3  most 4  closest  210   34.8s
+                                   shoe first vs golf held: house 0, most +1, golf -1, all throws +2, closest +4, seconds 0.0
+bounce 0 pierce 5 shoe-dmg 0, 1-5  golf at once  clear   house 5/5  golf 23  shoe  0  most 3  closest  553   35.5s
+bounce 0 pierce 5 shoe-dmg 0, 1-5  golf held     clear   house 5/5  golf 11  shoe  0  most 3  closest  208   49.9s
+bounce 0 pierce 5 shoe-dmg 0, 1-5  shoe first    clear   house 5/5  golf 11  shoe  5  most 4  closest  210   49.9s
+                                   shoe first vs golf held: house 0, most +1, golf 0, all throws +5, closest +2, seconds 0.0
+bounce 0 pierce 3 shoe-dmg 1, 1-3  golf at once  clear   house 5/5  golf 11  shoe  0  most 3  closest  524   19.1s
+bounce 0 pierce 3 shoe-dmg 1, 1-3  golf held     clear   house 5/5  golf  7  shoe  0  most 3  closest  207   34.8s
+bounce 0 pierce 3 shoe-dmg 1, 1-3  shoe first    clear   house 5/5  golf  4  shoe  4  most 3  closest  387   19.6s
+                                   shoe first vs golf held: house 0, most 0, golf -3, all throws +1, closest +180, seconds -15.2
+bounce 0 pierce 3 shoe-dmg 1, 1-5  golf at once  clear   house 5/5  golf 23  shoe  0  most 3  closest  553   35.5s
+bounce 0 pierce 3 shoe-dmg 1, 1-5  golf held     clear   house 5/5  golf 11  shoe  0  most 3  closest  208   49.9s
+bounce 0 pierce 3 shoe-dmg 1, 1-5  shoe first    clear   house 5/5  golf  9  shoe  4  most 3  closest  209   49.9s
+                                   shoe first vs golf held: house 0, most 0, golf -2, all throws +2, closest +1, seconds 0.0
+bounce 0 pierce 3 shoe-dmg 0, 1-3  golf at once  clear   house 5/5  golf 11  shoe  0  most 3  closest  524   19.1s
+bounce 0 pierce 3 shoe-dmg 0, 1-3  golf held     clear   house 5/5  golf  7  shoe  0  most 3  closest  207   34.8s
+bounce 0 pierce 3 shoe-dmg 0, 1-3  shoe first    clear   house 5/5  golf  6  shoe  7  most 3  closest  210   34.0s
+                                   shoe first vs golf held: house 0, most 0, golf -1, all throws +6, closest +3, seconds -0.8
+bounce 0 pierce 3 shoe-dmg 0, 1-5  golf at once  clear   house 5/5  golf 23  shoe  0  most 3  closest  553   35.5s
+bounce 0 pierce 3 shoe-dmg 0, 1-5  golf held     clear   house 5/5  golf 11  shoe  0  most 3  closest  208   49.9s
+bounce 0 pierce 3 shoe-dmg 0, 1-5  shoe first    clear   house 5/5  golf 11  shoe  5  most 3  closest  210   49.9s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +5, closest +2, seconds 0.0
+
+C. Spacing: how far the four walk in behind the front pair (1-3's first two groups; the game's table has 434)
+gap  shoe-dmg  shoes  result                       at     one ball then reaches (bounce 2 / bounce 0)   gap after each shoe
+434  1         2      front pair gone, never joined  4.9s  -                                            434 311 gone
+434  0         3      joined                        5.8s  5 of 6 / 4 of 6                              434 311 178 45
+350  1         2      front pair gone, never joined  4.9s  -                                            350 227 gone
+350  0         3      joined                        5.8s  5 of 6 / 5 of 6                              350 227 94 1
+250  1         2      front pair gone, never joined  4.9s  -                                            250 127 gone
+250  0         2      joined                        4.9s  5 of 6 / 5 of 6                              250 127 -6
+180  1         1      joined                        4.0s  5 of 5 / 5 of 5                              180 57
+180  0         1      joined                        4.0s  5 of 6 / 5 of 6                              180 57
+120  1         1      joined                        4.0s  5 of 5 / 4 of 5                              120 -3
+120  0         1      joined                        4.0s  5 of 6 / 5 of 6                              120 -3
+
+D. Shoe numbers at the ends of the plan's ranges (shoe damage 0): shoes needed to join the pair with the four
+push  radius  slow          gap 434              gap 250
+80    70      1.5s x0.60   5 shoe(s), 7.6s      3 shoe(s), 5.8s
+80    70      2.5s x0.35   4 shoe(s), 6.7s      3 shoe(s), 5.8s
+80    70      3.0s x0.30   4 shoe(s), 6.7s      3 shoe(s), 5.8s
+80    85      1.5s x0.60   4 shoe(s), 6.7s      2 shoe(s), 4.9s
+80    85      2.5s x0.35   4 shoe(s), 6.7s      2 shoe(s), 4.9s
+80    85      3.0s x0.30   4 shoe(s), 6.7s      2 shoe(s), 4.9s
+80    110     1.5s x0.60   4 shoe(s), 6.7s      2 shoe(s), 4.9s
+80    110     2.5s x0.35   4 shoe(s), 6.7s      2 shoe(s), 4.9s
+80    110     3.0s x0.30   4 shoe(s), 6.7s      2 shoe(s), 4.9s
+105   70      1.5s x0.60   4 shoe(s), 6.7s      2 shoe(s), 4.9s
+105   70      2.5s x0.35   4 shoe(s), 6.7s      2 shoe(s), 4.9s
+105   70      3.0s x0.30   4 shoe(s), 6.7s      2 shoe(s), 4.9s
+105   85      1.5s x0.60   3 shoe(s), 5.8s      2 shoe(s), 4.9s
+105   85      2.5s x0.35   3 shoe(s), 5.8s      2 shoe(s), 4.9s
+105   85      3.0s x0.30   3 shoe(s), 5.8s      2 shoe(s), 4.9s
+105   110     1.5s x0.60   3 shoe(s), 5.8s      2 shoe(s), 4.9s
+105   110     2.5s x0.35   3 shoe(s), 5.8s      2 shoe(s), 4.9s
+105   110     3.0s x0.30   3 shoe(s), 5.8s      2 shoe(s), 4.9s
+140   70      1.5s x0.60   4 shoe(s), 6.7s      3 shoe(s), 5.8s
+140   70      2.5s x0.35   4 shoe(s), 6.7s      3 shoe(s), 5.8s
+140   70      3.0s x0.30   4 shoe(s), 6.7s      3 shoe(s), 5.8s
+140   85      1.5s x0.60   3 shoe(s), 5.8s      2 shoe(s), 4.9s
+140   85      2.5s x0.35   3 shoe(s), 5.8s      2 shoe(s), 4.9s
+140   85      3.0s x0.30   3 shoe(s), 5.8s      2 shoe(s), 4.9s
+140   110     1.5s x0.60   3 shoe(s), 5.8s      2 shoe(s), 4.9s
+140   110     2.5s x0.35   3 shoe(s), 5.8s      2 shoe(s), 4.9s
+140   110     3.0s x0.30   3 shoe(s), 5.8s      2 shoe(s), 4.9s
+
+E. More pressure on 1-5 (22 people): faster walking and a schedule squeezed to half its time
+-- bounce 2 pierce 5 shoe-dmg 1; walking 48, schedule x1.0
+                                   golf at once  clear   house 5/5  golf 10  shoe  0  most 5  closest  554   31.8s
+                                   golf held     clear   house 5/5  golf  8  shoe  0  most 5  closest  416   33.4s
+                                   shoe first    clear   house 5/5  golf  8  shoe  2  most 5  closest  506   33.4s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +2, closest +89, seconds 0.0
+-- bounce 2 pierce 5 shoe-dmg 1; walking 48, schedule x0.5
+                                   golf at once  clear   house 5/5  golf  9  shoe  0  most 5  closest  553   17.2s
+                                   golf held     clear   house 5/5  golf  8  shoe  0  most 5  closest  484   18.9s
+                                   shoe first    clear   house 5/5  golf  8  shoe  2  most 5  closest  555   18.9s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +2, closest +70, seconds 0.0
+-- bounce 2 pierce 5 shoe-dmg 1; walking 65, schedule x1.0
+                                   golf at once  clear   house 5/5  golf 10  shoe  0  most 5  closest  544   31.5s
+                                   golf held     clear   house 5/5  golf  8  shoe  0  most 5  closest  362   32.7s
+                                   shoe first    clear   house 5/5  golf  8  shoe  2  most 5  closest  449   32.6s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +2, closest +87, seconds -0.1
+-- bounce 2 pierce 5 shoe-dmg 1; walking 65, schedule x0.5
+                                   golf at once  clear   house 5/5  golf  9  shoe  0  most 5  closest  543   17.0s
+                                   golf held     clear   house 5/5  golf  8  shoe  0  most 5  closest  452   18.2s
+                                   shoe first    clear   house 5/5  golf  8  shoe  2  most 5  closest  540   18.2s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +2, closest +88, seconds 0.0
+-- bounce 0 pierce 5 shoe-dmg 0; walking 48, schedule x1.0
+                                   golf at once  clear   house 5/5  golf 23  shoe  0  most 3  closest  553   35.5s
+                                   golf held     clear   house 5/5  golf 11  shoe  0  most 3  closest  208   49.9s
+                                   shoe first    clear   house 5/5  golf 11  shoe  5  most 4  closest  210   49.9s
+                                   shoe first vs golf held: house 0, most +1, golf 0, all throws +5, closest +2, seconds 0.0
+-- bounce 0 pierce 5 shoe-dmg 0; walking 48, schedule x0.5
+                                   golf at once  clear   house 5/5  golf 23  shoe  0  most 3  closest  552   21.0s
+                                   golf held     clear   house 5/5  golf 13  shoe  0  most 3  closest  148   35.4s
+                                   shoe first    clear   house 5/5  golf 11  shoe  3  most 4  closest  210   35.4s
+                                   shoe first vs golf held: house 0, most +1, golf -2, all throws +1, closest +62, seconds 0.0
+-- bounce 0 pierce 5 shoe-dmg 0; walking 65, schedule x1.0
+                                   golf at once  clear   house 5/5  golf 22  shoe  0  most 3  closest  542   34.0s
+                                   golf held     clear   house 5/5  golf 13  shoe  0  most 3  closest  202   44.6s
+                                   shoe first    clear   house 5/5  golf 10  shoe  9  most 4  closest  291   34.1s
+                                   shoe first vs golf held: house 0, most +1, golf -3, all throws +6, closest +89, seconds -10.5
+-- bounce 0 pierce 5 shoe-dmg 0; walking 65, schedule x0.5
+                                   golf at once  clear   house 5/5  golf 22  shoe  0  most 3  closest  545   19.4s
+                                   golf held     clear   house 5/5  golf 11  shoe  0  most 3  closest  207   30.0s
+                                   shoe first    clear   house 5/5  golf 11  shoe  0  most 3  closest  207   30.0s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws 0, closest 0, seconds 0.0
+-- bounce 0 pierce 3 shoe-dmg 0; walking 48, schedule x1.0
+                                   golf at once  clear   house 5/5  golf 23  shoe  0  most 3  closest  553   35.5s
+                                   golf held     clear   house 5/5  golf 11  shoe  0  most 3  closest  208   49.9s
+                                   shoe first    clear   house 5/5  golf 11  shoe  5  most 3  closest  210   49.9s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +5, closest +2, seconds 0.0
+-- bounce 0 pierce 3 shoe-dmg 0; walking 48, schedule x0.5
+                                   golf at once  clear   house 5/5  golf 23  shoe  0  most 3  closest  552   21.0s
+                                   golf held     clear   house 5/5  golf 13  shoe  0  most 3  closest  148   35.4s
+                                   shoe first    clear   house 5/5  golf 11  shoe  3  most 3  closest  210   35.4s
+                                   shoe first vs golf held: house 0, most 0, golf -2, all throws +1, closest +62, seconds 0.0
+-- bounce 0 pierce 3 shoe-dmg 0; walking 65, schedule x1.0
+                                   golf at once  clear   house 5/5  golf 22  shoe  0  most 3  closest  542   34.0s
+                                   golf held     clear   house 5/5  golf 13  shoe  0  most 3  closest  202   44.6s
+                                   shoe first    clear   house 5/5  golf 10  shoe  6  most 3  closest  207   44.5s
+                                   shoe first vs golf held: house 0, most 0, golf -3, all throws +3, closest +5, seconds -0.1
+-- bounce 0 pierce 3 shoe-dmg 0; walking 65, schedule x0.5
+                                   golf at once  clear   house 5/5  golf 22  shoe  0  most 3  closest  545   19.4s
+                                   golf held     clear   house 5/5  golf 11  shoe  0  most 3  closest  207   30.0s
+                                   shoe first    clear   house 5/5  golf 11  shoe  0  most 3  closest  207   30.0s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws 0, closest 0, seconds 0.0
+-- bounce 0 pierce 5 shoe-dmg 0 golf-reload 0.9; walking 48, schedule x1.0
+                                   golf at once  clear   house 5/5  golf 18  shoe  0  most 3  closest  552   35.5s
+                                   golf held     clear   house 5/5  golf 11  shoe  0  most 3  closest  206   50.0s
+                                   shoe first    clear   house 5/5  golf  9  shoe  6  most 4  closest  461   35.1s
+                                   shoe first vs golf held: house 0, most +1, golf -2, all throws +4, closest +255, seconds -14.9
+-- bounce 0 pierce 5 shoe-dmg 0 golf-reload 0.9; walking 48, schedule x0.5
+                                   golf at once  clear   house 5/5  golf 18  shoe  0  most 3  closest  554   20.9s
+                                   golf held     clear   house 5/5  golf  9  shoe  0  most 4  closest  208   35.4s
+                                   shoe first    clear   house 5/5  golf  9  shoe  3  most 4  closest  552   20.6s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +3, closest +344, seconds -14.7
+-- bounce 0 pierce 5 shoe-dmg 0 golf-reload 0.9; walking 65, schedule x1.0
+                                   golf at once  clear   house 5/5  golf 16  shoe  0  most 3  closest  542   33.4s
+                                   golf held     clear   house 5/5  golf 12  shoe  0  most 3  closest  152   36.2s
+                                   shoe first    clear   house 5/5  golf 11  shoe  3  most 3  closest  194   33.8s
+                                   shoe first vs golf held: house 0, most 0, golf -1, all throws +2, closest +42, seconds -2.4
+-- bounce 0 pierce 5 shoe-dmg 0 golf-reload 0.9; walking 65, schedule x0.5
+                                   golf at once  clear   house 5/5  golf 16  shoe  0  most 3  closest  545   18.9s
+                                   golf held     clear   house 5/5  golf 10  shoe  0  most 3  closest  206   24.2s
+                                   shoe first    clear   house 5/5  golf  9  shoe  2  most 3  closest  542   19.2s
+                                   shoe first vs golf held: house 0, most 0, golf -1, all throws +1, closest +336, seconds -4.9
+
+F. Stage 1-3 with each four walking in 180 behind its pair instead of 434 (one shoe is enough to join them, section C)
+bounce 2 pierce 5 shoe-dmg 1       golf at once  clear   house 5/5  golf  7  shoe  0  most 4  closest  523   16.9s
+bounce 2 pierce 5 shoe-dmg 1       golf held     clear   house 5/5  golf  4  shoe  0  most 5  closest  386   17.6s
+bounce 2 pierce 5 shoe-dmg 1       shoe first    clear   house 5/5  golf  4  shoe  2  most 5  closest  387   17.8s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +2, closest +1, seconds +0.2
+bounce 2 pierce 5 shoe-dmg 0       golf at once  clear   house 5/5  golf  7  shoe  0  most 4  closest  523   16.9s
+bounce 2 pierce 5 shoe-dmg 0       golf held     clear   house 5/5  golf  4  shoe  0  most 5  closest  386   17.6s
+bounce 2 pierce 5 shoe-dmg 0       shoe first    clear   house 5/5  golf  4  shoe  2  most 5  closest  387   18.4s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +2, closest +1, seconds +0.8
+bounce 1 pierce 5 shoe-dmg 0       golf at once  clear   house 5/5  golf  7  shoe  0  most 4  closest  523   16.9s
+bounce 1 pierce 5 shoe-dmg 0       golf held     clear   house 5/5  golf  4  shoe  0  most 5  closest  386   17.6s
+bounce 1 pierce 5 shoe-dmg 0       shoe first    clear   house 5/5  golf  4  shoe  2  most 5  closest  387   18.4s
+                                   shoe first vs golf held: house 0, most 0, golf 0, all throws +2, closest +1, seconds +0.8
+bounce 0 pierce 5 shoe-dmg 0       golf at once  clear   house 5/5  golf  9  shoe  0  most 3  closest  524   17.5s
+bounce 0 pierce 5 shoe-dmg 0       golf held     clear   house 5/5  golf  6  shoe  0  most 3  closest  207   21.9s
+bounce 0 pierce 5 shoe-dmg 0       shoe first    clear   house 5/5  golf  4  shoe  3  most 5  closest  210   18.4s
+                                   shoe first vs golf held: house 0, most +2, golf -2, all throws +1, closest +2, seconds -3.5

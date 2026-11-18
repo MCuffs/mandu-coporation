@@ -1,0 +1,16 @@
+Throw game Android test build; debug-signed, not for store upload.
+Unity: 6000.1.5f1
+Version: 0.3.1 (3)
+Application ID: com.bluemushroom.dadwar
+Backend: IL2CPP
+Architectures: ARM64
+Minimum SDK: AndroidApiLevel24
+Target SDK: AndroidApiLevel36
+Android dependency resolution: True
+Result: Succeeded
+Errors: 0
+Warnings: 13
+Package: 30.1 MB
+Duration: 00:01:44.7751274
+Artifact: Builds/ThrowAndroid/DadWar-test.aab
+Signing: local DEBUG key, not the store upload key

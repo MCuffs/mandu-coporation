@@ -1,0 +1,66 @@
+Programmatic strategy play, not human fun or rendering validation.
+Compilation succeeded - 3 warning(s)
+C:\Users\user\DadWarLatest\Assets\Alley\Alley3DWorld.cs(35,31): warning CS0414: The private field `Alley3DWorld.shockwaveRings' is assigned but its value is never used
+C:\Users\user\DadWarLatest\Assets\Alley\Alley3DWorld.cs(26,38): warning CS0414: The private field `Alley3DWorld.matWhite' is assigned but its value is never used
+C:\Users\user\DadWarLatest\Assets\Alley\ArcadeProfile.cs(114,108): warning CS0414: The private field `AlleyGame.runStars' is assigned but its value is never used
+Main game pacing bot (beginner: 20 deg, 1.5-2.5 s aim, 50-100% pull; 6 runs per stage, starting gear: wall damage +1)
+1-1: win 6/6 | 9s, health 100
+1-2: win 6/6 | 9s, health 92
+1-3: win 6/6 | 14s, health 100
+1-4: win 6/6 | 17s, health 84
+1-5: win 6/6 | 17s, health 78
+1-6: win 6/6 | 23s, health 92
+1-7: win 6/6 | 18s, health 84
+1-8: win 6/6 | 39s, health 80
+1-9: win 6/6 | 23s, health 70
+1-10: win 6/6 | 37s, health 78
+1-11: win 3/6 | 34s, health 66
+1-12: win 6/6 | 37s, health 68
+1-13: win 6/6 | 38s, health 58
+1-14: win 6/6 | 24s, health 88
+1-15: win 5/6 | 32s, health 52
+1-16: win 6/6 | 28s, health 76
+1-17: win 6/6 | 32s, health 70
+1-18: win 3/6 | 41s, health 68
+1-19: win 6/6 | 35s, health 68
+1-20: win 5/6 | 47s, health 31
+2-1: win 6/6 | 26s, health 76
+2-2: win 6/6 | 22s, health 82
+2-3: win 6/6 | 28s, health 66
+2-4: win 6/6 | 32s, health 80
+2-5: win 6/6 | 22s, health 78
+2-6: win 6/6 | 34s, health 56
+2-7: win 5/6 | 39s, health 66
+2-8: win 6/6 | 22s, health 92
+2-9: win 4/6 | 29s, health 70
+2-10: win 6/6 | 43s, health 60
+2-11: win 6/6 | 28s, health 72
+2-12: win 5/6 | 28s, health 64
+2-13: win 5/6 | 36s, health 38
+2-14: win 5/6 | 26s, health 74
+2-15: win 6/6 | 38s, health 76
+2-16: win 6/6 | 33s, health 88
+2-17: win 6/6 | 42s, health 54
+2-18: win 6/6 | 29s, health 64
+2-19: win 3/6 | 39s, health 38
+2-20: win 5/6 | 52s, health 39
+3-1: win 6/6 | 27s, health 66
+3-2: win 6/6 | 27s, health 76
+3-3: win 6/6 | 32s, health 64
+3-4: win 6/6 | 21s, health 70
+3-5: win 6/6 | 29s, health 76
+3-6: win 5/6 | 26s, health 74
+3-7: win 5/6 | 30s, health 54
+3-8: win 6/6 | 24s, health 92
+3-9: win 5/6 | 31s, health 44
+3-10: win 6/6 | 29s, health 72
+3-11: win 6/6 | 38s, health 70
+3-12: win 6/6 | 31s, health 54
+3-13: win 6/6 | 41s, health 76
+3-14: win 6/6 | 29s, health 64
+3-15: win 5/6 | 38s, health 64
+3-16: win 6/6 | 38s, health 78
+3-17: win 5/6 | 35s, health 60
+3-18: win 6/6 | 35s, health 66
+3-19: win 6/6 | 39s, health 54
+3-20: win 1/6 | 60s, health 2

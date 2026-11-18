@@ -1,0 +1,299 @@
+{
+  "version": 1,
+  "assets": [
+    {
+      "id": "rule_dodge",
+      "file": "rule_dodge.png",
+      "width": 384,
+      "height": 384,
+      "pivotPixels": {
+        "x": 192,
+        "y": 192
+      },
+      "bounds": [
+        31,
+        88,
+        336,
+        296
+      ]
+    },
+    {
+      "id": "rule_trays",
+      "file": "rule_trays.png",
+      "width": 384,
+      "height": 384,
+      "pivotPixels": {
+        "x": 192,
+        "y": 192
+      },
+      "bounds": [
+        28,
+        82,
+        354,
+        308
+      ]
+    },
+    {
+      "id": "rule_ballonly",
+      "file": "rule_ballonly.png",
+      "width": 384,
+      "height": 384,
+      "pivotPixels": {
+        "x": 192,
+        "y": 192
+      },
+      "bounds": [
+        41,
+        98,
+        365,
+        297
+      ]
+    },
+    {
+      "id": "rule_shoefeast",
+      "file": "rule_shoefeast.png",
+      "width": 384,
+      "height": 384,
+      "pivotPixels": {
+        "x": 192,
+        "y": 192
+      },
+      "bounds": [
+        103,
+        70,
+        355,
+        305
+      ]
+    },
+    {
+      "id": "rule_bigball",
+      "file": "rule_bigball.png",
+      "width": 384,
+      "height": 384,
+      "pivotPixels": {
+        "x": 192,
+        "y": 192
+      },
+      "bounds": [
+        68,
+        38,
+        302,
+        327
+      ]
+    },
+    {
+      "id": "rule_bouncy",
+      "file": "rule_bouncy.png",
+      "width": 384,
+      "height": 384,
+      "pivotPixels": {
+        "x": 192,
+        "y": 192
+      },
+      "bounds": [
+        33,
+        152,
+        347,
+        300
+      ]
+    },
+    {
+      "id": "rule_onegate",
+      "file": "rule_onegate.png",
+      "width": 384,
+      "height": 384,
+      "pivotPixels": {
+        "x": 192,
+        "y": 192
+      },
+      "bounds": [
+        68,
+        82,
+        316,
+        312
+      ]
+    },
+    {
+      "id": "rule_reverse",
+      "file": "rule_reverse.png",
+      "width": 384,
+      "height": 384,
+      "pivotPixels": {
+        "x": 192,
+        "y": 192
+      },
+      "bounds": [
+        72,
+        63,
+        346,
+        302
+      ]
+    },
+    {
+      "id": "rule_goldrush",
+      "file": "rule_goldrush.png",
+      "width": 384,
+      "height": 384,
+      "pivotPixels": {
+        "x": 192,
+        "y": 192
+      },
+      "bounds": [
+        29,
+        50,
+        344,
+        357
+      ]
+    },
+    {
+      "id": "rule_fog",
+      "file": "rule_fog.png",
+      "width": 384,
+      "height": 384,
+      "pivotPixels": {
+        "x": 192,
+        "y": 192
+      },
+      "bounds": [
+        48,
+        45,
+        341,
+        312
+      ]
+    },
+    {
+      "id": "rule_oneway",
+      "file": "rule_oneway.png",
+      "width": 384,
+      "height": 384,
+      "pivotPixels": {
+        "x": 192,
+        "y": 192
+      },
+      "bounds": [
+        41,
+        107,
+        350,
+        277
+      ]
+    },
+    {
+      "id": "rule_bossin",
+      "file": "rule_bossin.png",
+      "width": 384,
+      "height": 384,
+      "pivotPixels": {
+        "x": 192,
+        "y": 192
+      },
+      "bounds": [
+        38,
+        48,
+        346,
+        339
+      ]
+    },
+    {
+      "id": "rule_chip",
+      "file": "rule_chip.png",
+      "width": 256,
+      "height": 96,
+      "pivotPixels": {
+        "x": 128,
+        "y": 48
+      },
+      "nineSlice": {
+        "left": 40,
+        "right": 40,
+        "top": 0,
+        "bottom": 0
+      },
+      "bounds": [
+        1,
+        4,
+        255,
+        92
+      ]
+    },
+    {
+      "id": "mark_ban",
+      "file": "mark_ban.png",
+      "width": 128,
+      "height": 128,
+      "pivotPixels": {
+        "x": 64,
+        "y": 64
+      },
+      "bounds": [
+        16,
+        16,
+        112,
+        112
+      ]
+    },
+    {
+      "id": "fog_veil",
+      "file": "fog_veil.png",
+      "width": 1536,
+      "height": 1664,
+      "pivotPixels": {
+        "x": 768,
+        "y": 832
+      },
+      "bounds": [
+        29,
+        0,
+        1536,
+        1664
+      ]
+    },
+    {
+      "id": "fog_puff_0",
+      "file": "fog_puff_0.png",
+      "width": 512,
+      "height": 512,
+      "pivotPixels": {
+        "x": 256,
+        "y": 256
+      },
+      "bounds": [
+        64,
+        130,
+        481,
+        408
+      ]
+    },
+    {
+      "id": "fog_puff_1",
+      "file": "fog_puff_1.png",
+      "width": 512,
+      "height": 512,
+      "pivotPixels": {
+        "x": 256,
+        "y": 256
+      },
+      "bounds": [
+        51,
+        131,
+        476,
+        385
+      ]
+    },
+    {
+      "id": "fog_puff_2",
+      "file": "fog_puff_2.png",
+      "width": 512,
+      "height": 512,
+      "pivotPixels": {
+        "x": 256,
+        "y": 256
+      },
+      "bounds": [
+        42,
+        133,
+        468,
+        404
+      ]
+    }
+  ]
+}

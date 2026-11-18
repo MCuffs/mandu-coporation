@@ -1,0 +1,14 @@
+Native Unity release audit; no interactive rendering/device verification.
+Android application ID: com.SecondFistStudio.
+Android backend: Mono2x
+Android architectures: ARMv7
+Android target SDK setting: AndroidApiLevelAuto
+PASS prototype assets
+PASS economy and stage rules
+PASS equipment native loading
+PASS difficulty and JSON reload
+PASS presentation and backup recovery
+PASS new content assets resolve in native Unity
+FAIL empty primary does not shadow valid backup: System.Exception: Empty JSON primary accepted instead of valid backup; coins=0
+  at DadReleaseAudit+<>c.<Batch>b__0_2 () [0x0008f] in C:\Users\user\DadWarLatest\Assets\DadSchoolBoss\Editor\DadReleaseAudit.cs:39
+  at DadReleaseAudit+<>c__DisplayClass0_0.<Batch>b__0 (System.String name, System.Action action) [0x00000] in C:\Users\user\DadWarLatest\Assets\DadSchoolBoss\Editor\DadReleaseAudit.cs:19

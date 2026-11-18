@@ -5,8 +5,7 @@ public sealed partial class DadSlingshotPrototype
 {
     public bool UserPaused {get;private set;}
     bool pauseOptions;
-    float impactPause,impactCooldown,summaryTime;
-    int observedShots,shotKills,shotWalls,summaryShot,shotHits;
+    float impactPause,impactCooldown;
     int lessonKind=-1;
     public bool TutorialOpen {get{return lessonKind>=0&&Sim!=null&&!Sim.Over;}}
     sealed class Burst {public Vector2 point;public float age;public bool wall;}
@@ -18,25 +17,14 @@ public sealed partial class DadSlingshotPrototype
         if(pullLoop!=null)pullLoop.Stop();
     }
     void OnApplicationPause(bool paused){if(paused)SetPaused(true);}
-    void ResetPresentation(){UserPaused=false;pauseOptions=false;impactPause=impactCooldown=summaryTime=0;observedShots=summaryShot=0;lessonKind=-1;bursts.Clear();}
+    void ResetPresentation(){UserPaused=false;pauseOptions=false;impactPause=impactCooldown=0;lessonKind=-1;bursts.Clear();}
     void UpdatePresentation(float dt)
     {
-        impactCooldown=Mathf.Max(0,impactCooldown-dt);summaryTime=Mathf.Max(0,summaryTime-dt);
+        impactCooldown=Mathf.Max(0,impactCooldown-dt);
         for(int i=bursts.Count-1;i>=0;i--){bursts[i].age+=dt;if(bursts[i].age>.28f)bursts.RemoveAt(i);}
-    }
-    void ObserveShot()
-    {
-        if(Sim.shots==observedShots)return;
-        observedShots=Sim.shots;shotKills=Sim.kills;shotWalls=Sim.wallSlams;shotHits=0;summaryTime=0;
-    }
-    void CompleteShot()
-    {
-        if(Sim.shots==0||Sim.dad.flying||summaryShot==Sim.shots)return;
-        summaryShot=Sim.shots;summaryTime=2.4f;
     }
     void PresentImpact(SlingshotSim.Event e)
     {
-        if(e.text=="퍽!"||e.text=="분노의 들이받기!"||e.text=="쟁반 박살!"||e.text=="명중!")shotHits++;
         string sound=e.sound??"";
         bool wall=sound.StartsWith("sfx_wall_")&&!sound.EndsWith("boing");
         bool hit=wall||sound.StartsWith("sfx_punch_")||sound=="sfx_tray_break"||e.text=="명중!";
@@ -62,20 +50,6 @@ public sealed partial class DadSlingshotPrototype
                 Line(burst.point+dir*r*.58f,burst.point+dir*r,Mathf.Max(1,3*(1-t))*S,color);
             }
         }
-    }
-    void DrawShotFeedback()
-    {
-        if(Sim.Over||UserPaused)return;
-        float bottom=Height+Pad;
-        if(summaryTime>0)
-        {
-            Rect r=new Rect(14,bottom-102,340,48);DadUi.Fill(r,new Color(.12f,.20f,.16f,.94f),12);
-            string text=summaryShot+"번째 발사  ·  제압 "+Mathf.Max(0,Sim.kills-shotKills)+"명  ·  벽꿍 "+Mathf.Max(0,Sim.wallSlams-shotWalls);
-            if(Sim.kills==shotKills&&Sim.wallSlams==shotWalls)text=shotHits>0?"명중 "+shotHits+"회  ·  다음 발로 마무리!":"빗나갔어요  ·  옆벽으로 경로를 바꿔보세요";
-            Text(r,text,17,Color.white,false,TextAnchor.MiddleCenter);
-        }
-        Rect goal=new Rect(14,bottom-48,325,32);DadUi.Fill(goal,new Color(.97f,.94f,.84f,.94f),9);
-        Text(goal,"별 목표  "+Sim.shots+" / "+Sim.stage.par+"발  ·  체력 50% 이상",15,Sim.shots>Sim.stage.par?Red:Ink,false,TextAnchor.MiddleCenter);
     }
     void PrepareOpponentLesson()
     {

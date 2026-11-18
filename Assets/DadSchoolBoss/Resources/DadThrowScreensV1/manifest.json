@@ -1,0 +1,28 @@
+{
+  "assets": [
+    {
+      "id": "dad_clear",
+      "width": 1254,
+      "height": 1254,
+      "bounds": [
+        376,
+        121,
+        855,
+        1179
+      ],
+      "resource": "DadThrowScreensV1/dad_clear"
+    },
+    {
+      "id": "dad_retry",
+      "width": 1254,
+      "height": 1254,
+      "bounds": [
+        328,
+        328,
+        942,
+        1156
+      ],
+      "resource": "DadThrowScreensV1/dad_retry"
+    }
+  ]
+}

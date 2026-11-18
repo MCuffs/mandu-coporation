@@ -1,0 +1,150 @@
+{
+  "version": 1,
+  "note": "Chapter 1 stages. x and spacing are canvas units, at is seconds, speed is canvas units per second. A group appears all at once: the first person at firstX, each next one spacing further right. Since 2026-11-17 every stage is a stampede (user: much harder, hectic from 1-1; they should just come running in a mad herd): nobody strolls, a pack is already running when the stage opens and a new pack follows every second or so. 1-1 has 100 people on the street within 9 seconds, 1-3 has 160 within 8.4. The numbers were picked with bot players in Design/dad-throw-number-compare.txt section I. The gentle tables they replace are in Design/dad-war-throw-development-plan-v1.md section 13 and Design/dad-throw-stage-strategy-v2.md.",
+  "enemies": {
+    "normal": {
+      "resource": "DadV5/chars/gum/gum_walk",
+      "frames": 2,
+      "facesLeft": true,
+      "canvas": 768,
+      "pivotX": 384,
+      "pivotY": 720,
+      "standPixels": 560,
+      "heights": [102, 107, 112]
+    },
+    "tough": {
+      "resource": "DadV5/chars/chair/chair_walk",
+      "entrance": {
+        "resource": "DadThrowEntranceV1/chair_entrance",
+        "canvas": 2048,
+        "pivotX": 1024,
+        "pivotY": 1900,
+        "standPixels": 1400,
+        "name": "의자 아저씨",
+        "shout": "한 방? 간지럽지도 않다!",
+        "hint": "신발 먼저! 휘청일 때 공 위력 2배",
+        "with": "shoe"
+      },
+      "frames": 2,
+      "facesLeft": true,
+      "canvas": 768,
+      "pivotX": 368,
+      "pivotY": 720,
+      "standPixels": 545,
+      "heights": [118, 122, 126]
+    },
+    "fast": {
+      "resource": "DadV5/chars/dodge/dodge_walk",
+      "entrance": {
+        "resource": "DadThrowEntranceV1/dodge_entrance",
+        "canvas": 2048,
+        "pivotX": 1024,
+        "pivotY": 1900,
+        "standPixels": 1400,
+        "name": "피구 아저씨",
+        "shout": "눈 깜빡하면 대문이다!",
+        "hint": "제일 빨리 옵니다. 먼저 맞히세요",
+        "with": "golf"
+      },
+      "frames": 2,
+      "facesLeft": true,
+      "canvas": 768,
+      "pivotX": 384,
+      "pivotY": 720,
+      "standPixels": 560,
+      "heights": [96, 100, 104]
+    },
+    "guard": {
+      "resource": "DadV5/chars/tray/tray_walk",
+      "bareResource": "DadV5/chars/tray/tray_notray_walk",
+      "guards": true,
+      "entrance": {
+        "resource": "DadThrowEntranceV1/tray_entrance",
+        "canvas": 2048,
+        "pivotX": 1024,
+        "pivotY": 1900,
+        "standPixels": 1400,
+        "name": "쟁반 아저씨",
+        "shout": "공? 쟁반으로 다 막아 주지!",
+        "hint": "슬리퍼를 먼저 맞혀 쟁반을 떨어뜨리세요",
+        "with": "shoe"
+      },
+      "frames": 2,
+      "facesLeft": true,
+      "canvas": 768,
+      "pivotX": 380,
+      "pivotY": 720,
+      "standPixels": 560,
+      "heights": [104, 108, 112]
+    },
+    "boss": {
+      "resource": "DadV5/chars/boss1/boss1_walk",
+      "boss": {
+        "brace": "DadV5/chars/boss1/boss1_windup_0",
+        "dash": "DadV5/chars/boss1/boss1_dash_0",
+        "hit": "DadV5/chars/boss1/boss1_hit_0",
+        "dazed": "DadV5/chars/boss1/boss1_groggy_0",
+        "roar": "DadV5/chars/boss1/boss1_enrage_0",
+        "fly": "DadV5/chars/boss1/boss1_fly_0",
+        "bodyHalf": 45,
+        "bounty": 30
+      },
+      "entrance": {
+        "resource": "DadV5/chars/boss1/boss1_enrage_0",
+        "pivotX": 386,
+        "standPixels": 637,
+        "name": "점퍼 아저씨",
+        "shout": "비켜라, 내가 간다!",
+        "hint": "웅크릴 때 슬리퍼를 맞혀 멈추세요",
+        "with": "shoe"
+      },
+      "frames": 2,
+      "facesLeft": true,
+      "canvas": 768,
+      "pivotX": 390,
+      "pivotY": 720,
+      "standPixels": 635,
+      "heights": [160]
+    }
+  },
+  "stages": [
+    {
+      "id": "1-1",
+      "backgroundKey": "DadThrowScreensV2/street_wide",
+      "health": 5,
+      "baseReward": 12,
+      "hint": "pull",
+      "after": {"name": "지호 아빠", "line": "몸이 덜 풀려서 그래."},
+      "groups": [
+        {"at": 0, "count": 8, "firstX": 640, "spacing": 44, "enemy": "normal", "speed": 120, "hp": 1},
+        {"at": 0, "count": 12, "firstX": 1040, "spacing": 32, "enemy": "normal", "speed": 150, "hp": 1},
+        {"at": 1.5, "count": 12, "firstX": 1300, "spacing": 30, "enemy": "normal", "speed": 170, "hp": 1},
+        {"at": 3, "count": 14, "firstX": 1300, "spacing": 28, "enemy": "normal", "speed": 180, "hp": 1},
+        {"at": 4.5, "count": 14, "firstX": 1300, "spacing": 28, "enemy": "normal", "speed": 185, "hp": 1},
+        {"at": 6, "count": 14, "firstX": 1300, "spacing": 28, "enemy": "normal", "speed": 190, "hp": 1},
+        {"at": 7.5, "count": 14, "firstX": 1300, "spacing": 26, "enemy": "normal", "speed": 195, "hp": 1},
+        {"at": 9, "count": 12, "firstX": 1300, "spacing": 30, "enemy": "normal", "speed": 200, "hp": 1}
+      ]
+    },
+    {
+      "id": "1-3",
+      "backgroundKey": "DadThrowScreensV2/street_wide",
+      "health": 5,
+      "baseReward": 12,
+      "hint": "shoe",
+      "after": {"name": "만수", "line": "형, 아저씨들이 더 왔어."},
+      "ending": true,
+      "groups": [
+        {"at": 0, "count": 12, "firstX": 600, "spacing": 38, "enemy": "normal", "speed": 130, "hp": 1},
+        {"at": 0, "count": 16, "firstX": 1080, "spacing": 28, "enemy": "normal", "speed": 160, "hp": 1},
+        {"at": 1.2, "count": 16, "firstX": 1300, "spacing": 26, "enemy": "normal", "speed": 180, "hp": 1},
+        {"at": 2.4, "count": 18, "firstX": 1300, "spacing": 24, "enemy": "normal", "speed": 190, "hp": 1},
+        {"at": 3.6, "count": 18, "firstX": 1300, "spacing": 24, "enemy": "normal", "speed": 200, "hp": 1},
+        {"at": 4.8, "count": 20, "firstX": 1300, "spacing": 22, "enemy": "normal", "speed": 205, "hp": 1},
+        {"at": 6, "count": 20, "firstX": 1300, "spacing": 22, "enemy": "normal", "speed": 210, "hp": 1},
+        {"at": 7.2, "count": 20, "firstX": 1300, "spacing": 22, "enemy": "normal", "speed": 215, "hp": 1},
+        {"at": 8.4, "count": 20, "firstX": 1300, "spacing": 22, "enemy": "normal", "speed": 220, "hp": 1}
+      ]
+    }
+  ]
+}

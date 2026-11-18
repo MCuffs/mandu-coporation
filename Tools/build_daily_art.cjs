@@ -1,0 +1,55 @@
+const fs=require('fs'),path=require('path'),sharp=require(process.env.DAD_SHARP_MODULE||'sharp');
+const art=path.resolve(__dirname,'../Assets/DadSchoolBoss/Art'), hud='ThrowHudV2',ui='ThrowUiV2',home='ThrowHomeV1';
+const ink='#212629',paper='#faedc9',gold='#ffc421',red='#d14033',green='#608669',white='#fff9ec',blue='#40465c';
+const assets=[];
+const p=(d,f='none',s=ink,w=3)=>`<path d="${d}" fill="${f}" stroke="${s}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"/>`;
+const c=(x,y,r,f,s=ink,w=3)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${f}" stroke="${s}" stroke-width="${w}"/>`;
+const box=(x,y,w,h,r,f)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${f}" stroke="${ink}" stroke-width="3"/>`;
+const at=(body,x,y,k=1,a=0)=>`<g transform="translate(${x} ${y}) rotate(${a}) scale(${k}) translate(-50 -50)">${body}</g>`;
+const hand=p('M27 62L17 45Q15 38 21 36Q25 35 32 45L28 24Q28 17 34 17Q39 16 41 34L41 16Q42 10 47 11Q53 10 53 33L56 15Q58 10 63 13Q67 15 63 35L69 22Q73 17 78 22Q80 25 74 47L70 65Q68 81 52 84Q37 86 27 62Z',gold);
+const ball=c(50,50,29,white)+p('M38 40q-6 0 -6 6m15 -10q-6 0 -6 6m1 7q-6 0 -6 6','none','#83858c',3);
+const shoe=p('M10 59Q16 52 42 54Q51 24 66 32Q81 37 82 55Q96 56 90 66Q55 76 14 67Z',blue)+p('M47 52l9 -16m0 18 9 -17m0 17 8 -13','none',paper,4);
+const tray=box(22,15,56,70,6,'#a9afb0')+box(28,21,44,30,3,'#cbd0cb')+box(28,57,19,21,2,'#cbd0cb')+box(53,57,19,21,2,'#cbd0cb');
+const gate=box(15,19,70,65,2,green)+p('M50 21v60M22 27h20v47H22zm36 0h20v47H58z','none','#344d40',3);
+const ban=c(50,50,33,'none',red,9)+p('M27 27l46 46','none',red,9);
+const coinSource=fs.readFileSync(path.join(art,'ThrowShopV1/sources/icon_won.svg'),'utf8');
+const coin=`<svg x="0" y="0" width="100" height="100" viewBox="0 0 256 256">${coinSource.replace(/^.*?<svg[^>]*>|<\/svg>$/gs,'')}</svg>`;
+const spark=p('M50 9l6 28 23 10 -23 8 -7 26 -6 -26 -23 -8 23 -9Z',gold);
+const pawn=c(49,30,12,blue)+p('M39 44h21l8 35H31Z',blue);
+const cloud=p('M12 73Q4 60 23 53Q22 36 39 38Q49 19 65 35Q81 31 83 48Q102 55 88 72Z','#e4e4d8');
+function add(folder,id,w,h,body,brief,nineSlice){assets.push({folder,id,w,h,body,brief,nineSlice})}
+function rule(id,body,brief){add(hud,'rule_'+id,384,384,at(body,50,50,.88),brief)}
+rule('dodge',p('M5 37h27M10 50h21M6 63h22','none',ink,5)+c(62,50,29,red)+p('M46 27q28 18 29 45M34 51q24 3 43 -22','none',ink,3),'피구공과 속도선 셋');
+rule('trays',at(tray,28,48,.75,-12)+at(tray,50,49,.78,-3)+at(tray,71,53,.78,10),'칸이 나뉜 급식판 세 장');
+rule('ballonly',at(ball,31,48,.84)+at(shoe,70,57,.72)+at(ban,70,54,.72),'골프공 옆 금지된 슬리퍼');
+rule('shoefeast',at(shoe,36,39,.78,-58)+at(shoe,53,48,.81,-30)+at(shoe,63,65,.81,0),'부채꼴 슬리퍼 세 짝');
+rule('bigball',at(hand,53,74,.58,65)+at(ball,48,39,1.13),'작은 손에 받친 큰 공');
+rule('bouncy',`<path d="M5 74Q14 19 28 74Q39 21 53 74Q68 18 82 63" stroke="${ink}" stroke-width="4" stroke-dasharray="4 4" fill="none"/>`+at(ball,81,53,.48),'점선 세 번 바운드');
+rule('onegate',gate+at(hand,51,52,.59),'초록 대문의 손바닥');
+rule('reverse',p('M30 72l19 -48h18l-9 29H35l31 26m-31 -27 26 1','none',ink,7)+p('M17 42Q21 10 59 15Q82 17 85 36l-11 -5 12 16 7 -19 -8 7','none',red,5),'접이식 의자와 역방향 화살표');
+rule('goldrush',[[32,24,.39],[64,36,.48],[27,64,.62],[69,67,.64],[48,73,.63]].map(v=>at(coin,...v)).join(''),'쏟아진 꽃 동전');
+rule('fog',at(pawn,61,37,.91)+at(cloud,49,61,.99),'안개 뒤 사람 그림자');
+rule('oneway',Array.from({length:5},(_,i)=>`<ellipse cx="${23+13*i}" cy="50" rx="8" ry="23" fill="none" stroke="${ink}" stroke-width="4"/>`).join('')+p('M7 46h64V34l24 16 -24 17V55H7Z',gold),'다섯 고리를 관통하는 화살표');
+rule('bossin',p('M9 19l21 5 10 -15 15 13 28 -10 -4 22 15 12 -14 13 4 23 -22 -5 -12 15 -12 -14 -24 5 5 -24 -13 -12 13 -12Z',red)+p('M53 22L32 56h17l-5 23 25 -38H52Z',gold),'번개 난입 표식');
+const seal=c(50,50,14,red),envelope=box(9,24,82,54,4,white)+p('M11 27L50 55 89 27');
+for(const [id,body,size] of [['icon_letter',envelope+seal,256],['envelope_closed',envelope+seal+at(hand,50,50,.24),512],['envelope_open',p('M9 42L49 12 91 42v38H9Z',paper)+box(21,19,58,53,2,white)+p('M9 40l41 22 41 -22v40H9Z',white),512],['badge_alert',c(50,50,35,red)+c(50,50,8,white,'none'),128],['stamp_done',at(c(50,50,34,'none',red,5)+Array.from({length:5},(_,i)=>c(50+12*Math.cos(i*1.257),50+12*Math.sin(i*1.257),8,red,'none')).join('')+c(50,50,6,paper,'none'),50,50,1,-15),256],['chance_on',hand,128],['chance_off',hand.replace(gold,'#b6a98a'),128],['icon_check',p('M15 49l21 23 50 -51 8 9 -57 59 -30 -32Z',gold),128]])add(ui,id,size,size,body,id);
+add(home,'unlock_daily',512,512,at(spark,13,22,.34)+at(spark,84,18,.33)+at(spark,83,83,.28)+envelope+seal+at(hand,50,50,.24),'봉랍과 반짝임');
+add(ui,'paper_note',768,768,p('M3 7l22 -1 37 1 33 -2 2 81 -9 10 -84 -1Z',paper,ink,.9)+p('M88 95l1 -9 8 -1',white,ink,.8)+p('M7 8l12 -5 2 4 -12 5Z','#dfc998',ink,.5),'종이와 모서리 테이프',96);
+const frame=box(3,3,94,94,4,paper)+p('M77 4h19v17Z',red);
+add(ui,'rule_card_frame',384,512,frame,'접힌 모서리 카드',48);
+add(ui,'rule_card_back',384,512,box(3,3,94,94,4,red)+[19,49,79].flatMap(y=>[20,50,80].map(x=>at(hand,x,y,.22))).join(''),'손바닥 패턴');
+add(ui,'tier_clear',128,128,p('M10 78l29 -37h27l26 37Z','#c2bba2')+p('M51 61V15l27 7 -27 11',red),'길 위의 깃발');
+add(ui,'tier_gate',128,128,gate+p('M50 46l21 -7 16 8q-1 28 -19 38 -18 -10 -18 -39Z',gold),'대문 앞 방패');
+add(ui,'tier_chain',128,128,[21,35,49,63,77].map(x=>at(pawn,x,50,.43)).join('')+p('M8 59h78','none',gold,5)+at(ball,80,53,.56),'다섯 말을 꿰뚫는 공');
+for(const [k,col] of [['wood','#bc8254'],['silver','#a4b5b9'],['gold',gold]])for(const open of [false,true]){
+const body=k==='gold'?p('M19 43l26 -13 -10 -14q17 -3 20 14 14 -16 24 -12l-14 17 18 12 8 30q-36 17 -77 -1Z',col):box(13,40,74,40,k==='silver'?12:2,col);
+const detail=k==='wood'?p('M18 51h63M18 69h63M23 43l51 33','none','#704a34',4):k==='gold'?p('M50 41v40','none','#b47130',7):p('M22 69q24 7 56 0','none',white,2);
+const lid=box(10,34,80,13,k==='silver'?6:2,col);
+add(ui,'chest_'+k+'_'+(open?'open':'closed'),512,512,(open?at(lid,50,28,1,-13):'')+body+detail+(open?[32,50,66].map((x,i)=>at(coin,x,42-i%2*6,.32)).join(''):k==='gold'?'':lid),k+' 보상 상자 '+(open?'열림':'닫힘'))}
+add(hud,'rule_chip',256,96,box(2,6,96,88,15,paper)+`<ellipse cx="17" cy="50" rx="12" ry="31" fill="#e3d4ad"/>`,'규칙 표시판',{left:40,right:40,top:0,bottom:0});
+add(hud,'mark_ban',128,128,ban,'빨간 금지');
+for(let i=0;i<3;i++)add(ui,'fx_chest_coins_'+i,384,384,[[31,66],[52,49],[69,68],[46,78]].map(([x,y],j)=>at(coin,x+(x-50)*i*.18,y-i*(9+j),.36-i*.035)).join('')+at(spark,76,39-i*7,.22),'상자 동전 프레임 '+i);
+const defs='<defs><filter id="mist" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.4"/></filter></defs>';
+add(hud,'fog_veil',1536,1664,defs+[0,1,2,3].map(i=>`<path transform="translate(${i*17} 0)" d="M25 -20Q5 -1 16 9Q0 19 14 28Q22 37 12 45Q0 54 16 62Q2 74 14 83Q23 95 9 102L8 120H120V-20Z" fill="#fff8e6" opacity=".31" filter="url(#mist)"/>`).join(''),'크림 안개 오른쪽으로 진해짐');
+for(let i=0;i<3;i++)add(hud,'fog_puff_'+i,512,512,defs+`<g filter="url(#mist)" opacity=".5">${at(cloud.replace('#e4e4d8','#fff8e6').replace('stroke="'+ink+'"','stroke="none"'),50,50,.85,i*9-9)}</g>`,'흐르는 안개 '+i);
+(async()=>{for(const folder of [ui,hud,home]){let rows=[],prompts=[];const dir=path.join(art,folder);fs.mkdirSync(dir,{recursive:true});for(const a of assets.filter(a=>a.folder===folder)){const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${a.w}" height="${a.h}" viewBox="0 0 100 100" preserveAspectRatio="none">${a.body}</svg>`;await sharp(Buffer.from(svg)).png().toFile(path.join(dir,a.id+'.png'));rows.push({id:a.id,file:a.id+'.png',width:a.w,height:a.h,pivotPixels:{x:a.w/2,y:a.h/2},...(a.nineSlice?{nineSlice:typeof a.nineSlice==='number'?Object.fromEntries(['top','left','bottom','right'].map(k=>[k,a.nineSlice])):a.nineSlice}:{})});prompts.push({id:a.id,brief:a.brief,method:'native vector',source:'Tools/build_daily_art.cjs'})}for(const [file,data] of [['manifest',rows],['prompts',prompts]])fs.writeFileSync(path.join(dir,file+'.json'),JSON.stringify({version:1,assets:data},null,2)+'\n')}console.log(assets.length)})().catch(e=>{console.error(e);process.exitCode=1});

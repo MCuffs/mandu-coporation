@@ -1,0 +1,13 @@
+PASS main scene starts in actual Windows player
+PASS smoke save is isolated
+PASS Korean font is included
+PASS offline privacy policy is included
+PASS cart artwork is included
+PASS pause cancels aim
+PASS release fires once in compiled player
+PASS quick start enters challenge and disables campaign host
+PASS twelve stages are present and redirect is taught first
+PASS compiled challenge launches and redirects
+PASS leaving challenge restores the campaign host
+PASS native JSON save round-trip succeeds
+LIMIT: no rendered frames or physical gestures were tested.

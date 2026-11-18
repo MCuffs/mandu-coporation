@@ -65,7 +65,6 @@ public sealed partial class DadSchoolPrototype
     {
         DadSave save = Progress.Save; int stage = save.currentStage, floor = Progress.Eco.Floor(stage);
         Box(new Rect(0, BarHeight, Width, 146), Paper); Box(new Rect(22,196,496,1),new Color(.3f,.35f,.27f,.25f));
-        Text(new Rect(22, 70, 340, 26), "아들: \"지호가 자기 아빠 데려왔대…\"", 17, Red, true);
         Text(new Rect(22, 94, 330, 76), Title, 54, Ink, true);
         // Stars collected over the school (C-13: the power number moved out; the fight runs on upgrades, not power).
         int stars = 0; foreach (int s in save.stars) stars += s;
@@ -129,7 +128,6 @@ public sealed partial class DadSchoolPrototype
     {
         DadSave save = Progress.Save;
         Text(new Rect(24, 70, 492, 54), "엄마가 뭘 넣었지?", 36, Ink, true);
-        Text(new Rect(24, 120, 492, 26), "엄마: \"밥은 먹고 싸워.\"  열면 아빠 물건이 나온다", 16, Green, true);
         Panel(new Rect(20, 154, 500, 346), new Color(.84f, .86f, .78f));
         Ellipse(new Vector2(270, 474), 170, 26, new Color(0, 0, 0, .2f));
         if (NewArt) DrawCharacter("dad", "idle", Mathf.FloorToInt(clock / .6f), new Vector2(270, 474), 262, false);
@@ -157,8 +155,6 @@ public sealed partial class DadSchoolPrototype
         for (int i = 0; i < DadProgress.RarityCount && i < w.Length; i++) odds += (i > 0 ? " · " : "") + DadProgress.RarityNames[i] + " " + Mathf.RoundToInt(100 * w[i] / total) + "%";
         Box(new Rect(20, 708, 6, 66), Green);
         Text(new Rect(36, 708, 484, 30), "등급 확률  " + odds, 17, Ink, true);
-        Text(new Rect(36, 738, 484, 36), "첫 장비는 희귀 손 장비 · 두 번째는 신발 · 이후 빈 부위부터", 15, Muted);
-        Text(new Rect(24, 790, 492, 60), "\"밥 먹으려고 열었는데 효자손이 나왔다.\"", 18, Green, true, TextAnchor.MiddleCenter);
     }
 
     bool HasUpgradeableStat()
@@ -242,6 +238,14 @@ public sealed partial class DadSchoolPrototype
         if (won && LastReward != null && LastReward.challengeLevel > 0) Text(new Rect(20,196,500,40),"재대결 " + LastReward.challengeLevel + "단계 격파",24,Green,true,TextAnchor.MiddleCenter);
         else if (won && LastReward != null) for (int s = 0; s < 3; s++) Icon(s < LastReward.stars ? "star_full" : "star_empty", new Rect(Width / 2 - 66 + s * 44, 196, 40, 40));
         scene();
+        if(won&&DadRewardedAds.Ready&&Progress.Save.adBonusCoins>0)
+        {
+            if(Button(new Rect(70,382,400,44),"광고 완료 후 코인 추가 받기",Yellow,true,19))
+            {
+                string receipt=Progress.Save.adBonusToken;
+                DadRewardedAds.Show(()=>{if(Progress.GrantAdBonus(receipt)){PersistNow();toast="추가 코인 지급 완료";toastTime=2.2f;}});
+            }
+        }
         for (int i = 0; i < 3; i++)
         {
             Rect r = new Rect(32 + i * 164, 448, 148, 82); Panel(r, Color.white);

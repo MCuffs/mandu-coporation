@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "assets": [
+    {
+      "id": "sfx_envelope",
+      "file": "sfx_envelope.wav",
+      "seconds": 0.4,
+      "sampleRate": 48000,
+      "channels": 1,
+      "peakDb": -3
+    },
+    {
+      "id": "sfx_stamp",
+      "file": "sfx_stamp.wav",
+      "seconds": 0.25,
+      "sampleRate": 48000,
+      "channels": 1,
+      "peakDb": -3
+    },
+    {
+      "id": "sfx_chest_open",
+      "file": "sfx_chest_open.wav",
+      "seconds": 0.6,
+      "sampleRate": 48000,
+      "channels": 1,
+      "peakDb": -3
+    },
+    {
+      "id": "sfx_card_deal",
+      "file": "sfx_card_deal.wav",
+      "seconds": 0.15,
+      "sampleRate": 48000,
+      "channels": 1,
+      "peakDb": -3
+    },
+    {
+      "id": "sfx_try_spent",
+      "file": "sfx_try_spent.wav",
+      "seconds": 0.2,
+      "sampleRate": 48000,
+      "channels": 1,
+      "peakDb": -3
+    },
+    {
+      "id": "jingle_daily_clear",
+      "file": "jingle_daily_clear.wav",
+      "seconds": 1.5,
+      "sampleRate": 48000,
+      "channels": 1,
+      "peakDb": -3
+    }
+  ]
+}

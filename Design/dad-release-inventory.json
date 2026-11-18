@@ -1,0 +1,182 @@
+{
+  "date": "2026-11-09",
+  "head": "58c0733",
+  "limits": "Repository inspection only. RGBA pixel bytes assume every original texture uncompressed and simultaneously resident; actual imports, compression, loading and Android measurements differ.",
+  "enabled_scenes": [
+    "Assets/DadSchoolBoss.unity"
+  ],
+  "company": "SecondFistStudio",
+  "identifiers": [
+    [
+      "Standalone",
+      "com.DefaultCompany.2DProject"
+    ]
+  ],
+  "resources_files": 235,
+  "resources_source_bytes": 112769360,
+  "resource_groups": {
+    "DadV5": {
+      "files": 131,
+      "source_bytes": 41959444,
+      "textures": 110,
+      "rgba_pixel_bytes": 201566144
+    },
+    "DadV11": {
+      "files": 7,
+      "source_bytes": 12004424,
+      "textures": 7,
+      "rgba_pixel_bytes": 44053856
+    },
+    "DadV17": {
+      "files": 20,
+      "source_bytes": 9382689,
+      "textures": 17,
+      "rgba_pixel_bytes": 106928496
+    },
+    "DadV6": {
+      "files": 12,
+      "source_bytes": 8279115,
+      "textures": 12,
+      "rgba_pixel_bytes": 56840900
+    },
+    "DadV2": {
+      "files": 11,
+      "source_bytes": 7454254,
+      "textures": 11,
+      "rgba_pixel_bytes": 30336968
+    },
+    "Fonts": {
+      "files": 3,
+      "source_bytes": 5580892,
+      "textures": 0,
+      "rgba_pixel_bytes": 0
+    },
+    "PrologueInkScenes.png": {
+      "files": 1,
+      "source_bytes": 3672302,
+      "textures": 1,
+      "rgba_pixel_bytes": 6291456
+    },
+    "StageArenas.png": {
+      "files": 1,
+      "source_bytes": 3224160,
+      "textures": 1,
+      "rgba_pixel_bytes": 6291456
+    },
+    "DadV13": {
+      "files": 18,
+      "source_bytes": 3061853,
+      "textures": 14,
+      "rgba_pixel_bytes": 27148160
+    },
+    "AlleyBackground.png": {
+      "files": 1,
+      "source_bytes": 2851134,
+      "textures": 1,
+      "rgba_pixel_bytes": 6291456
+    },
+    "DadContentV2": {
+      "files": 2,
+      "source_bytes": 2156964,
+      "textures": 2,
+      "rgba_pixel_bytes": 12580128
+    },
+    "FighterAtlas.png": {
+      "files": 1,
+      "source_bytes": 2032938,
+      "textures": 1,
+      "rgba_pixel_bytes": 6291456
+    },
+    "EnemyMotion.png": {
+      "files": 1,
+      "source_bytes": 1807370,
+      "textures": 1,
+      "rgba_pixel_bytes": 6290064
+    },
+    "AbilityIcons.png": {
+      "files": 1,
+      "source_bytes": 1764771,
+      "textures": 1,
+      "rgba_pixel_bytes": 6290064
+    },
+    "StreetRoster.png": {
+      "files": 1,
+      "source_bytes": 1602374,
+      "textures": 1,
+      "rgba_pixel_bytes": 6292352
+    },
+    "HeroMotion.png": {
+      "files": 1,
+      "source_bytes": 1578327,
+      "textures": 1,
+      "rgba_pixel_bytes": 6290064
+    },
+    "DadV7": {
+      "files": 6,
+      "source_bytes": 1302463,
+      "textures": 6,
+      "rgba_pixel_bytes": 14155776
+    },
+    "GymBackdrop.png": {
+      "files": 1,
+      "source_bytes": 1236055,
+      "textures": 1,
+      "rgba_pixel_bytes": 4227072
+    },
+    "DadV14": {
+      "files": 2,
+      "source_bytes": 996702,
+      "textures": 1,
+      "rgba_pixel_bytes": 6290064
+    },
+    "GymEquipment.png": {
+      "files": 1,
+      "source_bytes": 576779,
+      "textures": 1,
+      "rgba_pixel_bytes": 4194304
+    },
+    "Voice": {
+      "files": 8,
+      "source_bytes": 227664,
+      "textures": 0,
+      "rgba_pixel_bytes": 0
+    },
+    "StreetRosterPivots.json": {
+      "files": 1,
+      "source_bytes": 4645,
+      "textures": 0,
+      "rgba_pixel_bytes": 0
+    },
+    "EnemyMotionPivots.json": {
+      "files": 1,
+      "source_bytes": 4426,
+      "textures": 0,
+      "rgba_pixel_bytes": 0
+    },
+    "HeroMotionPivots.json": {
+      "files": 1,
+      "source_bytes": 4425,
+      "textures": 0,
+      "rgba_pixel_bytes": 0
+    },
+    "FighterAtlasPivots.json": {
+      "files": 1,
+      "source_bytes": 2140,
+      "textures": 0,
+      "rgba_pixel_bytes": 0
+    },
+    "DadEconomy.json": {
+      "files": 1,
+      "source_bytes": 1050,
+      "textures": 0,
+      "rgba_pixel_bytes": 0
+    }
+  },
+  "duplicate_resource_sets": [],
+  "missing_resource_meta": [],
+  "android_artifacts": [],
+  "fonts_license_files": [
+    "Design\\Licenses\\BlackHanSans-OFL.txt",
+    "Design\\Licenses\\GothicA1-OFL.txt"
+  ]
+}

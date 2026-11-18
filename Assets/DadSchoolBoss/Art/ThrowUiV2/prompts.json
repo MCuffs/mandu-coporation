@@ -1,0 +1,143 @@
+{
+  "version": 1,
+  "assets": [
+    {
+      "id": "icon_letter",
+      "brief": "icon_letter",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "envelope_closed",
+      "brief": "envelope_closed",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "envelope_open",
+      "brief": "envelope_open",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "badge_alert",
+      "brief": "badge_alert",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "stamp_done",
+      "brief": "stamp_done",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "chance_on",
+      "brief": "chance_on",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "chance_off",
+      "brief": "chance_off",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "icon_check",
+      "brief": "icon_check",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "paper_note",
+      "brief": "종이와 모서리 테이프",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "rule_card_frame",
+      "brief": "접힌 모서리 카드",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "rule_card_back",
+      "brief": "손바닥 패턴",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "tier_clear",
+      "brief": "길 위의 깃발",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "tier_gate",
+      "brief": "대문 앞 방패",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "tier_chain",
+      "brief": "다섯 말을 꿰뚫는 공",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "chest_wood_closed",
+      "brief": "wood 보상 상자 닫힘",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "chest_wood_open",
+      "brief": "wood 보상 상자 열림",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "chest_silver_closed",
+      "brief": "silver 보상 상자 닫힘",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "chest_silver_open",
+      "brief": "silver 보상 상자 열림",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "chest_gold_closed",
+      "brief": "gold 보상 상자 닫힘",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "chest_gold_open",
+      "brief": "gold 보상 상자 열림",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "fx_chest_coins_0",
+      "brief": "상자 동전 프레임 0",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "fx_chest_coins_1",
+      "brief": "상자 동전 프레임 1",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    },
+    {
+      "id": "fx_chest_coins_2",
+      "brief": "상자 동전 프레임 2",
+      "method": "native vector",
+      "source": "Tools/build_daily_art.cjs"
+    }
+  ]
+}

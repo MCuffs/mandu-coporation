@@ -1,0 +1,20 @@
+using System;
+using System.IO;
+using UnityEditor;
+using UnityEditor.Build.Reporting;
+public static class DadCompatibilityBuild
+{
+ public static void Batch()
+ {
+  int code=1; var original=PlayerSettings.Android.targetArchitectures;
+  try {
+   PlayerSettings.Android.targetArchitectures=AndroidArchitecture.ARM64|AndroidArchitecture.X86_64;
+   var r=BuildPipeline.BuildPlayer(new BuildPlayerOptions {
+    scenes=new[]{"Assets/DadSchoolBoss.unity"},target=BuildTarget.Android,options=BuildOptions.None,
+    locationPathName="Builds/AndroidPlaytest/DadWar-v0.3.1-emulator-compat.apk"
+   });
+   File.WriteAllText("Build/StartupFix/compat-build-report.txt","CPU variant for x86_64 emulator testing, not release APK.\nResult: "+r.summary.result+"\nErrors: "+r.summary.totalErrors+"\nWarnings: "+r.summary.totalWarnings+"\nDuration: "+r.summary.totalTime);
+   code=r.summary.result==BuildResult.Succeeded?0:1;
+  } finally {PlayerSettings.Android.targetArchitectures=original;AssetDatabase.SaveAssets();EditorApplication.Exit(code);}
+ }
+}

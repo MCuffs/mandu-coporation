@@ -1,0 +1,27 @@
+Native save validation and recovery checks
+PASS missing all files is a genuine new game
+PASS new zero-coin game persists and reloads
+PASS invalid primary selects healthy backup case 0
+PASS invalid primary selects healthy backup case 1
+PASS invalid primary selects healthy backup case 2
+PASS invalid primary selects healthy backup case 3
+PASS invalid primary selects healthy backup case 4
+PASS invalid primary selects healthy backup case 5
+PASS invalid primary selects healthy backup case 6
+PASS invalid primary selects healthy backup case 7
+PASS invalid primary selects healthy backup case 8
+PASS invalid primary selects healthy backup case 9
+PASS invalid primary selects healthy backup case 10
+PASS recovered progress can be saved and reloaded
+PASS recovery write does not back up the invalid primary over healthy backup
+PASS valid temporary save recovers when primary and backup are invalid
+PASS missing primary is restored without deleting its valid backup
+PASS all invalid copies expose failure and reject automatic saving
+PASS all original copies survive total recovery failure byte-for-byte
+PASS retry after repairing a file clears the recovery block
+PASS minimal legacy v2 loads with optional fields defaulted
+PASS minimal legacy v2 remains writable
+PASS v1 gear migration preserves progress
+PASS historical over-cap purchased levels are retained
+PASS newer schema is protected rather than downgraded to an older backup
+PASS invalid in-memory currency cannot overwrite a valid save

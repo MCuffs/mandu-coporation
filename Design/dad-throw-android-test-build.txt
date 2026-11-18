@@ -1,0 +1,17 @@
+Throw game Android test build; debug-signed, not for store upload.
+Unity: 6000.1.5f1
+Version: 0.3.1 (3)
+Application ID: com.manducorporation.dadthrow.prototype
+Backend: IL2CPP
+Architectures: ARM64
+Minimum SDK: AndroidApiLevel24
+Target SDK: AndroidApiLevel36
+Icon: the store icon (6 adaptive sizes, 12 plain sizes)
+Android dependency resolution: True
+Result: Succeeded
+Errors: 0
+Warnings: 1
+Package: 30.5 MB
+Duration: 00:00:51.4059774
+Artifact: Builds/ThrowAndroid/DadThrow-arm64-test.apk
+Signing: local DEBUG key, not the store upload key

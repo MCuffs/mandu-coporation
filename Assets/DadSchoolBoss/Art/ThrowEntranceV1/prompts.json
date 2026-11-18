@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "assets": [
+    {
+      "id": "tray_entrance",
+      "tool": "image_gen.imagegen",
+      "prompt": "Tall 1:2 portrait transparent character sprite. Same lunch-tray man as reference facing LEFT. CRITICAL framing: HEAD ALMOST TOUCHES TOP OF IMAGE (no blank headroom at all), BOTH SHOE SOLES ALMOST TOUCH BOTTOM OF IMAGE. FULL BODY fills 96 percent of canvas height. Native tall1774pixel canvas, actual scalp-to-sole at least1500pixels. He has short brown hair, thickbrows, squarejaw, white short sleeves, stainednavy apron, browntrousers, blackworkboots. Legs slightly bent wide braced stance. Both hands thrust a steel COMPARTMENT tray toward LEFT like shield. Teeth clenched, stubborn wide eyes. No part cut off, very narrow transparent margin. Bold BLACK outlined FLAT cartoon cel colors with ONE flat hardshadow; NO gradients, lighting, softglow, haze, backdrop, floor, shadow, text or effects. Draw new native big sprite, not enlargement.",
+      "references": [
+        "Assets/DadSchoolBoss/Resources/DadV5/chars/tray/tray_block_0.png"
+      ]
+    },
+    {
+      "id": "chair_entrance",
+      "tool": "image_gen.imagegen",
+      "prompt": "Native resolution character sprite on transparent background. VERY TALL PORTRAIT canvas aspect1:2. FULL BODY the SAME BALD PURPLE TRACKSUIT MAN as reference, facing left, two cream stripes on sleeves and pants, grey sneakers. Confident toothy grin. He holds a SMALL FOLDED STEEL CHAIR horizontally tightly ABOVE his head with both hands. COMPOSITION STRICT: no wasted headroom; chair top at y40; HEAD SCALP at y200; feet soles at y1730 on a native887x1774 portrait. The face/body should occupy MOST of the canvas HEIGHT, NOT the chair. Scale the chair SMALL enough to keep the head close to the top of the illustration. Body scalp-to-sole native1500px. Whole person/prop uncut,10px side margin. Thick BLACK ink contour, perfectly FLAT muted colors and exactly one HARD shadow. No gradients, glow, ground, cast shadow, background, text, blur or haze. Redraw native, not enlarged reference.",
+      "references": [
+        "Assets/DadSchoolBoss/Resources/DadV5/chars/chair/chair_windup_0.png"
+      ]
+    },
+    {
+      "id": "dodge_entrance",
+      "tool": "image_gen.imagegen",
+      "prompt": "Native resolution character sprite, tall PORTRAIT canvas1:2, native887x1774or larger. True transparent empty background. SAME PERSON as reference, FACING LEFT. Dodge man: white headband, scruffy black hair, stubble, white sleeveless shirt, darkgreen shorts, kneepads, white sneakers. Low crouched runner pose, onefoot back, redball tuckedhip, narrow determined eyes. SCALP at y120, soles y1710, so body height1590 native pixels. NO EMPTY SPACE ABOVE HIS HEAD; fill the canvas vertically. Do not draw skin spots. Fullbody and prop, no cropping; native scalp-to-sole at least1400px. Thick black ink contour, perfectly flat muted colors with ONE hard flatshadow. No gradients, softlighting, airbrush, glow, haze, ground, castshadow, speedlines, speechbubble, text, injuries. Redraw at native large resolution, never upscale reference.",
+      "references": [
+        "Assets/DadSchoolBoss/Resources/DadV5/chars/dodge/dodge_walk_0.png"
+      ]
+    },
+    {
+      "id": "entrance_band_lines",
+      "tool": "native SVG / sharp",
+      "brief": "v3 request: entrance_band_lines; exact native canvas, flat fills, black outline, no text.",
+      "source": "sources/entrance_band_lines.svg",
+      "recipe": "Tools/build_throw_v3_vectors.cjs"
+    },
+    {
+      "id": "entrance_burst",
+      "tool": "native SVG / sharp",
+      "brief": "v3 request: entrance_burst; exact native canvas, flat fills, black outline, no text.",
+      "source": "sources/entrance_burst.svg",
+      "recipe": "Tools/build_throw_v3_vectors.cjs"
+    },
+    {
+      "id": "entrance_balloon",
+      "tool": "native SVG / sharp",
+      "brief": "v3 request: entrance_balloon; exact native canvas, flat fills, black outline, no text.",
+      "source": "sources/entrance_balloon.svg",
+      "recipe": "Tools/build_throw_v3_vectors.cjs"
+    }
+  ]
+}

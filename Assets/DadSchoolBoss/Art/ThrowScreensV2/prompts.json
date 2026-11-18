@@ -1,0 +1,17 @@
+{
+  "tool": "built-in image_gen",
+  "assets": [
+    {
+      "id": "title_wide",
+      "ref": "/Users/jeongminsu/.gemini/antigravity/scratch/mandu-coporation-remote-20261110/Assets/DadSchoolBoss/Resources/DadThrowV1/title_keyart.png",
+      "prompt": "Edit this landscape game key art to use a noticeably WIDER CAMERA SHOT. Keep the exact same father on the left throwing a tiny golf ball toward the same three adult neighbors on the right, same identities, same Korean house/street, thick ink and flat comic style. Make all people and nearby objects about 25% SMALLER in frame, while keeping father and neighbors widely separated across the scene. Reveal more house frontage on the left, more open sky above and more street around them. Keep their sandals on one common ground baseline at roughly 78% image height. Upper central half should be spacious pale warm sky, lower central foreground clear for a live start button. Do not simply shrink the whole old picture into a border: redraw a wider continuous environment edge-to-edge. Do not enlarge heads, add people, debris, labels, UI, text, logos or watermark. Wide 16:9 opaque illustration. Restrained detail and clear silhouettes.",
+      "hint": "Generated images are saved to /Users/jeongminsu/.codex/generated_images/01a1a442-9056-7f12-9556-572b0f41018e as /Users/jeongminsu/.codex/generated_images/01a1a442-9056-7f12-9556-572b0f41018e/exec-5fa983a5-0ff1-4785-b6ba-286dd04bfa10.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    },
+    {
+      "id": "street_wide",
+      "ref": "/Users/jeongminsu/.gemini/antigravity/scratch/mandu-coporation-remote-20261110/Assets/DadSchoolBoss/Resources/DadThrowV1/bg_street.png",
+      "prompt": "Edit this side-view mobile game environment into a WIDER CAMERA SHOT with smaller neighborhood architecture and more breathing room. Preserve Korean neighborhood, house entrance at far left, low boundary wall, rooftops and flat cartoon black outlines/warm flat colors. Nearby house/gate and wall details should be around 20-25% smaller in frame, with more open sky and a broad open pavement combat space. Absolutely level side-on ground baseline around 79% image height; right edge unobstructed. No perspective vanishing street, no border, no empty letterboxing, no people, text, HUD, props, projectiles or foreground obstructions. Redraw edge-to-edge at wide 16:9. Maintain palette and line style, no photorealism or gradients.",
+      "hint": "Generated images are saved to /Users/jeongminsu/.codex/generated_images/01a1a442-9056-7f12-9556-572b0f41018e as /Users/jeongminsu/.codex/generated_images/01a1a442-9056-7f12-9556-572b0f41018e/exec-9305d0a7-5f5e-4db7-bee7-43b92be2160a.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    }
+  ]
+}

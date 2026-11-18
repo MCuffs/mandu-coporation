@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "assets": [
+    {
+      "id": "shop_pierce",
+      "tool": "image_gen.imagegen",
+      "prompt": "Game shop upgrade icon, one isolated object symbol, true transparent alpha, square native 1024px source, no sprite sheet. A plain white dimpled golf ball punching through THREE overlapping thick dark metal rings, one bold straight speed streak behind the ball. Strong single readable silhouette. Match the referenced game's golf ball and sandal appearance where relevant, heavy dark black contour about28px at1024 resolution, flat muted cream/white/navy/grey with ONE solid shadow shape only. Main symbol occupies80percent of canvas, centered, comfortable10percent clear margins, every part inside. Instantly readable when downsampled to48px. No face, no character, no lettering, digits, currency symbols, gradients, glossy highlights, texture, checkerboard or ground shadow. This will be downsampled, never enlarged, to512px.",
+      "references": [
+        "Assets/DadSchoolBoss/Resources/DadThrowV1/projectile_golf.png",
+        "Assets/DadSchoolBoss/Resources/DadThrowV1/projectile_shoe.png"
+      ]
+    },
+    {
+      "id": "shop_reload",
+      "tool": "image_gen.imagegen",
+      "prompt": "Game shop upgrade icon, one isolated object symbol, true transparent alpha, square native 1024px source, no sprite sheet. ONE adult hand gripping a plain white dimpled golf ball, with exactly two offset faint flat silhouette after-images of that same hand behind it. Clear five-finger anatomy of the main gripping hand. No arm beyond a short wrist. Match the referenced game's golf ball and sandal appearance where relevant, heavy dark black contour about28px at1024 resolution, flat muted cream/white/navy/grey with ONE solid shadow shape only. Main symbol occupies80percent of canvas, centered, comfortable10percent clear margins, every part inside. Instantly readable when downsampled to48px. No face, no character, no lettering, digits, currency symbols, gradients, glossy highlights, texture, checkerboard or ground shadow. This will be downsampled, never enlarged, to512px.",
+      "references": [
+        "Assets/DadSchoolBoss/Resources/DadThrowV1/projectile_golf.png",
+        "Assets/DadSchoolBoss/Resources/DadThrowV1/projectile_shoe.png"
+      ]
+    },
+    {
+      "id": "shop_twin",
+      "tool": "image_gen.imagegen",
+      "prompt": "Game shop upgrade icon, one isolated object symbol, true transparent alpha, square native 1024px source, no sprite sheet. Exactly TWO plain white dimpled golf balls flying in parallel, vertically slightly separated and horizontally slightly offset. Two short broad motion streaks, clear twin-ball symbol. Match the referenced game's golf ball and sandal appearance where relevant, heavy dark black contour about28px at1024 resolution, flat muted cream/white/navy/grey with ONE solid shadow shape only. Main symbol occupies80percent of canvas, centered, comfortable10percent clear margins, every part inside. Instantly readable when downsampled to48px. No face, no character, no lettering, digits, currency symbols, gradients, glossy highlights, texture, checkerboard or ground shadow. This will be downsampled, never enlarged, to512px.",
+      "references": [
+        "Assets/DadSchoolBoss/Resources/DadThrowV1/projectile_golf.png",
+        "Assets/DadSchoolBoss/Resources/DadThrowV1/projectile_shoe.png"
+      ]
+    },
+    {
+      "id": "shop_heavy",
+      "tool": "image_gen.imagegen",
+      "prompt": "Use case: stylized-concept. Single game shop icon on true transparent background. ONE rough grey stone-like ball, three bold broad cracks, short heavy weight lines underneath. Muted grey solid fill. Match reference golf ball and sandal object style. Bold black outline about 28px at 1024. Flat muted cream/navy/yellow palette and ONE hard-edged darker shadow. Isolated readable silhouette occupying 80 percent of a square canvas with clear 10 percent margin. No gradient, glow, ambient haze, paper texture, letters, digits, logo, people, face, background, ground or cast shadow. Readable when reduced to 48px. Native 1024px or larger, not enlarged raster.",
+      "references": [
+        "Assets/DadSchoolBoss/Resources/DadThrowV1/projectile_golf.png",
+        "Assets/DadSchoolBoss/Resources/DadThrowV1/projectile_shoe.png"
+      ]
+    },
+    {
+      "id": "shop_bounce",
+      "tool": "image_gen.imagegen",
+      "prompt": "Single isolated GAME HUD ITEM SYMBOL: exactly ONE white dimpled golf ball bouncing UPWARD. One thick dotted arc curves downward to a tiny contact dash then upward toward the ball. NOTHING ELSE. In particular NO SHOP, no awning, no store, no frame, no card, no sandal, no text, no people, no floor. True transparent empty background. Heavy black contour, flat cream-white with one solid grey shadow only; no gradients, glow, gloss, lighting or texture. Native square1024px. Center the combined ball and dotted arc within the central80percent, leave10percent transparent margin. Clear readable at48px. Reference image is ball design ONLY.",
+      "references": [
+        "Assets/DadSchoolBoss/Resources/DadThrowV1/projectile_golf.png",
+        "Assets/DadSchoolBoss/Resources/DadThrowV1/projectile_shoe.png"
+      ]
+    },
+    {
+      "id": "shop_blast",
+      "tool": "image_gen.imagegen",
+      "prompt": "Use case: stylized-concept. Single game shop icon on true transparent background. ONE navy slide sandal with exactly THREE broad cream stripes on the strap, a large spiky cream/yellow comic impact star behind. No flame, fuse, explosive or smoke. Match reference golf ball and sandal object style. Bold black outline about 28px at 1024. Flat muted cream/navy/yellow palette and ONE hard-edged darker shadow. Isolated readable silhouette occupying 80 percent of a square canvas with clear 10 percent margin. No gradient, glow, ambient haze, paper texture, letters, digits, logo, people, face, background, ground or cast shadow. Readable when reduced to 48px. Native 1024px or larger, not enlarged raster.",
+      "references": [
+        "Assets/DadSchoolBoss/Resources/DadThrowV1/projectile_golf.png",
+        "Assets/DadSchoolBoss/Resources/DadThrowV1/projectile_shoe.png"
+      ]
+    },
+    {
+      "id": "shop_wide",
+      "tool": "image_gen.imagegen",
+      "prompt": "Use case: stylized-concept. Single game shop upgrade icon on true transparent background. Exactly TWO navy slide sandals, each with THREE broad cream stripes: ONE HUGE sandal in rear and ONE ordinary sandal in front, very obvious size comparison. Huge sandal about1.8 times ordinary size. Match the reference golf ball/sandal design. Bold heavy BLACK contour about28px on1024 source. Flat muted fills, ONE solid hard shadow. Square canvas, symbol fits within central80percent, at least10percent empty margin all sides. Readable at48px. No gradients, glow, haze, texture, shiny highlights, checkerboard, letters, digits, logos, faces, people, background, ground or cast shadow. Native1024or larger source; never upscale.",
+      "references": [
+        "Assets/DadSchoolBoss/Resources/DadThrowV1/projectile_golf.png",
+        "Assets/DadSchoolBoss/Resources/DadThrowV1/projectile_shoe.png"
+      ]
+    },
+    {
+      "id": "shop_sticky",
+      "tool": "image_gen.imagegen",
+      "prompt": "Use case: stylized-concept. Single game shop upgrade icon on true transparent background. ONE navy slide sandal with THREE broad cream stripes and a clearly visible stretched PINK chewing gum ribbon hanging from its sole, two sticky strands and a small gum pad. No extra footwear. Match the reference golf ball/sandal design. Bold heavy BLACK contour about28px on1024 source. Flat muted fills, ONE solid hard shadow. Square canvas, symbol fits within central80percent, at least10percent empty margin all sides. Readable at48px. No gradients, glow, haze, texture, shiny highlights, checkerboard, letters, digits, logos, faces, people, background, ground or cast shadow. Native1024or larger source; never upscale.",
+      "references": [
+        "Assets/DadSchoolBoss/Resources/DadThrowV1/projectile_golf.png",
+        "Assets/DadSchoolBoss/Resources/DadThrowV1/projectile_shoe.png"
+      ]
+    },
+    {
+      "id": "shop_flow",
+      "tool": "image_gen.imagegen",
+      "prompt": "Isolated HUD icon, square transparent PNG. ONE white dimpled golf ball in center, EXACTLY THREE curved WIND swoosh lines spiraling around it: one upper, one lowerleft, one right. Only THREE swooshes, no fourth. Reference ball shape/colors. Bold black outline, flat cream and mutedbluegrey with one hardshadow. Entire symbol inside80percentcanvas,10percentclear margins. No frame, shop, building, text, ground, shadow, texture, gradient, glow or glossy lighting. Make legible at48px.",
+      "references": [
+        "Assets/DadSchoolBoss/Resources/DadThrowV1/projectile_golf.png",
+        "Assets/DadSchoolBoss/Resources/DadThrowV1/projectile_shoe.png"
+      ]
+    },
+    {
+      "id": "icon_won",
+      "tool": "native SVG / sharp",
+      "brief": "v3 request: icon_won; exact native canvas, flat fills, black outline, no text.",
+      "source": "sources/icon_won.svg",
+      "recipe": "Tools/build_throw_v3_vectors.cjs"
+    },
+    {
+      "id": "icon_shop",
+      "tool": "native SVG / sharp",
+      "brief": "v3 request: icon_shop; exact native canvas, flat fills, black outline, no text.",
+      "source": "sources/icon_shop.svg",
+      "recipe": "Tools/build_throw_v3_vectors.cjs"
+    },
+    {
+      "id": "mark_soldout",
+      "tool": "native SVG / sharp",
+      "brief": "v3 request: mark_soldout; exact native canvas, flat fills, black outline, no text.",
+      "source": "sources/mark_soldout.svg",
+      "recipe": "Tools/build_throw_v3_vectors.cjs"
+    }
+  ]
+}
