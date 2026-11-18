@@ -21,6 +21,9 @@ using UnityEngine.Rendering;
 //                and keep; this build is told where it is by four environment variables set in the terminal that
 //                starts it, and writes none of them anywhere:
 //                DAD_UPLOAD_KEYSTORE (path to the .jks), DAD_UPLOAD_KEYSTORE_PASS, DAD_UPLOAD_KEY_ALIAS, DAD_UPLOAD_KEY_PASS.
+// Every build carries the project's own version unless the same terminal names another: DAD_VERSION_NAME (what a
+// player sees, such as 1.0.0) and DAD_VERSION_CODE (a whole number; Play refuses a code an earlier upload used, so
+// each upload counts one up). The build copy's settings are never committed, so nothing here reaches the project.
 // StoreId was decided by the owner on 2026-11-18 ("yes, that one"). Play never lets an app change it after the
 // first upload.
 public static class DadThrowAndroidBuild
@@ -29,8 +32,17 @@ public static class DadThrowAndroidBuild
     public const string Output="Builds/ThrowAndroid/DadThrow-arm64-test.apk";
     public static void TestApk(){Run(false,TestId,false,Output,"Design/dad-throw-android-test-build.txt");}
     public static void TestBundle(){Run(true,StoreId,false,"Builds/ThrowAndroid/DadWar-test.aab","Design/dad-throw-android-test-bundle-build.txt");}
-    public static void StoreBundle()
-    {Run(true,StoreId,true,"Builds/ThrowAndroid/DadWar-"+PlayerSettings.bundleVersion+"-"+PlayerSettings.Android.bundleVersionCode+".aab","Design/dad-throw-android-store-bundle-build.txt");}
+    // The store bundle is named after its version, which is only known once Version() has read the terminal.
+    public static void StoreBundle(){Run(true,StoreId,true,null,"Design/dad-throw-android-store-bundle-build.txt");}
+    static void Version()
+    {
+        string name=Environment.GetEnvironmentVariable("DAD_VERSION_NAME"),code=Environment.GetEnvironmentVariable("DAD_VERSION_CODE");
+        if(!string.IsNullOrEmpty(name))PlayerSettings.bundleVersion=name.Trim();
+        if(string.IsNullOrEmpty(code))return;
+        int number;
+        if(!int.TryParse(code.Trim(),out number)||number<1)throw new InvalidOperationException("DAD_VERSION_CODE must be a whole number from 1 up, not \""+code+"\"");
+        PlayerSettings.Android.bundleVersionCode=number;
+    }
 
     static void Run(bool bundle,string id,bool store,string output,string reportPath)
     {
@@ -39,6 +51,8 @@ public static class DadThrowAndroidBuild
         {
             if(!Application.unityVersion.StartsWith("6000."))throw new InvalidOperationException("Build in the Unity 6 copy: Play asks for target API 36 and 16 KB pages");
             if(EditorUserBuildSettings.activeBuildTarget!=BuildTarget.Android)throw new InvalidOperationException("Launch Unity with -buildTarget Android");
+            Version();
+            if(output==null)output="Builds/ThrowAndroid/DadWar-"+PlayerSettings.bundleVersion+"-"+PlayerSettings.Android.bundleVersionCode+".aab";
             string alias=null;
             if(store)
             {
