@@ -65,6 +65,8 @@ public sealed class DadThrowPrototype:MonoBehaviour
     const float BlockTime=.3f,NudgeTime=4;float blockClock,shoeNudge;int seenBlock;Vector2 blockAt;
     // Words with a number in them, rebuilt only when the number changes.
     int shownCoins=-1,shownEarned=-1;string coinText="",earnedText="";
+    // The rewarded ad's words on the clear card.
+    int shownAdBonus=-1,shownAdPaid=-1;string adOfferText="",adPaidText="";
     readonly int[] shownPrice=new int[DadThrowShop.Cards.Length];readonly string[] priceText=new string[DadThrowShop.Cards.Length];
     readonly List<string> missing=new List<string>();string missingText;
     DadThrowModel.Weapon selected;DadThrowLayout.Fit fit;
@@ -271,6 +273,8 @@ public sealed class DadThrowPrototype:MonoBehaviour
     {
         fit=DadThrowLayout.FitTo(Screen.safeArea,Screen.height);
         if(Flow==null)return;
+        // An ad is on the screen: nothing in the game moves or listens until it is closed.
+        if(DadRewardedAds.Busy){aim.Cancel();return;}
 #if DAD_THROW_WEBTEST
         WebTestTick();
 #endif
@@ -826,7 +830,10 @@ public sealed class DadThrowPrototype:MonoBehaviour
         Veil(PauseVeil);DadUi.Panel(DadThrowLayout.PauseCard,Paper,Ink);
         Text(DadThrowLayout.PauseHeading,"잠깐만!",46,Ink,display);
         if(Button(DadThrowLayout.PauseResume,"계속하기",true))Flow.Resume();
-        if(Button(DadThrowLayout.PauseTitle,"타이틀",false))Flow.ToTitle();
+        if(Button(DadThrowLayout.PauseTitle,"타이틀",false)){Flow.ToTitle();return;}
+        // The privacy policy, and where the law asks for it the way back to the ad privacy choices.
+        if(Button(DadThrowLayout.PausePolicy,"개인정보처리방침",false,18))Application.OpenURL(DadSchoolPrototype.PrivacyPolicyUrl);
+        if(DadAdPrivacy.Available&&Button(DadThrowLayout.PauseAdChoice,"광고 개인정보 선택 변경",false,18))DadAdPrivacy.Show();
     }
     void DrawClear()
     {
@@ -865,6 +872,18 @@ public sealed class DadThrowPrototype:MonoBehaviour
         {
             Text(DadThrowLayout.ClearWordName,Flow.Word.name,20,Olive,display);
             Text(DadThrowLayout.ClearWordLine,Flow.Word.line,24,Ink,body,TextAnchor.UpperCenter);
+        }
+        // An ad the player chooses to watch pays the stage's won once more. It is offered only while one is loaded
+        // and ready, and is paid by the ad's own earned-reward callback: closing it early pays nothing.
+        if(Flow.AdBonus>0&&DadRewardedAds.Ready)
+        {
+            if(Flow.AdBonus!=shownAdBonus){shownAdBonus=Flow.AdBonus;adOfferText="광고 보고 +"+shownAdBonus+"원 더 받기";}
+            if(Button(DadThrowLayout.ClearAd,adOfferText,false,24)){DadThrowFlow asked=Flow;DadRewardedAds.Show(()=>{if(Flow==asked)asked.TakeAdBonus();});}
+        }
+        else if(Flow.AdPaid>0)
+        {
+            if(Flow.AdPaid!=shownAdPaid){shownAdPaid=Flow.AdPaid;adPaidText="광고 보상 +"+shownAdPaid+"원";}
+            Outlined(DadThrowLayout.ClearAd,adPaidText,30,Gold,Ink,3,display);
         }
         // The lesser choice is the shop now; the title is reached from the pause.
         if(Button(DadThrowLayout.ClearLeft,"상점",false)){Flow.OpenShop();return;}
@@ -1087,10 +1106,11 @@ public sealed class DadThrowPrototype:MonoBehaviour
     }
     void OnGUI()
     {
-        fit=DadThrowLayout.FitTo(Screen.safeArea,Screen.height);Matrix4x4 old=GUI.matrix;Color tint=GUI.color;
+        fit=DadThrowLayout.FitTo(Screen.safeArea,Screen.height);Matrix4x4 old=GUI.matrix;Color tint=GUI.color;bool lit=GUI.enabled;
         try
         {
             GUI.matrix=Matrix4x4.TRS(fit.offset,Quaternion.identity,new Vector3(fit.scale,fit.scale,1));GUI.color=Color.white;
+            GUI.enabled=lit&&!DadRewardedAds.Busy;
             Color bars=Ink;
             if(Flow==null){DrawMissing();bars=Color.black;}
             else if(Upright){DrawTurn();bars=Color.black;}
@@ -1105,6 +1125,6 @@ public sealed class DadThrowPrototype:MonoBehaviour
             Outlined(new Rect(DadThrowLayout.W/2-200,DadThrowLayout.H-40,400,36),webText,22,Paper,Ink,2,bold);
 #endif
         }
-        finally{GUI.color=tint;GUI.matrix=old;}
+        finally{GUI.color=tint;GUI.matrix=old;GUI.enabled=lit;}
     }
 }

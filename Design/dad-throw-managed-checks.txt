@@ -444,6 +444,12 @@ PASS his body is wider to a ball than anyone's
 PASS a boss makes no entrance when the stage starts: he makes it in the middle of the fight, as he steps onto the street, and the street holds still for it
 PASS the entrance is made once; a boss sent back through the flow pays one won and his bounty
 PASS and he does not make it again on the next try
+PASS the first three stages offer no ad, and asking for the bonus anyway pays nothing
+PASS from the fourth stage a clear offers the stage's won once more, and has paid nothing for it yet
+PASS the ad's reward pays that once: a second reward for the same clear pays nothing
+PASS the offer belongs to the clear card: it is gone in the shop and on the next stage
+PASS a defeat offers no ad
+PASS leaving for the title drops the offer
 PASS a new player meets every stage exactly as the curve has it
 PASS one defeat changes nothing
 PASS a second defeat on the same stage takes 6% of its people away and leaves its name, its gate and its words alone
@@ -620,4 +626,4 @@ LAYOUT painted_gate 145.41 570 0 0
 LAYOUT road_edge 0 622.41 0 0
 LAYOUT sand_top 0 522.13 0 0
 
-TOTAL PASS: 516
+TOTAL PASS: 522

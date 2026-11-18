@@ -95,7 +95,7 @@ public sealed class DadThrowFlow
     // The throws are the plain ones with everything bought in the shop added.
     void Load(int index,bool wait=false)
     {
-        InDaily=false;StageIndex=index;DadThrowStage plain=stages[index];
+        InDaily=false;AdBonus=AdPaid=0;StageIndex=index;DadThrowStage plain=stages[index];
         Ease=tuner!=null?DadThrowTuner.Ease(Save,plain.id):0;Heat=tuner!=null?DadThrowTuner.Heat(Save):0;
         Model=new DadThrowModel(field,tuner!=null?tuner.Table(plain,index+1,Save):plain){Rules=DadThrowShop.Rules(Save)};
         Runs++;Word=null;WaitingForAim=wait;primed=false;banked=false;Now=Screen.Playing;
@@ -162,11 +162,22 @@ public sealed class DadThrowFlow
     public void AimStarted(){WaitingForAim=false;}
     public bool Pause(){if(Now!=Screen.Playing)return false;Now=Screen.Paused;return true;}
     public bool Resume(){if(Now!=Screen.Paused)return false;Now=Screen.Playing;return true;}
+    // An ad the player chooses to watch pays a cleared stage's won once more (2026-11-18, the owner: the first
+    // release carries ads). The rules are the ones settled for the upright game: nothing is offered on the first
+    // AdFreeStages stages, only after a clear, never after a defeat, never as a condition of going on, and a try
+    // of the day has bonuses of its own. AdBonus is what watching would add for the clear in hand (0 when nothing
+    // is offered or it has been taken); AdPaid is what it did add. Whether an ad can be shown at all is the
+    // screen's to ask (DadRewardedAds); nothing here knows about an ad SDK.
+    public const int AdFreeStages=3;
+    public int AdBonus {get;private set;} public int AdPaid {get;private set;}
+    // For the ad's earned-reward callback and nothing else: pays once, on the result card it was offered on.
+    public bool TakeAdBonus()
+    {if(Now!=Screen.Clear||InDaily||AdBonus<=0)return false;Save.coins+=AdBonus;AdPaid=AdBonus;AdBonus=0;Persist();return true;}
     public bool Retry(){if(InDaily||Now!=Screen.Defeat&&Now!=Screen.Clear)return false;Load(StageIndex);return true;}
     // There is no stage after the last one to move to.
     public bool Next(){if(Now!=Screen.Clear||!HasNext)return false;Load(StageIndex+1);return true;}
     // Leaving drops the stage in progress; what was opened stays opened.
-    public bool ToTitle(){if(Now!=Screen.Paused&&Now!=Screen.Clear&&Now!=Screen.Defeat)return false;Bank();Model=null;Entering=null;InDaily=false;Now=Screen.Title;return true;}
+    public bool ToTitle(){if(Now!=Screen.Paused&&Now!=Screen.Clear&&Now!=Screen.Defeat)return false;Bank();Model=null;Entering=null;InDaily=false;AdBonus=AdPaid=0;Now=Screen.Title;return true;}
     // Android back: pause a fight; skip a story; close the shop or the letter; from the pause or a result, go to the title.
     public bool Back(){return Now==Screen.Playing?Pause():Now==Screen.Intro||Now==Screen.Ending?Skip():Now==Screen.Shop?CloseShop():Now==Screen.Daily?CloseDaily():ToTitle();}
     // The app went to the background or lost focus. Only a live fight changes; a result never turns back into a fight.
@@ -175,6 +186,7 @@ public sealed class DadThrowFlow
     {
         DadThrowStage stage=Stage;bool first=!Save.cleared.Contains(stage.id);
         Bank(false);
+        AdBonus=StageIndex>=AdFreeStages?Earned:0;AdPaid=0;
         if(tuner!=null)DadThrowTuner.Cleared(Save,Model.Health<stage.health);
         if(first)Save.cleared.Add(stage.id);
         if(HasNext)Furthest=Math.Max(Furthest,StageIndex+1);

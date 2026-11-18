@@ -397,6 +397,33 @@ public static class DadThrowGrowthChecks
             check(cfFlow.Now==OnFight&&cfFlow.Model.Chief!=null&&cfFlow.Entering==null,"and he does not make it again on the next try");
         }
 
+        // ── the rewarded ad: what the flow offers and pays (no ad SDK here) ──
+        {
+            var adStages=new List<DadThrowStage>();
+            for(int i=0;i<6;i++){var one=new DadThrowStage{id="ad-"+i,health=5,backgroundKey=street};one.groups.Add(new DadThrowStage.Group{at=0,count=2,firstX=640,spacing=40,speed=60,hp=1,kind=set.kinds["normal"]});adStages.Add(one);}
+            var adSave=new DadThrowSave{introSeen=true};var adFlow=new DadThrowFlow(adStages,field,null,adSave,null);adFlow.Tick(2);adFlow.Start();
+            var adHand=new DadThrowBots.Run();
+            Func<bool> adClear=()=>{for(int i=0;i<120*60&&adFlow.Now==OnFight;i++){DadThrowBots.Spam(adFlow.Model,adHand);adFlow.Tick(1/120f);}return adFlow.Now==OnClear;};
+            bool adEarly=true;
+            for(int i=0;i<DadThrowFlow.AdFreeStages;i++){adEarly&=adClear()&&adFlow.AdBonus==0&&!adFlow.TakeAdBonus();adFlow.Next();}
+            check(adEarly&&adFlow.StageIndex==DadThrowFlow.AdFreeStages,"the first three stages offer no ad, and asking for the bonus anyway pays nothing");
+            int adBefore=adSave.coins;bool adOffered=adClear()&&adFlow.Earned==2&&adFlow.AdBonus==adFlow.Earned;int adPurse=adSave.coins;
+            check(adOffered&&adPurse==adBefore+2,"from the fourth stage a clear offers the stage's won once more, and has paid nothing for it yet");
+            bool adTook=adFlow.TakeAdBonus();
+            check(adTook&&adSave.coins==adPurse+2&&adFlow.AdPaid==2&&adFlow.AdBonus==0&&adFlow.Coins==adSave.coins&&!adFlow.TakeAdBonus()&&adSave.coins==adPurse+2,
+                "the ad's reward pays that once: a second reward for the same clear pays nothing");
+            adFlow.OpenShop();bool adInShop=!adFlow.TakeAdBonus();adFlow.CloseShop();adFlow.Next();
+            check(adInShop&&adFlow.Now==OnFight&&adFlow.AdBonus==0&&adFlow.AdPaid==0&&!adFlow.TakeAdBonus(),"the offer belongs to the clear card: it is gone in the shop and on the next stage");
+            // A stage that one touch on the gate loses.
+            var adDoom=new DadThrowStage{id="ad-doom",health=1,backgroundKey=street};adDoom.groups.Add(new DadThrowStage.Group{at=0,count=2,firstX=640,spacing=40,speed=60,hp=1,kind=set.kinds["normal"]});
+            var adHard=new List<DadThrowStage>(adStages);adHard[4]=adDoom;
+            var adLost=new DadThrowFlow(adHard,field,null,new DadThrowSave{introSeen=true,furthest=4},null);adLost.Tick(2);adLost.Start();
+            for(int i=0;i<120*60&&adLost.Now==OnFight;i++)adLost.Tick(1/120f);
+            check(adLost.Now==OnDefeat&&adLost.AdBonus==0&&!adLost.TakeAdBonus(),"a defeat offers no ad");
+            adClear();adFlow.ToTitle();
+            check(adFlow.Now==OnTitle&&adFlow.AdBonus==0&&!adFlow.TakeAdBonus(),"leaving for the title drops the offer");
+        }
+
         // ── difficulty that bends a little toward how the player is doing ──
         var tuner=new DadThrowTuner(set.kinds,street);var note=new DadThrowSave();
         check(DadThrowTuner.Ease(note,"2-1")==0&&DadThrowTuner.Heat(note)==0&&tuner.Table(game[5],6,note)==game[5],"a new player meets every stage exactly as the curve has it");

@@ -122,6 +122,10 @@ public sealed class DadThrowLayout
         DefeatRetry=CardButton(ResultCard,148),DefeatShop=new Rect(ResultCard.x+28,ResultCard.y+236,194,56),DefeatTitle=new Rect(ResultCard.xMax-222,ResultCard.y+236,194,56);
     // What the stage paid, over the top edge of the result card.
     public static readonly Rect ResultEarned=new Rect(ResultCard.x,ResultCard.y-56,ResultCard.width,48);
+    // Under the clear card: the offer to watch an ad for the stage's won once more, and afterwards what it paid.
+    public static readonly Rect ClearAd=new Rect(ResultCard.x,ResultCard.yMax+12,ResultCard.width,58);
+    // At the foot of the pause card: the privacy policy, and (where the law asks for it) the ad privacy choices.
+    public static readonly Rect PausePolicy=new Rect(PauseCard.x+28,PauseCard.y+352,PauseCard.width-56,34),PauseAdChoice=new Rect(PauseCard.x+28,PauseCard.y+390,PauseCard.width-56,34);
     // Pause: heading, resume, title. The sound switch joins when the game has sound.
     public static readonly Rect PauseHeading=CardHeading(PauseCard,88),PauseResume=CardButton(PauseCard,182),PauseTitle=CardButton(PauseCard,272);
 

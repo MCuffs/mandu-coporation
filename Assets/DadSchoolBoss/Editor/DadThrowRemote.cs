@@ -204,6 +204,44 @@ public static class DadThrowRemote
         nextStep=EditorApplication.timeSinceStartup;
         Note("shop audit started: "+folder);
     }
+    // A pretend rewarded ad for the editor, where no ad SDK runs: always ready, and it ends when the audit says so.
+    sealed class PretendAd:IDadRewardedProvider
+    {
+        public Action<bool> Pending;
+        public bool Ready {get{return Pending==null;}}
+        public void Show(Action<bool> completed){Pending=completed;}
+        public void Close(bool earned){Action<bool> done=Pending;Pending=null;if(done!=null)done(earned);}
+    }
+    // The rewarded ad on the clear card: no offer on the first stages, the offer from the fourth, the screen held
+    // still while the pretend ad is up, what it paid afterwards, and the pause card with its privacy link.
+    static void AdAudit(string folder)
+    {
+        steps.Clear();bot=null;DadThrowPrototype g=Game;
+        if(g==null){Note("ad audit: no DadThrowPrototype in the open scene");return;}
+        Action<string> shot=name=>Shot(Path.Combine(folder,name+".png"));
+        Func<DadThrowFlow.Screen,Func<bool>> on=screen=>()=>g.Flow.Now==screen;
+        var ad=new PretendAd();DadThrowBots.Policy hand=DadThrowGrowthChecks.Hand(7,true,.2f,.9f);
+        Step(0,()=>{Size(1920,1080);g.DebugScripted(true);DadRewardedAds.Bind(ad);g.DebugStartAt(0,0);});
+        Until(on(DadThrowFlow.Screen.Title),3);
+        Step(.3f,()=>{Note("start: "+g.Flow.Start()+" "+g.Flow.Stage.id);Play(hand);});
+        Until(on(DadThrowFlow.Screen.Clear),90,()=>bot=null);
+        Step(.5f,()=>{Note("1-1 cleared, ad bonus "+g.Flow.AdBonus);shot("ad-01-first-stages-no-offer");});
+        Step(.3f,()=>g.DebugStartAt(3,0,"fast","tough","guard"));
+        Until(on(DadThrowFlow.Screen.Title),3);
+        Step(.3f,()=>{Note("start: "+g.Flow.Start()+" "+g.Flow.Stage.id);Play(hand);});
+        Until(()=>g.Flow.Now==DadThrowFlow.Screen.Playing&&g.Model!=null&&g.Model.Clock>=2,6,()=>Note("pause: "+g.Flow.Pause()));
+        Step(.4f,()=>shot("ad-02-pause-with-privacy-policy"));
+        Step(.2f,()=>Note("resume: "+g.Flow.Resume()));
+        Until(()=>g.Flow.Now==DadThrowFlow.Screen.Clear||g.Flow.Now==DadThrowFlow.Screen.Defeat,120,()=>bot=null);
+        Step(.5f,()=>{Note("1-4 ended on "+g.Flow.Now+", earned "+g.Flow.Earned+", ad bonus "+g.Flow.AdBonus);shot("ad-03-clear-with-the-offer");});
+        Step(.3f,()=>{DadThrowFlow asked=g.Flow;Note("ad shown: "+DadRewardedAds.Show(()=>asked.TakeAdBonus()));});
+        Step(.5f,()=>shot("ad-04-while-the-ad-is-up-nothing-can-be-pressed"));
+        Step(.3f,()=>{ad.Close(true);Note("ad closed with its reward: paid "+g.Flow.AdPaid+", purse "+g.Flow.Coins);});
+        Step(.5f,()=>shot("ad-05-after-the-reward"));
+        Step(.6f,()=>{DadRewardedAds.Bind(null);g.DebugScripted(false);g.DebugReal();Note("ad audit done: "+folder);});
+        nextStep=EditorApplication.timeSinceStartup;
+        Note("ad audit started: "+folder);
+    }
     // The boss of 1-5: his entrance in the middle of the fight, then each thing he does stood up by hand, so
     // every picture of his is on a screen once. A bot keeps the street busy meanwhile.
     static void BossAudit(string folder)
@@ -343,6 +381,7 @@ public static class DadThrowRemote
             else if(command.StartsWith("shopaudit:"))ShopAudit(command.Substring(10));
             else if(command.StartsWith("bossaudit:"))BossAudit(command.Substring(10));
             else if(command.StartsWith("dailyaudit:"))DailyAudit(command.Substring(11));
+            else if(command.StartsWith("adaudit:"))AdAudit(command.Substring(8));
             // at:5 opens the player's own save at the fifth stage, in memory only; real goes back to the save on disk.
             else if(command.StartsWith("at:")){int number=int.Parse(command.Substring(3));Game.DebugPlayAt(number-1);Note("the player's save, in memory only, opened at stage "+number+" ("+DadThrowCurve.Id(number)+")");}
             // From here on it is the player's own game again: the save on disk is read and written as in the app.
